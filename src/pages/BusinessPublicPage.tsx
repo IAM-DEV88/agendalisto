@@ -1,6 +1,6 @@
-import React, { useState, useEffect } from 'react';
+import { useState, useEffect } from 'react';
 import { useParams, Link, useNavigate } from 'react-router-dom';
-import { getBusinessBySlug, getBusinessServices, getBusinessHours, getBusinessReviews, Appointment, Service, BusinessHours, Review } from '../lib/api';
+import { getBusinessBySlug, getBusinessServices, getBusinessHours, getBusinessReviews, Service, BusinessHours, Review } from '../lib/api';
 import { supabase } from '../lib/supabase';
 import {
   BusinessHeader,
@@ -26,6 +26,12 @@ function BusinessPublicPage() {
   const [reviews, setReviews] = useState<Review[]>([]);
   const [averageRating, setAverageRating] = useState<number>(0);
   
+
+  // Debug logs for booking modal state
+  console.log('BusinessPublicPage initial render:', { selectedService, showBooking, user, businessData });
+  useEffect(() => {
+    console.log('showBooking changed:', showBooking);
+  }, [showBooking]);
 
   // Fetch current user
   useEffect(() => {

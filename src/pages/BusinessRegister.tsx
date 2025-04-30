@@ -31,8 +31,10 @@ const BusinessRegister = ({ user }: BusinessRegisterProps) => {
     setError(null);
 
     try {
+      const slug = businessName.trim().toLowerCase().replace(/\s+/g, '-').replace(/[^\w\-]+/g, '');
       const businessData = {
         owner_id: user.id,
+        slug,
         name: businessName,
         description,
         address,

@@ -18,6 +18,7 @@ const ReviewsSection: React.FC<ReviewsSectionProps> = ({ businessId, currentUser
   });
   const [submitting, setSubmitting] = useState(false);
   const [canReview, setCanReview] = useState(false);
+  const [eligibleAppointmentId, setEligibleAppointmentId] = useState<string | null>(null);
 
   useEffect(() => {
     const loadReviews = async () => {
@@ -48,12 +49,16 @@ const ReviewsSection: React.FC<ReviewsSectionProps> = ({ businessId, currentUser
         if (success && appts) {
           const completed = appts.filter((a: any) => a.business_id === businessId && a.status === 'completed');
           const hasReviewed = reviews.some(r => r.user_id === currentUser.id);
-          setCanReview(completed.length > 0 && !hasReviewed);
+          const eligible = completed.length > 0 && !hasReviewed;
+          setCanReview(eligible);
+          setEligibleAppointmentId(eligible ? completed[0].id : null);
         } else {
           setCanReview(false);
+          setEligibleAppointmentId(null);
         }
       } catch {
         setCanReview(false);
+        setEligibleAppointmentId(null);
       }
     };
     checkEligibility();
@@ -65,7 +70,9 @@ const ReviewsSection: React.FC<ReviewsSectionProps> = ({ businessId, currentUser
 
     try {
       setSubmitting(true);
+      const appointmentId = eligibleAppointmentId || '';
       const { success, data, error } = await createBusinessReview(
+        appointmentId,
         businessId,
         currentUser.id,
         newReview.rating,

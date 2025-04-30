@@ -1,6 +1,5 @@
 import { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
-import { supabase } from '../lib/supabase';
 import {
   getUserBusiness,
   getBusinessAppointments,
@@ -60,11 +59,6 @@ const BusinessDashboard = ({ user }: BusinessDashboardProps) => {
   const [loadingBusinessConfig, setLoadingBusinessConfig] = useState(true);
   const [savingBusinessConfig, setSavingBusinessConfig] = useState(false);
 
-  // Estado para servicios del negocio
-  const [businessServices, setBusinessServices] = useState<Service[]>([]);
-  const [loadingBusinessServices, setLoadingBusinessServices] = useState(true);
-  const [servicesMessage, setServicesMessage] = useState<{ text: string; type: 'success' | 'error' } | null>(null);
-
   useEffect(() => {
     const loadBusinessData = async () => {
       if (!user?.id) return;
@@ -78,7 +72,6 @@ const BusinessDashboard = ({ user }: BusinessDashboardProps) => {
         setLoadingBusinessAppointments(false);
         setLoadingBusinessHours(false);
         setLoadingBusinessConfig(false);
-        setLoadingBusinessServices(false);
       }, 20000); // 20 segundos máximo para toda la operación
 
       try {
@@ -184,39 +177,6 @@ const BusinessDashboard = ({ user }: BusinessDashboardProps) => {
             });
             setLoadingBusinessConfig(false);
           }
-
-          // Cargar servicios del negocio
-          setLoadingBusinessServices(true);
-          const servicesTimeoutId = setTimeout(() => {
-            setLoadingBusinessServices(false);
-            setServicesMessage({
-              text: 'No se pudieron cargar los servicios del negocio. Por favor, recarga la página.',
-              type: 'error'
-            });
-          }, 15000); // 15 segundos para cargar servicios
-
-          try {
-            const { success: servicesSuccess, data: servicesData, error: servicesError } = await getBusinessServices(business.id);
-            clearTimeout(servicesTimeoutId);
-
-            if (servicesSuccess && servicesData) {
-              setBusinessServices(servicesData);
-            } else {
-              setServicesMessage({
-                text: servicesError || 'No se pudieron cargar los servicios del negocio.',
-                type: 'error'
-              });
-            }
-            setLoadingBusinessServices(false);
-          } catch (servicesErr) {
-            clearTimeout(servicesTimeoutId);
-            console.error('Error fetching business services:', servicesErr);
-            setServicesMessage({
-              text: 'Error al cargar los servicios del negocio.',
-              type: 'error'
-            });
-            setLoadingBusinessServices(false);
-          }
         } else {
           // Redirigir si no hay negocio
           setBusinessMessage({
@@ -226,7 +186,6 @@ const BusinessDashboard = ({ user }: BusinessDashboardProps) => {
           setLoadingBusinessAppointments(false);
           setLoadingBusinessHours(false);
           setLoadingBusinessConfig(false);
-          setLoadingBusinessServices(false);
         }
       } catch (err) {
         console.error('Error loading business data:', err);
@@ -237,7 +196,6 @@ const BusinessDashboard = ({ user }: BusinessDashboardProps) => {
         setLoadingBusinessAppointments(false);
         setLoadingBusinessHours(false);
         setLoadingBusinessConfig(false);
-        setLoadingBusinessServices(false);
       } finally {
         clearTimeout(mainTimeoutId);
       }
@@ -250,7 +208,6 @@ const BusinessDashboard = ({ user }: BusinessDashboardProps) => {
       setLoadingBusinessAppointments(false);
       setLoadingBusinessHours(false);
       setLoadingBusinessConfig(false);
-      setLoadingBusinessServices(false);
     };
   }, [user]);
 

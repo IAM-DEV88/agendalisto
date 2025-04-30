@@ -1,6 +1,4 @@
-import React from 'react';
-import { UserProfile } from '../../lib/supabase';
-import { Link } from 'react-router-dom';
+import React, { type FormEvent, type ChangeEvent } from 'react';
 
 interface UserProfileSectionProps {
   profileData: {
@@ -11,8 +9,8 @@ interface UserProfileSectionProps {
   };
   saving: boolean;
   message: { text: string; type: 'success' | 'error' } | null;
-  onSave: (e: React.FormEvent) => Promise<void>;
-  onChange: (e: React.ChangeEvent<HTMLInputElement>) => void;
+  onSave: (e: FormEvent<HTMLFormElement>) => Promise<void>;
+  onChange: (e: ChangeEvent<HTMLInputElement>) => void;
 }
 
 const UserProfileSection: React.FC<UserProfileSectionProps> = ({

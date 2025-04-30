@@ -158,18 +158,6 @@ const ProfileDashboard = ({ user }: ProfileDashboardProps) => {
     checkBusiness();
   }, [user]);
 
-  const formatDate = (dateString: string) => {
-    const date = new Date(dateString);
-    return date.toLocaleDateString('es-ES', {
-      weekday: 'long',
-      year: 'numeric',
-      month: 'long',
-      day: 'numeric',
-      hour: 'numeric',
-      minute: 'numeric',
-    });
-  };
-
   const handleProfileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;
     setProfileData(prev => ({
@@ -231,7 +219,7 @@ const ProfileDashboard = ({ user }: ProfileDashboardProps) => {
   };
 
   // Handlers for appointment actions
-  const handleReschedule = (appointment: Appointment) => {
+  const handleReschedule = (_appointment: Appointment) => {
     // Redirect to explore for new booking
     navigate('/explore');
   };

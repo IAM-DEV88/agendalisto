@@ -1,7 +1,7 @@
 import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
 import { useState, useEffect } from 'react';
 import { supabase } from './lib/supabase';
-import { getUserProfile, obtenerPerfilUsuario } from './lib/api';
+import { obtenerPerfilUsuario } from './lib/api';
 import Home from './pages/Home';
 import Login from './pages/Login';
 import Register from './pages/Register';

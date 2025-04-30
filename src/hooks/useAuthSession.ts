@@ -1,6 +1,5 @@
 import { useState, useEffect } from 'react';
 import { supabase } from '../lib/supabase';
-import { User } from '@supabase/supabase-js';
 import { obtenerPerfilUsuario } from '../lib/api';
 import type { UserProfile } from '../lib/supabase';
 

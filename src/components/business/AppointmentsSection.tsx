@@ -1,6 +1,4 @@
 import React from 'react';
-import { Link } from 'react-router-dom';
-import { Appointment } from '../../lib/api';
 
 interface AppointmentsSectionProps {
   appointments: any[];

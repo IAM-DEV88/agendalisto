@@ -100,7 +100,7 @@ export interface BusinessConfig {
 const slugify = (str: string) => str.toLowerCase().replace(/\s+/g, '-').replace(/[^\w\-]+/g, '');
 
 // API functions for businesses
-export const getBusinesses = async (search?: string, category?: string) => {
+export const getBusinesses = async (search?: string, _category?: string) => {
   let query = supabase.from('businesses').select('*');
   
   if (search) {
@@ -306,31 +306,6 @@ export const setBusinessHours = async (hours: Omit<BusinessHours, 'id'>[]) => {
   return data;
 };
 
-// API functions for user profiles
-export const getUserProfile = async (userId: string) => {
-  try {
-    const { data, error } = await supabase
-      .from('profiles')
-      .select('*')
-      .eq('id', userId)
-      .single();
-    
-    if (error) {
-      console.error('Error fetching user profile:', error.message);
-      // Si es error de datos no encontrados, retornamos null en lugar de lanzar error
-      if (error.code === 'PGRST116') {
-        console.log('Profile not found, returning null');
-        return null;
-      }
-      throw error;
-    }
-    return data as UserProfile;
-  } catch (err) {
-    console.error('Exception in getUserProfile:', err);
-    return null; // Devolver null en lugar de propagar el error
-  }
-};
-
 // Versión mejorada que retorna un objeto con información estructurada
 export const obtenerPerfilUsuario = async (userId: string) => {
   try {
@@ -454,7 +429,7 @@ export async function getBusinessConfig(businessId: string): Promise<{ success: 
 // API functions for business config
 export async function updateBusinessConfig(businessId: string, config: BusinessConfig): Promise<{ success: boolean, error?: string }> {
   try {
-    const { data, error } = await supabase
+    const { error } = await supabase
       .from('business_config')
       .upsert({
         business_id: businessId,
@@ -503,6 +478,7 @@ export const updateBusinessService = async (id: string, updates: Partial<Service
         updated_at: new Date().toISOString() 
       })
       .eq('id', id)
+      .select()
       .single();
 
     if (error) throw error;
