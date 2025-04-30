@@ -1,8 +1,8 @@
 // Configuration and environment variables
 
 // Supabase config
-export const SUPABASE_URL = import.meta.env.VITE_SUPABASE_URL as string;
-export const SUPABASE_ANON_KEY = import.meta.env.VITE_SUPABASE_ANON_KEY as string;
+export const SUPABASE_URL = import.meta.env.PUBLIC_SUPABASE_URL as string;
+export const SUPABASE_ANON_KEY = import.meta.env.PUBLIC_SUPABASE_ANON_KEY as string;
 
 // API URLs
 export const BASE_URL = import.meta.env.VITE_BASE_URL || window.location.origin;

@@ -58,8 +58,8 @@ AppAgenda es una plataforma web para la gestión de reservas y citas, permitiend
 3. Configurar variables de entorno
    Crea un archivo `.env` en la raíz del proyecto con las siguientes variables:
    ```
-   VITE_SUPABASE_URL=your_supabase_url
-   VITE_SUPABASE_ANON_KEY=your_supabase_anon_key
+   PUBLIC_SUPABASE_URL=your_supabase_url
+   PUBLIC_SUPABASE_ANON_KEY=your_supabase_anon_key
    ```
 
 4. Iniciar el servidor de desarrollo

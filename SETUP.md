@@ -18,8 +18,8 @@ Este documento proporciona instrucciones paso a paso para configurar Supabase co
 3. Crea un archivo `.env.local` en la raíz del proyecto con estos valores:
 
 ```
-VITE_SUPABASE_URL=https://tu-proyecto-id.supabase.co
-VITE_SUPABASE_ANON_KEY=tu-clave-publica-anon
+PUBLIC_SUPABASE_URL=https://tu-proyecto-id.supabase.co
+PUBLIC_SUPABASE_ANON_KEY=tu-clave-publica-anon
 ```
 
 Reemplaza los valores con los de tu proyecto Supabase.
