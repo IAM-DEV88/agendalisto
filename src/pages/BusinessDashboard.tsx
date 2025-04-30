@@ -16,7 +16,6 @@ import {
   Business,
   BusinessHours,
   BusinessConfig,
-  Service
 } from '../lib/api';
 import { UserProfile } from '../lib/supabase';
 import AppointmentsSection from '../components/business/AppointmentsSection';
