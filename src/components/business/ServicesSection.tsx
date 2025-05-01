@@ -136,9 +136,8 @@ const ServicesSection: React.FC<ServicesSectionProps> = ({
 
   return (
     <div>
-      <div className="pb-5 border-b border-gray-200 sm:flex sm:items-center sm:justify-between">
-        <h1 className="text-2xl font-bold text-gray-900">Servicios</h1>
-        <div className="mt-3 sm:mt-0 sm:ml-4">
+      <div className="sm:flex sm:items-center sm:justify-between">
+        <div className="mt-2 sm:mt-0 sm:ml-4">
           <button
             type="button"
             onClick={() => {
@@ -191,47 +190,47 @@ const ServicesSection: React.FC<ServicesSectionProps> = ({
           </div>
         </div>
       ) : (
-        <div className="mt-8 grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3">
+        <div className="mt-2 grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3">
           {services.map((service) => (
             <div
               key={service.id}
-              className={`bg-white overflow-hidden shadow rounded-lg ${
+              className={`dark:bg-opacity-10 bg-white overflow-hidden shadow rounded-lg ${
                 !service.is_active ? 'opacity-75' : ''
               }`}
             >
               <div className="p-6">
                 <div className="flex items-start justify-between">
                   <div>
-                    <h3 className="text-lg font-medium text-gray-900">{service.name}</h3>
-                    <p className="mt-1 text-sm text-gray-500">{service.description}</p>
+                    <h3 className="dark:text-white text-lg font-medium text-gray-900">{service.name}</h3>
+                    <p className="dark:text-white mt-1 text-sm text-gray-500">{service.description}</p>
                   </div>
                   {!service.is_active && (
-                    <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-gray-100 text-gray-800">
+                    <span className="dark:text-white inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-gray-100 text-gray-800">
                       Inactivo
                     </span>
                   )}
                 </div>
                 <div className="mt-4">
                   <div className="flex justify-between text-sm">
-                    <span className="text-gray-500">Duración</span>
-                    <span className="font-medium">{service.duration} min</span>
+                    <span className="dark:text-white text-gray-500">Duración</span>
+                    <span className="dark:text-white font-medium">{service.duration} min</span>
                   </div>
                   <div className="mt-1 flex justify-between text-sm">
-                    <span className="text-gray-500">Precio</span>
-                    <span className="font-medium">${service.price.toFixed(2)}</span>
+                    <span className="dark:text-white text-gray-500">Precio</span>
+                    <span className="dark:text-white font-medium">${service.price.toFixed(2)}</span>
                   </div>
                   {service.provider && (
                     <div className="mt-1 flex justify-between text-sm">
-                      <span className="text-gray-500">Proveedor</span>
-                      <span className="font-medium">{service.provider}</span>
+                      <span className="dark:text-white text-gray-500">Proveedor</span>
+                      <span className="dark:text-white font-medium">{service.provider}</span>
                     </div>
                   )}
                 </div>
               </div>
-              <div className="bg-gray-50 px-6 py-3 flex justify-end space-x-3">
+              <div className="dark:bg-opacity-10 bg-gray-50 px-6 py-3 flex justify-end space-x-3">
                 <button
                   onClick={() => handleEdit(service)}
-                  className="inline-flex items-center px-3 py-1.5 border border-gray-300 shadow-sm text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
+                  className="inline-flex items-center px-3 py-1.5 border border-gray-300 shadow-sm text-sm font-medium rounded-md text-gray-700 bdarg-white hover:bg-gray-600 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 dark:bg-gray-100"
                 >
                   <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4 mr-1.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 0L11.828 15H9v-2.828l8.586-8.586z" />

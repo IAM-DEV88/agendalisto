@@ -25,29 +25,24 @@ const AppointmentsSection: React.FC<AppointmentsSectionProps> = ({
 
   return (
     <div>
-      <div className="flex justify-between items-center mb-4">
-        <h2 className="text-xl font-semibold text-gray-800">Gestión de citas</h2>
-        
-      </div>
-
       {loading ? (
         <div className="flex justify-center py-8">
           <div className="animate-spin rounded-full h-10 w-10 border-t-2 border-b-2 border-indigo-500"></div>
         </div>
       ) : appointments.length === 0 ? (
-        <div className="bg-white shadow overflow-hidden sm:rounded-md p-6 text-center">
+        <div className="dark:bg-opacity-10 bg-white shadow overflow-hidden sm:rounded-md p-6 text-center">
           <p className="text-gray-500">No hay citas agendadas.</p>
         </div>
       ) : (
-        <div className="bg-white shadow overflow-hidden sm:rounded-md">
+        <div className="dark:bg-opacity-10 bg-white shadow overflow-hidden sm:rounded-md">
           <ul className="divide-y divide-gray-200">
             {appointments.map((appointment) => (
               <li key={appointment.id} className="px-4 py-4 sm:px-6">
                 <div className="flex items-center justify-between">
                   <div>
-                    <p className="text-sm font-medium text-indigo-600">{appointment.services?.name}</p>
-                    <p className="text-sm text-gray-500">Cliente: {appointment.profiles?.full_name || appointment.user_id}</p>
-                    <p className="text-sm text-gray-500">Fecha: {formatDate(appointment.start_time)}</p>
+                    <p className="text-sm font-medium text-indigo-600 dark:text-indigo-200">{appointment.services?.name}</p>
+                    <p className="text-sm text-gray-500 dark:text-white">Cliente: {appointment.profiles?.full_name || appointment.user_id}</p>
+                    <p className="text-sm text-gray-500 dark:text-white">Fecha: {formatDate(appointment.start_time)}</p>
                   </div>
                   <div className="flex space-x-2">
                     {appointment.status === 'pending' && (

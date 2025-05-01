@@ -198,9 +198,9 @@ function App() {
 
   return (
     <Router>
-      <div className="min-h-screen flex flex-col">
+      <div className="min-h-screen flex flex-col bg-gray-50 dark:bg-gray-900 text-gray-900 dark:text-gray-100">
         <Nav user={userProfile} />
-        <main className="flex-grow">
+        <main className="flex-grow pt-14 bg-white dark:bg-gray-800 shadow-md">
           <Routes>
             <Route path="/" element={<Home />} />
             <Route path="/login" element={<Login />} />

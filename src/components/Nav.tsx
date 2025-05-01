@@ -3,12 +3,15 @@ import { useState, useEffect, useRef } from 'react';
 import { signOut } from '../lib/supabase';
 import { UserProfile } from '../lib/supabase';
 import { getUserBusiness } from '../lib/api';
+import { useTheme } from '../contexts/ThemeContext';
+import { Sun, Moon } from 'lucide-react';
 
 type NavProps = {
   user: UserProfile | null;
 };
 
 const Nav = ({ user }: NavProps) => {
+  const { theme, toggleTheme } = useTheme();
   const navigate = useNavigate();
   const location = useLocation();
   const [isMenuOpen, setIsMenuOpen] = useState(false);
@@ -73,32 +76,32 @@ const Nav = ({ user }: NavProps) => {
   }, [isUserDropdownOpen]);
 
   return (
-    <header className="bg-white shadow-md">
+    <header className="bg-white dark:bg-gray-800 shadow-md fixed w-full z-50">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex justify-between h-16">
           <div className="flex">
             <div className="flex-shrink-0 flex items-center">
-              <Link to="/" className="text-2xl font-bold text-indigo-600">
-                AgendaApp
+              <Link to="/" className="text-2xl font-bold text-indigo-600 dark:text-white">
+                AgendaListo
               </Link>
             </div>
           </div>
 
           <div className="hidden sm:ml-6 sm:flex sm:items-center sm:space-x-8">
-            <Link to="/" className="px-3 py-2 text-sm font-medium text-gray-700 hover:text-indigo-600">
+            <Link to="/" className="px-2 py-1 text-sm font-medium text-gray-700 dark:text-gray-300 hover:text-indigo-600">
               Inicio
             </Link>
 
-            <Link to="/explore" className="px-3 py-2 text-sm font-medium text-gray-700 hover:text-indigo-600">
+            <Link to="/explore" className="px-2 py-1 text-sm font-medium text-gray-700 dark:text-gray-300 hover:text-indigo-600">
               Explorar Negocios
             </Link>
 
             {!isLoggedIn && (
               <>
-                <Link to="/login" className="px-3 py-2 text-sm font-medium text-gray-700 hover:text-indigo-600">
+                <Link to="/login" className="px-2 py-1 text-sm font-medium text-gray-700 dark:text-gray-300 hover:text-indigo-600">
                   Iniciar Sesión
                 </Link>
-                <Link to="/register" className="px-4 py-2 text-sm font-medium text-white bg-indigo-600 hover:bg-indigo-700 rounded-md">
+                <Link to="/register" className="px-3 py-1 text-sm font-medium text-white bg-indigo-600 hover:bg-indigo-700 rounded-md">
                   Registrarse
                 </Link>
               </>
@@ -129,6 +132,9 @@ const Nav = ({ user }: NavProps) => {
                 )}
               </div>
             )}
+            <button onClick={toggleTheme} className="ml-2 p-2 rounded-md text-gray-600 hover:text-gray-800 dark:text-gray-300 dark:hover:text-white focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500" aria-label="Toggle theme">
+              {theme === 'dark' ? <Sun className="h-5 w-5" /> : <Moon className="h-5 w-5" />}
+            </button>
           </div>
 
           <div className="flex items-center sm:hidden">
@@ -169,36 +175,41 @@ const Nav = ({ user }: NavProps) => {
       {isMenuOpen && (
         <div className="sm:hidden">
           <div className="pt-2 pb-3 space-y-1">
-            <Link to="/" className="block px-3 py-2 text-base font-medium text-gray-700 hover:text-indigo-600 hover:bg-gray-50">
+            <Link to="/" onClick={() => setIsMenuOpen(false)} className="block px-2 py-1 text-base font-medium text-gray-700 dark:text-gray-300 hover:text-indigo-600 hover:bg-gray-50 dark:hover:bg-gray-700">
               Inicio
             </Link>
-            <Link to="/explore" className="block px-3 py-2 text-base font-medium text-gray-700 hover:text-indigo-600 hover:bg-gray-50">
+            <Link to="/explore" onClick={() => setIsMenuOpen(false)} className="block px-2 py-1 text-base font-medium text-gray-700 dark:text-gray-300 hover:text-indigo-600 hover:bg-gray-50 dark:hover:bg-gray-700">
               Explorar Negocios
             </Link>
             {!isLoggedIn ? (
               <> 
-                <Link to="/login" className="block px-3 py-2 text-base font-medium text-gray-700 hover:text-indigo-600 hover:bg-gray-50">
+                <Link to="/login" onClick={() => setIsMenuOpen(false)} className="block px-2 py-1 text-base font-medium text-gray-700 dark:text-gray-300 hover:text-indigo-600 hover:bg-gray-50 dark:hover:bg-gray-700">
                   Iniciar Sesión
                 </Link>
-                <Link to="/register" className="block px-3 py-2 text-base font-medium text-gray-700 hover:text-indigo-600 hover:bg-gray-50">
+                <Link to="/register" onClick={() => setIsMenuOpen(false)} className="block px-2 py-1 text-base font-medium text-gray-700 dark:text-gray-300 hover:text-indigo-600 hover:bg-gray-50 dark:hover:bg-gray-700">
                   Registrarse
                 </Link>
               </>
             ) : (
               <> 
-                <Link to="/dashboard" onClick={() => setIsMenuOpen(false)} className="block px-3 py-2 text-base font-medium text-gray-700 hover:text-indigo-600 hover:bg-gray-50">
+                <Link to="/dashboard" onClick={() => setIsMenuOpen(false)} className="block px-2 py-1 text-base font-medium text-gray-700 dark:text-gray-300 hover:text-indigo-600 hover:bg-gray-50 dark:hover:bg-gray-700">
                   Mi Perfil
                 </Link>
                 {hasBusiness && (
-                  <Link to="/business/dashboard" onClick={() => setIsMenuOpen(false)} className="block px-3 py-2 text-base font-medium text-gray-700 hover:text-indigo-600 hover:bg-gray-50">
+                  <Link to="/business/dashboard" onClick={() => setIsMenuOpen(false)} className="block px-2 py-1 text-base font-medium text-gray-700 dark:text-gray-300 hover:text-indigo-600 hover:bg-gray-50 dark:hover:bg-gray-700">
                     Mi Negocio
                   </Link>
                 )}
-                <button onClick={() => { setIsMenuOpen(false); handleLogout(); }} className="block w-full text-left px-3 py-2 text-base font-medium text-gray-700 hover:text-indigo-600 hover:bg-gray-50">
+                <button onClick={() => { setIsMenuOpen(false); handleLogout(); }} className="block w-full text-left px-2 py-1 text-base font-medium text-gray-700 dark:text-gray-300 hover:text-indigo-600 hover:bg-gray-50 dark:hover:bg-gray-700">
                   Cerrar Sesión
                 </button>
               </>
             )}
+            {/* Theme toggle */}
+            <button onClick={() => { setIsMenuOpen(false); toggleTheme(); }} className="block w-full text-left px-2 py-1 text-base font-medium text-gray-700 dark:text-gray-300 hover:text-indigo-600 hover:bg-gray-50 dark:hover:bg-gray-700" aria-label="Toggle theme">
+              {theme === 'dark' ? <Sun className="inline h-5 w-5 mr-1" /> : <Moon className="inline h-5 w-5 mr-1" />}
+              {theme === 'dark' ? 'Claro' : 'Oscuro'}
+            </button>
           </div>
         </div>
       )}
