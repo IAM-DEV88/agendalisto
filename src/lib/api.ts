@@ -306,53 +306,87 @@ export const setBusinessHours = async (hours: Omit<BusinessHours, 'id'>[]) => {
   return data;
 };
 
-// Versión mejorada que retorna un objeto con información estructurada
-export const obtenerPerfilUsuario = async (userId: string) => {
+// Helper para Promise con timeout
+function withTimeout<T>(promise: Promise<T>, ms: number, timeoutError = 'Operación excedió el tiempo límite'): Promise<T> {
+  const timeout = new Promise<never>((_, reject) => {
+    const id = setTimeout(() => {
+      clearTimeout(id);
+      reject(new Error(timeoutError));
+    }, ms);
+  });
+  return Promise.race([promise, timeout]);
+}
+
+// Define la estructura esperada de la respuesta de Supabase para .single()
+interface SingleResponse<T> {
+  data: T | null;
+  error: any | null; // Podrías usar PostgrestError si está disponible
+}
+
+export const obtenerPerfilUsuario = async (userId: string): Promise<{ success: boolean; perfil: UserProfile | null; error: string | null; }> => {
+  console.log(`[api] obtenerPerfilUsuario: Iniciando para userId: ${userId}`);
   try {
     if (!userId) {
-      return { 
-        success: false, 
-        perfil: null, 
-        error: 'ID de usuario no proporcionado' 
-      };
+      console.warn('[api] obtenerPerfilUsuario: userId no proporcionado.');
+      return { success: false, perfil: null, error: 'ID de usuario no proporcionado' };
     }
 
-    const { data, error } = await supabase
-      .from('profiles')
-      .select('*')
-      .eq('id', userId)
-      .single();
-    
+    console.log(`[api] obtenerPerfilUsuario: Ejecutando consulta a Supabase para ${userId} con timeout de 15s...`);
+
+    // Envolver la llamada async de Supabase en una Promise explícita
+    const supabaseQueryPromise = new Promise<SingleResponse<UserProfile>>(async (resolve, reject) => {
+      try {
+        // Ejecutar la consulta dentro del try/catch de la Promise
+        const response = await supabase
+          .from('profiles')
+          .select('*')
+          .eq('id', userId)
+          .single();
+        
+        // Resolvemos con la estructura esperada
+        resolve({ data: response.data as UserProfile | null, error: response.error });
+        
+      } catch (queryError) {
+        // Rechazamos si la consulta misma lanza una excepción
+        reject(queryError);
+      }
+    });
+
+    // Aplicar timeout a la promesa envuelta
+    const { data, error } = await withTimeout(supabaseQueryPromise, 1000, 'Timeout al obtener perfil de usuario');
+
+    console.log(`[api] obtenerPerfilUsuario: Consulta a Supabase completada para ${userId}. Error: ${error ? error.message : 'No'}`);
+
     if (error) {
-      console.error('Error al obtener perfil de usuario:', error.message);
-      
-      // Si el perfil no existe, podemos devolver success=false pero sin considerar un error grave
+      const errorMessage = error.message || 'Error desconocido';
+      if (errorMessage === 'Timeout al obtener perfil de usuario') {
+        console.error(`[api] obtenerPerfilUsuario: Timeout detectado para ${userId}`);
+      } else {
+        console.error(`[api] obtenerPerfilUsuario: Error detectado en respuesta de Supabase para ${userId}:`, errorMessage, error.code ? `Código: ${error.code}` : '');
+      }
+
       if (error.code === 'PGRST116') {
-        return { 
-          success: false, 
-          perfil: null, 
-          error: 'Perfil no encontrado' 
-        };
+        console.log(`[api] obtenerPerfilUsuario: Perfil no encontrado (PGRST116) para ${userId}.`);
+        return { success: false, perfil: null, error: 'Perfil no encontrado' };
       }
       
-      return { 
-        success: false, 
-        perfil: null, 
-        error: error.message 
-      };
+      return { success: false, perfil: null, error: errorMessage };
     }
-    
-    return { 
-      success: true, 
-      perfil: data as UserProfile, 
-      error: null 
-    };
+
+    if (data) {
+      console.log(`[api] obtenerPerfilUsuario: Perfil encontrado exitosamente para ${userId}.`);
+      return { success: true, perfil: data, error: null };
+    } else {
+      console.error(`[api] obtenerPerfilUsuario: Respuesta inesperada sin data ni error (post-timeout check) para ${userId}.`);
+      return { success: false, perfil: null, error: 'Respuesta inesperada del servidor' };
+    }
+
   } catch (err: any) {
-    console.error('Excepción en obtenerPerfilUsuario:', err);
-    return { 
-      success: false, 
-      perfil: null, 
-      error: err.message || 'Error desconocido' 
+    console.error(`[api] obtenerPerfilUsuario: Excepción no controlada (puede ser timeout) para ${userId}:`, err);
+    return {
+      success: false,
+      perfil: null,
+      error: err.message || 'Error desconocido'
     };
   }
 };

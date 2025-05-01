@@ -7,45 +7,53 @@ export function useBusiness(userId: string | null) {
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
+    // Variable local para controlar si el componente está montado
+    let isMounted = true;
+    
     const loadBusiness = async () => {
       if (!userId) {
-        setHasBusiness(false);
-        setLoading(false);
+        if (isMounted) {
+          setHasBusiness(false);
+          setLoading(false);
+        }
         return;
       }
-      setLoading(true);
-      setError(null);
-
-      // Crear un timeout para evitar bloqueos
-      const timeoutId = setTimeout(() => {
-        if (loading) {
-          setLoading(false);
-          setError('La operación ha tardado demasiado tiempo. Por favor, reintenta más tarde.');
-        }
-      }, 10000); // 10 segundos
+      
+      if (isMounted) {
+        setLoading(true);
+        setError(null);
+      }
 
       try {
         const { success, business, error: apiError } = await getUserBusiness(userId);
+        
+        // No actualizar si componente se desmontó
+        if (!isMounted) return;
+        
         if (success) {
           setHasBusiness(business !== null);
         } else {
           setError(typeof apiError === 'string' ? apiError : 'Error al verificar información del negocio');
         }
       } catch (err: any) {
-        console.error('Error checking business status:', err);
+        // No actualizar si componente se desmontó
+        if (!isMounted) return;
+        
         setError(err.message || 'Error al verificar información del negocio');
         setHasBusiness(false);
       } finally {
-        clearTimeout(timeoutId);
-        setLoading(false);
+        // No actualizar si componente se desmontó
+        if (isMounted) {
+          setLoading(false);
+        }
       }
     };
 
     loadBusiness();
     
-    // Limpieza al desmontar
+    // Marcar como desmontado al limpiar
     return () => {
-      setLoading(false);
+      isMounted = false;
     };
   }, [userId]);
 

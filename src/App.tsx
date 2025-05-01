@@ -1,5 +1,5 @@
 import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback, useMemo, useRef } from 'react';
 import { supabase } from './lib/supabase';
 import { obtenerPerfilUsuario } from './lib/api';
 import Home from './pages/Home';
@@ -20,129 +20,181 @@ function App() {
   const [user, setUser] = useState<any>(null);
   const [userProfile, setUserProfile] = useState<UserProfile | null>(null);
   const [loading, setLoading] = useState(true);
+  const [authInitialized, setAuthInitialized] = useState(false);
+  const authInProgressRef = useRef(false);
+  const retryTimeoutRef = useRef<number>();
+  const profileLoadAttemptsRef = useRef(0);
+  const MAX_PROFILE_LOAD_ATTEMPTS = 3;
 
-  // Inicialización principal: verificar si hay una sesión activa al cargar
+  // Limpiar cualquier timeout pendiente al desmontar
   useEffect(() => {
-    // Simplified initial session check without custom timeouts
-    const getInitialSession = async () => {
-      setLoading(true);
-      console.log('Obteniendo sesión inicial...');
-      try {
-        const { data: { session } } = await supabase.auth.getSession();
-        if (session?.user) {
-          console.log('Sesión encontrada:', session.user.email);
-          setUser(session.user);
-          const { success, perfil, error } = await obtenerPerfilUsuario(session.user.id);
-          if (success && perfil) {
-            console.log('Perfil cargado correctamente');
-            setUserProfile(perfil);
-          } else {
-            console.log('No se pudo cargar el perfil, pero continuando:', error);
+    return () => {
+      if (retryTimeoutRef.current) {
+        window.clearTimeout(retryTimeoutRef.current);
+      }
+    };
+  }, []);
+
+  // Memoizar la función de carga de perfil para evitar recreaciones en cada render
+  const loadProfile = useCallback(async (userId: string, isRetry = false) => {
+    // No reintentar más allá del límite máximo
+    if (isRetry && profileLoadAttemptsRef.current >= MAX_PROFILE_LOAD_ATTEMPTS) {
+      console.log(`[App] loadProfile: Máximo de ${MAX_PROFILE_LOAD_ATTEMPTS} intentos alcanzado para ${userId}`);
+      return false;
+    }
+    
+    if (isRetry) {
+      profileLoadAttemptsRef.current++;
+      console.log(`[App] loadProfile: Intento ${profileLoadAttemptsRef.current} de ${MAX_PROFILE_LOAD_ATTEMPTS} para ${userId}`);
+    } else {
+      // Reiniciar contador para nuevas cargas (no reintentos)
+      profileLoadAttemptsRef.current = 0;
+    }
+
+    try {
+      console.log(`[App] loadProfile: Cargando perfil para ${userId}${isRetry ? ' (reintento)' : ''}`);
+      const { success, perfil, error } = await obtenerPerfilUsuario(userId);
+      
+      if (success && perfil) {
+        console.log(`[App] loadProfile: Perfil cargado exitosamente para ${userId}`);
+        setUserProfile(perfil);
+        return true;
+      } else {
+        console.error(`[App] loadProfile: Error al cargar perfil para ${userId}: ${error}`);
+        
+        // Si es timeout, programar reintento después de 2 segundos
+        if (error === 'Timeout al obtener perfil de usuario' && profileLoadAttemptsRef.current < MAX_PROFILE_LOAD_ATTEMPTS) {
+          if (retryTimeoutRef.current) {
+            window.clearTimeout(retryTimeoutRef.current);
           }
+          
+          console.log(`[App] loadProfile: Programando reintento en 2 segundos...`);
+          retryTimeoutRef.current = window.setTimeout(() => {
+            console.log(`[App] loadProfile: Ejecutando reintento programado...`);
+            loadProfile(userId, true);
+          }, 2000);
         } else {
-          console.log('No hay sesión activa');
+          // Error diferente de timeout o máximo de reintentos alcanzado
+          setUserProfile(null);
+        }
+        return false;
+      }
+    } catch (err) {
+      console.error(`[App] loadProfile: Excepción inesperada:`, err);
+      setUserProfile(null);
+      return false;
+    }
+  }, []);
+
+  // Efecto para manejar autenticación, usando useCallback de loadProfile
+  useEffect(() => {
+    // Prevenir ejecuciones duplicadas
+    if (authInProgressRef.current) return;
+    authInProgressRef.current = true;
+    
+    console.log('[App] useEffect [Auth]: Inicializando gestión de autenticación');
+    setLoading(true);
+
+    // Obtener sesión inicial
+    const getInitialSession = async () => {
+      try {
+        console.log('[App] getInitialSession: Obteniendo sesión...');
+        const { data: { session } } = await supabase.auth.getSession();
+        
+        if (session?.user) {
+          console.log(`[App] getInitialSession: Sesión encontrada para ${session.user.id}`);
+          setUser(session.user);
+          await loadProfile(session.user.id);
+        } else {
+          console.log('[App] getInitialSession: No hay sesión activa');
+          setUser(null);
+          setUserProfile(null);
         }
       } catch (err) {
-        console.error('Error obteniendo sesión inicial:', err);
+        console.error('[App] getInitialSession: Error:', err);
       } finally {
+        setAuthInitialized(true);
         setLoading(false);
       }
     };
 
     getInitialSession();
 
-    // Set up auth state listener
+    // Suscribirse a cambios de estado de autenticación
     const { data: { subscription } } = supabase.auth.onAuthStateChange(
       async (event, session) => {
-        console.log('Estado de autenticación cambiado:', event);
+        console.log(`[App] onAuthStateChange: Evento ${event}`, session?.user ? `para ${session.user.id}` : 'sin sesión');
+        
+        // Evitar operaciones innecesarias para eventos no relacionados con login/logout
+        const isSignificantEvent = ['SIGNED_IN', 'SIGNED_OUT', 'TOKEN_REFRESHED', 'USER_UPDATED'].includes(event);
+        if (!isSignificantEvent) {
+          console.log(`[App] onAuthStateChange: Ignorando evento ${event} (no significativo)`);
+          return;
+        }
+        
+        setLoading(true);
+        
         if (session?.user) {
-          console.log('Usuario autenticado:', session.user.email);
-          setUser(session.user);
-          try {
-            const { success, perfil, error } = await obtenerPerfilUsuario(session.user.id);
-            if (success && perfil) {
-              console.log('Perfil cargado en cambio de auth');
-              setUserProfile(perfil);
-            } else {
-              console.log('No se pudo cargar el perfil en cambio de auth:', error);
+          const currentUserId = user?.id || null;
+          
+          // Solo actualizar user/userProfile si el ID cambió o no hay perfil actual
+          if (!currentUserId || currentUserId !== session.user.id || !userProfile) {
+            console.log(`[App] onAuthStateChange: Actualizando usuario a ${session.user.id}`);
+            setUser(session.user);
+            
+            // Cargar perfil solo si es un usuario diferente o no hay perfil
+            if (!userProfile || currentUserId !== session.user.id) {
+              await loadProfile(session.user.id);
             }
-          } catch (err) {
-            console.error('Error al cargar perfil en cambio de auth:', err);
+          } else {
+            console.log(`[App] onAuthStateChange: Usuario ya actualizado (${currentUserId})`);
           }
-        } else {
-          console.log('Usuario desconectado');
+        } else if (event === 'SIGNED_OUT') {
+          console.log('[App] onAuthStateChange: Limpiando estado por SIGNED_OUT');
           setUser(null);
           setUserProfile(null);
         }
+        
         setLoading(false);
       }
     );
 
-    // Clean up subscription on unmount
+    // Limpiar suscripción al desmontar
     return () => {
+      console.log('[App] useEffect [Auth]: Limpiando suscripción');
       subscription?.unsubscribe();
-      setLoading(false); // Asegurar que no quede en estado de carga al desmontar
+      authInProgressRef.current = false;
     };
-  }, []);
-
-  // NUEVO: restaurar sesión al volver al foco
-  useEffect(() => {
-    const handleVisibilityChange = async () => {
-      if (document.visibilityState === "visible") {
-        console.log('Documento visible, verificando sesión...');
-        try {
-          const { data: { session } } = await supabase.auth.getSession();
-          if (session?.user && (!user || user.id !== session.user.id)) {
-            console.log('Actualizando usuario después de cambio de visibilidad');
-            setUser(session.user);
-            const { success, perfil } = await obtenerPerfilUsuario(session.user.id);
-            if (success && perfil) {
-              console.log('Actualizando perfil después de cambio de visibilidad');
-              setUserProfile(perfil);
-            }
-          } else if (!session?.user && user) {
-            console.log('Sesión finalizada mientras fuera de foco');
-            setUser(null);
-            setUserProfile(null);
-          }
-        } catch (err) {
-          console.error('Error al verificar sesión en cambio de visibilidad:', err);
-        }
-      }
-    };
-
-    document.addEventListener("visibilitychange", handleVisibilityChange);
-    
-    return () => {
-      document.removeEventListener("visibilitychange", handleVisibilityChange);
-    };
-  }, [user, userProfile]);
+  }, [loadProfile]); // Solo depende de loadProfile (memoizado)
 
   // Escuchar el evento userProfileUpdated
   useEffect(() => {
     const handleProfileUpdate = (event: CustomEvent) => {
-      const { user: updatedUser, profile: updatedProfile } = event.detail;
-      console.log('Evento userProfileUpdated recibido:', { updatedUser, updatedProfile });
-      
-      if (updatedProfile) {
-        setUserProfile(updatedProfile);
+      if (event.detail.profile) {
+        console.log('[App] Evento userProfileUpdated recibido', event.detail.profile.id);
+        setUserProfile(event.detail.profile);
       }
     };
-
-    // Agregar el event listener
+    
     window.addEventListener('userProfileUpdated', handleProfileUpdate as EventListener);
-
-    // Limpiar el event listener
     return () => {
       window.removeEventListener('userProfileUpdated', handleProfileUpdate as EventListener);
     };
-  }, []);
+  }, []); // Sin dependencias - solo se ejecuta una vez
 
-  if (loading) {
+  // Usar useMemo para determinar si hay que mostrar la pantalla de carga
+  const showLoading = useMemo(() => {
+    return loading || !authInitialized;
+  }, [loading, authInitialized]);
+
+  if (showLoading) {
     return <div className="flex h-screen w-full items-center justify-center">
-      <p className="text-xl">Cargando...</p>
+      <p className="text-xl">Cargando aplicación...</p>
     </div>;
   }
+
+  // Evitar loggear en cada render
+  // console.log('[App] Renderizando. Usuario:', user ? user.id : 'null', 'Perfil:', userProfile ? userProfile.id : 'null');
 
   return (
     <Router>
