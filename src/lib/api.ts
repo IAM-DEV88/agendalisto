@@ -219,10 +219,12 @@ export const updateAppointmentStatus = async (id: string, status: Appointment['s
 // API functions for business management
 export const createBusiness = async (business: Omit<Business, 'id' | 'created_at' | 'updated_at'>) => {
   try {
+    // Exclude slug field from insert payload; it doesn't exist in the DB
+    const { slug, ...payload } = business;
     const { data, error } = await supabase
       .from('businesses')
       .insert([{
-        ...business,
+        ...payload,
         updated_at: new Date().toISOString()
       }])
       .select()

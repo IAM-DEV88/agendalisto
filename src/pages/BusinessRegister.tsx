@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { createBusiness } from '../lib/api';
+import { createBusiness, updateUserProfile } from '../lib/api';
 import type { UserProfile } from '../lib/supabase';
 
 type BusinessRegisterProps = {
@@ -52,6 +52,8 @@ const BusinessRegister = ({ user }: BusinessRegisterProps) => {
       const { success, business, error: apiError } = await createBusiness(businessData);
       
       if (success && business) {
+        // Actualizar perfil indicando que ahora es negocio
+        await updateUserProfile(user.id, { is_business: true, business_id: business.id });
         // Redirigir al dashboard del negocio
         navigate('/business/dashboard');
       } else {

@@ -1,6 +1,24 @@
 import { Link } from 'react-router-dom';
+import { useAuthSession } from '../hooks/useAuthSession';
 
 const Home = () => {
+  const { user, loading } = useAuthSession();
+  let registerText = 'Registrarse';
+  let registerLink = '/register';
+  let secondText = 'Iniciar Sesión';
+  let secondLink = '/login';
+  if (!loading && user) {
+    secondText = 'Explorar';
+    secondLink = '/explore';
+    if (user.business_id) {
+      registerText = 'Mi negocio';
+      registerLink = '/business/dashboard';
+    } else {
+      registerText = 'Registrar mi negocio';
+      registerLink = '/business/register';
+    }
+  }
+
   return (
     <div className="bg-white">
       {/* Hero section */}
@@ -19,13 +37,13 @@ const Home = () => {
                 </p>
                 <div className="mt-5 sm:mt-8 sm:flex sm:justify-center lg:justify-start">
                   <div className="rounded-md shadow">
-                    <Link to="/register" className="w-full flex items-center justify-center px-8 py-3 border border-transparent text-base font-medium rounded-md text-white bg-indigo-800 hover:bg-indigo-700 md:py-4 md:text-lg md:px-10">
-                      Registrarse
+                    <Link to={registerLink} className="w-full flex items-center justify-center px-8 py-3 border border-transparent text-base font-medium rounded-md text-white bg-indigo-800 hover:bg-indigo-700 md:py-4 md:text-lg md:px-10">
+                      {registerText}
                     </Link>
                   </div>
                   <div className="mt-3 sm:mt-0 sm:ml-3">
-                    <Link to="/login" className="w-full flex items-center justify-center px-8 py-3 border border-transparent text-base font-medium rounded-md text-indigo-700 bg-indigo-100 hover:bg-indigo-200 md:py-4 md:text-lg md:px-10">
-                      Iniciar Sesión
+                    <Link to={secondLink} className="w-full flex items-center justify-center px-8 py-3 border border-transparent text-base font-medium rounded-md text-indigo-700 bg-indigo-100 hover:bg-indigo-200 md:py-4 md:text-lg md:px-10">
+                      {secondText}
                     </Link>
                   </div>
                 </div>
