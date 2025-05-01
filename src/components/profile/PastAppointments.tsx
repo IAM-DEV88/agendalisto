@@ -139,19 +139,18 @@ const PastAppointments: React.FC<PastAppointmentsProps> = ({
 
   return (
     <>
-      <h2 className="text-xl font-semibold text-gray-800 mb-4">Historial de citas</h2>
-      
+      <div className="mt-2">
       {loading ? (
         <div className="flex justify-center py-8">
           <div className="animate-spin rounded-full h-10 w-10 border-t-2 border-b-2 border-indigo-500"></div>
         </div>
       ) : appointments.length === 0 ? (
-        <div className="bg-white shadow overflow-hidden sm:rounded-md p-6 text-center">
-          <p className="text-gray-500">No tienes citas pasadas.</p>
+        <div className="dark:bg-opacity-10 bg-white shadow overflow-hidden sm:rounded-md p-6 text-center">
+          <p className="text-gray-500 dark:text-white">No tienes citas pasadas.</p>
         </div>
       ) : (
         <>
-          <div className="bg-white shadow overflow-hidden sm:rounded-md">
+          <div className="dark:bg-opacity-10 bg-white shadow overflow-hidden sm:rounded-md">
             <ul className="divide-y divide-gray-200">
               {appointments
                 .slice((currentPage - 1) * itemsPerPage, currentPage * itemsPerPage)
@@ -166,7 +165,7 @@ const PastAppointments: React.FC<PastAppointmentsProps> = ({
                         >
                           {appointment.businesses?.name || 'Negocio sin nombre'}
                         </Link>
-                        <p className={`ml-2 px-2 inline-flex text-xs leading-5 font-semibold rounded-full 
+                        <p className={`ml-2 dark:text-gray-600 px-2 inline-flex text-xs leading-5 font-semibold rounded-full 
                           ${appointment.status === 'confirmed' ? 'bg-green-100 text-green-800' : 
                             appointment.status === 'pending' ? 'bg-yellow-100 text-yellow-800' : 
                             appointment.status === 'cancelled' ? 'bg-red-100 text-red-800' : 
@@ -180,14 +179,14 @@ const PastAppointments: React.FC<PastAppointmentsProps> = ({
                         {reviews[appointment.id] ? null : appointment.status === 'completed' ? (
                           <button
                             onClick={() => setShowReviewFormId(appointment.id)}
-                            className="inline-flex items-center px-2.5 py-1.5 border border-gray-300 text-xs font-medium rounded text-gray-700 bg-white hover:bg-gray-50"
+                            className="inline-flex items-center px-2.5 py-1.5 border border-gray-300 text-xs font-medium text-gray-700 bg-white hover:bg-gray-50"
                           >
                             Dejar reseña
                           </button>
                         ) : (
                           <button
                             onClick={() => onReschedule(appointment)}
-                            className="inline-flex items-center px-2.5 py-1.5 border border-gray-300 text-xs font-medium rounded text-gray-700 bg-white hover:bg-gray-50"
+                            className="inline-flex items-center px-2.5 py-1.5 border border-gray-300 text-xs font-medium text-gray-700 bg-white hover:bg-gray-50"
                           >
                             Reagendar
                           </button>
@@ -196,23 +195,23 @@ const PastAppointments: React.FC<PastAppointmentsProps> = ({
                     </div>
                     <div className="mt-2 sm:flex sm:justify-between">
                       <div className="sm:flex">
-                        <p className="flex items-center text-sm text-gray-500">
+                        <p className="flex dark:text-white items-center text-sm text-gray-500">
                           {appointment.services?.name || 'Servicio sin nombre'}
                         </p>
-                        <p className="mt-2 flex items-center text-sm text-gray-500 sm:mt-0 sm:ml-6">
+                        <p className="mt-2 dark:text-white flex items-center text-sm text-gray-500 sm:mt-0 sm:ml-6">
                           Duración: {appointment.services?.duration || 0} min
                         </p>
                       </div>
                       <div className="mt-2 flex items-center text-sm text-gray-500 sm:mt-0">
-                        <p>
+                        <p className="dark:text-white">
                           {formatDate(appointment.start_time)}
                         </p>
                       </div>
                     </div>
                   </div>
                   {reviews[appointment.id] && (
-                    <div className="px-4 py-4 sm:px-6 bg-gray-50 rounded-md border border-gray-200 mt-4">
-                      <h3 className="text-lg font-medium text-gray-900 mb-2">Tu reseña</h3>
+                    <div className="px-4 py-2 sm:px-6 dark:bg-opacity-10 bg-gray-50 border-b border-gray-200">
+                      <h3 className="text-sm dark:text-white font-medium text-gray-900 mb-2">Tu reseña</h3>
                       <div className="flex space-x-1">
                         {[1, 2, 3, 4, 5].map((star) => (
                           <Star
@@ -226,7 +225,7 @@ const PastAppointments: React.FC<PastAppointmentsProps> = ({
                         ))}
                       </div>
                       {reviews[appointment.id].comment && (
-                        <p className="mt-2 text-sm text-gray-700">{reviews[appointment.id].comment}</p>
+                        <p className="mt-2 dark:text-white text-sm text-gray-700">{reviews[appointment.id].comment}</p>
                       )}
                     </div>
                   )}
@@ -289,6 +288,7 @@ const PastAppointments: React.FC<PastAppointmentsProps> = ({
           />
         </>
       )}
+      </div>
     </>
   );
 };

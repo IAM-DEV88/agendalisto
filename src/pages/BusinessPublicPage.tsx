@@ -145,13 +145,13 @@ function BusinessPublicPage() {
   }
 
   return (
-    <div className="min-h-screen bg-gray-50 py-12 px-4 sm:px-6 lg:px-8">
+    <div className="py-6 px-4 sm:px-6 lg:px-8">
       <div className="max-w-7xl mx-auto">
         {/* Business Header */}
         <BusinessHeader businessData={businessData} averageRating={averageRating} reviewsCount={reviews.length} />
 
         {/* Mobile Tabs */}
-        <div className="mt-6 bg-white shadow-md rounded-xl overflow-hidden md:hidden">
+        <div className="mt-6 bg-white dark:bg-white dark:bg-opacity-10 shadow-md overflow-hidden md:hidden">
           <div className="flex border-b border-gray-200">
             <button
               onClick={() => setActiveTab('services')}
@@ -196,7 +196,7 @@ function BusinessPublicPage() {
                   <div className="mt-6">
                     <button
                       onClick={() => { console.log('Mobile reserve now clicked'); setShowBooking(true); }}
-                      className="w-full bg-indigo-600 text-white rounded-md py-2 px-4 font-medium hover:bg-indigo-700 transition-colors"
+                      className="w-full bg-indigo-600 text-white py-2 px-4 font-medium hover:bg-indigo-700 transition-colors"
                     >
                       Reservar Ahora
                     </button>
@@ -204,7 +204,7 @@ function BusinessPublicPage() {
                 )}
 
                 {showBooking && user && user.id !== businessData?.owner_id && (
-                  <div className="mt-6 bg-white shadow-md rounded-xl p-6">
+                  <div className="mt-6 bg-white dark:bg-white dark:bg-opacity-10 shadow-md p-6">
                     <BookingForm 
                       businessId={businessData.id}
                       serviceId={selectedService || ''}
@@ -240,16 +240,16 @@ function BusinessPublicPage() {
 
         {/* Mobile Reviews Section */}
         <div className="mt-6 md:hidden">
-          <div className="bg-white shadow-md rounded-xl p-6">
+          <div className="bg-white dark:bg-white dark:bg-opacity-10 shadow-md p-6">
             <ReviewsSection businessId={businessData.id} currentUser={user} />
           </div>
         </div>
 
-        {/* Desktop Layout */}
-        <div className="mt-6 grid grid-cols-1 md:grid-cols-3 gap-6">
+        {/* Desktop Layout - hidden on mobile to prevent duplicate booking forms */}
+        <div className="mt-6 hidden md:grid grid-cols-1 md:grid-cols-3 gap-6">
           {/* Main Column */}
           <div className="md:col-span-2">
-            <div className="bg-white shadow-md rounded-xl p-6 hidden md:block">
+            <div className="bg-white dark:bg-white dark:bg-opacity-10 shadow-md p-6 hidden md:block">
               <h2 className="text-xl font-semibold mb-6">Servicios Disponibles</h2>
               <ServicesList 
                 services={services} 
@@ -263,7 +263,7 @@ function BusinessPublicPage() {
 
             {/* Booking Form */}
             {showBooking && user && user.id !== businessData?.owner_id && (
-              <div className="mt-6 bg-white shadow-md rounded-xl p-6">
+              <div className="mt-6 bg-white dark:bg-white dark:bg-opacity-10 shadow-md p-6">
                 <BookingForm 
                   businessId={businessData.id}
                   serviceId={selectedService || ''}
@@ -284,14 +284,14 @@ function BusinessPublicPage() {
           {/* Sidebar */}
           <div className="space-y-6 hidden md:block">
             {/* Hours */}
-            <div className="bg-white shadow-md rounded-xl p-6">
+            <div className="bg-white dark:bg-white dark:bg-opacity-10 shadow-md p-6">
               <h2 className="text-xl font-semibold mb-4">Horarios de Atención</h2>
               <BusinessHoursList businessHours={businessHours} />
             </div>
 
             {/* Location */}
             {businessData?.config?.mostrar_direccion && (
-              <div className="bg-white shadow-md rounded-xl p-6">
+              <div className="bg-white dark:bg-white dark:bg-opacity-10 shadow-md p-6">
                 <h2 className="text-xl font-semibold mb-4">Ubicación</h2>
                 <BusinessLocation address={businessData.address} />
               </div>
@@ -299,11 +299,11 @@ function BusinessPublicPage() {
 
             {/* Booking Button */}
             {selectedService && businessData?.config?.permitir_reservas_online && user && user.id !== businessData?.owner_id && (
-              <div className="bg-white shadow-md rounded-xl p-6">
+              <div className="bg-white dark:bg-white dark:bg-opacity-10 shadow-md p-6">
                 <h2 className="text-xl font-semibold mb-4">Reservar Cita</h2>
                 <button
                   onClick={() => { console.log('Desktop reserve now clicked'); setShowBooking(true); }}
-                  className="w-full bg-indigo-600 text-white rounded-md py-2 px-4 font-medium hover:bg-indigo-700 transition-colors"
+                  className="w-full bg-indigo-600 text-white py-2 px-4 font-medium hover:bg-indigo-700 transition-colors"
                 >
                   Reservar Ahora
                 </button>
@@ -311,7 +311,7 @@ function BusinessPublicPage() {
             )}
 
             {!user && (
-              <div className="bg-white shadow-md rounded-xl p-6">
+              <div className="bg-white dark:bg-white dark:bg-opacity-10 shadow-md p-6">
                 <div className="bg-yellow-50 border border-yellow-200 rounded-md p-4">
                   <p className="text-sm text-yellow-800">
                     Debes <Link to="/login" className="font-medium underline">iniciar sesión</Link> para reservar servicios.

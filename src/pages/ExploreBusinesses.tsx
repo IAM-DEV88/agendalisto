@@ -111,10 +111,10 @@ const ExploreBusinesses = () => {
         ) : (
           <div className="mt-10 grid gap-6 grid-cols-1 sm:grid-cols-2 lg:grid-cols-3">
             {businesses.map((business) => (
-              <Link 
-                key={business.slug} 
+              <Link
+                key={business.slug}
                 to={`/${business.slug}`}
-                className="bg-white overflow-hidden shadow rounded-lg hover:shadow-lg transition-shadow duration-300"
+                className="bg-white dark:bg-white dark:bg-opacity-10 overflow-hidden shadow hover:shadow-lg transition-shadow duration-300"
               >
                 <div className="h-48 bg-gray-200 relative">
                   <img 
@@ -124,11 +124,11 @@ const ExploreBusinesses = () => {
                   />
                 </div>
                 <div className="p-6">
-                  <h3 className="text-lg font-medium text-gray-900">{business.name}</h3>
-                  <p className="mt-1 text-sm text-gray-500">{business.address}</p>
-                  <p className="mt-2 text-sm text-gray-600 line-clamp-2">{business.description}</p>
+                  <h3 className="text-lg font-medium text-gray-900 dark:text-white">{business.name}</h3>
+                  <p className="mt-1 text-sm text-gray-500 dark:text-white">{business.address}</p>
+                  <p className="mt-2 text-sm text-gray-600 dark:text-white line-clamp-2">{business.description}</p>
                   <div className="mt-4">
-                    <span className="inline-flex items-center px-3 py-0.5 rounded-full text-sm font-medium bg-indigo-100 text-indigo-800">
+                    <span className="inline-flex items-center px-3 py-0.5 text-sm font-medium bg-indigo-100 text-indigo-800 dark:bg-white dark:bg-opacity-10 dark:text-white">
                       Ver servicios
                     </span>
                   </div>

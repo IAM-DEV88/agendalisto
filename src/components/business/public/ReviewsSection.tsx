@@ -202,10 +202,10 @@ const ReviewsSection: React.FC<ReviewsSectionProps> = ({ businessId, currentUser
                   <User className="h-5 w-5 text-gray-500" />
                 </div>
                 <div>
-                  <div className="font-medium text-gray-900">
+                  <div className="font-medium dark:text-white text-gray-900">
                     {review.user?.full_name || 'Usuario'}
                   </div>
-                  <div className="text-xs text-gray-500">
+                  <div className="text-xs dark:text-white text-gray-500">
                     {new Date(review.created_at).toLocaleDateString()}
                   </div>
                 </div>

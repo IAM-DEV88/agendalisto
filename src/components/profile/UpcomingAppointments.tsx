@@ -12,6 +12,13 @@ interface UpcomingAppointmentsProps {
   onCancel: (appointment: Appointment) => void;
 }
 
+// Helper to generate slug from business name
+const slugify = (str: string): string =>
+  str
+    .toLowerCase()
+    .replace(/\s+/g, '-')
+    .replace(/[^\w\-]+/g, '');
+
 const UpcomingAppointments: React.FC<UpcomingAppointmentsProps> = ({
   appointments,
   loading,
@@ -77,24 +84,21 @@ const UpcomingAppointments: React.FC<UpcomingAppointmentsProps> = ({
 
   return (
     <>
-      <div className="flex justify-between items-center mb-4">
-        <h2 className="text-xl font-semibold text-gray-800">Próximas citas</h2>
-      </div>
-
+      <div className="mt-2">
       {loading ? (
         <div className="flex justify-center py-8">
           <div className="animate-spin rounded-full h-10 w-10 border-t-2 border-b-2 border-indigo-500"></div>
         </div>
       ) : appointments.length === 0 ? (
-        <div className="bg-white shadow overflow-hidden sm:rounded-md p-6 text-center">
-          <p className="text-gray-500">No tienes citas programadas.</p>
-          <Link to="/explore" className="mt-4 inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm text-white bg-indigo-600 hover:bg-indigo-700">
-            Agendar una cita
+        <div className="dark:bg-opacity-10 bg-white shadow overflow-hidden sm:rounded-md p-6 text-center">
+          <p className="text-gray-500 dark:text-white">No tienes citas programadas.</p>
+          <Link to="/explore" className="mt-4 inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium shadow-sm text-white bg-indigo-600 hover:bg-indigo-700">
+            Explorar servicios
           </Link>
         </div>
       ) : (
         <>
-          <div className="bg-white shadow overflow-hidden sm:rounded-md">
+          <div className="dark:bg-opacity-10 bg-white shadow overflow-hidden sm:rounded-md">
             <ul className="divide-y divide-gray-200">
               {appointments
                 .slice((currentPage - 1) * itemsPerPage, currentPage * itemsPerPage)
@@ -103,10 +107,19 @@ const UpcomingAppointments: React.FC<UpcomingAppointmentsProps> = ({
                   <div className="px-4 py-4 sm:px-6">
                     <div className="flex items-center justify-between">
                       <div className="flex items-center">
-                        <p className="text-sm font-medium text-indigo-600 truncate">
-                          {appointment.businesses?.name || 'Negocio sin nombre'}
+                        <p className="text-sm dark:text-white font-medium text-indigo-600 truncate">
+                          {appointment.businesses?.name ? (
+                            <Link
+                              to={`/${slugify(appointment.businesses.name)}`}
+                              className="hover:text-indigo-700"
+                            >
+                              {appointment.businesses.name}
+                            </Link>
+                          ) : (
+                            'Negocio sin nombre'
+                          )}
                         </p>
-                        <p className={`ml-2 px-2 inline-flex text-xs leading-5 font-semibold rounded-full 
+                        <p className={`ml-2 dark:text-black px-2 inline-flex text-xs leading-5 font-semibold rounded-full 
                           ${appointment.status === 'confirmed' ? 'bg-green-100 text-green-800' : 
                             appointment.status === 'pending' ? 'bg-yellow-100 text-yellow-800' : 
                             appointment.status === 'cancelled' ? 'bg-red-100 text-red-800' : 
@@ -121,13 +134,13 @@ const UpcomingAppointments: React.FC<UpcomingAppointmentsProps> = ({
                           <>
                             <button
                               onClick={() => onReschedule(appointment)}
-                              className="inline-flex items-center px-2.5 py-1.5 border border-gray-300 text-xs font-medium rounded text-gray-700 bg-white hover:bg-gray-50"
+                              className="inline-flex items-center px-2.5 py-1.5 border border-gray-300 text-xs font-medium text-gray-700 bg-white hover:bg-gray-50"
                             >
                               Reagendar
                             </button>
                             <button
                               onClick={() => onCancel(appointment)}
-                              className="inline-flex items-center px-2.5 py-1.5 border border-gray-300 text-xs font-medium rounded text-red-700 bg-white hover:bg-gray-50"
+                              className="inline-flex items-center px-2.5 py-1.5 border border-gray-300 text-xs font-medium text-red-700 bg-white hover:bg-gray-50"
                             >
                               Cancelar
                             </button>
@@ -136,7 +149,7 @@ const UpcomingAppointments: React.FC<UpcomingAppointmentsProps> = ({
                         {appointment.status === 'cancelled' && (
                           <button
                             onClick={() => onReschedule(appointment)}
-                            className="inline-flex items-center px-2.5 py-1.5 border border-gray-300 text-xs font-medium rounded text-gray-700 bg-white hover:bg-gray-50"
+                            className="inline-flex items-center px-2.5 py-1.5 border border-gray-300 text-xs font-medium text-gray-700 bg-white hover:bg-gray-50"
                           >
                             Reagendar
                           </button>
@@ -145,15 +158,15 @@ const UpcomingAppointments: React.FC<UpcomingAppointmentsProps> = ({
                     </div>
                     <div className="mt-2 sm:flex sm:justify-between">
                       <div className="sm:flex">
-                        <p className="flex items-center text-sm text-gray-500">
+                        <p className="flex dark:text-white items-center text-sm text-gray-500">
                           {appointment.services?.name || 'Servicio sin nombre'}
                         </p>
-                        <p className="mt-2 flex items-center text-sm text-gray-500 sm:mt-0 sm:ml-6">
+                        <p className="mt-2 dark:text-white flex items-center text-sm text-gray-500 sm:mt-0 sm:ml-6">
                           Duración: {appointment.services?.duration || 0} min
                         </p>
                       </div>
                       <div className="mt-2 flex items-center text-sm text-gray-500 sm:mt-0">
-                        <p>
+                        <p className="dark:text-white">
                           {formatDate(appointment.start_time)}
                         </p>
                       </div>
@@ -170,6 +183,8 @@ const UpcomingAppointments: React.FC<UpcomingAppointmentsProps> = ({
           />
         </>
       )}
+      </div>
+
     </>
   );
 };

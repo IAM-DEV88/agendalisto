@@ -39,7 +39,7 @@ const ServicesList: React.FC<ServicesListProps> = ({
       {services.map((service) => (
         <div
           key={service.id}
-          className={`bg-white border rounded-lg p-4 ${currentUser && currentUser.id !== businessOwnerId ? 'cursor-pointer' : ''} transition-colors ${
+          className={`bg-white dark:bg-opacity-10 border rounded-lg p-4 ${currentUser && currentUser.id !== businessOwnerId ? 'cursor-pointer' : ''} transition-colors ${
             selectedService === service.id ? 'border-indigo-500 ring-2 ring-indigo-200' : 'border-gray-200 hover:border-indigo-300'
           }`}
           onClick={() => currentUser && handleServiceClick(service.id)}
@@ -67,7 +67,7 @@ const ServicesList: React.FC<ServicesListProps> = ({
           )}
           
           {currentUser && currentUser.id === businessOwnerId && (
-            <div className="mt-3 text-xs text-gray-500">
+            <div className="mt-3 dark:text-white text-xs text-gray-500">
               Este es tu negocio, no puedes reservar tus propios servicios
             </div>
           )}

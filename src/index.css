@@ -4,6 +4,18 @@
 
 /* Custom base styles and class-based theming */
 @layer base {
+  /* Ensure text elements are white in dark mode */
+  html.dark h1,
+  html.dark h2,
+  html.dark h3,
+  html.dark h4,
+  html.dark h5,
+  html.dark h6,
+  html.dark p,
+  html.dark label,
+  html.dark span {
+    @apply text-white;
+  }
   html {
     font-family: Inter, system-ui, Avenir, Helvetica, Arial, sans-serif;
     font-weight: 400;
@@ -23,5 +35,17 @@
   :root {
     color: #213547;
     background-color: #ffffff;
+  }
+}
+
+/* Remove rounding for standard rounded-* classes globally, keep rounded-full */
+@layer utilities {
+  .rounded,
+  .rounded-sm,
+  .rounded-md,
+  .rounded-lg,
+  .rounded-xl,
+  .rounded-2xl {
+    border-radius: 0 !important;
   }
 } 
