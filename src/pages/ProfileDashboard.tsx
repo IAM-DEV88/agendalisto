@@ -257,6 +257,12 @@ const ProfileDashboard = ({ user }: ProfileDashboardProps) => {
     <div>
       <div className="max-w-7xl mx-auto py-6 sm:px-6 lg:px-8">
         <div className="px-4 py-2 sm:px-0">
+          {/* Show error message if any */}
+          {error && (
+            <div className="mb-4 p-4 bg-red-50 text-red-800 dark:bg-red-900 dark:text-white rounded-none">
+              {error}
+            </div>
+          )}
           <div>
             <div className="flex items-center justify-between mb-8 sm:flex sm:items-baseline">
               <h3 className="text-lg dark:text-white leading-6 font-medium text-gray-900">Mi Perfil</h3>
