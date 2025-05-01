@@ -15,7 +15,6 @@ const BusinessHoursSection: React.FC<BusinessHoursSectionProps> = ({
   businessHours,
   loading,
   saving,
-  message,
   onSave,
   onHoursChange,
   days

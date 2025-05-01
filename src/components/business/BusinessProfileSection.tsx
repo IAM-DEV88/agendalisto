@@ -12,7 +12,6 @@ interface BusinessProfileSectionProps {
 const BusinessProfileSection: React.FC<BusinessProfileSectionProps> = ({
   businessData,
   saving,
-  message,
   onSave,
   onChange
 }) => {
