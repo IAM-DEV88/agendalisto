@@ -1,5 +1,5 @@
 import React from 'react';
-import { Calendar, Clock, CheckSquare, Users, Box, DollarSign, Percent, StopCircle, TrendingUp } from 'lucide-react';
+import { Calendar, Clock, CheckSquare, Users, Box, DollarSign, Percent, TrendingUp } from 'lucide-react';
 
 interface StatsSectionProps {
   totalAppointments: number;
@@ -8,8 +8,6 @@ interface StatsSectionProps {
   totalClients: number;
   totalServices: number;
   totalRevenue?: number;
-  revenueWeek?: number;
-  revenueMonth?: number;
   confirmationRate?: number;    // porcentaje 0-100
   cancellationRate?: number;
   avgDuration?: number;
@@ -33,8 +31,6 @@ const StatsSection: React.FC<StatsSectionProps> = ({
   totalClients,
   totalServices,
   totalRevenue = 0,
-  revenueWeek = 0,
-  revenueMonth = 0,
   confirmationRate = 0,
   cancellationRate = 0,
   avgDuration = 0,

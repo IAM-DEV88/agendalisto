@@ -194,7 +194,6 @@ const ServicesSection: React.FC<ServicesSectionProps> = ({
         <>
         <div className="mt-2 grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3">
           {(() => {
-            const totalPages = Math.ceil(services.length / itemsPerPage);
             const pagedServices = services.slice((currentPage - 1) * itemsPerPage, currentPage * itemsPerPage);
             return pagedServices.map((service) => (
               <div
