@@ -262,7 +262,7 @@ const ProfileDashboard = ({ user }: ProfileDashboardProps) => {
               <h3 className="text-lg leading-6 font-medium text-gray-900">Mi Perfil</h3>
               {hasBusiness ? (
                 <Link to="/business/dashboard" className="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md text-indigo-600 border-indigo-600 hover:bg-indigo-50">
-                  Ir a mi Negocio
+                  Mi Negocio
                 </Link>
               ) : (
                 <Link to="/business/register" className="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md text-indigo-600 border-indigo-600 hover:bg-indigo-50">

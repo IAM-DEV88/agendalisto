@@ -279,9 +279,6 @@ function BusinessPublicPage() {
               </div>
             )}
 
-            <div className="mt-6 bg-white shadow-md rounded-xl p-6">
-              <ReviewsSection businessId={businessData.id} currentUser={user} />
-            </div>
           </div>
 
           {/* Sidebar */}
