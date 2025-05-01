@@ -389,6 +389,48 @@ const BusinessDashboard = ({ user }: BusinessDashboardProps) => {
   const pagedPast = pastAppointments.slice((historyPage - 1) * itemsPerPage, historyPage * itemsPerPage);
   const pagedClients = businessClients.slice((clientsPage - 1) * itemsPerPage, clientsPage * itemsPerPage);
 
+  // FIRST_EDIT: compute all statistics needed for StatsSection
+  const completedAppointments = businessAppointments.filter(a => a.status === 'completed');
+  const totalRevenue = completedAppointments.reduce((sum, a) => sum + (a.services?.price ?? 0), 0);
+  const confirmationRate = businessAppointments.length > 0 ? (businessAppointments.filter(a => a.status === 'confirmed').length / businessAppointments.length) * 100 : 0;
+  const cancellationRate = businessAppointments.length > 0 ? (businessAppointments.filter(a => a.status === 'cancelled').length / businessAppointments.length) * 100 : 0;
+  const avgDuration = completedAppointments.length > 0 ? completedAppointments.reduce((sum, a) => sum + (a.services?.duration ?? 0), 0) / completedAppointments.length : 0;
+  const avgPrice = completedAppointments.length > 0 ? totalRevenue / completedAppointments.length : 0;
+  const userAppointmentCounts: Record<string, number> = {};
+  businessAppointments.forEach(a => {
+    userAppointmentCounts[a.user_id] = (userAppointmentCounts[a.user_id] || 0) + 1;
+  });
+  const newClientsCount = Object.values(userAppointmentCounts).filter(count => count === 1).length;
+  const returningClientsCount = Object.values(userAppointmentCounts).filter(count => count > 1).length;
+  const serviceCounts: Record<string, number> = {};
+  businessAppointments.forEach(a => {
+    const serviceName = a.services?.name ?? '';
+    serviceCounts[serviceName] = (serviceCounts[serviceName] || 0) + 1;
+  });
+  const [topServiceName, topServiceCount] = Object.entries(serviceCounts).sort((a, b) => b[1] - a[1])[0] || ['-', 0];
+  const clientCounts: Record<string, number> = {};
+  businessAppointments.forEach(a => {
+    const clientName = a.profiles?.full_name ?? '';
+    clientCounts[clientName] = (clientCounts[clientName] || 0) + 1;
+  });
+  const [topClientName, topClientCount] = Object.entries(clientCounts).sort((a, b) => b[1] - a[1])[0] || ['-', 0];
+  const dayCounts: Record<number, number> = {};
+  businessAppointments.forEach(a => {
+    const dayIndex = new Date(a.start_time).getDay();
+    dayCounts[dayIndex] = (dayCounts[dayIndex] || 0) + 1;
+  });
+  const peakDayIndex = Number(Object.entries(dayCounts).sort((a, b) => b[1] - a[1])[0]?.[0]) || 0;
+  const peakDayName = days[peakDayIndex] || '-';
+  const peakHourCounts: Record<number, number> = {};
+  businessAppointments.forEach(a => {
+    const hour = new Date(a.start_time).getHours();
+    peakHourCounts[hour] = (peakHourCounts[hour] || 0) + 1;
+  });
+  const peakHour = Number(Object.entries(peakHourCounts).sort((a, b) => b[1] - a[1])[0]?.[0]) || 0;
+  const avgRatingAppointments = businessAppointments.filter(a => typeof a.review?.rating === 'number');
+  const avgRating = avgRatingAppointments.length > 0 ? avgRatingAppointments.reduce((sum, a) => sum + (a.review?.rating ?? 0), 0) / avgRatingAppointments.length : 0;
+  const lifetimeValueAvg = businessClients.length > 0 ? totalRevenue / businessClients.length : 0;
+
   return (
     <div>
       <div className="max-w-7xl mx-auto py-6 sm:px-6 lg:px-8">
@@ -499,6 +541,21 @@ const BusinessDashboard = ({ user }: BusinessDashboardProps) => {
                 pastAppointments={pastAppointments.length}
                 totalClients={businessClients.length}
                 totalServices={totalServices}
+                totalRevenue={totalRevenue}
+                confirmationRate={confirmationRate}
+                cancellationRate={cancellationRate}
+                avgDuration={avgDuration}
+                avgPrice={avgPrice}
+                topServiceName={topServiceName}
+                topServiceCount={topServiceCount}
+                topClientName={topClientName}
+                topClientCount={topClientCount}
+                peakDay={peakDayName}
+                peakHour={peakHour}
+                newClients={newClientsCount}
+                returningClients={returningClientsCount}
+                lifetimeValueAvg={lifetimeValueAvg}
+                avgRating={avgRating}
               />
             )}
             {/* Tab de Agenda */}

@@ -116,17 +116,17 @@ const Nav = ({ user }: NavProps) => {
                   <span className="inline-flex items-center justify-center h-6 w-6 rounded-full bg-indigo-100 mr-2">
                     <span className="text-xs font-medium leading-none text-indigo-700">{userName.charAt(0)}</span>
                   </span>
-                  {userName}
+                  <span className="dark:text-white">{userName}</span>
                   <svg className="ml-1 h-4 w-4 text-gray-400" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
                   </svg>
                 </button>
                 {isUserDropdownOpen && (
-                  <div ref={dropdownRef} className="origin-top-right absolute right-0 mt-2 w-48 rounded-md shadow-lg bg-white ring-1 ring-black ring-opacity-5 z-20">
+                  <div ref={dropdownRef} className="origin-top-right absolute right-0 mt-2 w-48 rounded-md shadow-lg bg-white dark:bg-gray-600 ring-1 ring-black ring-opacity-5 z-20">
                     <div className="py-1">
-                      <Link to="/dashboard" onClick={() => setIsUserDropdownOpen(false)} className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">Mi Perfil</Link>
-                      {hasBusiness && <Link to="/business/dashboard" onClick={() => setIsUserDropdownOpen(false)} className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">Mi Negocio</Link>}
-                      <button onClick={() => { setIsUserDropdownOpen(false); handleLogout(); }} className="w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">Cerrar Sesión</button>
+                      <Link to="/dashboard" onClick={() => setIsUserDropdownOpen(false)} className="block px-4 py-2 text-sm text-gray-700 dark:text-white dark:hover:text-black hover:bg-gray-100">Mi Perfil</Link>
+                      {hasBusiness && <Link to="/business/dashboard" onClick={() => setIsUserDropdownOpen(false)} className="block px-4 py-2 text-sm text-gray-700 dark:text-white dark:hover:text-black hover:bg-gray-100">Mi Negocio</Link>}
+                      <button onClick={() => { setIsUserDropdownOpen(false); handleLogout(); }} className="w-full text-left px-4 py-2 text-sm text-gray-700 dark:text-white dark:hover:text-black hover:bg-gray-100">Cerrar Sesión</button>
                     </div>
                   </div>
                 )}
