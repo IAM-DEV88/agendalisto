@@ -216,6 +216,33 @@ export const updateAppointmentStatus = async (id: string, status: Appointment['s
   return data;
 };
 
+// Function to get unique clients of a business based on appointments
+export async function getBusinessClients(businessId: string): Promise<{ success: boolean; data: UserProfile[] | null; error: string | null }> {
+  try {
+    // Fetch all appointments for the business to get user IDs
+    const { data: appts, error: apptError } = await supabase
+      .from('appointments')
+      .select('user_id')
+      .eq('business_id', businessId);
+    if (apptError) throw apptError;
+    // Extract unique user IDs
+    const userIds = Array.from(new Set((appts as { user_id: string }[]).map(a => a.user_id)));
+    if (userIds.length === 0) {
+      return { success: true, data: [], error: null };
+    }
+    // Fetch profiles for these user IDs
+    const { data: profiles, error: profilesError } = await supabase
+      .from('profiles')
+      .select('*')
+      .in('id', userIds);
+    if (profilesError) throw profilesError;
+    return { success: true, data: profiles as UserProfile[], error: null };
+  } catch (err: any) {
+    console.error('Error fetching business clients:', err);
+    return { success: false, data: null, error: err.message || 'Error al obtener clientes del negocio' };
+  }
+}
+
 // API functions for business management
 export const createBusiness = async (business: Omit<Business, 'id' | 'created_at' | 'updated_at'>) => {
   try {

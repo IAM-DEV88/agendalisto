@@ -1,4 +1,5 @@
 import React from 'react';
+import { Star } from 'lucide-react';
 
 interface AppointmentsSectionProps {
   appointments: any[];
@@ -43,6 +44,20 @@ const AppointmentsSection: React.FC<AppointmentsSectionProps> = ({
                     <p className="text-sm font-medium text-indigo-600 dark:text-indigo-200">{appointment.services?.name}</p>
                     <p className="text-sm text-gray-500 dark:text-white">Cliente: {appointment.profiles?.full_name || appointment.user_id}</p>
                     <p className="text-sm text-gray-500 dark:text-white">Fecha: {formatDate(appointment.start_time)}</p>
+                    {appointment.status === 'completed' && (
+                      appointment.review ? (
+                        <div className="flex mt-1">
+                          {Array.from({ length: appointment.review.rating }).map((_, i) => (
+                            <Star key={`star-filled-${i}`} className="h-4 w-4 text-yellow-400" />
+                          ))}
+                          {Array.from({ length: 5 - appointment.review.rating }).map((_, i) => (
+                            <Star key={`star-empty-${i}`} className="h-4 w-4 text-gray-300" />
+                          ))}
+                        </div>
+                      ) : (
+                        <p className="text-sm text-yellow-500 mt-1">Pendiente de reseña</p>
+                      )
+                    )}
                   </div>
                   <div className="flex space-x-2">
                     {appointment.status === 'pending' && (

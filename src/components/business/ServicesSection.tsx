@@ -17,6 +17,8 @@ const ServicesSection: React.FC<ServicesSectionProps> = ({
   deleteService
 }) => {
   const [services, setServices] = useState<Service[]>([]);
+  const itemsPerPage = 4;
+  const [currentPage, setCurrentPage] = useState(1);
   const [loading, setLoading] = useState(true);
   const [modalOpen, setModalOpen] = useState(false);
   const [editingService, setEditingService] = useState<Service | null>(null);
@@ -45,6 +47,7 @@ const ServicesSection: React.FC<ServicesSectionProps> = ({
       
       if (response.success && response.data) {
         setServices(response.data);
+        setCurrentPage(1);
       } else {
         setError(response.error || 'Error al cargar los servicios');
       }
@@ -66,39 +69,36 @@ const ServicesSection: React.FC<ServicesSectionProps> = ({
       provider: ''
     });
     setEditingService(null);
+    setError(null);
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    
+    setError(null);
+
+    const serviceData = {
+      business_id: businessId,
+      name: formData.name,
+      description: formData.description,
+      duration: parseInt(formData.duration),
+      price: parseFloat(formData.price),
+      is_active: formData.is_active,
+      provider: formData.provider
+    };
+
     try {
-      const serviceData = {
-        business_id: businessId,
-        name: formData.name,
-        description: formData.description,
-        duration: parseInt(formData.duration),
-        price: parseFloat(formData.price),
-        is_active: formData.is_active,
-        provider: formData.provider
-      };
-
-      let result;
       if (editingService) {
-        result = await updateService(editingService.id, serviceData);
+        await updateService(editingService.id, serviceData);
       } else {
-        result = await createService(serviceData);
-      }
-
-      if (result) {
-        await loadServices();
-        setModalOpen(false);
-        resetForm();
-      } else {
-        setError('Error al guardar el servicio');
+        await createService(serviceData);
       }
     } catch (err: any) {
       console.error('Error saving service:', err);
-      setError(err.message || 'Error al guardar el servicio');
+    } finally {
+      setModalOpen(false);
+      resetForm();
+      await loadServices();
+      setError(null);
     }
   };
 
@@ -122,6 +122,7 @@ const ServicesSection: React.FC<ServicesSectionProps> = ({
   };
 
   const handleEdit = (service: Service) => {
+    setError(null);
     setEditingService(service);
     setFormData({
       name: service.name,
@@ -190,66 +191,98 @@ const ServicesSection: React.FC<ServicesSectionProps> = ({
           </div>
         </div>
       ) : (
+        <>
         <div className="mt-2 grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3">
-          {services.map((service) => (
-            <div
-              key={service.id}
-              className={`dark:bg-opacity-10 bg-white overflow-hidden shadow rounded-lg ${
-                !service.is_active ? 'opacity-75' : ''
-              }`}
-            >
-              <div className="p-6">
-                <div className="flex items-start justify-between">
-                  <div>
-                    <h3 className="dark:text-white text-lg font-medium text-gray-900">{service.name}</h3>
-                    <p className="dark:text-white mt-1 text-sm text-gray-500">{service.description}</p>
-                  </div>
-                  {!service.is_active && (
-                    <span className="dark:text-white inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-gray-100 text-gray-800">
-                      Inactivo
-                    </span>
-                  )}
-                </div>
-                <div className="mt-4">
-                  <div className="flex justify-between text-sm">
-                    <span className="dark:text-white text-gray-500">Duración</span>
-                    <span className="dark:text-white font-medium">{service.duration} min</span>
-                  </div>
-                  <div className="mt-1 flex justify-between text-sm">
-                    <span className="dark:text-white text-gray-500">Precio</span>
-                    <span className="dark:text-white font-medium">${service.price.toFixed(2)}</span>
-                  </div>
-                  {service.provider && (
-                    <div className="mt-1 flex justify-between text-sm">
-                      <span className="dark:text-white text-gray-500">Proveedor</span>
-                      <span className="dark:text-white font-medium">{service.provider}</span>
+          {(() => {
+            const totalPages = Math.ceil(services.length / itemsPerPage);
+            const pagedServices = services.slice((currentPage - 1) * itemsPerPage, currentPage * itemsPerPage);
+            return pagedServices.map((service) => (
+              <div
+                key={service.id}
+                className={`dark:bg-opacity-10 bg-white overflow-hidden shadow rounded-lg ${
+                  !service.is_active ? 'opacity-75' : ''
+                }`}
+              >
+                <div className="p-6">
+                  <div className="flex items-start justify-between">
+                    <div>
+                      <h3 className="dark:text-white text-lg font-medium text-gray-900">{service.name}</h3>
+                      <p className="dark:text-white mt-1 text-sm text-gray-500">{service.description}</p>
                     </div>
-                  )}
+                    {!service.is_active && (
+                      <span className="dark:text-white inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-gray-100 text-gray-800">
+                        Inactivo
+                      </span>
+                    )}
+                  </div>
+                  <div className="mt-4">
+                    <div className="flex justify-between text-sm">
+                      <span className="dark:text-white text-gray-500">Duración</span>
+                      <span className="dark:text-white font-medium">{service.duration} min</span>
+                    </div>
+                    <div className="mt-1 flex justify-between text-sm">
+                      <span className="dark:text-white text-gray-500">Precio</span>
+                      <span className="dark:text-white font-medium">${service.price.toFixed(2)}</span>
+                    </div>
+                    {service.provider && (
+                      <div className="mt-1 flex justify-between text-sm">
+                        <span className="dark:text-white text-gray-500">Proveedor</span>
+                        <span className="dark:text-white font-medium">{service.provider}</span>
+                      </div>
+                    )}
+                  </div>
+                </div>
+                <div className="dark:bg-opacity-10 bg-gray-50 px-6 py-3 flex justify-end space-x-3">
+                  <button
+                    onClick={() => handleEdit(service)}
+                    className="inline-flex items-center px-3 py-1.5 border border-gray-300 shadow-sm text-sm font-medium rounded-md text-gray-700 bdarg-white hover:bg-gray-600 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 dark:bg-gray-100"
+                  >
+                    <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4 mr-1.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 0L11.828 15H9v-2.828l8.586-8.586z" />
+                    </svg>
+                    Editar
+                  </button>
+                  <button
+                    onClick={() => handleDelete(service.id)}
+                    className="inline-flex items-center px-3 py-1.5 border border-red-300 shadow-sm text-sm font-medium rounded-md text-red-700 bg-white hover:bg-red-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500"
+                  >
+                    <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4 mr-1.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                    </svg>
+                    Eliminar
+                  </button>
                 </div>
               </div>
-              <div className="dark:bg-opacity-10 bg-gray-50 px-6 py-3 flex justify-end space-x-3">
-                <button
-                  onClick={() => handleEdit(service)}
-                  className="inline-flex items-center px-3 py-1.5 border border-gray-300 shadow-sm text-sm font-medium rounded-md text-gray-700 bdarg-white hover:bg-gray-600 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 dark:bg-gray-100"
-                >
-                  <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4 mr-1.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 0L11.828 15H9v-2.828l8.586-8.586z" />
-                  </svg>
-                  Editar
-                </button>
-                <button
-                  onClick={() => handleDelete(service.id)}
-                  className="inline-flex items-center px-3 py-1.5 border border-red-300 shadow-sm text-sm font-medium rounded-md text-red-700 bg-white hover:bg-red-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500"
-                >
-                  <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4 mr-1.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
-                  </svg>
-                  Eliminar
-                </button>
-              </div>
-            </div>
-          ))}
+            ));
+          })()}
         </div>
+        {/* Controles de paginación */}
+        {Math.ceil(services.length / itemsPerPage) > 1 && (
+          <div className="flex justify-center mt-4">
+            <nav className="flex items-center space-x-2">
+              <button
+                onClick={() => setCurrentPage(prev => prev - 1)}
+                disabled={currentPage === 1}
+                aria-label="Anterior"
+                className="px-3 py-1 rounded-md bg-white border border-gray-300 text-gray-700 hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed"
+              >◀</button>
+              {Array.from({ length: Math.ceil(services.length / itemsPerPage) }, (_, i) => i + 1).map(page => (
+                <button
+                  key={page}
+                  onClick={() => setCurrentPage(page)}
+                  className={`px-3 py-1 rounded-md ${currentPage === page ? 'bg-indigo-600 text-white' : 'bg-white border border-gray-300 text-gray-700 hover:bg-gray-50'}`}
+                >{page}</button>
+              ))}
+              <button
+                onClick={() => setCurrentPage(prev => prev + 1)}
+                disabled={currentPage === Math.ceil(services.length / itemsPerPage)}
+                aria-label="Siguiente"
+                className="px-3 py-1 rounded-md bg-white border border-gray-300 text-gray-700 hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed"
+              >▶</button>
+            </nav>
+          </div>
+        )}
+        </>
       )}
 
       {/* Modal Form */}
