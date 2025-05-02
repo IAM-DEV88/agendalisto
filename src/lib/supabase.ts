@@ -24,7 +24,7 @@ const supabaseOptions = {
 export const supabase = createClient(SUPABASE_URL, SUPABASE_ANON_KEY, supabaseOptions);
 
 // Escuchar cambios de autenticación de manera simple
-supabase.auth.onAuthStateChange((event) => {
+supabase.auth.onAuthStateChange(() => {
 });
 
 // Auth functions simplificadas

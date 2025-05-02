@@ -25,7 +25,7 @@ function BusinessPublicPage() {
   const [user, setUser] = useState<any>(null);
   const [reviews, setReviews] = useState<Review[]>([]);
   const [averageRating, setAverageRating] = useState<number>(0);
-  
+
 
   // Fetch current user
   useEffect(() => {
@@ -33,7 +33,7 @@ function BusinessPublicPage() {
       const { data: { user } } = await supabase.auth.getUser();
       setUser(user);
     };
-    
+
     fetchUser();
   }, []);
 
@@ -48,17 +48,17 @@ function BusinessPublicPage() {
 
       try {
         setLoading(true);
-        
+
         // Get business by slug
         const { success, business, error: businessError } = await getBusinessBySlug(slug);
-        
+
         if (!success || !business) {
           setError(businessError || 'Negocio no encontrado');
           return;
         }
 
         setBusinessData(business);
-        
+
         // Fetch services
         const { success: servicesSuccess, data: servicesData } = await getBusinessServices(business.id);
         if (servicesSuccess && servicesData) {
@@ -67,7 +67,7 @@ function BusinessPublicPage() {
             setSelectedService(servicesData[0].id);
           }
         }
-        
+
         // Fetch business hours
         try {
           const hoursData = await getBusinessHours(business.id);
@@ -143,25 +143,22 @@ function BusinessPublicPage() {
           <div className="flex border-b border-gray-200">
             <button
               onClick={() => setActiveTab('services')}
-              className={`flex-1 py-3 px-4 text-center font-medium ${
-                activeTab === 'services' ? 'text-indigo-600 border-b-2 border-indigo-600' : 'text-gray-500'
-              }`}
+              className={`flex-1 py-3 px-4 text-center font-medium ${activeTab === 'services' ? 'text-indigo-600 border-b-2 border-indigo-600' : 'text-gray-500'
+                }`}
             >
               Servicios
             </button>
             <button
               onClick={() => setActiveTab('hours')}
-              className={`flex-1 py-3 px-4 text-center font-medium ${
-                activeTab === 'hours' ? 'text-indigo-600 border-b-2 border-indigo-600' : 'text-gray-500'
-              }`}
+              className={`flex-1 py-3 px-4 text-center font-medium ${activeTab === 'hours' ? 'text-indigo-600 border-b-2 border-indigo-600' : 'text-gray-500'
+                }`}
             >
               Horarios
             </button>
             <button
               onClick={() => setActiveTab('location')}
-              className={`flex-1 py-3 px-4 text-center font-medium ${
-                activeTab === 'location' ? 'text-indigo-600 border-b-2 border-indigo-600' : 'text-gray-500'
-              }`}
+              className={`flex-1 py-3 px-4 text-center font-medium ${activeTab === 'location' ? 'text-indigo-600 border-b-2 border-indigo-600' : 'text-gray-500'
+                }`}
             >
               Ubicación
             </button>
@@ -171,8 +168,8 @@ function BusinessPublicPage() {
             {activeTab === 'services' && (
               <div>
                 <h3 className="text-lg font-semibold mb-4">Servicios Disponibles</h3>
-                <ServicesList 
-                  services={services} 
+                <ServicesList
+                  services={services}
                   selectedService={selectedService}
                   onSelectService={handleServiceSelection}
                   showPrices={businessData?.config?.mostrar_precios}
@@ -192,7 +189,7 @@ function BusinessPublicPage() {
 
                 {showBooking && user && user.id !== businessData?.owner_id && (
                   <div className="mt-6 bg-white dark:bg-white dark:bg-opacity-10 shadow-md p-6">
-                    <BookingForm 
+                    <BookingForm
                       businessId={businessData.id}
                       serviceId={selectedService || ''}
                       userId={user.id}
@@ -238,8 +235,8 @@ function BusinessPublicPage() {
           <div className="md:col-span-2">
             <div className="bg-white dark:bg-white dark:bg-opacity-10 shadow-md p-6 hidden md:block">
               <h2 className="text-xl font-semibold mb-6">Servicios Disponibles</h2>
-              <ServicesList 
-                services={services} 
+              <ServicesList
+                services={services}
                 selectedService={selectedService}
                 onSelectService={handleServiceSelection}
                 showPrices={businessData?.config?.mostrar_precios}
@@ -251,7 +248,7 @@ function BusinessPublicPage() {
             {/* Booking Form */}
             {showBooking && user && user.id !== businessData?.owner_id && (
               <div className="mt-6 bg-white dark:bg-white dark:bg-opacity-10 shadow-md p-6">
-                <BookingForm 
+                <BookingForm
                   businessId={businessData.id}
                   serviceId={selectedService || ''}
                   userId={user.id}
@@ -265,6 +262,12 @@ function BusinessPublicPage() {
                 />
               </div>
             )}
+            {/* Reviews Section */}
+            <div className="mt-6 hidden md:block">
+              <div className="bg-white dark:bg-white dark:bg-opacity-10 shadow-md p-6">
+                <ReviewsSection businessId={businessData.id} currentUser={user} />
+              </div>
+            </div>
 
           </div>
 
@@ -296,6 +299,7 @@ function BusinessPublicPage() {
               </div>
             )}
 
+
             {!user && (
               <div className="bg-white dark:bg-white dark:bg-opacity-10 shadow-md p-6">
                 <div className="bg-yellow-50 border border-yellow-200 rounded-md p-4">
@@ -305,8 +309,11 @@ function BusinessPublicPage() {
                 </div>
               </div>
             )}
+
           </div>
+
         </div>
+
       </div>
     </div>
   );

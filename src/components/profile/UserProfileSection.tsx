@@ -50,7 +50,7 @@ const UserProfileSection: React.FC<UserProfileSectionProps> = ({
             setDebugInfo(`Error ${response.status} al verificar URL`);
           }
         })
-        .catch(error => {
+        .catch(() => {
         });
       
       return data.publicUrl;
@@ -111,7 +111,7 @@ const UserProfileSection: React.FC<UserProfileSectionProps> = ({
     
     try {
       // Upload file to bucket and store its path
-      const { error: uploadError, data: uploadData } = await supabase.storage.from('avatars').upload(filePath, file, {
+      const { error: uploadError } = await supabase.storage.from('avatars').upload(filePath, file, {
         upsert: true // Sobreescribir si existe
       });
       
