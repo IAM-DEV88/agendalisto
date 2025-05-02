@@ -24,7 +24,7 @@ const ReviewsSection: React.FC<ReviewsSectionProps> = ({ businessId, currentUser
     const loadReviews = async () => {
       setLoading(true);
       try {
-        const { success, data, error } = await getBusinessReviews(businessId);
+        const { success, data } = await getBusinessReviews(businessId);
         if (success) {
           setReviews(data);
         } else {
@@ -69,7 +69,7 @@ const ReviewsSection: React.FC<ReviewsSectionProps> = ({ businessId, currentUser
     try {
       setSubmitting(true);
       const appointmentId = eligibleAppointmentId || '';
-      const { success, data, error } = await createBusinessReview(
+      const { success, data } = await createBusinessReview(
         appointmentId,
         businessId,
         currentUser.id,

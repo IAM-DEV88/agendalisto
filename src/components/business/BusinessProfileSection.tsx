@@ -88,7 +88,7 @@ const BusinessProfileSection: React.FC<BusinessProfileSectionProps> = ({
       const filePath = fileName; 
       
       // Subir el archivo
-      const { error: uploadError, data: uploadData } = await supabase.storage.from(BUCKET_NAME).upload(filePath, selectedFile, {
+      const { error: uploadError } = await supabase.storage.from(BUCKET_NAME).upload(filePath, selectedFile, {
         upsert: true // Sobreescribir si existe
       });
       

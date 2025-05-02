@@ -72,7 +72,7 @@ const PastAppointments: React.FC<PastAppointmentsProps> = ({
   const handleSubmitReview = async (appointment: Appointment) => {
     setSubmittingReview(true);
     try {
-      const { success, data, error } = await createBusinessReview(
+      const { success, data } = await createBusinessReview(
         appointment.id,
         appointment.business_id,
         appointment.user_id,

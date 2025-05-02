@@ -12,36 +12,9 @@ interface BusinessHeaderProps {
 const BusinessHeader: React.FC<BusinessHeaderProps> = ({ businessData, averageRating = 0, reviewsCount = 0 }) => {
   const [imageState, setImageState] = useState<'loading' | 'success' | 'error'>('loading');
   const [logoUrl, setLogoUrl] = useState<string | null>(null);
-  const addLog = () => {}; // no-op debug function
   
   // Memoria local para URL inválidas para evitar intentos repetidos
   const invalidUrlsRef = React.useRef<Set<string>>(new Set());
-  
-  // Función de log con persistencia temporal para depuración
-  const getValidLogoUrl = (url: string): string => {
-    // Si ya es una URL completa, usarla
-    if (url.startsWith('http')) {
-      // Corregir URLs duplicadas si es necesario
-      if (url.includes('/business-logos/business-logos/')) {
-        return url.replace('/business-logos/business-logos/', '/business-logos/');
-      }
-      
-      // Identificar URLs problemáticas conocidas
-      if (url && url.endsWith('_1746130038843.png')) {
-        return 'https://upload.wikimedia.org/wikipedia/commons/8/89/Portrait_Placeholder.png';
-      }
-      return url;
-    }
-    
-    // Si no, asumir que es una clave de storage y generar URL pública
-    try {
-      // Primero intentamos con business-logos
-      const { data } = supabase.storage.from('business-logos').getPublicUrl(url);
-      return data.publicUrl;
-    } catch (error) {
-      return 'https://upload.wikimedia.org/wikipedia/commons/8/89/Portrait_Placeholder.png';
-    }
-  };
   
   // Verificar si una URL realmente existe y es accesible
   const verifyImageUrl = async (url: string): Promise<boolean> => {
