@@ -1,7 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { Business, updateBusiness } from '../../lib/api';
 import { supabase } from '../../lib/supabase';
-import BusinessHeaderPreview from './BusinessHeaderPreview';
 
 interface BusinessProfileSectionProps {
   businessData: Business;
@@ -112,7 +111,6 @@ const BusinessProfileSection: React.FC<BusinessProfileSectionProps> = ({
       // Retornar la URL pública para actualizar el modelo
       return urlData.publicUrl;
     } catch (error: any) {
-      console.error('Error al subir logo:', error.message || error, error);
       // Error en la subida del logo
       return null;
     } finally {
@@ -135,7 +133,6 @@ const BusinessProfileSection: React.FC<BusinessProfileSectionProps> = ({
         try {
           await updateBusiness(businessData.id, { logo_url: logoUrl });
         } catch (err: any) {
-          console.error('Error updating logo_url in business table:', err);
         }
       }
     }
@@ -229,24 +226,13 @@ const BusinessProfileSection: React.FC<BusinessProfileSectionProps> = ({
                         alt="Logo del negocio" 
                         className={`h-20 w-20 object-cover rounded ${isUploading ? 'opacity-70' : ''}`}
                         onError={(e) => {
-                          console.error('Error cargando imagen de logo:', previewUrl);
                           // Usar imagen fallback cuando hay error
-                          console.log('Error en imagen, usando fallback para logo:', FALLBACK_LOGO);
                           e.currentTarget.src = FALLBACK_LOGO;
                         }}
                       />
                     </>
                   )}
                 </div>
-              </div>
-              <div className="sm:col-span-6 mt-4">
-                <h3 className="text-sm font-medium mb-2">Depurador de imagen de logo</h3>
-                <BusinessHeaderPreview logoUrl={businessData.logo_url} />
-                {selectedFile && (
-                  <div className="mt-2 p-2 bg-yellow-50 border border-yellow-200 rounded text-sm">
-                    <p className="text-yellow-700">El logo seleccionado se subirá cuando haga clic en "Guardar cambios".</p>
-                  </div>
-                )}
               </div>
             </div>
             <div className="mt-6">

@@ -27,12 +27,6 @@ function BusinessPublicPage() {
   const [averageRating, setAverageRating] = useState<number>(0);
   
 
-  // Debug logs for booking modal state
-  console.log('BusinessPublicPage initial render:', { selectedService, showBooking, user, businessData });
-  useEffect(() => {
-    console.log('showBooking changed:', showBooking);
-  }, [showBooking]);
-
   // Fetch current user
   useEffect(() => {
     const fetchUser = async () => {
@@ -79,7 +73,6 @@ function BusinessPublicPage() {
           const hoursData = await getBusinessHours(business.id);
           setBusinessHours(hoursData);
         } catch (hoursError) {
-          console.error('Error loading business hours:', hoursError);
         }
 
         // Fetch business reviews and compute average rating
@@ -91,10 +84,8 @@ function BusinessPublicPage() {
             setAverageRating(reviewsData.length > 0 ? totalRating / reviewsData.length : 0);
           }
         } catch (reviewsError) {
-          console.error('Error loading business reviews:', reviewsError);
         }
       } catch (err) {
-        console.error('Error loading business data:', err);
         setError('Error al cargar la información del negocio');
       } finally {
         setLoading(false);
@@ -105,13 +96,10 @@ function BusinessPublicPage() {
   }, [slug, navigate]);
 
   const handleServiceSelection = (serviceId: string) => {
-    console.log('handleServiceSelection called with:', serviceId, { currentUser: user?.id, businessOwnerId: businessData?.owner_id, config: businessData?.config });
     setSelectedService(serviceId);
     if (businessData?.config?.permitir_reservas_online) {
-      console.log('Enabling booking modal per config');
       setShowBooking(true);
     } else {
-      console.warn('Booking is disabled by config', businessData?.config);
     }
   };
 
@@ -195,7 +183,6 @@ function BusinessPublicPage() {
                 {selectedService && businessData?.config?.permitir_reservas_online && user && user.id !== businessData?.owner_id && (
                   <div className="mt-6">
                     <button
-                      onClick={() => { console.log('Mobile reserve now clicked'); setShowBooking(true); }}
                       className="w-full bg-indigo-600 text-white py-2 px-4 font-medium hover:bg-indigo-700 transition-colors"
                     >
                       Reservar Ahora
@@ -302,7 +289,6 @@ function BusinessPublicPage() {
               <div className="bg-white dark:bg-white dark:bg-opacity-10 shadow-md p-6">
                 <h2 className="text-xl font-semibold mb-4">Reservar Cita</h2>
                 <button
-                  onClick={() => { console.log('Desktop reserve now clicked'); setShowBooking(true); }}
                   className="w-full bg-indigo-600 text-white py-2 px-4 font-medium hover:bg-indigo-700 transition-colors"
                 >
                   Reservar Ahora

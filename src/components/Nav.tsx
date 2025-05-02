@@ -25,7 +25,6 @@ const Nav = ({ user }: NavProps) => {
       await signOut();
       navigate('/');
     } catch (error) {
-      console.error('Error al cerrar sesión:', error);
     }
   };
 
@@ -41,7 +40,6 @@ const Nav = ({ user }: NavProps) => {
           const { success, business } = await getUserBusiness(user.id);
           setHasBusiness(success && business !== null);
         } catch (err) {
-          console.error('Error checking user business:', err);
           setHasBusiness(false);
         }
       } else {

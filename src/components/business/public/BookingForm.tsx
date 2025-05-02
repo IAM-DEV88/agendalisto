@@ -53,7 +53,6 @@ const BookingForm: React.FC<BookingFormProps> = ({
         setBusinessHours(hours);
         setAppointments(apptsRes.success && apptsRes.data ? apptsRes.data : []);
       } catch (err) {
-        console.error('Error fetching schedule data:', err);
       } finally {
         setLoadingSlots(false);
       }
@@ -164,7 +163,6 @@ const BookingForm: React.FC<BookingFormProps> = ({
         setError('Error al crear la reserva. Por favor, inténtalo de nuevo.');
       }
     } catch (err: any) {
-      console.error('Error creating appointment:', err);
       setError(err.message || 'Error al crear la reserva');
     } finally {
       setSubmitting(false);

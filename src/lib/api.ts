@@ -142,7 +142,6 @@ export const getBusinessServices = async (businessId: string) => {
     if (error) throw error;
     return { success: true, data: data as Service[] };
   } catch (err: any) {
-    console.error('Error fetching business services:', err);
     return { success: false, error: err.message || 'Error al obtener servicios' };
   }
 };
@@ -157,7 +156,6 @@ export const getBusinessHours = async (businessId: string) => {
     if (error) throw error;
     return data as BusinessHours[];
   } catch (error: any) {
-    console.error('Error fetching business hours:', error);
     throw new Error(error.message || 'Error al cargar horarios del negocio');
   }
 };
@@ -173,7 +171,6 @@ export async function getUserAppointments(userId: string) {
     if (error) throw error;
     return { success: true, data: data as Appointment[], error: null };
   } catch (err: any) {
-    console.error('Error fetching user appointments:', err);
     return { success: false, data: null, error: err.message || 'Error al cargar citas' };
   }
 }
@@ -188,7 +185,6 @@ export async function getBusinessAppointments(businessId: string) {
     if (error) throw error;
     return { success: true, data: data as Appointment[], error: null };
   } catch (err: any) {
-    console.error('Error fetching business appointments:', err);
     return { success: false, data: null, error: err.message || 'Error al cargar citas del negocio' };
   }
 }
@@ -238,7 +234,6 @@ export async function getBusinessClients(businessId: string): Promise<{ success:
     if (profilesError) throw profilesError;
     return { success: true, data: profiles as UserProfile[], error: null };
   } catch (err: any) {
-    console.error('Error fetching business clients:', err);
     return { success: false, data: null, error: err.message || 'Error al obtener clientes del negocio' };
   }
 }
@@ -262,7 +257,6 @@ export const createBusiness = async (business: Omit<Business, 'id' | 'created_at
     const businessWithSlug = { ...data, slug: slugify(data.name) } as Business;
     return { success: true, business: businessWithSlug };
   } catch (error) {
-    console.error('Error creating business:', error);
     return { success: false, error };
   }
 };
@@ -353,14 +347,11 @@ interface SingleResponse<T> {
 }
 
 export const obtenerPerfilUsuario = async (userId: string): Promise<{ success: boolean; perfil: UserProfile | null; error: string | null; }> => {
-  console.log(`[api] obtenerPerfilUsuario: Iniciando para userId: ${userId}`);
   try {
     if (!userId) {
-      console.warn('[api] obtenerPerfilUsuario: userId no proporcionado.');
       return { success: false, perfil: null, error: 'ID de usuario no proporcionado' };
     }
 
-    console.log(`[api] obtenerPerfilUsuario: Ejecutando consulta a Supabase para ${userId} con timeout de 15s...`);
 
     // Envolver la llamada async de Supabase en una Promise explícita
     const supabaseQueryPromise = new Promise<SingleResponse<UserProfile>>(async (resolve, reject) => {
@@ -384,18 +375,14 @@ export const obtenerPerfilUsuario = async (userId: string): Promise<{ success: b
     // Aplicar timeout a la promesa envuelta
     const { data, error } = await withTimeout(supabaseQueryPromise, 1000, 'Timeout al obtener perfil de usuario');
 
-    console.log(`[api] obtenerPerfilUsuario: Consulta a Supabase completada para ${userId}. Error: ${error ? error.message : 'No'}`);
 
     if (error) {
       const errorMessage = error.message || 'Error desconocido';
       if (errorMessage === 'Timeout al obtener perfil de usuario') {
-        console.error(`[api] obtenerPerfilUsuario: Timeout detectado para ${userId}`);
       } else {
-        console.error(`[api] obtenerPerfilUsuario: Error detectado en respuesta de Supabase para ${userId}:`, errorMessage, error.code ? `Código: ${error.code}` : '');
       }
 
       if (error.code === 'PGRST116') {
-        console.log(`[api] obtenerPerfilUsuario: Perfil no encontrado (PGRST116) para ${userId}.`);
         return { success: false, perfil: null, error: 'Perfil no encontrado' };
       }
       
@@ -403,15 +390,12 @@ export const obtenerPerfilUsuario = async (userId: string): Promise<{ success: b
     }
 
     if (data) {
-      console.log(`[api] obtenerPerfilUsuario: Perfil encontrado exitosamente para ${userId}.`);
       return { success: true, perfil: data, error: null };
     } else {
-      console.error(`[api] obtenerPerfilUsuario: Respuesta inesperada sin data ni error (post-timeout check) para ${userId}.`);
       return { success: false, perfil: null, error: 'Respuesta inesperada del servidor' };
     }
 
   } catch (err: any) {
-    console.error(`[api] obtenerPerfilUsuario: Excepción no controlada (puede ser timeout) para ${userId}:`, err);
     return {
       success: false,
       perfil: null,
@@ -446,7 +430,6 @@ export async function getUserBusiness(userId: string) {
     const businessWithSlug = { ...data, slug: slugify(data.name) } as Business;
     return { success: true, business: businessWithSlug };
   } catch (err: any) {
-    console.error('Error fetching user business:', err);
     return { success: false, error: err.message || 'Error desconocido' };
   }
 }
@@ -478,13 +461,11 @@ export async function getBusinessConfig(businessId: string): Promise<{ success: 
         return { success: true, config: defaultConfig };
       }
       // Other errors
-      console.error('Error fetching business config:', error);
       return { success: false, error: error.message };
     }
     // Single row returned
     return { success: true, config: data as BusinessConfig };
   } catch (err: any) {
-    console.error('Exception in getBusinessConfig:', err);
     return { success: false, error: err.message };
   }
 }
@@ -501,13 +482,11 @@ export async function updateBusinessConfig(businessId: string, config: BusinessC
       });
 
     if (error) {
-      console.error('Error updating business config:', error);
       return { success: false, error: error.message };
     }
 
     return { success: true };
   } catch (error: any) {
-    console.error('Error en updateBusinessConfig:', error);
     return { success: false, error: error.message };
   }
 }
@@ -527,7 +506,6 @@ export const createBusinessService = async (service: Omit<Service, 'id' | 'creat
     if (error) throw error;
     return data;
   } catch (err: any) {
-    console.error('Error creating service:', err);
     throw err;
   }
 };
@@ -547,7 +525,6 @@ export const updateBusinessService = async (id: string, updates: Partial<Service
     if (error) throw error;
     return data;
   } catch (err: any) {
-    console.error('Error updating service:', err);
     throw err;
   }
 };
@@ -562,7 +539,6 @@ export const deleteBusinessService = async (id: string) => {
     if (error) throw error;
     return true;
   } catch (err: any) {
-    console.error('Error deleting service:', err);
     throw err;
   }
 };
@@ -599,7 +575,6 @@ export async function getBusinessBySlug(slug: string) {
     business.slug = slug;
     return { success: true, business };
   } catch (error: any) {
-    console.error('Error in getBusinessBySlug:', error);
     return { success: false, error: error.message };
   }
 }
@@ -615,7 +590,6 @@ export async function getBusinessReviews(businessId: string): Promise<{ success:
     if (error) throw error;
     return { success: true, data: data as Review[] };
   } catch (err: any) {
-    console.error('Error fetching business reviews:', err);
     return { success: false, data: [], error: err.message };
   }
 }
@@ -642,7 +616,6 @@ export async function createBusinessReview(
     if (error) throw error;
     return { success: true, data: data as Review };
   } catch (err: any) {
-    console.error('Error creating review:', err);
     return { success: false, error: err.message };
   }
 } 

@@ -28,13 +28,11 @@ const BusinessHeaderPreview: React.FC<BusinessHeaderPreviewProps> = ({ logoUrl }
     
     // Detectar y corregir rutas duplicadas de "business-logos"
     if (url.includes('/business-logos/business-logos/')) {
-      console.log('BusinessHeaderPreview - Corrigiendo URL duplicada:', url);
       return url.replace('/business-logos/business-logos/', '/business-logos/');
     }
     
     // Identificar URLs que han generado errores 400 previamente
     if (url && url.endsWith('_1746130038843.png')) {
-      console.log('BusinessHeaderPreview - Detectada URL problemática conocida:', url);
       return null; // Retornar null para forzar el uso de imagen fallback
     }
     
@@ -49,7 +47,6 @@ const BusinessHeaderPreview: React.FC<BusinessHeaderPreviewProps> = ({ logoUrl }
     }
     
     if (!logoUrl) {
-      console.log('BusinessHeaderPreview - No hay URL de logo');
       setImgSrc(FALLBACK_LOGO);
       setLoadState('error');
       setErrorInfo('No logo URL provided');
@@ -58,7 +55,6 @@ const BusinessHeaderPreview: React.FC<BusinessHeaderPreviewProps> = ({ logoUrl }
     
     // Verificar si la URL ya está en la lista de URLs inválidas
     if (invalidUrlsRef.current.has(logoUrl)) {
-      console.log('BusinessHeaderPreview - URL previamente inválida:', logoUrl);
       setImgSrc(FALLBACK_LOGO);
       setLoadState('error');
       setErrorInfo('Previously failed URL');
@@ -71,7 +67,6 @@ const BusinessHeaderPreview: React.FC<BusinessHeaderPreviewProps> = ({ logoUrl }
     
     // Si la URL fue identificada como problemática, usar fallback
     if (cleanedLogoUrl === null) {
-      console.log('BusinessHeaderPreview - URL problemática conocida, usando fallback');
       setImgSrc(FALLBACK_LOGO);
       setLoadState('error');
       setErrorInfo('Known problematic URL');
@@ -80,30 +75,25 @@ const BusinessHeaderPreview: React.FC<BusinessHeaderPreviewProps> = ({ logoUrl }
     }
     
     if (cleanedLogoUrl !== urlToUse && cleanedLogoUrl) {
-      console.log('BusinessHeaderPreview - URL limpiada de:', urlToUse, 'a:', cleanedLogoUrl);
       urlToUse = cleanedLogoUrl;
     }
     
     const getImageSrc = async () => {
       try {
         setLoadState('loading');
-        console.log('BusinessHeaderPreview - Logo URL recibida:', urlToUse);
 
         // Si ya es una URL completa, usarla directamente
         const isCompleteUrl = urlToUse.startsWith('http');
         if (isCompleteUrl) {
-          console.log('BusinessHeaderPreview - Usando URL directa:', urlToUse);
           
           // Verificar si es accesible
           try {
             const response = await fetch(urlToUse as string, { method: 'HEAD' });
             if (!response.ok) {
-              console.warn(`URL directa no accesible (${response.status}):`, urlToUse);
               invalidUrlsRef.current.add(logoUrl);
               // Continuar de todos modos, a veces HEAD falla pero GET funciona
             }
           } catch (fetchError) {
-            console.warn('Error al verificar URL directa:', urlToUse, fetchError);
             // No marcar como inválida aún, podría ser CORS
           }
           
@@ -114,17 +104,14 @@ const BusinessHeaderPreview: React.FC<BusinessHeaderPreviewProps> = ({ logoUrl }
           // Si después de un tiempo la imagen no ha cargado, intentar con otra técnica
           timeoutRef.current = setTimeout(() => {
             if (loadState === 'loading') {
-              console.warn('Timeout cargando imagen:', urlToUse);
               setErrorInfo('Timeout loading image');
               
               // Como fallback, intentar con una etiqueta img directamente
               const testImg = new Image();
               testImg.onload = () => {
-                console.log('Imagen cargada via Image constructor:', urlToUse);
                 setLoadState('success');
               };
               testImg.onerror = () => {
-                console.error('Imagen falló también con Image constructor:', urlToUse);
                 setImgSrc(FALLBACK_LOGO);
                 setLoadState('error');
                 invalidUrlsRef.current.add(logoUrl);
@@ -137,7 +124,6 @@ const BusinessHeaderPreview: React.FC<BusinessHeaderPreviewProps> = ({ logoUrl }
         }
         
         // Intentar convertir clave a URL pública
-        console.log('BusinessHeaderPreview - Convirtiendo clave a URL:', urlToUse);
         
         // Asegurarse de que la clave no contenga rutas duplicadas
         const cleanKey = typeof urlToUse === 'string' 
@@ -150,7 +136,6 @@ const BusinessHeaderPreview: React.FC<BusinessHeaderPreviewProps> = ({ logoUrl }
             .from('business-logos')
             .getPublicUrl(cleanKey);
           
-          console.log('BusinessHeaderPreview - URL business-logos:', businessLogoData?.publicUrl);
           
           if (businessLogoData?.publicUrl) {
             setImgSrc(businessLogoData.publicUrl);
@@ -163,7 +148,6 @@ const BusinessHeaderPreview: React.FC<BusinessHeaderPreviewProps> = ({ logoUrl }
             .from('avatars')
             .getPublicUrl(cleanKey);
           
-          console.log('BusinessHeaderPreview - URL avatars:', avatarsData?.publicUrl);
           
           if (avatarsData?.publicUrl) {
             setImgSrc(avatarsData.publicUrl);
@@ -173,14 +157,12 @@ const BusinessHeaderPreview: React.FC<BusinessHeaderPreviewProps> = ({ logoUrl }
           
           throw new Error('No se pudo obtener URL pública');
         } catch (error: any) {
-          console.error('BusinessHeaderPreview - Error generando URL:', error);
           setImgSrc(FALLBACK_LOGO);
           setLoadState('error');
           setErrorInfo(`Error converting key: ${error.message}`);
           invalidUrlsRef.current.add(logoUrl);
         }
       } catch (error: any) {
-        console.error('BusinessHeaderPreview - Error global:', error);
         setImgSrc(FALLBACK_LOGO);
         setLoadState('error');
         setErrorInfo(`General error: ${error.message}`);
@@ -225,7 +207,6 @@ const BusinessHeaderPreview: React.FC<BusinessHeaderPreviewProps> = ({ logoUrl }
             alt="Vista previa de logo" 
             className={`w-24 h-24 object-cover rounded ${loadState === 'loading' ? 'opacity-50' : ''}`}
             onLoad={() => {
-              console.log('Imagen cargada correctamente en preview:', imgSrc);
               if (timeoutRef.current) {
                 clearTimeout(timeoutRef.current);
                 timeoutRef.current = null;
@@ -234,7 +215,6 @@ const BusinessHeaderPreview: React.FC<BusinessHeaderPreviewProps> = ({ logoUrl }
               setErrorInfo(null);
             }}
             onError={(e) => {
-              console.error('Error cargando imagen en preview:', imgSrc);
               e.currentTarget.src = FALLBACK_LOGO;
               if (logoUrl) {
                 invalidUrlsRef.current.add(logoUrl);

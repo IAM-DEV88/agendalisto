@@ -119,7 +119,6 @@ const ProfileDashboard = ({ user }: ProfileDashboardProps) => {
           setError(apiError || 'No se pudieron cargar tus citas. Por favor, intenta de nuevo más tarde.');
         }
       } catch (err) {
-        console.error('Error al cargar citas:', err);
         setError('No se pudieron cargar tus citas. Por favor, intenta de nuevo más tarde.');
       } finally {
         clearTimeout(timeoutId);
@@ -147,7 +146,6 @@ const ProfileDashboard = ({ user }: ProfileDashboardProps) => {
           const { success, business } = await getUserBusiness(user.id);
           setHasBusiness(success && business !== null);
         } catch (err) {
-          console.error('Error checking business:', err);
           setHasBusiness(false);
         } finally {
           clearTimeout(timeoutId);
@@ -208,7 +206,6 @@ const ProfileDashboard = ({ user }: ProfileDashboardProps) => {
         });
       }
     } catch (error: any) {
-      console.error('Error al actualizar perfil:', error);
       setProfileMessage({
         text: error.message || 'Error al actualizar perfil',
         type: 'error'
@@ -246,7 +243,6 @@ const ProfileDashboard = ({ user }: ProfileDashboardProps) => {
         setError(apiError || 'Error al cancelar la cita.');
       }
     } catch (err) {
-      console.error('Error al cancelar cita:', err);
       setError('Error al cancelar la cita. Por favor, intenta de nuevo.');
     } finally {
       setLoading(false);

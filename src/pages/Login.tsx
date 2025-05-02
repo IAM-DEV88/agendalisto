@@ -15,12 +15,10 @@ const Login = () => {
     setLoading(true);
 
     try {
-      console.log('Intentando iniciar sesión para:', email);
       
       const { data, error } = await signIn(email, password);
       
       if (error) {
-        console.error('Error al iniciar sesión:', error);
         
         if (error.message.includes('Invalid login credentials')) {
           setError('Credenciales incorrectas. Por favor verifica tu correo y contraseña.');
@@ -34,14 +32,11 @@ const Login = () => {
       }
       
       if (data.user) {
-        console.log('Inicio de sesión exitoso, redirigiendo al dashboard...');
         navigate('/dashboard');
       } else {
-        console.warn('Inicio de sesión sin datos de usuario');
         setError('No se pudo obtener la información del usuario. Inténtalo nuevamente.');
       }
     } catch (err: any) {
-      console.error('Excepción durante el inicio de sesión:', err);
     } finally {
       setLoading(false);
     }

@@ -58,7 +58,6 @@ const PastAppointments: React.FC<PastAppointmentsProps> = ({
             });
           }
         } catch (error) {
-          console.error('Error fetching reviews for business', businessId, error);
         }
       }
       setReviews(reviewsMap);
@@ -86,10 +85,8 @@ const PastAppointments: React.FC<PastAppointmentsProps> = ({
         setShowReviewFormId(null);
         setNewReview({ rating: 5, comment: '' });
       } else {
-        console.error('Error creando reseña:', error);
       }
     } catch (err) {
-      console.error('Error al enviar reseña:', err);
     } finally {
       setSubmittingReview(false);
     }

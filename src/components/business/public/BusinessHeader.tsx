@@ -12,33 +12,23 @@ interface BusinessHeaderProps {
 const BusinessHeader: React.FC<BusinessHeaderProps> = ({ businessData, averageRating = 0, reviewsCount = 0 }) => {
   const [imageState, setImageState] = useState<'loading' | 'success' | 'error'>('loading');
   const [logoUrl, setLogoUrl] = useState<string | null>(null);
-  const [attemptsCount, setAttemptsCount] = useState(0);
-  const [logDebugging, setLogDebugging] = useState<string[]>([]);
-  const FALLBACK_LOGO = 'https://upload.wikimedia.org/wikipedia/commons/8/89/Portrait_Placeholder.png';
+  const addLog = () => {}; // no-op debug function
   
   // Memoria local para URL inválidas para evitar intentos repetidos
   const invalidUrlsRef = React.useRef<Set<string>>(new Set());
   
   // Función de log con persistencia temporal para depuración
-  const addLog = (message: string) => {
-    console.log(message);
-    setLogDebugging(prev => [...prev.slice(-9), message]);
-  };
-  
-  // Manejar el caso especial cuando la URL recibida es una clave de storage sin http://
   const getValidLogoUrl = (url: string): string => {
     // Si ya es una URL completa, usarla
     if (url.startsWith('http')) {
       // Corregir URLs duplicadas si es necesario
       if (url.includes('/business-logos/business-logos/')) {
-        addLog(`BusinessHeader - Corrigiendo URL duplicada: ${url}`);
         return url.replace('/business-logos/business-logos/', '/business-logos/');
       }
       
       // Identificar URLs problemáticas conocidas
       if (url && url.endsWith('_1746130038843.png')) {
-        addLog(`BusinessHeader - URL problemática detectada: ${url}`);
-        return FALLBACK_LOGO;
+        return 'https://upload.wikimedia.org/wikipedia/commons/8/89/Portrait_Placeholder.png';
       }
       return url;
     }
@@ -49,39 +39,31 @@ const BusinessHeader: React.FC<BusinessHeaderProps> = ({ businessData, averageRa
       const { data } = supabase.storage.from('business-logos').getPublicUrl(url);
       return data.publicUrl;
     } catch (error) {
-      console.error('Error generando URL pública desde clave:', url, error);
-      return FALLBACK_LOGO;
+      return 'https://upload.wikimedia.org/wikipedia/commons/8/89/Portrait_Placeholder.png';
     }
   };
   
   // Verificar si una URL realmente existe y es accesible
   const verifyImageUrl = async (url: string): Promise<boolean> => {
-    if (!url || url === FALLBACK_LOGO) return true; // La URL fallback siempre existe
+    if (!url || url === 'https://upload.wikimedia.org/wikipedia/commons/8/89/Portrait_Placeholder.png') return true; // La URL fallback siempre existe
     
     try {
-      addLog(`Verificando accesibilidad de URL: ${url}`);
-      
       // Método 1: Intentar hacer un HEAD request
       try {
         const response = await fetch(url, { method: 'HEAD' });
         if (response.ok) {
-          addLog(`URL verificada como accesible (HEAD): ${url}`);
           return true;
         }
-        addLog(`URL no accesible vía HEAD (${response.status}): ${url}`);
       } catch (e) {
-        addLog(`Error al verificar vía HEAD: ${e}`);
       }
       
       // Método 2: Crear un objeto Image y esperar a que cargue
       return new Promise((resolve) => {
         const img = new Image();
         img.onload = () => {
-          addLog(`URL verificada como accesible (Image): ${url}`);
           resolve(true);
         };
         img.onerror = () => {
-          addLog(`URL no accesible vía Image: ${url}`);
           resolve(false);
         };
         img.src = url;
@@ -90,7 +72,6 @@ const BusinessHeader: React.FC<BusinessHeaderProps> = ({ businessData, averageRa
         setTimeout(() => resolve(false), 5000);
       });
     } catch (error) {
-      addLog(`Error al verificar URL: ${error}`);
       return false;
     }
   };
@@ -98,60 +79,41 @@ const BusinessHeader: React.FC<BusinessHeaderProps> = ({ businessData, averageRa
   // Procesamos la URL del logo cuando se carga el componente o cambia businessData
   useEffect(() => {
     const processLogoUrl = async () => {
-      addLog(`=== Iniciando procesamiento de logo (intento ${attemptsCount+1}) ===`);
-      
       if (!businessData.logo_url) return;
-      
-      addLog(`Logo original en businessData: ${businessData.logo_url}`);
       
       // Corregir URL si contiene rutas duplicadas
       let logoUrlToProcess = businessData.logo_url;
       if (logoUrlToProcess.includes('/business-logos/business-logos/')) {
-        addLog(`URL con ruta duplicada detectada: ${logoUrlToProcess}`);
         logoUrlToProcess = logoUrlToProcess.replace('/business-logos/business-logos/', '/business-logos/');
-        addLog(`URL corregida: ${logoUrlToProcess}`);
       }
       
       // Verificar URLs problemáticas conocidas
       if (logoUrlToProcess && logoUrlToProcess.endsWith('_1746130038843.png')) {
-        addLog(`URL problemática conocida, usando fallback: ${logoUrlToProcess}`);
-        setLogoUrl(FALLBACK_LOGO);
+        setLogoUrl('https://upload.wikimedia.org/wikipedia/commons/8/89/Portrait_Placeholder.png');
         setImageState('error');
         return;
       }
       
       setImageState('loading');
       
-      // Log para depuración
-      addLog(`Procesando logo: ${logoUrlToProcess}`);
-      
       // Si la URL ya se sabe que es inválida, usar fallback directamente
       if (invalidUrlsRef.current.has(logoUrlToProcess)) {
-        addLog(`URL previamente inválida, usando fallback: ${logoUrlToProcess}`);
-        setLogoUrl(FALLBACK_LOGO);
+        setLogoUrl('https://upload.wikimedia.org/wikipedia/commons/8/89/Portrait_Placeholder.png');
         setImageState('error');
         return;
       }
       
-      // Incrementar contador de intentos (para diagnóstico)
-      setAttemptsCount(count => count + 1);
-      
       // Si ya es una URL completa (posiblemente corregida), usarla directamente
       if (logoUrlToProcess.startsWith('http')) {
-        addLog(`URL directa detectada: ${logoUrlToProcess}`);
-        
-        // Verificar si realmente es accesible usando nuestra función robusta
         const isAccessible = await verifyImageUrl(logoUrlToProcess);
         
         if (!isAccessible) {
-          addLog(`URL inaccesible tras verificación: ${logoUrlToProcess}`);
           invalidUrlsRef.current.add(logoUrlToProcess);
-          setLogoUrl(FALLBACK_LOGO);
+          setLogoUrl('https://upload.wikimedia.org/wikipedia/commons/8/89/Portrait_Placeholder.png');
           setImageState('error');
           return;
         }
         
-        addLog(`URL verificada y accesible, usándola: ${logoUrlToProcess}`);
         setLogoUrl(logoUrlToProcess);
         return;
       }
@@ -159,9 +121,6 @@ const BusinessHeader: React.FC<BusinessHeaderProps> = ({ businessData, averageRa
       // Si es una clave de storage, intentar generar URL pública
       try {
         // Intentar primero con el bucket business-logos
-        addLog(`Intentando generar URL desde business-logos bucket: ${logoUrlToProcess}`);
-        
-        // Limpiar clave si es necesario (aunque ya debería estar limpia)
         const cleanKey = logoUrlToProcess.replace('business-logos/business-logos/', 'business-logos/');
         
         const { data: businessLogoData } = supabase.storage
@@ -170,37 +129,28 @@ const BusinessHeader: React.FC<BusinessHeaderProps> = ({ businessData, averageRa
         
         // Verificar si tenemos una URL
         if (businessLogoData?.publicUrl) {
-          addLog(`URL generada (business-logos): ${businessLogoData.publicUrl}`);
-          
-          // Verificar si realmente es accesible
           const isAccessible = await verifyImageUrl(businessLogoData.publicUrl);
           
           if (!isAccessible) {
-            addLog(`URL generada inaccesible: ${businessLogoData.publicUrl}`);
             // Intentar con avatars como fallback
             throw new Error(`URL generada inaccesible`);
           }
           
-          addLog(`URL generada accesible, usándola: ${businessLogoData.publicUrl}`);
           setLogoUrl(businessLogoData.publicUrl);
           return;
         }
         
         // Si no funciona, intentar con el bucket avatars
-        addLog(`Intentando avatars bucket como fallback`);
         const { data: avatarsData } = supabase.storage
           .from('avatars')
           .getPublicUrl(logoUrlToProcess);
-        
-        addLog(`URL generada (avatars): ${avatarsData?.publicUrl || 'ninguna'}`);
         
         if (avatarsData?.publicUrl) {
           setLogoUrl(avatarsData.publicUrl);
           return;
         }
       } catch (error) {
-        addLog(`Error grave al procesar logo: ${error}`);
-        setLogoUrl(FALLBACK_LOGO);
+        setLogoUrl('https://upload.wikimedia.org/wikipedia/commons/8/89/Portrait_Placeholder.png');
         setImageState('error');
       }
     };
@@ -210,37 +160,23 @@ const BusinessHeader: React.FC<BusinessHeaderProps> = ({ businessData, averageRa
   
   // Marcar URL como válida una vez cargada correctamente
   const handleImageLoaded = () => {
-    addLog(`Imagen cargada correctamente: ${logoUrl}`);
     setImageState('success');
   };
   
   // Marcar URL como inválida y usar fallback
   const handleImageError = (e: React.SyntheticEvent<HTMLImageElement>) => {
-    addLog(`Error al cargar imagen: ${logoUrl}`);
-    
     // Guardar URL fallida para evitar intentos futuros
-    if (logoUrl && logoUrl !== FALLBACK_LOGO) {
+    if (logoUrl && logoUrl !== 'https://upload.wikimedia.org/wikipedia/commons/8/89/Portrait_Placeholder.png') {
       invalidUrlsRef.current.add(logoUrl);
-      addLog(`URL marcada como inválida: ${logoUrl}`);
     }
     
-    e.currentTarget.src = FALLBACK_LOGO;
+    e.currentTarget.src = 'https://upload.wikimedia.org/wikipedia/commons/8/89/Portrait_Placeholder.png';
     setImageState('error');
   };
   
   return (
     <div className="bg-white dark:bg-white dark:bg-opacity-10 shadow-md overflow-hidden">
       <div className="h-48 md:h-64 bg-indigo-100 relative">
-        {process.env.NODE_ENV === 'development' && logDebugging.length > 0 && (
-          <div className="absolute top-0 right-0 z-10 bg-black bg-opacity-75 text-white p-2 text-xs overflow-auto max-h-full max-w-md">
-            <h4 className="font-bold mb-1">Debug Log:</h4>
-            <ul className="list-disc pl-4 space-y-1">
-              {logDebugging.map((log, i) => (
-                <li key={i} className="break-all">{log}</li>
-              ))}
-            </ul>
-          </div>
-        )}
         {logoUrl ? (
           <>
             <img

@@ -52,7 +52,6 @@ const ServicesSection: React.FC<ServicesSectionProps> = ({
         setError(response.error || 'Error al cargar los servicios');
       }
     } catch (err: any) {
-      console.error('Error loading services:', err);
       setError(err.message || 'Error al cargar los servicios');
     } finally {
       setLoading(false);
@@ -93,7 +92,6 @@ const ServicesSection: React.FC<ServicesSectionProps> = ({
         await createService(serviceData);
       }
     } catch (err: any) {
-      console.error('Error saving service:', err);
     } finally {
       setModalOpen(false);
       resetForm();
@@ -116,7 +114,6 @@ const ServicesSection: React.FC<ServicesSectionProps> = ({
         setError('Error al eliminar el servicio');
       }
     } catch (err: any) {
-      console.error('Error deleting service:', err);
       setError(err.message || 'Error al eliminar el servicio');
     }
   };

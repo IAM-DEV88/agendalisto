@@ -3,6 +3,9 @@ import { Link } from 'react-router-dom';
 import { getBusinesses } from '../lib/api';
 import type { Business } from '../lib/api';
 
+// Fallback logo for businesses without an image
+const FALLBACK_LOGO = 'https://upload.wikimedia.org/wikipedia/commons/8/89/Portrait_Placeholder.png';
+
 const ExploreBusinesses = () => {
   const [businesses, setBusinesses] = useState<Business[]>([]);
   const [loading, setLoading] = useState(true);
@@ -29,7 +32,6 @@ const ExploreBusinesses = () => {
         const data = await getBusinesses(searchTerm, category !== 'all' ? category : undefined);
         setBusinesses(data);
       } catch (err) {
-        console.error('Error fetching businesses:', err);
         setError('Error al cargar los negocios. Por favor, inténtalo de nuevo más tarde.');
       } finally {
         setLoading(false);
@@ -117,10 +119,11 @@ const ExploreBusinesses = () => {
                 className="bg-white dark:bg-white dark:bg-opacity-10 overflow-hidden shadow hover:shadow-lg transition-shadow duration-300"
               >
                 <div className="h-48 bg-gray-200 relative">
-                  <img 
-                    src={business.logo_url || 'https://via.placeholder.com/150?text=No+Logo'} 
-                    alt={business.name} 
+                  <img
+                    src={business.logo_url || FALLBACK_LOGO}
+                    alt={business.name}
                     className="w-full h-full object-cover"
+                    onError={(e) => { e.currentTarget.src = FALLBACK_LOGO }}
                   />
                 </div>
                 <div className="p-6">

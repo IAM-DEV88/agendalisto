@@ -28,11 +28,9 @@ const ReviewsSection: React.FC<ReviewsSectionProps> = ({ businessId, currentUser
         if (success) {
           setReviews(data);
         } else {
-          console.error('Error fetching reviews:', error);
           setReviews([]);
         }
       } catch (err) {
-        console.error('Error loading reviews:', err);
       } finally {
         setLoading(false);
       }
@@ -83,10 +81,8 @@ const ReviewsSection: React.FC<ReviewsSectionProps> = ({ businessId, currentUser
         setShowReviewForm(false);
         setNewReview({ rating: 5, comment: '' });
       } else {
-        console.error('Error submitting review:', error);
       }
     } catch (error) {
-      console.error('Error submitting review:', error);
     } finally {
       setSubmitting(false);
     }

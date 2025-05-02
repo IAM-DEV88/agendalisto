@@ -8,7 +8,6 @@ type ProtectedRouteProps = {
 const ProtectedRoute = ({ user, children }: ProtectedRouteProps) => {
   // Si el usuario no existe (pasado desde App), redirigir
   if (!user) {
-    console.log('[ProtectedRoute] Usuario no proporcionado, redirigiendo a /login');
     return <Navigate to="/login" replace />; // replace evita añadir al historial
   }
 

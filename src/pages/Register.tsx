@@ -32,22 +32,18 @@ const Register = () => {
     setLoading(true);
 
     try {
-      console.log('Iniciando proceso de registro para:', email);
       
       // Paso 1: Registrar usuario con email y contraseña únicamente
       const { data, error: signUpError } = await signUp(email, password);
       
       if (signUpError) {
-        console.error('Error en registro inicial:', signUpError);
         throw signUpError;
       }
       
       if (data.user) {
-        console.log('Usuario registrado exitosamente:', data.user.id);
         
         try {
           // Paso 2: Actualizar metadatos del usuario (por separado para reducir errores)
-          console.log('Actualizando metadatos del usuario');
           const { error: updateError } = await supabase.auth.updateUser({
             data: {
               full_name: fullName,
@@ -56,13 +52,10 @@ const Register = () => {
           });
           
           if (updateError) {
-            console.warn('No se pudieron actualizar los metadatos, pero el usuario fue creado:', updateError);
             // No bloqueamos el flujo por esto, solo advertimos
           } else {
-            console.log('Metadatos actualizados correctamente');
           }
         } catch (metadataError) {
-          console.warn('Error al actualizar metadatos:', metadataError);
           // No bloqueamos el flujo por un error en metadatos
         }
 
@@ -76,7 +69,6 @@ const Register = () => {
         }, 2000);
       }
     } catch (err: any) {
-      console.error('Error completo durante el registro:', err);
       
       // Manejar mensajes de error comunes
       if (err.message.includes('Email already registered')) {

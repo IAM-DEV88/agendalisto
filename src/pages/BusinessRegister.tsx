@@ -60,7 +60,6 @@ const BusinessRegister = ({ user }: BusinessRegisterProps) => {
         throw new Error(apiError instanceof Error ? apiError.message : 'Error al registrar el negocio');
       }
     } catch (err: any) {
-      console.error('Error registering business:', err);
       setError(err.message || 'Error al registrar el negocio. Por favor, intenta de nuevo.');
     } finally {
       setLoading(false);

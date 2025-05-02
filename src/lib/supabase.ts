@@ -25,7 +25,6 @@ export const supabase = createClient(SUPABASE_URL, SUPABASE_ANON_KEY, supabaseOp
 
 // Escuchar cambios de autenticación de manera simple
 supabase.auth.onAuthStateChange((event) => {
-  console.log(`[Auth] State changed: ${event}`);
 });
 
 // Auth functions simplificadas
@@ -38,12 +37,10 @@ export const signUp = async (email: string, password: string) => {
     }) as any;
     
     if (response.error) {
-      console.error('Error en signUp:', response.error.message);
     }
     
     return response;
   } catch (err) {
-    console.error('Error en signUp:', err);
     return { error: err, data: null };
   }
 };
@@ -57,7 +54,6 @@ export const signIn = async (email: string, password: string) => {
     
     return response;
   } catch (err) {
-    console.error('Error en signIn:', err);
     return { error: err, data: null };
   }
 };
@@ -66,7 +62,6 @@ export const signOut = async () => {
   try {
     return await supabase.auth.signOut() as any;
   } catch (err) {
-    console.error('Error al cerrar sesión:', err);
     return { error: err, data: { session: null } };
   }
 };
@@ -75,7 +70,6 @@ export const resetPassword = async (email: string) => {
   try {
     return await supabase.auth.resetPasswordForEmail(email) as any;
   } catch (err) {
-    console.error('Error al restablecer contraseña:', err);
     return { error: err, data: null };
   }
 };
@@ -84,7 +78,6 @@ export const updatePassword = async (newPassword: string) => {
   try {
     return await supabase.auth.updateUser({ password: newPassword }) as any;
   } catch (err) {
-    console.error('Error al actualizar contraseña:', err);
     return { error: err, data: { user: null } };
   }
 };

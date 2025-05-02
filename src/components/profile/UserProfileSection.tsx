@@ -22,7 +22,6 @@ const UserProfileSection: React.FC<UserProfileSectionProps> = ({
   onChange
 }) => {
   // Debug estado inicial
-  console.log('Estado inicial avatar:', profileData.avatar_url);
   
   // Estado para la URL de previsualización
   const [previewUrl, setPreviewUrl] = useState<string | null>(null);
@@ -33,7 +32,6 @@ const UserProfileSection: React.FC<UserProfileSectionProps> = ({
   const FALLBACK_AVATAR = 'https://upload.wikimedia.org/wikipedia/commons/8/89/Portrait_Placeholder.png';
   
   // URLs del bucket
-  console.log('URL completa para debug:', profileData.avatar_url);
   
   // Obtener URL pública del bucket de Supabase
   const getPublicUrl = (key: string) => {
@@ -41,27 +39,22 @@ const UserProfileSection: React.FC<UserProfileSectionProps> = ({
       // Sólo procesar claves que no sean URLs completas
       if (!key || key.startsWith('http')) return key;
       
-      console.log('Procesando clave:', key);
       
       // Convertir clave de almacenamiento a URL pública
       const { data } = supabase.storage.from('avatars').getPublicUrl(key);
-      console.log('Método getPublicUrl generó:', data.publicUrl);
       
       // Verificar que la URL sea válida con un fetch
       fetch(data.publicUrl, { method: 'HEAD' })
         .then(response => {
           if (!response.ok) {
-            console.warn(`La URL ${data.publicUrl} respondió con: ${response.status}`);
             setDebugInfo(`Error ${response.status} al verificar URL`);
           }
         })
         .catch(error => {
-          console.error('Error verificando URL:', error);
         });
       
       return data.publicUrl;
     } catch (error: any) {
-      console.error('Error al generar URL pública:', error);
       return null;
     }
   };
@@ -69,14 +62,12 @@ const UserProfileSection: React.FC<UserProfileSectionProps> = ({
   // Inicializar y actualizar previewUrl cuando cambia profileData
   useEffect(() => {
     try {
-      console.log('Avatar URL en ProfileData:', profileData.avatar_url);
       
       // Si no hay URL o está subiendo, no actualizar
       if (!profileData.avatar_url || isUploading) return;
       
       // Si ya es una URL completa, usarla directamente
       if (profileData.avatar_url.startsWith('http')) {
-        console.log('Usando URL completa:', profileData.avatar_url);
         setPreviewUrl(profileData.avatar_url);
         setDebugInfo("URL directa");
         return;
@@ -84,7 +75,6 @@ const UserProfileSection: React.FC<UserProfileSectionProps> = ({
       
       // Generar URL pública a partir de la clave de almacenamiento
       const url = getPublicUrl(profileData.avatar_url);
-      console.log('URL generada:', url);
       
       if (url) {
         setPreviewUrl(url);
@@ -93,7 +83,6 @@ const UserProfileSection: React.FC<UserProfileSectionProps> = ({
         setDebugInfo(`No se pudo generar URL de: ${profileData.avatar_url}`);
       }
     } catch (error: any) {
-      console.error('Error procesando avatar_url:', error);
       setDebugInfo(`Error: ${error?.message || 'desconocido'}`);
     }
   }, [profileData.avatar_url, isUploading]);
@@ -104,7 +93,6 @@ const UserProfileSection: React.FC<UserProfileSectionProps> = ({
     // Evitar múltiples cargas
     if (isUploading) return;
     
-    console.log('Iniciando carga de avatar');
     const file = e.target.files[0];
     // Create immediate local preview while uploading
     const objectUrl = URL.createObjectURL(file);
@@ -120,23 +108,19 @@ const UserProfileSection: React.FC<UserProfileSectionProps> = ({
     
     // Asegurarnos de no usar subcarpetas - archivo directo en el bucket
     const filePath = fileName; 
-    console.log('Ruta de archivo a subir:', filePath);
     
     try {
       // Upload file to bucket and store its path
-      console.log('Subiendo archivo a:', filePath);
       const { error: uploadError, data: uploadData } = await supabase.storage.from('avatars').upload(filePath, file, {
         upsert: true // Sobreescribir si existe
       });
       
-      console.log('Resultado subida:', uploadError ? 'Error' : 'Éxito', uploadData);
       
       if (uploadError) {
         throw new Error(`Error de Supabase: ${uploadError.message}`);
       }
       
       // Después de subir, obtener URL pública y guardarla
-      console.log('Obteniendo URL pública para:', filePath);
       const { data } = supabase.storage.from('avatars').getPublicUrl(filePath, {
         download: false
       });
@@ -150,7 +134,6 @@ const UserProfileSection: React.FC<UserProfileSectionProps> = ({
       setPreviewUrl(data.publicUrl);
       setDebugInfo(`Subida exitosa, archivo: ${filePath}`);
     } catch (err: any) {
-      console.error('Error uploading avatar:', err);
       // En caso de error, volver a la imagen original
       setPreviewUrl(profileData.avatar_url);
       setDebugInfo(`Error: ${err?.message || 'desconocido'}`);
@@ -252,7 +235,6 @@ const UserProfileSection: React.FC<UserProfileSectionProps> = ({
                           alt="Avatar" 
                           className={`h-20 w-20 rounded-full object-cover ${isUploading ? 'opacity-70' : ''}`}
                           onError={(e) => {
-                            console.error('Error cargando imagen:', previewUrl);
                             // Usar imagen fallback cuando hay error
                             e.currentTarget.src = FALLBACK_AVATAR;
                             setDebugInfo(`Imagen fallback cargada por error en: ${previewUrl}`);

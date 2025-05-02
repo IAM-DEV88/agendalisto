@@ -122,7 +122,6 @@ const BusinessDashboard = ({ user }: BusinessDashboardProps) => {
                   setBusinessAppointments(appData);
                 }
               } catch (revErr) {
-                console.error('Error fetching reviews:', revErr);
                 setBusinessAppointments(appData);
               }
             } else {
@@ -134,7 +133,6 @@ const BusinessDashboard = ({ user }: BusinessDashboardProps) => {
             setLoadingBusinessAppointments(false);
           } catch (appErr) {
             clearTimeout(appointmentTimeoutId);
-            console.error('Error fetching business appointments:', appErr);
             setBusinessMessage({
               text: 'Error al cargar las citas del negocio.',
               type: 'error'
@@ -166,7 +164,6 @@ const BusinessDashboard = ({ user }: BusinessDashboardProps) => {
             setLoadingBusinessHours(false);
           } catch (hoursErr) {
             clearTimeout(hoursTimeoutId);
-            console.error('Error fetching business hours:', hoursErr);
             setHoursMessage({
               text: 'Error al cargar los horarios del negocio.',
               type: 'error'
@@ -199,7 +196,6 @@ const BusinessDashboard = ({ user }: BusinessDashboardProps) => {
             setLoadingBusinessConfig(false);
           } catch (configErr) {
             clearTimeout(configTimeoutId);
-            console.error('Error fetching business config:', configErr);
             setConfigMessage({
               text: 'Error al cargar la configuración del negocio.',
               type: 'error'
@@ -218,7 +214,6 @@ const BusinessDashboard = ({ user }: BusinessDashboardProps) => {
               setTotalServices(_totalServices);
             }
           } catch (svcErr) {
-            console.error('Error fetching business services for stats:', svcErr);
           }
           const clientsTimeoutId = setTimeout(() => {
             setLoadingBusinessClients(false);
@@ -238,7 +233,6 @@ const BusinessDashboard = ({ user }: BusinessDashboardProps) => {
             setLoadingBusinessClients(false);
           } catch (clientsErr) {
             clearTimeout(clientsTimeoutId);
-            console.error('Error fetching business clients:', clientsErr);
             setClientsMessage({ text: 'Error al cargar los clientes del negocio.', type: 'error' });
             setLoadingBusinessClients(false);
           }
@@ -253,7 +247,6 @@ const BusinessDashboard = ({ user }: BusinessDashboardProps) => {
           setLoadingBusinessConfig(false);
         }
       } catch (err) {
-        console.error('Error loading business data:', err);
         setBusinessMessage({
           text: 'Error al cargar los datos del negocio. Por favor, recarga la página.',
           type: 'error'
@@ -286,7 +279,6 @@ const BusinessDashboard = ({ user }: BusinessDashboardProps) => {
         }
       }
     } catch (err) {
-      console.error('Error updating appointment status:', err);
     }
   };
 
@@ -316,7 +308,6 @@ const BusinessDashboard = ({ user }: BusinessDashboardProps) => {
       setBusinessData(updated);
       setBusinessMessage({ text: 'Datos del negocio actualizados correctamente', type: 'success' });
     } catch (err: any) {
-      console.error('Error updating business:', err);
       setBusinessMessage({ text: err.message || 'Error al actualizar datos del negocio', type: 'error' });
     } finally {
       setSavingBusiness(false);
@@ -342,7 +333,6 @@ const BusinessDashboard = ({ user }: BusinessDashboardProps) => {
       await updateBusinessHoursAPI(payload);
       setHoursMessage({ text: 'Horarios actualizados correctamente', type: 'success' });
     } catch (err: any) {
-      console.error('Error updating hours:', err);
       setHoursMessage({ text: err.message || 'Error al actualizar horarios', type: 'error' });
     } finally {
       setSavingBusinessHours(false);
@@ -371,7 +361,6 @@ const BusinessDashboard = ({ user }: BusinessDashboardProps) => {
         throw new Error(error || 'Error al guardar la configuración');
       }
     } catch (err: any) {
-      console.error('Error updating config:', err);
       setConfigMessage({ text: err.message || 'Error al actualizar la configuración', type: 'error' });
     } finally {
       setSavingBusinessConfig(false);

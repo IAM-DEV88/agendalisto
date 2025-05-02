@@ -39,28 +39,23 @@ function App() {
   const loadProfile = useCallback(async (userId: string, isRetry = false) => {
     // No reintentar más allá del límite máximo
     if (isRetry && profileLoadAttemptsRef.current >= MAX_PROFILE_LOAD_ATTEMPTS) {
-      console.log(`[App] loadProfile: Máximo de ${MAX_PROFILE_LOAD_ATTEMPTS} intentos alcanzado para ${userId}`);
       return false;
     }
     
     if (isRetry) {
       profileLoadAttemptsRef.current++;
-      console.log(`[App] loadProfile: Intento ${profileLoadAttemptsRef.current} de ${MAX_PROFILE_LOAD_ATTEMPTS} para ${userId}`);
     } else {
       // Reiniciar contador para nuevas cargas (no reintentos)
       profileLoadAttemptsRef.current = 0;
     }
 
     try {
-      console.log(`[App] loadProfile: Cargando perfil para ${userId}${isRetry ? ' (reintento)' : ''}`);
       const { success, perfil, error } = await obtenerPerfilUsuario(userId);
       
       if (success && perfil) {
-        console.log(`[App] loadProfile: Perfil cargado exitosamente para ${userId}`);
         setUserProfile(perfil);
         return true;
       } else {
-        console.error(`[App] loadProfile: Error al cargar perfil para ${userId}: ${error}`);
         
         // Si es timeout, programar reintento después de 2 segundos
         if (error === 'Timeout al obtener perfil de usuario' && profileLoadAttemptsRef.current < MAX_PROFILE_LOAD_ATTEMPTS) {
@@ -68,9 +63,7 @@ function App() {
             window.clearTimeout(retryTimeoutRef.current);
           }
           
-          console.log(`[App] loadProfile: Programando reintento en 2 segundos...`);
           retryTimeoutRef.current = window.setTimeout(() => {
-            console.log(`[App] loadProfile: Ejecutando reintento programado...`);
             loadProfile(userId, true);
           }, 2000);
         } else {
@@ -80,7 +73,6 @@ function App() {
         return false;
       }
     } catch (err) {
-      console.error(`[App] loadProfile: Excepción inesperada:`, err);
       setUserProfile(null);
       return false;
     }
@@ -92,26 +84,21 @@ function App() {
     if (authInProgressRef.current) return;
     authInProgressRef.current = true;
     
-    console.log('[App] useEffect [Auth]: Inicializando gestión de autenticación');
     setLoading(true);
 
     // Obtener sesión inicial
     const getInitialSession = async () => {
       try {
-        console.log('[App] getInitialSession: Obteniendo sesión...');
         const { data: { session } } = await supabase.auth.getSession();
         
         if (session?.user) {
-          console.log(`[App] getInitialSession: Sesión encontrada para ${session.user.id}`);
           setUser(session.user);
           await loadProfile(session.user.id);
         } else {
-          console.log('[App] getInitialSession: No hay sesión activa');
           setUser(null);
           setUserProfile(null);
         }
       } catch (err) {
-        console.error('[App] getInitialSession: Error:', err);
       } finally {
         setAuthInitialized(true);
         setLoading(false);
@@ -123,12 +110,10 @@ function App() {
     // Suscribirse a cambios de estado de autenticación
     const { data: { subscription } } = supabase.auth.onAuthStateChange(
       async (event, session) => {
-        console.log(`[App] onAuthStateChange: Evento ${event}`, session?.user ? `para ${session.user.id}` : 'sin sesión');
         
         // Evitar operaciones innecesarias para eventos no relacionados con login/logout
         const isSignificantEvent = ['SIGNED_IN', 'SIGNED_OUT', 'TOKEN_REFRESHED', 'USER_UPDATED'].includes(event);
         if (!isSignificantEvent) {
-          console.log(`[App] onAuthStateChange: Ignorando evento ${event} (no significativo)`);
           return;
         }
         
@@ -139,7 +124,6 @@ function App() {
           
           // Solo actualizar user/userProfile si el ID cambió o no hay perfil actual
           if (!currentUserId || currentUserId !== session.user.id || !userProfile) {
-            console.log(`[App] onAuthStateChange: Actualizando usuario a ${session.user.id}`);
             setUser(session.user);
             
             // Cargar perfil solo si es un usuario diferente o no hay perfil
@@ -147,10 +131,8 @@ function App() {
               await loadProfile(session.user.id);
             }
           } else {
-            console.log(`[App] onAuthStateChange: Usuario ya actualizado (${currentUserId})`);
           }
         } else if (event === 'SIGNED_OUT') {
-          console.log('[App] onAuthStateChange: Limpiando estado por SIGNED_OUT');
           setUser(null);
           setUserProfile(null);
         }
@@ -161,7 +143,6 @@ function App() {
 
     // Limpiar suscripción al desmontar
     return () => {
-      console.log('[App] useEffect [Auth]: Limpiando suscripción');
       subscription?.unsubscribe();
       authInProgressRef.current = false;
     };
@@ -171,7 +152,6 @@ function App() {
   useEffect(() => {
     const handleProfileUpdate = (event: CustomEvent) => {
       if (event.detail.profile) {
-        console.log('[App] Evento userProfileUpdated recibido', event.detail.profile.id);
         setUserProfile(event.detail.profile);
       }
     };
@@ -194,7 +174,6 @@ function App() {
   }
 
   // Evitar loggear en cada render
-  // console.log('[App] Renderizando. Usuario:', user ? user.id : 'null', 'Perfil:', userProfile ? userProfile.id : 'null');
 
   return (
     <Router>

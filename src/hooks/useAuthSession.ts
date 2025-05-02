@@ -24,7 +24,6 @@ export function useAuthSession() {
           setUser(null);
         }
       } catch (err: any) {
-        console.error('Error en getSessionProfile:', err);
         setError(err.message);
       } finally {
         setLoading(false);
