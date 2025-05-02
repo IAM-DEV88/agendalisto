@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Business, updateBusiness } from '../../lib/api';
+import { Business, updateBusiness, getBusinessCategories, BusinessCategory } from '../../lib/api';
 import { supabase } from '../../lib/supabase';
 
 interface BusinessProfileSectionProps {
@@ -7,7 +7,7 @@ interface BusinessProfileSectionProps {
   saving: boolean;
   message: { text: string; type: 'success' | 'error' } | null;
   onSave: (e: React.FormEvent) => Promise<void>;
-  onChange: (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => void;
+  onChange: (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => void;
 }
 
 const BusinessProfileSection: React.FC<BusinessProfileSectionProps> = ({
@@ -38,6 +38,7 @@ const BusinessProfileSection: React.FC<BusinessProfileSectionProps> = ({
   const [previewUrl, setPreviewUrl] = useState<string | null>(initialPreviewUrl);
   const [isUploading, setIsUploading] = useState(false);
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
+  const [categories, setCategories] = useState<BusinessCategory[]>([]);
   
   // Sync previewUrl when businessData.logo_url changes externally (e.g., after saving)
   useEffect(() => {
@@ -58,6 +59,16 @@ const BusinessProfileSection: React.FC<BusinessProfileSectionProps> = ({
       setPreviewUrl(null);
     }
   }, [businessData.logo_url]);
+  
+  useEffect(() => {
+    const fetchCategories = async () => {
+      const { success, data } = await getBusinessCategories();
+      if (success && data) {
+        setCategories(data);
+      }
+    };
+    fetchCategories();
+  }, []);
   
   // Handle logo file upload to Supabase storage
   const handleLogoUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -200,6 +211,32 @@ const BusinessProfileSection: React.FC<BusinessProfileSectionProps> = ({
                   onChange={onChange} 
                   className="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500 dark:bg-gray-900 p-2" 
                 />
+              </div>
+              <div className="sm:col-span-3">
+                <label htmlFor="email" className="block text-sm font-medium text-gray-700 dark:text-white">Correo Electrónico</label>
+                <input
+                  type="email"
+                  name="email"
+                  id="email"
+                  value={businessData.email}
+                  onChange={onChange}
+                  className="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500 dark:bg-gray-900 p-2"
+                />
+              </div>
+              <div className="sm:col-span-3">
+                <label htmlFor="category_id" className="block text-sm font-medium text-gray-700 dark:text-white">Categoría</label>
+                <select
+                  name="category_id"
+                  id="category_id"
+                  value={businessData.category_id || ''}
+                  onChange={onChange}
+                  className="mt-1 block w-full border-gray-300 bg-white rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500 dark:bg-gray-900 p-2"
+                >
+                  <option value="" disabled>Selecciona una categoría</option>
+                  {categories.map(cat => (
+                    <option key={cat.id} value={cat.id}>{cat.name}</option>
+                  ))}
+                </select>
               </div>
               <div className="sm:col-span-3">
                 <label htmlFor="logo" className="block text-sm font-medium text-gray-700 dark:text-white">Logo del negocio</label>

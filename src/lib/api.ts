@@ -6,6 +6,7 @@ export type Business = {
   id: string;
   slug: string;
   owner_id: string;
+  category_id: string | null;  // ID of the assigned category
   name: string;
   description: string;
   address: string;
@@ -422,10 +423,12 @@ export async function getUserBusiness(userId: string) {
       .from('businesses')
       .select('*')
       .eq('owner_id', userId)
-      .single();
+      .maybeSingle();
     if (error) {
-      if (error.code === 'PGRST116') return { success: true, business: null };
       throw error;
+    }
+    if (!data) {
+      return { success: true, business: null };
     }
     const businessWithSlug = { ...data, slug: slugify(data.name) } as Business;
     return { success: true, business: businessWithSlug };
@@ -618,4 +621,23 @@ export async function createBusinessReview(
   } catch (err: any) {
     return { success: false, error: err.message };
   }
-} 
+}
+
+// Type for business categories
+export type BusinessCategory = {
+  id: string;
+  name: string;
+};
+
+// Fetch all business categories
+export async function getBusinessCategories(): Promise<{ success: boolean; data: BusinessCategory[] | null; error: string | null }> {
+  try {
+    const { data, error } = await supabase
+      .from('business_categories')
+      .select('*');
+    if (error) throw error;
+    return { success: true, data: data as BusinessCategory[], error: null };
+  } catch (err: any) {
+    return { success: false, data: null, error: err.message || 'Error fetching categories' };
+  }
+}

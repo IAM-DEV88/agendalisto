@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
-import { getBusinesses } from '../lib/api';
+import { getBusinesses, getBusinessCategories, BusinessCategory } from '../lib/api';
 import type { Business } from '../lib/api';
 
 // Fallback logo for businesses without an image
@@ -12,16 +12,16 @@ const ExploreBusinesses = () => {
   const [searchTerm, setSearchTerm] = useState('');
   const [category, setCategory] = useState('all');
   const [error, setError] = useState<string | null>(null);
+  const [categories, setCategories] = useState<BusinessCategory[]>([]);
 
-  // Mock categories for demonstration purposes
-  const categories = [
-    { id: 'all', name: 'Todos' },
-    { id: 'beauty', name: 'Belleza' },
-    { id: 'health', name: 'Salud' },
-    { id: 'fitness', name: 'Fitness' },
-    { id: 'food', name: 'Alimentación' },
-    { id: 'education', name: 'Educación' },
-  ];
+  // Load real categories from Supabase
+  useEffect(() => {
+    const fetchCategories = async () => {
+      const { success, data } = await getBusinessCategories();
+      if (success && data) setCategories(data);
+    };
+    fetchCategories();
+  }, []);
 
   useEffect(() => {
     const fetchBusinesses = async () => {
@@ -85,6 +85,7 @@ const ExploreBusinesses = () => {
               onChange={(e) => setCategory(e.target.value)}
               className="w-full px-4 py-2 border border-gray-300 rounded-md focus:ring-indigo-500 focus:border-indigo-500"
             >
+              <option value="all">Todos</option>
               {categories.map((cat) => (
                 <option key={cat.id} value={cat.id}>
                   {cat.name}
@@ -130,6 +131,14 @@ const ExploreBusinesses = () => {
                   <h3 className="text-lg font-medium text-gray-900 dark:text-white">{business.name}</h3>
                   <p className="mt-1 text-sm text-gray-500 dark:text-white">{business.address}</p>
                   <p className="mt-2 text-sm text-gray-600 dark:text-white line-clamp-2">{business.description}</p>
+                  {(() => {
+                    const cat = categories.find(c => c.id === business.category_id);
+                    return cat ? (
+                      <span className="inline-block mt-2 px-2 py-0.5 text-xs font-medium bg-indigo-100 text-indigo-800 rounded">
+                        {cat.name}
+                      </span>
+                    ) : null;
+                  })()}
                   <div className="mt-4">
                     <span className="inline-flex items-center px-3 py-0.5 text-sm font-medium bg-indigo-100 text-indigo-800 dark:bg-white dark:bg-opacity-10 dark:text-white">
                       Ver servicios

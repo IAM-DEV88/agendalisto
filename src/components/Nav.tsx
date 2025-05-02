@@ -91,7 +91,7 @@ const Nav = ({ user }: NavProps) => {
             </Link>
 
             <Link to="/explore" className="px-2 py-1 text-sm font-medium text-gray-700 dark:text-gray-300 hover:text-indigo-600">
-              Explorar Negocios
+              Explorar
             </Link>
 
             {!isLoggedIn && (
@@ -189,7 +189,7 @@ const Nav = ({ user }: NavProps) => {
               Inicio
             </Link>
             <Link to="/explore" onClick={() => setIsMenuOpen(false)} className="block px-2 py-1 text-base font-medium text-gray-700 dark:text-gray-300 hover:text-indigo-600 hover:bg-gray-50 dark:hover:bg-gray-700">
-              Explorar Negocios
+              Explorar
             </Link>
             {!isLoggedIn ? (
               <> 

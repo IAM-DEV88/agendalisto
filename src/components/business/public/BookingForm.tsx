@@ -34,6 +34,7 @@ const BookingForm: React.FC<BookingFormProps> = ({
     time: '',
     notes: ''
   });
+
   const [submitting, setSubmitting] = useState(false);
   const [bookingSuccess, setBookingSuccess] = useState(false);
   const [error, setError] = useState<string | null>(null);

@@ -1,7 +1,8 @@
 import React, { useState, useEffect } from 'react';
 import { MapPin, Phone, Globe, MessageCircle, Facebook, Instagram, Mail, Star } from 'lucide-react';
-import { Business } from '../../../lib/api';
+import { Business, getBusinessCategories, BusinessCategory } from '../../../lib/api';
 import { supabase } from '../../../lib/supabase';
+import { Link } from 'react-router-dom';
 
 interface BusinessHeaderProps {
   businessData: Business;
@@ -12,6 +13,8 @@ interface BusinessHeaderProps {
 const BusinessHeader: React.FC<BusinessHeaderProps> = ({ businessData, averageRating = 0, reviewsCount = 0 }) => {
   const [imageState, setImageState] = useState<'loading' | 'success' | 'error'>('loading');
   const [logoUrl, setLogoUrl] = useState<string | null>(null);
+  const [currentUser, setCurrentUser] = useState<any>(null);
+  const [categories, setCategories] = useState<BusinessCategory[]>([]);
   
   // Memoria local para URL inválidas para evitar intentos repetidos
   const invalidUrlsRef = React.useRef<Set<string>>(new Set());
@@ -131,6 +134,27 @@ const BusinessHeader: React.FC<BusinessHeaderProps> = ({ businessData, averageRa
     processLogoUrl();
   }, [businessData.logo_url]);
   
+  // Fetch current authenticated user to determine ownership
+  useEffect(() => {
+    const fetchUser = async () => {
+      const { data: { user } } = await supabase.auth.getUser();
+      setCurrentUser(user);
+    };
+    fetchUser();
+  }, []);
+  
+  // Fetch categories to display category name
+  useEffect(() => {
+    const fetchCategories = async () => {
+      const { success, data } = await getBusinessCategories();
+      if (success && data) setCategories(data);
+    };
+    fetchCategories();
+  }, []);
+  
+  // Determine the name of this business's category
+  const categoryName = categories.find(c => c.id === businessData.category_id)?.name;
+  
   // Marcar URL como válida una vez cargada correctamente
   const handleImageLoaded = () => {
     setImageState('success');
@@ -187,6 +211,11 @@ const BusinessHeader: React.FC<BusinessHeaderProps> = ({ businessData, averageRa
               </div>
             )}
             <p className="mt-3 text-gray-600 dark:text-white">{businessData.description}</p>
+            {categoryName && (
+              <p className="mt-2 inline-block px-2 py-1 bg-indigo-100 text-indigo-800 rounded dark:bg-indigo-800 dark:text-indigo-200 uppercase text-xs">
+                {categoryName}
+              </p>
+            )}
           </div>
 
           <div className="flex flex-col space-y-3 text-sm">
@@ -253,6 +282,34 @@ const BusinessHeader: React.FC<BusinessHeaderProps> = ({ businessData, averageRa
             </a>
           )}
         </div>
+        {currentUser && currentUser.id === businessData.owner_id && (
+          <div className="mt-4 flex flex-wrap gap-2">
+            <Link
+              to="/business/dashboard?tab=profile"
+              className="px-3 py-1 bg-green-600 text-white rounded hover:bg-green-700"
+            >
+              Datos
+            </Link>
+            <Link
+              to="/business/dashboard?tab=services"
+              className="px-3 py-1 bg-green-600 text-white rounded hover:bg-green-700"
+            >
+              Servicios
+            </Link>
+            <Link
+              to="/business/dashboard?tab=availability"
+              className="px-3 py-1 bg-green-600 text-white rounded hover:bg-green-700"
+            >
+              Horarios
+            </Link>
+            <Link
+              to="/business/dashboard?tab=settings"
+              className="px-3 py-1 bg-green-600 text-white rounded hover:bg-green-700"
+            >
+              Configuración
+            </Link>
+          </div>
+        )}
       </div>
     </div>
   );

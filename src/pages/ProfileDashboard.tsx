@@ -44,6 +44,13 @@ interface Appointment {
   user_id: string;
 }
 
+// Helper to create slug from business name
+const slugify = (str: string): string =>
+  str
+    .toLowerCase()
+    .replace(/\s+/g, '-')
+    .replace(/[^\w\-]+/g, '');
+
 const ProfileDashboard = ({ user }: ProfileDashboardProps) => {
   const dispatch = useAppDispatch();
   const activeTab = useSelector((state: RootState) => state.ui.activeTab);
@@ -221,9 +228,12 @@ const ProfileDashboard = ({ user }: ProfileDashboardProps) => {
   };
 
   // Handlers for appointment actions
-  const handleReschedule = (_appointment: Appointment) => {
-    // Redirect to explore for new booking
-    navigate('/explore');
+  const handleReschedule = (appointment: Appointment) => {
+    // Navigate to public business page and open booking form for rescheduling
+    const businessName = appointment.businesses?.name;
+    if (!businessName) return;
+    const slug = slugify(businessName);
+    navigate(`/${slug}?reschedule=true&serviceId=${appointment.service_id}&date=${encodeURIComponent(appointment.start_time)}`);
   };
 
   const handleCancel = async (appointment: Appointment) => {

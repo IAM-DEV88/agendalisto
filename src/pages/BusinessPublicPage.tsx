@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { useParams, Link, useNavigate } from 'react-router-dom';
+import { useParams, Link, useNavigate, useLocation } from 'react-router-dom';
 import { getBusinessBySlug, getBusinessServices, getBusinessHours, getBusinessReviews, Service, BusinessHours, Review } from '../lib/api';
 import { supabase } from '../lib/supabase';
 import {
@@ -14,6 +14,7 @@ import {
 function BusinessPublicPage() {
   const { slug } = useParams();
   const navigate = useNavigate();
+  const location = useLocation();
   const [businessData, setBusinessData] = useState<any>(null);
   const [services, setServices] = useState<Service[]>([]);
   const [businessHours, setBusinessHours] = useState<BusinessHours[]>([]);
@@ -95,6 +96,16 @@ function BusinessPublicPage() {
     fetchBusinessData();
   }, [slug, navigate]);
 
+  // Read reschedule param to show booking form
+  useEffect(() => {
+    const params = new URLSearchParams(location.search);
+    if (params.get('reschedule') === 'true') {
+      const svcId = params.get('serviceId');
+      if (svcId) setSelectedService(svcId);
+      setShowBooking(true);
+    }
+  }, [location.search]);
+
   const handleServiceSelection = (serviceId: string) => {
     setSelectedService(serviceId);
     if (businessData?.config?.permitir_reservas_online) {
@@ -143,21 +154,21 @@ function BusinessPublicPage() {
           <div className="flex border-b border-gray-200">
             <button
               onClick={() => setActiveTab('services')}
-              className={`flex-1 py-3 px-4 text-center font-medium ${activeTab === 'services' ? 'text-indigo-600 border-b-2 border-indigo-600' : 'text-gray-500'
+              className={`flex-1 py-3 px-4 text-center font-medium ${activeTab === 'services' ? 'dark:text-white border-b-2 border-indigo-600' : 'text-gray-500'
                 }`}
             >
               Servicios
             </button>
             <button
               onClick={() => setActiveTab('hours')}
-              className={`flex-1 py-3 px-4 text-center font-medium ${activeTab === 'hours' ? 'text-indigo-600 border-b-2 border-indigo-600' : 'text-gray-500'
+              className={`flex-1 py-3 px-4 text-center font-medium ${activeTab === 'hours' ? 'dark:text-white border-b-2 border-indigo-600' : 'text-gray-500'
                 }`}
             >
               Horarios
             </button>
             <button
               onClick={() => setActiveTab('location')}
-              className={`flex-1 py-3 px-4 text-center font-medium ${activeTab === 'location' ? 'text-indigo-600 border-b-2 border-indigo-600' : 'text-gray-500'
+              className={`flex-1 py-3 px-4 text-center font-medium ${activeTab === 'location' ? 'dark:text-white border-b-2 border-indigo-600' : 'text-gray-500'
                 }`}
             >
               Ubicación
@@ -203,6 +214,14 @@ function BusinessPublicPage() {
                     />
                   </div>
                 )}
+
+                {user && user.id === businessData?.owner_id && (
+                  <div className="mt-6">
+                    <Link to="/business/dashboard?tab=services" className="w-full block bg-green-600 text-white py-2 px-4 rounded hover:bg-green-700">
+                      Gestionar Servicios
+                    </Link>
+                  </div>
+                )}
               </div>
             )}
 
@@ -210,6 +229,14 @@ function BusinessPublicPage() {
               <div>
                 <h3 className="text-lg font-semibold mb-4">Horarios de Atención</h3>
                 <BusinessHoursList businessHours={businessHours} />
+
+                {user && user.id === businessData?.owner_id && (
+                  <div className="mt-6">
+                    <Link to="/business/dashboard?tab=availability" className="w-full block bg-green-600 text-white py-2 px-4 rounded hover:bg-green-700">
+                      Editar Horarios
+                    </Link>
+                  </div>
+                )}
               </div>
             )}
 
@@ -217,6 +244,14 @@ function BusinessPublicPage() {
               <div>
                 <h3 className="text-lg font-semibold mb-4">Ubicación</h3>
                 <BusinessLocation address={businessData.address} />
+
+                {user && user.id === businessData?.owner_id && (
+                  <div className="mt-6">
+                    <Link to="/business/dashboard?tab=profile" className="w-full block bg-green-600 text-white py-2 px-4 rounded hover:bg-green-700">
+                      Editar Datos del Negocio
+                    </Link>
+                  </div>
+                )}
               </div>
             )}
           </div>
@@ -243,6 +278,14 @@ function BusinessPublicPage() {
                 currentUser={user}
                 businessOwnerId={businessData?.owner_id}
               />
+
+              {user && user.id === businessData?.owner_id && (
+                <div className="mt-6">
+                  <Link to="/business/dashboard?tab=services" className="block text-center bg-green-600 text-white py-2 px-4 rounded hover:bg-green-700">
+                    Gestionar Servicios
+                  </Link>
+                </div>
+              )}
             </div>
 
             {/* Booking Form */}
@@ -277,6 +320,14 @@ function BusinessPublicPage() {
             <div className="bg-white dark:bg-white dark:bg-opacity-10 shadow-md p-6">
               <h2 className="text-xl font-semibold mb-4">Horarios de Atención</h2>
               <BusinessHoursList businessHours={businessHours} />
+
+              {user && user.id === businessData?.owner_id && (
+                <div className="mt-6">
+                  <Link to="/business/dashboard?tab=availability" className="block text-center bg-green-600 text-white py-2 px-4 rounded hover:bg-green-700">
+                    Editar Horarios
+                  </Link>
+                </div>
+              )}
             </div>
 
             {/* Location */}
@@ -284,6 +335,14 @@ function BusinessPublicPage() {
               <div className="bg-white dark:bg-white dark:bg-opacity-10 shadow-md p-6">
                 <h2 className="text-xl font-semibold mb-4">Ubicación</h2>
                 <BusinessLocation address={businessData.address} />
+
+                {user && user.id === businessData?.owner_id && (
+                  <div className="mt-6">
+                    <Link to="/business/dashboard?tab=profile" className="block text-center bg-green-600 text-white py-2 px-4 rounded hover:bg-green-700">
+                      Editar Datos del Negocio
+                    </Link>
+                  </div>
+                )}
               </div>
             )}
 

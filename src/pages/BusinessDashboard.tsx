@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { Link } from 'react-router-dom';
+import { Link, useLocation } from 'react-router-dom';
 import {
   getUserBusiness,
   getBusinessAppointments,
@@ -35,6 +35,7 @@ type BusinessDashboardProps = {
 
 const BusinessDashboard = ({ user }: BusinessDashboardProps) => {
   const [activeTab, setActiveTab] = useState('appointments');
+  const location = useLocation();
   const [businessData, setBusinessData] = useState<Business | null>(null);
   const [businessAppointments, setBusinessAppointments] = useState<any[]>([]);
   const [loadingBusinessAppointments, setLoadingBusinessAppointments] = useState(true);
@@ -269,6 +270,14 @@ const BusinessDashboard = ({ user }: BusinessDashboardProps) => {
     };
   }, [user]);
 
+  useEffect(() => {
+    const params = new URLSearchParams(location.search);
+    const tab = params.get('tab');
+    if (tab) {
+      setActiveTab(tab);
+    }
+  }, [location.search]);
+
   const handleUpdateAppointmentStatus = async (id: string, newStatus: 'pending' | 'confirmed' | 'completed' | 'cancelled') => {
     try {
       await updateAppointmentStatus(id, newStatus);
@@ -282,7 +291,7 @@ const BusinessDashboard = ({ user }: BusinessDashboardProps) => {
     }
   };
 
-  const handleBusinessChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
+  const handleBusinessChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
     const { name, value } = e.target;
     setBusinessData(prev => prev ? ({ ...prev, [name]: value } as Business) : prev);
   };
@@ -301,6 +310,8 @@ const BusinessDashboard = ({ user }: BusinessDashboardProps) => {
         whatsapp: businessData.whatsapp,
         instagram: businessData.instagram,
         facebook: businessData.facebook,
+        email: businessData.email,
+        category_id: businessData.category_id,
         website: businessData.website,
         lat: businessData.lat,
         lng: businessData.lng

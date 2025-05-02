@@ -1,6 +1,6 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { createBusiness, updateUserProfile } from '../lib/api';
+import { createBusiness, updateUserProfile, getBusinessCategories, BusinessCategory } from '../lib/api';
 import type { UserProfile } from '../lib/supabase';
 
 type BusinessRegisterProps = {
@@ -17,8 +17,18 @@ const BusinessRegister = ({ user }: BusinessRegisterProps) => {
   const [whatsapp, setWhatsapp] = useState('');
   const [instagram, setInstagram] = useState('');
   const [facebook, setFacebook] = useState('');
+  const [categories, setCategories] = useState<BusinessCategory[]>([]);
+  const [categoryId, setCategoryId] = useState('');
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+
+  useEffect(() => {
+    const fetchCategories = async () => {
+      const { success, data } = await getBusinessCategories();
+      if (success && data) setCategories(data);
+    };
+    fetchCategories();
+  }, []);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -38,6 +48,7 @@ const BusinessRegister = ({ user }: BusinessRegisterProps) => {
         name: businessName,
         description,
         address,
+        category_id: categoryId || null,
         phone,
         email,
         whatsapp: whatsapp || null,
@@ -137,6 +148,26 @@ const BusinessRegister = ({ user }: BusinessRegisterProps) => {
                         required
                         className="shadow-sm focus:ring-indigo-500 focus:border-indigo-500 block w-full sm:text-sm border-gray-300"
                       />
+                    </div>
+                  </div>
+
+                  <div className="sm:col-span-6">
+                    <label htmlFor="category" className="block text-sm font-medium text-gray-700 dark:text-white">
+                      Categoría
+                    </label>
+                    <div className="mt-1">
+                      <select
+                        id="category"
+                        value={categoryId}
+                        onChange={(e) => setCategoryId(e.target.value)}
+                        required
+                        className="shadow-sm p-2 focus:ring-indigo-500 focus:border-indigo-500 block w-full sm:text-sm border-gray-300"
+                      >
+                        <option value="" disabled>Selecciona una categoría</option>
+                        {categories.map(cat => (
+                          <option key={cat.id} value={cat.id}>{cat.name}</option>
+                        ))}
+                      </select>
                     </div>
                   </div>
                 </div>

@@ -8,8 +8,8 @@ const Home = () => {
   let secondText = 'Iniciar Sesión';
   let secondLink = '/login';
   if (!loading && user) {
-    secondText = 'Explorar';
-    secondLink = '/explore';
+    secondText = 'Mi Perfil';
+    secondLink = '/dashboard';
     if (user.business_id) {
       registerText = 'Mi negocio';
       registerLink = '/business/dashboard';

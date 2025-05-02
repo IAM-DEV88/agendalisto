@@ -18,6 +18,11 @@ const supabaseOptions = {
     params: {
       eventsPerSecond: 0
     }
+  },
+  global: {
+    headers: {
+      Accept: 'application/json'
+    }
   }
 };
 
