@@ -1,9 +1,13 @@
 import { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { signIn } from '../lib/supabase';
+import { useAppDispatch } from '../hooks/useAppDispatch';
+import { setUser, setUserProfile } from '../store/userSlice';
+import { obtenerPerfilUsuario } from '../lib/api';
 
 const Login = () => {
   const navigate = useNavigate();
+  const dispatch = useAppDispatch();
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [error, setError] = useState('');
@@ -32,6 +36,13 @@ const Login = () => {
       }
       
       if (data.user) {
+        dispatch(setUser(data.user));
+        try {
+          const { success, perfil } = await obtenerPerfilUsuario(data.user.id);
+          if (success && perfil) {
+            dispatch(setUserProfile(perfil));
+          }
+        } catch {}
         navigate('/dashboard');
       } else {
         setError('No se pudo obtener la información del usuario. Inténtalo nuevamente.');

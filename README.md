@@ -11,6 +11,8 @@ AppAgenda es una plataforma web para la gestión de reservas y citas, diseñada 
 - [Flujo de Negocio](#flujo-de-negocio)
 - [Tecnologías Utilizadas](#tecnologías-utilizadas)
 - [Esquema de la Base de Datos](#esquema-de-la-base-de-datos)
+- [Esquema de la Base de Datos](#esquema-de-la-base-deatos)
+  - [Cambios Recientes](#cambios-recientes)
 - [Licencia](#licencia)
 
 ## Descripción
@@ -92,7 +94,7 @@ Y a los negocios:
 │       ├── ProfileDashboard.tsx     # Panel de control de usuario
 │       ├── BusinessRegister.tsx     # Formulario para registrar negocio
 │       ├── BusinessDashboard.tsx    # Panel de gestión de negocio
-│       └── BusinessPublicPage.tsx   # Página pública de cada negocio
+│       └── BusinessPublicPage.tsx   # Página pública de cada negocio (incluye sección de reseñas responsive en móvil y escritorio)
 └── supabase/                        # Migraciones y esquema de la base de datos
     ├── migrations/                  # Scripts de migración SQL
     │   ├── 001_create_business_config_table.sql
@@ -297,6 +299,10 @@ AppAgenda utiliza Supabase, una plataforma basada en PostgreSQL, para la gestió
 Supabase Row Level Security está habilitado para asegurar:
 - Solo el dueño (`owner_id`) puede modificar su negocio, servicios, horarios y configuración.
 - Usuarios autenticados gestionan únicamente sus perfiles y citas.
+
+## Cambios Recientes
+
+ - Se añadió la sección de reseñas (`ReviewsSection`) en `BusinessPublicPage.tsx`, ahora visible tanto en móvil (`md:hidden`) como en escritorio (`md:block`).
 
 ## Licencia
 

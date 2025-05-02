@@ -1,5 +1,5 @@
 import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
-import { useState, useEffect, useCallback, useMemo, useRef } from 'react';
+import { useEffect, useCallback, useMemo, useRef } from 'react';
 import { supabase } from './lib/supabase';
 import { obtenerPerfilUsuario } from './lib/api';
 import Home from './pages/Home';
@@ -15,12 +15,17 @@ import Nav from './components/Nav';
 import Footer from './components/Footer';
 import ProtectedRoute from './components/ProtectedRoute';
 import { UserProfile } from './lib/supabase';
+import { useSelector } from 'react-redux';
+import { useAppDispatch } from './hooks/useAppDispatch';
+import type { RootState } from './store';
+import { setUser, setUserProfile, setLoading, setAuthInitialized } from './store/userSlice';
 
 function App() {
-  const [user, setUser] = useState<any>(null);
-  const [userProfile, setUserProfile] = useState<UserProfile | null>(null);
-  const [loading, setLoading] = useState(true);
-  const [authInitialized, setAuthInitialized] = useState(false);
+  const dispatch = useAppDispatch();
+  const user = useSelector((state: RootState) => state.user.user);
+  const userProfile = useSelector((state: RootState) => state.user.userProfile);
+  const loading = useSelector((state: RootState) => state.user.loading);
+  const authInitialized = useSelector((state: RootState) => state.user.authInitialized);
   const authInProgressRef = useRef(false);
   const retryTimeoutRef = useRef<number>();
   const profileLoadAttemptsRef = useRef(0);
@@ -53,7 +58,7 @@ function App() {
       const { success, perfil, error } = await obtenerPerfilUsuario(userId);
       
       if (success && perfil) {
-        setUserProfile(perfil);
+        dispatch(setUserProfile(perfil));
         return true;
       } else {
         
@@ -68,15 +73,15 @@ function App() {
           }, 2000);
         } else {
           // Error diferente de timeout o máximo de reintentos alcanzado
-          setUserProfile(null);
+          dispatch(setUserProfile(null));
         }
         return false;
       }
     } catch (err) {
-      setUserProfile(null);
+      dispatch(setUserProfile(null));
       return false;
     }
-  }, []);
+  }, [dispatch]);
 
   // Efecto para manejar autenticación, usando useCallback de loadProfile
   useEffect(() => {
@@ -84,7 +89,7 @@ function App() {
     if (authInProgressRef.current) return;
     authInProgressRef.current = true;
     
-    setLoading(true);
+    dispatch(setLoading(true));
 
     // Obtener sesión inicial
     const getInitialSession = async () => {
@@ -92,16 +97,16 @@ function App() {
         const { data: { session } } = await supabase.auth.getSession();
         
         if (session?.user) {
-          setUser(session.user);
+          dispatch(setUser(session.user));
           await loadProfile(session.user.id);
         } else {
-          setUser(null);
-          setUserProfile(null);
+          dispatch(setUser(null));
+          dispatch(setUserProfile(null));
         }
       } catch (err) {
       } finally {
-        setAuthInitialized(true);
-        setLoading(false);
+        dispatch(setAuthInitialized(true));
+        dispatch(setLoading(false));
       }
     };
 
@@ -117,14 +122,14 @@ function App() {
           return;
         }
         
-        setLoading(true);
+        dispatch(setLoading(true));
         
         if (session?.user) {
           const currentUserId = user?.id || null;
           
           // Solo actualizar user/userProfile si el ID cambió o no hay perfil actual
           if (!currentUserId || currentUserId !== session.user.id || !userProfile) {
-            setUser(session.user);
+            dispatch(setUser(session.user));
             
             // Cargar perfil solo si es un usuario diferente o no hay perfil
             if (!userProfile || currentUserId !== session.user.id) {
@@ -133,11 +138,11 @@ function App() {
           } else {
           }
         } else if (event === 'SIGNED_OUT') {
-          setUser(null);
-          setUserProfile(null);
+          dispatch(setUser(null));
+          dispatch(setUserProfile(null));
         }
         
-        setLoading(false);
+        dispatch(setLoading(false));
       }
     );
 
@@ -146,13 +151,13 @@ function App() {
       subscription?.unsubscribe();
       authInProgressRef.current = false;
     };
-  }, [loadProfile]); // Solo depende de loadProfile (memoizado)
+  }, [dispatch, loadProfile]); // Solo depende de loadProfile (memoizado)
 
   // Escuchar el evento userProfileUpdated
   useEffect(() => {
     const handleProfileUpdate = (event: CustomEvent) => {
       if (event.detail.profile) {
-        setUserProfile(event.detail.profile);
+        dispatch(setUserProfile(event.detail.profile));
       }
     };
     
@@ -160,14 +165,10 @@ function App() {
     return () => {
       window.removeEventListener('userProfileUpdated', handleProfileUpdate as EventListener);
     };
-  }, []); // Sin dependencias - solo se ejecuta una vez
+  }, [dispatch]); // Sin dependencias - solo se ejecuta una vez
 
-  // Usar useMemo para determinar si hay que mostrar la pantalla de carga
-  const showLoading = useMemo(() => {
-    return loading || !authInitialized;
-  }, [loading, authInitialized]);
-
-  if (showLoading) {
+  // Mostrar sólo loading inicial hasta que authInitialized sea true
+  if (!authInitialized) {
     return <div className="flex h-screen w-full items-center justify-center">
       <p className="text-xl">Cargando aplicación...</p>
     </div>;
