@@ -1,5 +1,5 @@
 import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
-import { useEffect, useCallback, useMemo, useRef } from 'react';
+import { useEffect, useCallback, useRef } from 'react';
 import { supabase } from './lib/supabase';
 import { obtenerPerfilUsuario } from './lib/api';
 import Home from './pages/Home';
@@ -14,7 +14,6 @@ import ExploreBusinesses from './pages/ExploreBusinesses';
 import Nav from './components/Nav';
 import Footer from './components/Footer';
 import ProtectedRoute from './components/ProtectedRoute';
-import { UserProfile } from './lib/supabase';
 import { useSelector } from 'react-redux';
 import { useAppDispatch } from './hooks/useAppDispatch';
 import type { RootState } from './store';
@@ -24,7 +23,6 @@ function App() {
   const dispatch = useAppDispatch();
   const user = useSelector((state: RootState) => state.user.user);
   const userProfile = useSelector((state: RootState) => state.user.userProfile);
-  const loading = useSelector((state: RootState) => state.user.loading);
   const authInitialized = useSelector((state: RootState) => state.user.authInitialized);
   const authInProgressRef = useRef(false);
   const retryTimeoutRef = useRef<number>();
