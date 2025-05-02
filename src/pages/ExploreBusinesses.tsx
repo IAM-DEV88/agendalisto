@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { Link } from 'react-router-dom';
+import { Link, useSearchParams } from 'react-router-dom';
 import { getBusinesses, getBusinessCategories, BusinessCategory } from '../lib/api';
 import type { Business } from '../lib/api';
 
@@ -7,10 +7,12 @@ import type { Business } from '../lib/api';
 const FALLBACK_LOGO = 'https://upload.wikimedia.org/wikipedia/commons/8/89/Portrait_Placeholder.png';
 
 const ExploreBusinesses = () => {
+  const [searchParams] = useSearchParams();
   const [businesses, setBusinesses] = useState<Business[]>([]);
   const [loading, setLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState('');
-  const [category, setCategory] = useState('all');
+  const initialCategory = searchParams.get('category') || 'all';
+  const [category, setCategory] = useState(initialCategory);
   const [error, setError] = useState<string | null>(null);
   const [categories, setCategories] = useState<BusinessCategory[]>([]);
 

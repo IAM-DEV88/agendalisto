@@ -71,7 +71,7 @@ const Home = () => {
                     </Link>
                   </div>
                   <div className="mt-3 sm:mt-0 sm:ml-3">
-                    <Link to={exploreLink} className="w-full flex items-center justify-center px-8 py-3 border border-transparent text-white font-medium rounded-md text-indigo-700 hover:text-gray-100 bg-indigo-700 hover:bg-indigo-900 md:py-4 md:text-lg md:px-10">
+                    <Link to={exploreLink} className="w-full flex items-center justify-center px-8 py-3 border border-transparent text-base font-medium rounded-md text-white bg-indigo-800 hover:bg-indigo-700 md:py-4 md:text-lg md:px-10">
                       {exploreText}
                     </Link>
                   </div>

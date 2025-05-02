@@ -107,9 +107,11 @@ export const getBusinesses = async (search?: string, _category?: string) => {
   if (search) {
     query = query.or(`name.ilike.%${search}%,description.ilike.%${search}%`);
   }
+  if (_category) {
+    query = query.eq('category_id', _category);
+  }
   
-  // Note: In a real application, you would have a category field in your businesses table
-  // and would filter by it here
+  // Note: Filter by category_id if provided
   
   const { data, error } = await query;
   
