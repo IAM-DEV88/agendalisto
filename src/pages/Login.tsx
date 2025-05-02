@@ -43,7 +43,7 @@ const Login = () => {
             dispatch(setUserProfile(perfil));
           }
         } catch {}
-        navigate('/dashboard');
+        navigate('/');
       } else {
         setError('No se pudo obtener la información del usuario. Inténtalo nuevamente.');
       }
