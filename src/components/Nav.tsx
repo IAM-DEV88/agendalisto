@@ -1,6 +1,6 @@
 import { Link, useNavigate, useLocation } from 'react-router-dom';
 import { useState, useEffect, useRef } from 'react';
-import { signOut } from '../lib/supabase';
+import { signOut, supabase } from '../lib/supabase';
 import { UserProfile } from '../lib/supabase';
 import { getUserBusiness } from '../lib/api';
 import { useTheme } from '../contexts/ThemeContext';
@@ -113,9 +113,21 @@ const Nav = ({ user }: NavProps) => {
                   onClick={() => setIsUserDropdownOpen(!isUserDropdownOpen)}
                   className="flex items-center px-3 py-2 text-sm font-medium text-gray-700 hover:text-indigo-600"
                 >
-                  <span className="inline-flex items-center justify-center h-6 w-6 rounded-full bg-indigo-100 mr-2">
-                    <span className="text-xs font-medium leading-none text-indigo-700">{userName.charAt(0)}</span>
-                  </span>
+                  {user?.avatar_url ? (
+                    <img
+                      src={
+                        user.avatar_url.startsWith('http')
+                          ? user.avatar_url
+                          : supabase.storage.from('avatars').getPublicUrl(user.avatar_url).data.publicUrl
+                      }
+                      alt={userName}
+                      className="inline-flex h-6 w-6 rounded-full object-cover mr-2"
+                    />
+                  ) : (
+                    <span className="inline-flex items-center justify-center h-6 w-6 rounded-full bg-indigo-100 mr-2">
+                      <span className="text-xs font-medium leading-none text-indigo-700">{userName.charAt(0)}</span>
+                    </span>
+                  )}
                   <span className="dark:text-white">{userName}</span>
                   <svg className="ml-1 h-4 w-4 text-gray-400" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />

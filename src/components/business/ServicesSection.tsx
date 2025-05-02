@@ -198,11 +198,11 @@ const ServicesSection: React.FC<ServicesSectionProps> = ({
             return pagedServices.map((service) => (
               <div
                 key={service.id}
-                className={`dark:bg-opacity-10 bg-white overflow-hidden shadow rounded-lg ${
+                className={`dark:bg-opacity-10 bg-white overflow-hidden flex flex-col shadow rounded-lg ${
                   !service.is_active ? 'opacity-75' : ''
                 }`}
               >
-                <div className="p-6">
+                <div className="p-6 grow">
                   <div className="flex items-start justify-between">
                     <div>
                       <h3 className="dark:text-white text-lg font-medium text-gray-900">{service.name}</h3>

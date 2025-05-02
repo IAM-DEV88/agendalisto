@@ -305,7 +305,6 @@ const BusinessDashboard = ({ user }: BusinessDashboardProps) => {
         name: businessData.name,
         description: businessData.description,
         address: businessData.address,
-        logo_url: businessData.logo_url,
         phone: businessData.phone,
         whatsapp: businessData.whatsapp,
         instagram: businessData.instagram,

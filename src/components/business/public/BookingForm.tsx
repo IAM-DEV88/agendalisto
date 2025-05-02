@@ -1,6 +1,6 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect, useMemo } from 'react';
 import { X, Clock, Calendar, CheckCircle } from 'lucide-react';
-import { createAppointment, Service } from '../../../lib/api';
+import { createAppointment, Service, getBusinessHours, getBusinessAppointments, BusinessHours, Appointment } from '../../../lib/api';
 
 interface BookingFormProps {
   businessId: string;
@@ -38,6 +38,44 @@ const BookingForm: React.FC<BookingFormProps> = ({
   const [bookingSuccess, setBookingSuccess] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
+  // State for business hours and existing appointments to filter slots
+  const [businessHours, setBusinessHours] = useState<BusinessHours[]>([]);
+  const [appointments, setAppointments] = useState<Appointment[]>([]);
+  const [loadingSlots, setLoadingSlots] = useState(true);
+
+  // Fetch business hours and existing appointments when businessId changes
+  useEffect(() => {
+    const fetchSchedule = async () => {
+      try {
+        setLoadingSlots(true);
+        const hours = await getBusinessHours(businessId);
+        const apptsRes = await getBusinessAppointments(businessId);
+        setBusinessHours(hours);
+        setAppointments(apptsRes.success && apptsRes.data ? apptsRes.data : []);
+      } catch (err) {
+        console.error('Error fetching schedule data:', err);
+      } finally {
+        setLoadingSlots(false);
+      }
+    };
+    if (businessId) {
+      fetchSchedule();
+    }
+  }, [businessId]);
+
+  // Reset error and time selection if selected date is a closed day
+  useEffect(() => {
+    if (!formData.date || !businessHours.length) return;
+    const selectedDay = new Date(formData.date).getDay();
+    const todaysHours = businessHours.find(h => h.day_of_week === selectedDay);
+    if (todaysHours && todaysHours.is_closed) {
+      setError('El negocio está cerrado ese día');
+      setFormData(prev => ({ ...prev, time: '' }));
+    } else {
+      setError(null);
+    }
+  }, [formData.date, businessHours]);
+
   // Generate available time slots
   const generateTimeSlots = () => {
     const slots = [];
@@ -54,6 +92,37 @@ const BookingForm: React.FC<BookingFormProps> = ({
   };
 
   const timeSlots = generateTimeSlots();
+
+  // Compute available slots based on business hours and existing appointments
+  const availableTimeSlots = useMemo(() => {
+    if (!formData.date || loadingSlots || !service) return [];
+    const selectedDay = new Date(formData.date).getDay();
+    const todaysHours = businessHours.find(h => h.day_of_week === selectedDay);
+    if (!todaysHours || todaysHours.is_closed) return [];
+    const [startH, startM] = todaysHours.start_time.split(':').map(Number);
+    const [endH, endM] = todaysHours.end_time.split(':').map(Number);
+    const businessStart = startH * 60 + startM;
+    const businessEnd = endH * 60 + endM;
+    return timeSlots.filter(slot => {
+      const [slotH, slotM] = slot.split(':').map(Number);
+      const slotStart = slotH * 60 + slotM;
+      const slotEnd = slotStart + service.duration;
+      if (slotStart < businessStart || slotEnd > businessEnd) {
+        return false;
+      }
+      const overlapping = appointments.some(appt => {
+        const apptDate = appt.start_time.split('T')[0];
+        if (apptDate !== formData.date) return false;
+        if (appt.status === 'cancelled') return false;
+        const apptStart = new Date(appt.start_time).getTime();
+        const apptEnd = new Date(appt.end_time).getTime();
+        const slotStartTime = new Date(`${formData.date}T${slot}`).getTime();
+        const slotEndTime = slotStartTime + service.duration * 60000;
+        return slotStartTime < apptEnd && slotEndTime > apptStart;
+      });
+      return !overlapping;
+    });
+  }, [formData.date, loadingSlots, businessHours, appointments, timeSlots, service]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -205,9 +274,18 @@ const BookingForm: React.FC<BookingFormProps> = ({
               onChange={(e) => setFormData({ ...formData, time: e.target.value })}
               className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500"
               required
+              disabled={loadingSlots || !formData.date || availableTimeSlots.length === 0}
             >
-              <option value="">Seleccionar hora</option>
-              {timeSlots.map((slot) => (
+              <option value="">
+                {loadingSlots
+                  ? 'Cargando...'
+                  : !formData.date
+                  ? 'Selecciona fecha primero'
+                  : availableTimeSlots.length > 0
+                  ? 'Seleccionar hora'
+                  : 'No hay horas disponibles'}
+              </option>
+              {!loadingSlots && availableTimeSlots.map((slot) => (
                 <option key={slot} value={slot}>
                   {slot}
                 </option>
