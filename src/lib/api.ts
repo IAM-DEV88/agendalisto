@@ -627,6 +627,7 @@ export async function createBusinessReview(
 export type BusinessCategory = {
   id: string;
   name: string;
+  description: string | null;
 };
 
 // Fetch all business categories

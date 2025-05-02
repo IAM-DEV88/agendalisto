@@ -1,5 +1,11 @@
 import { Link } from 'react-router-dom';
 import { useAuthSession } from '../hooks/useAuthSession';
+import { useState, useEffect } from 'react';
+import { getBusinessCategories, BusinessCategory } from '../lib/api';
+import { Swiper, SwiperSlide } from 'swiper/react';
+import { Pagination, Autoplay } from 'swiper/modules';
+import 'swiper/css';
+import 'swiper/css/pagination';
 
 const Home = () => {
   const { user, loading } = useAuthSession();
@@ -7,6 +13,8 @@ const Home = () => {
   let registerLink = '/register';
   let secondText = 'Iniciar Sesión';
   let secondLink = '/login';
+  const exploreText = 'Explorar';
+  const exploreLink = '/explore';
   if (!loading && user) {
     secondText = 'Mi Perfil';
     secondLink = '/dashboard';
@@ -19,8 +27,24 @@ const Home = () => {
     }
   }
 
+  const [categories, setCategories] = useState<BusinessCategory[]>([]);
+  const [loadingCategories, setLoadingCategories] = useState(true);
+
+  useEffect(() => {
+    const fetchCategories = async () => {
+      const { success, data, error } = await getBusinessCategories();
+      if (success && data) {
+        setCategories(data);
+      } else {
+        console.error('Error fetching categories', error);
+      }
+      setLoadingCategories(false);
+    };
+    fetchCategories();
+  }, []);
+
   return (
-    <div className="bg-white">
+    <div>
       {/* Hero section */}
       <div className="relative bg-indigo-600 overflow-hidden">
         <div className="max-w-7xl mx-auto">
@@ -46,12 +70,48 @@ const Home = () => {
                       {secondText}
                     </Link>
                   </div>
+                  <div className="mt-3 sm:mt-0 sm:ml-3">
+                    <Link to={exploreLink} className="w-full flex items-center justify-center px-8 py-3 border border-transparent text-white font-medium rounded-md text-indigo-700 hover:text-gray-100 bg-indigo-700 hover:bg-indigo-900 md:py-4 md:text-lg md:px-10">
+                      {exploreText}
+                    </Link>
+                  </div>
                 </div>
               </div>
             </div>
           </div>
         </div>
       </div>
+      {!loadingCategories ? (
+        <div className="max-w-7xl mx-auto">
+          <Swiper
+            modules={[Pagination, Autoplay]}
+            autoplay={{ delay: 4500, pauseOnMouseEnter: true, disableOnInteraction: false }}
+            spaceBetween={20}
+            slidesPerView={1}
+            pagination={{ clickable: true }}
+            breakpoints={{
+              640: { slidesPerView: 1 },
+              768: { slidesPerView: 2 },
+              1024: { slidesPerView: 3 },
+            }}
+          >
+            {categories.map((cat) => (
+              <SwiperSlide key={cat.id}>
+                <div className="dark:bg-gray-800 rounded-lg p-6 h-full">
+                  <h3 className="text-lg font-bold">
+                    <Link to={`/explore?category=${cat.id}`} className="text-gray-800 dark:text-white hover:underline">
+                      {cat.name}
+                    </Link>
+                  </h3>
+                  <p className="mt-2 text-sm text-gray-600 dark:text-gray-400">{cat.description}</p>
+                </div>
+              </SwiperSlide>
+            ))}
+          </Swiper>
+        </div>
+      ) : (
+        <p className="text-center my-8">Cargando categorías...</p>
+      )}
     </div>
   );
 };
