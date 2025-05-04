@@ -244,6 +244,12 @@ const BusinessDashboard = ({ user }: BusinessDashboardProps) => {
     trackTouch: true,
   });
 
+  // Efecto para desplazar el tab activo al centro de la vista
+  useEffect(() => {
+    const btn = document.getElementById(`tab-${activeTab}`);
+    btn?.scrollIntoView({ behavior: 'smooth', inline: 'center', block: 'nearest' });
+  }, [activeTab]);
+
   const handleUpdateAppointmentStatus = async (id: string, newStatus: 'pending' | 'confirmed' | 'completed' | 'cancelled') => {
     try {
       await updateAppointmentStatus(id, newStatus);
@@ -436,67 +442,53 @@ const BusinessDashboard = ({ user }: BusinessDashboardProps) => {
           )}
 
           <div className="border-b border-gray-200">
-            <nav className="-mb-px flex space-x-2 overflow-x-auto">
-              <button
-                onClick={() => handleTabChange('appointments')}
-                className={`${activeTab === 'appointments'
-                  ? 'border-indigo-500 text-indigo-600 dark:text-white'
-                  : 'border-transparent text-gray-500 hover:text-gray-400 hover:border-gray-300'
-                  } whitespace-nowrap py-4 px-1 border-b-2 font-medium text-sm`}
+            <nav className="-mb-px flex space-x-2 overflow-x-auto whitespace-nowrap">
+              <button id="tab-appointments" onClick={() => handleTabChange('appointments')} className={`${activeTab === 'appointments'
+                ? 'border-indigo-500 text-indigo-600 dark:text-white'
+                : 'border-transparent text-gray-500 hover:text-gray-400 hover:border-gray-300'
+                } whitespace-nowrap py-4 px-1 border-b-2 font-medium text-sm`}
               >
                 Agenda
               </button>
-              <button
-                onClick={() => handleTabChange('history')}
-                className={`${activeTab === 'history'
-                  ? 'border-indigo-500 text-indigo-600 dark:text-white'
-                  : 'border-transparent text-gray-500 hover:text-gray-400 hover:border-gray-300'
-                  } whitespace-nowrap py-4 px-1 border-b-2 font-medium text-sm`}
+              <button id="tab-history" onClick={() => handleTabChange('history')} className={`${activeTab === 'history'
+                ? 'border-indigo-500 text-indigo-600 dark:text-white'
+                : 'border-transparent text-gray-500 hover:text-gray-400 hover:border-gray-300'
+                } whitespace-nowrap py-4 px-1 border-b-2 font-medium text-sm`}
               >
                 Historial
               </button>
-              <button
-                onClick={() => handleTabChange('services')}
-                className={`${activeTab === 'services'
-                  ? 'border-indigo-500 text-indigo-600 dark:text-white'
-                  : 'border-transparent text-gray-500 hover:text-gray-400 hover:border-gray-300'
-                  } whitespace-nowrap py-4 px-1 border-b-2 font-medium text-sm`}
+              <button id="tab-services" onClick={() => handleTabChange('services')} className={`${activeTab === 'services'
+                ? 'border-indigo-500 text-indigo-600 dark:text-white'
+                : 'border-transparent text-gray-500 hover:text-gray-400 hover:border-gray-300'
+                } whitespace-nowrap py-4 px-1 border-b-2 font-medium text-sm`}
               >
                 Servicios
               </button>
-              <button
-                onClick={() => handleTabChange('clients')}
-                className={`${activeTab === 'clients'
-                  ? 'border-indigo-500 text-indigo-600 dark:text-white'
-                  : 'border-transparent text-gray-500 hover:text-gray-400 hover:border-gray-300'
-                  } whitespace-nowrap py-4 px-1 border-b-2 font-medium text-sm`}
+              <button id="tab-clients" onClick={() => handleTabChange('clients')} className={`${activeTab === 'clients'
+                ? 'border-indigo-500 text-indigo-600 dark:text-white'
+                : 'border-transparent text-gray-500 hover:text-gray-400 hover:border-gray-300'
+                } whitespace-nowrap py-4 px-1 border-b-2 font-medium text-sm`}
               >
                 Clientes
               </button>
-              <button
-                onClick={() => handleTabChange('profile')}
-                className={`${activeTab === 'profile'
-                  ? 'border-indigo-500 text-indigo-600 dark:text-white'
-                  : 'border-transparent text-gray-500 hover:text-gray-400 hover:border-gray-300'
-                  } whitespace-nowrap py-4 px-1 border-b-2 font-medium text-sm`}
+              <button id="tab-profile" onClick={() => handleTabChange('profile')} className={`${activeTab === 'profile'
+                ? 'border-indigo-500 text-indigo-600 dark:text-white'
+                : 'border-transparent text-gray-500 hover:text-gray-400 hover:border-gray-300'
+                } whitespace-nowrap py-4 px-1 border-b-2 font-medium text-sm`}
               >
                 Datos
               </button>
-              <button
-                onClick={() => handleTabChange('availability')}
-                className={`${activeTab === 'availability'
-                  ? 'border-indigo-500 text-indigo-600 dark:text-white'
-                  : 'border-transparent text-gray-500 hover:text-gray-400 hover:border-gray-300'
-                  } whitespace-nowrap py-4 px-1 border-b-2 font-medium text-sm`}
+              <button id="tab-availability" onClick={() => handleTabChange('availability')} className={`${activeTab === 'availability'
+                ? 'border-indigo-500 text-indigo-600 dark:text-white'
+                : 'border-transparent text-gray-500 hover:text-gray-400 hover:border-gray-300'
+                } whitespace-nowrap py-4 px-1 border-b-2 font-medium text-sm`}
               >
                 Horarios
               </button>
-              <button
-                onClick={() => handleTabChange('settings')}
-                className={`${activeTab === 'settings'
-                  ? 'border-indigo-500 text-indigo-600 dark:text-white'
-                  : 'border-transparent text-gray-500 hover:text-gray-400 hover:border-gray-300'
-                  } whitespace-nowrap py-4 px-1 border-b-2 font-medium text-sm`}
+              <button id="tab-settings" onClick={() => handleTabChange('settings')} className={`${activeTab === 'settings'
+                ? 'border-indigo-500 text-indigo-600 dark:text-white'
+                : 'border-transparent text-gray-500 hover:text-gray-400 hover:border-gray-300'
+                } whitespace-nowrap py-4 px-1 border-b-2 font-medium text-sm`}
               >
                 Configuración
               </button>

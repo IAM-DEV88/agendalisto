@@ -93,6 +93,12 @@ const ProfileDashboard = ({ user }: ProfileDashboardProps) => {
     trackMouse: true,
   });
 
+  // Efecto para desplazar el tab activo al centro de la vista
+  useEffect(() => {
+    const btn = document.getElementById(`tab-${activeTab}`);
+    btn?.scrollIntoView({ behavior: 'smooth', inline: 'center', block: 'nearest' });
+  }, [activeTab]);
+
   useEffect(() => {
     // Actualizar estado cuando cambia el usuario
     if (user) {
@@ -230,10 +236,10 @@ const ProfileDashboard = ({ user }: ProfileDashboardProps) => {
 
           {/* Sub-navegación del perfil */}
           <div className="border-b border-gray-200 mt-4">
-            <nav className="-mb-px flex space-x-2">
-              <button onClick={() => dispatch(setActiveTab('upcoming'))} className={`whitespace-nowrap pb-4 px-1 border-b-2 font-medium text-sm ${activeTab === 'upcoming' ? 'border-indigo-500 text-indigo-600 dark:text-white' : 'border-transparent text-gray-500 hover:text-gray-400 hover:border-gray-300'}`}>Próximas citas</button>
-              <button onClick={() => dispatch(setActiveTab('past'))} className={`whitespace-nowrap pb-4 px-1 border-b-2 font-medium text-sm ${activeTab === 'past' ? 'border-indigo-500 text-indigo-600 dark:text-white' : 'border-transparent text-gray-500 hover:text-gray-400 hover:border-gray-300'}`}>Historial</button>
-              <button onClick={() => dispatch(setActiveTab('profile'))} className={`whitespace-nowrap pb-4 px-1 border-b-2 font-medium text-sm ${activeTab === 'profile' ? 'border-indigo-500 text-indigo-600 dark:text-white' : 'border-transparent text-gray-500 hover:text-gray-400 hover:border-gray-300'}`}>Mis Datos</button>
+            <nav className="-mb-px flex space-x-2 overflow-x-auto whitespace-nowrap">
+              <button id="tab-upcoming" onClick={() => dispatch(setActiveTab('upcoming'))} className={`whitespace-nowrap pb-4 px-1 border-b-2 font-medium text-sm ${activeTab === 'upcoming' ? 'border-indigo-500 text-indigo-600 dark:text-white' : 'border-transparent text-gray-500 hover:text-gray-400 hover:border-gray-300'}`}>Próximas citas</button>
+              <button id="tab-past" onClick={() => dispatch(setActiveTab('past'))} className={`whitespace-nowrap pb-4 px-1 border-b-2 font-medium text-sm ${activeTab === 'past' ? 'border-indigo-500 text-indigo-600 dark:text-white' : 'border-transparent text-gray-500 hover:text-gray-400 hover:border-gray-300'}`}>Historial</button>
+              <button id="tab-profile" onClick={() => dispatch(setActiveTab('profile'))} className={`whitespace-nowrap pb-4 px-1 border-b-2 font-medium text-sm ${activeTab === 'profile' ? 'border-indigo-500 text-indigo-600 dark:text-white' : 'border-transparent text-gray-500 hover:text-gray-400 hover:border-gray-300'}`}>Mis Datos</button>
             </nav>
           </div>
 
