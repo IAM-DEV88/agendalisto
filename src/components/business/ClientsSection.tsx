@@ -20,11 +20,11 @@ const ClientsSection: React.FC<ClientsSectionProps> = ({ clients, loading, messa
           <div className="animate-spin rounded-full h-10 w-10 border-t-2 border-b-2 border-indigo-500"></div>
         </div>
       ) : clients.length === 0 ? (
-        <div className="dark:bg-opacity-10 bg-white shadow overflow-hidden sm:rounded-md p-6 text-center">
+        <div className="dark:bg-opacity-10 bg-gray-50 shadow overflow-hidden sm:rounded-md p-6 text-center">
           <p className="text-gray-500 dark:text-white">No hay clientes.</p>
         </div>
       ) : (
-        <div className="dark:bg-opacity-10 bg-white shadow overflow-hidden sm:rounded-md">
+        <div className="dark:bg-opacity-10 bg-gray-50 shadow overflow-hidden sm:rounded-md">
           <ul className="divide-y divide-gray-200">
             {clients.map((client) => (
               <li key={client.id} className="px-4 py-4 sm:px-6">

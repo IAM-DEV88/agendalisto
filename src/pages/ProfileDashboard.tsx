@@ -16,6 +16,7 @@ import { useSelector } from 'react-redux';
 import { useAppDispatch } from '../hooks/useAppDispatch';
 import type { RootState } from '../store';
 import { setActiveTab } from '../store/uiSlice';
+import { notifySuccess, notifyError } from '../lib/toast';
 
 type ProfileDashboardProps = {
   user: UserProfile | null;
@@ -108,7 +109,7 @@ const ProfileDashboard = ({ user }: ProfileDashboardProps) => {
       }, 15000); // 15 segundos es un tiempo razonable para la carga
 
       try {
-        const { success, data, error: apiError } = await getUserAppointments(user.id);
+        const { success, data } = await getUserAppointments(user.id);
         if (success && data) {
           // Separar citas pasadas y futuras
           const now = new Date();
@@ -128,7 +129,7 @@ const ProfileDashboard = ({ user }: ProfileDashboardProps) => {
           setAppointments(upcoming);
           setPastAppointments(past);
         } else {
-          setError(apiError || 'No se pudieron cargar tus citas. Por favor, intenta de nuevo más tarde.');
+          setError('No se pudieron cargar tus citas. Por favor, intenta de nuevo más tarde.');
         }
       } catch (err) {
         setError('No se pudieron cargar tus citas. Por favor, intenta de nuevo más tarde.');
@@ -140,9 +141,41 @@ const ProfileDashboard = ({ user }: ProfileDashboardProps) => {
 
     fetchAppointments();
 
-    // Cleanup para evitar memory leaks
+    // Limpieza para evitar memory leaks
     return () => {
       setLoading(false);
+    };
+  }, [user]);
+
+  // Suscripción a cambios en citas para actualizaciones en vivo de perfil de usuario
+  useEffect(() => {
+    if (!user) return;
+
+    const channel = supabase
+      .channel(`user-appointments-${user.id}`)
+      .on('postgres_changes', {
+        event: '*',
+        schema: 'public',
+        table: 'appointments',
+        filter: `user_id=eq.${user.id}`
+      }, async () => {
+        const { success, data } = await getUserAppointments(user.id);
+        if (success && data) {
+          const now = new Date();
+          const upcoming: Appointment[] = [];
+          const past: Appointment[] = [];
+          data.forEach((appt: Appointment) => {
+            if (new Date(appt.start_time) > now) upcoming.push(appt);
+            else past.push(appt);
+          });
+          setAppointments(upcoming);
+          setPastAppointments(past);
+        }
+      })
+      .subscribe();
+
+    return () => {
+      supabase.removeChannel(channel);
     };
   }, [user]);
 
@@ -212,16 +245,14 @@ const ProfileDashboard = ({ user }: ProfileDashboardProps) => {
         // Disparar evento personalizado para actualizar el estado global
         dispatchUserProfileUpdated(session.user, updatedProfile);
 
-        setProfileMessage({
-          text: 'Perfil actualizado correctamente',
-          type: 'success'
-        });
+        const successMsg = 'Perfil actualizado correctamente';
+        setProfileMessage({ text: successMsg, type: 'success' });
+        notifySuccess(successMsg);
       }
     } catch (error: any) {
-      setProfileMessage({
-        text: error.message || 'Error al actualizar perfil',
-        type: 'error'
-      });
+      const errorMsg = error.message || 'Error al actualizar perfil';
+      setProfileMessage({ text: errorMsg, type: 'error' });
+      notifyError(errorMsg);
     } finally {
       setSaving(false);
     }
@@ -243,7 +274,7 @@ const ProfileDashboard = ({ user }: ProfileDashboardProps) => {
     try {
       await updateAppointmentStatus(appointment.id, 'cancelled');
       // Refresh appointments
-      const { success, data, error: apiError } = await getUserAppointments(user.id);
+      const { success, data } = await getUserAppointments(user.id);
       if (success && data) {
         const now = new Date();
         const upcoming: Appointment[] = [];
@@ -254,11 +285,16 @@ const ProfileDashboard = ({ user }: ProfileDashboardProps) => {
         });
         setAppointments(upcoming);
         setPastAppointments(past);
+        notifySuccess(`Cita cancelada por ${user.full_name}`);
       } else {
-        setError(apiError || 'Error al cancelar la cita.');
+        const errMsg = 'Error al cancelar la cita. Por favor, intenta de nuevo.';
+        setError(errMsg);
+        notifyError(errMsg);
       }
     } catch (err) {
-      setError('Error al cancelar la cita. Por favor, intenta de nuevo.');
+      const errMsg = 'Error al cancelar la cita. Por favor, intenta de nuevo.';
+      setError(errMsg);
+      notifyError(errMsg);
     } finally {
       setLoading(false);
     }

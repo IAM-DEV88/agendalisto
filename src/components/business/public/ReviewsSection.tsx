@@ -1,7 +1,8 @@
 import React, { useState, useEffect } from 'react';
 import { Star, User } from 'lucide-react';
 import { Link } from 'react-router-dom';
-import { Review, getBusinessReviews, createBusinessReview, getUserAppointments } from '../../../lib/api';
+import { Review, getBusinessReviews, createBusinessReview, getUserAppointments, obtenerPerfilUsuario } from '../../../lib/api';
+import { notifySuccess, notifyError } from '../../../lib/toast';
 
 interface ReviewsSectionProps {
   businessId: string;
@@ -80,9 +81,19 @@ const ReviewsSection: React.FC<ReviewsSectionProps> = ({ businessId, currentUser
         setReviews(prev => [data, ...prev]);
         setShowReviewForm(false);
         setNewReview({ rating: 5, comment: '' });
+        let userName = '';
+        try {
+          const { success: perfilSuccess, perfil } = await obtenerPerfilUsuario(currentUser.id);
+          if (perfilSuccess && perfil) {
+            userName = perfil.full_name;
+          }
+        } catch {}
+        notifySuccess(userName ? `Reseña enviada por ${userName}` : 'Reseña enviada correctamente');
       } else {
+        notifyError('Error al enviar la reseña');
       }
-    } catch (error) {
+    } catch (error: any) {
+      notifyError(error.message || 'Error al enviar la reseña');
     } finally {
       setSubmitting(false);
     }
@@ -165,7 +176,7 @@ const ReviewsSection: React.FC<ReviewsSectionProps> = ({ businessId, currentUser
               <button
                 type="button"
                 onClick={() => setShowReviewForm(false)}
-                className="mr-2 px-4 py-2 border border-gray-300 rounded-md shadow-sm text-sm font-medium text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
+                className="mr-2 px-4 py-2 border border-gray-300 rounded-md shadow-sm text-sm font-medium text-gray-700 bg-gray-50 hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
               >
                 Cancelar
               </button>
@@ -194,7 +205,7 @@ const ReviewsSection: React.FC<ReviewsSectionProps> = ({ businessId, currentUser
           {reviews.map((review: any) => (
             <div key={review.id} className="border-b border-gray-200 pb-6 last:border-0">
               <div className="flex items-center mb-2">
-                <div className="bg-gray-100 rounded-full p-2 mr-3">
+                <div className="bg-gray-500 rounded-full p-2 mr-3">
                   <User className="h-5 w-5 text-gray-500" />
                 </div>
                 <div>

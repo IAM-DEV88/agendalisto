@@ -119,13 +119,13 @@ const ExploreBusinesses = () => {
               <Link
                 key={business.slug}
                 to={`/${business.slug}`}
-                className="bg-white dark:bg-white dark:bg-opacity-10 overflow-hidden shadow hover:shadow-lg transition-shadow duration-300"
+                className="bg-gray-50 dark:bg-gray-50 dark:bg-opacity-10 overflow-hidden shadow hover:shadow-lg transition-shadow duration-300"
               >
                 <div className="h-48 bg-gray-200 relative">
                   <img
                     src={business.logo_url || FALLBACK_LOGO}
                     alt={business.name}
-                    className="w-full h-full object-cover"
+                    className="w-full h-full object-contain"
                     onError={(e) => { e.currentTarget.src = FALLBACK_LOGO }}
                   />
                 </div>
@@ -142,7 +142,7 @@ const ExploreBusinesses = () => {
                     ) : null;
                   })()}
                   <div className="mt-4">
-                    <span className="inline-flex items-center px-3 py-0.5 text-sm font-medium bg-indigo-100 text-indigo-800 dark:bg-white dark:bg-opacity-10 dark:text-white">
+                    <span className="inline-flex items-center px-3 py-0.5 text-sm font-medium bg-indigo-100 text-indigo-800 dark:bg-gray-50 dark:bg-opacity-10 dark:text-white">
                       Ver servicios
                     </span>
                   </div>

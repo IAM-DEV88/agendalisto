@@ -12,11 +12,11 @@ const supabaseOptions = {
     persistSession: true,
     detectSessionInUrl: true
   },
-  // Disable realtime to avoid connection issues
+  // Enable realtime subscriptions (default settings)
+  // Remove the eventsPerSecond limit to allow live updates
   realtime: {
-    // Deshabilitar completamente si no se usa para evitar problemas
     params: {
-      eventsPerSecond: 0
+      eventsPerSecond: 10
     }
   },
   global: {

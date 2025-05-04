@@ -48,4 +48,16 @@
   .rounded-2xl {
     border-radius: 0 !important;
   }
+}
+
+/* Global form control styling matching Login inputs */
+input[type="text"],
+input[type="email"],
+input[type="password"],
+input[type="date"],
+input[type="number"],
+select,
+textarea {
+  @apply appearance-none block w-full px-3 py-2 border border-gray-300 shadow-sm placeholder-gray-400 rounded-md
+    focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm bg-gray-50 dark:bg-gray-900;
 } 

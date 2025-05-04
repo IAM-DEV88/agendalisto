@@ -51,7 +51,7 @@ const UpcomingAppointments: React.FC<UpcomingAppointmentsProps> = ({
           <button
             onClick={() => onPageChange(currentPage - 1)}
             disabled={currentPage === 1}
-            className="px-3 py-1 rounded-md bg-white border border-gray-300 text-gray-700 hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed"
+            className="px-3 py-1 rounded-md bg-gray-50 border border-gray-300 text-gray-700 hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed"
           >
             Anterior
           </button>
@@ -63,7 +63,7 @@ const UpcomingAppointments: React.FC<UpcomingAppointmentsProps> = ({
               className={`px-3 py-1 rounded-md ${
                 currentPage === page
                   ? 'bg-indigo-600 text-white'
-                  : 'bg-white border border-gray-300 text-gray-700 hover:bg-gray-50'
+                  : 'bg-gray-50 border border-gray-300 text-gray-700 hover:bg-gray-50'
               }`}
             >
               {page}
@@ -73,7 +73,7 @@ const UpcomingAppointments: React.FC<UpcomingAppointmentsProps> = ({
           <button
             onClick={() => onPageChange(currentPage + 1)}
             disabled={currentPage === totalPages}
-            className="px-3 py-1 rounded-md bg-white border border-gray-300 text-gray-700 hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed"
+            className="px-3 py-1 rounded-md bg-gray-50 border border-gray-300 text-gray-700 hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed"
           >
             Siguiente
           </button>
@@ -90,7 +90,7 @@ const UpcomingAppointments: React.FC<UpcomingAppointmentsProps> = ({
           <div className="animate-spin rounded-full h-10 w-10 border-t-2 border-b-2 border-indigo-500"></div>
         </div>
       ) : appointments.length === 0 ? (
-        <div className="dark:bg-opacity-10 bg-white shadow overflow-hidden sm:rounded-md p-6 text-center">
+        <div className="dark:bg-opacity-10 bg-gray-50 shadow overflow-hidden sm:rounded-md p-6 text-center">
           <p className="text-gray-500 dark:text-white">No tienes citas programadas.</p>
           <Link to="/explore" className="mt-4 inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium shadow-sm text-white bg-indigo-600 hover:bg-indigo-700">
             Explorar servicios
@@ -98,7 +98,7 @@ const UpcomingAppointments: React.FC<UpcomingAppointmentsProps> = ({
         </div>
       ) : (
         <>
-          <div className="dark:bg-opacity-10 bg-white shadow overflow-hidden sm:rounded-md">
+          <div className="dark:bg-opacity-10 bg-gray-50 shadow overflow-hidden sm:rounded-md">
             <ul className="divide-y divide-gray-200">
               {appointments
                 .slice((currentPage - 1) * itemsPerPage, currentPage * itemsPerPage)
@@ -134,13 +134,13 @@ const UpcomingAppointments: React.FC<UpcomingAppointmentsProps> = ({
                           <>
                             <button
                               onClick={() => onReschedule(appointment)}
-                              className="inline-flex items-center px-2.5 py-1.5 border border-gray-300 text-xs font-medium text-gray-700 bg-white hover:bg-gray-50"
+                              className="inline-flex items-center px-2.5 py-1.5 border border-gray-300 text-xs font-medium text-gray-700 bg-gray-50 hover:bg-gray-50"
                             >
                               Reagendar
                             </button>
                             <button
                               onClick={() => onCancel(appointment)}
-                              className="inline-flex items-center px-2.5 py-1.5 border border-gray-300 text-xs font-medium text-red-700 bg-white hover:bg-gray-50"
+                              className="inline-flex items-center px-2.5 py-1.5 border border-gray-300 text-xs font-medium text-red-700 bg-gray-50 hover:bg-gray-50"
                             >
                               Cancelar
                             </button>
@@ -149,7 +149,7 @@ const UpcomingAppointments: React.FC<UpcomingAppointmentsProps> = ({
                         {appointment.status === 'cancelled' && (
                           <button
                             onClick={() => onReschedule(appointment)}
-                            className="inline-flex items-center px-2.5 py-1.5 border border-gray-300 text-xs font-medium text-gray-700 bg-white hover:bg-gray-50"
+                            className="inline-flex items-center px-2.5 py-1.5 border border-gray-300 text-xs font-medium text-gray-700 bg-gray-50 hover:bg-gray-50"
                           >
                             Reagendar
                           </button>

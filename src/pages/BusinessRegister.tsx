@@ -94,7 +94,7 @@ const BusinessRegister = ({ user }: BusinessRegisterProps) => {
             </div>
           )}
 
-          <div className="bg-white dark:bg-opacity-10 shadow p-4">
+          <div className="bg-gray-50 dark:bg-opacity-10 shadow p-4">
             <form onSubmit={handleSubmit} className="space-y-8">
               <div className="space-y-6">
                 <h3 className="text-lg dark:text-white font-medium leading-6 text-gray-900">Información general</h3>
@@ -266,7 +266,7 @@ const BusinessRegister = ({ user }: BusinessRegisterProps) => {
                   <button
                     type="button"
                     onClick={() => navigate('/dashboard')}
-                    className="bg-white dark:text-white dark:bg-opacity-10 py-2 px-4 border border-gray-300 shadow-sm text-sm font-medium text-gray-700 hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
+                    className="bg-gray-50 dark:text-white dark:bg-opacity-10 py-2 px-4 border border-gray-300 shadow-sm text-sm font-medium text-gray-700 hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
                   >
                     Cancelar
                   </button>

@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { Link, useLocation } from 'react-router-dom';
+import { Link, useSearchParams } from 'react-router-dom';
 import {
   getUserBusiness,
   getBusinessAppointments,
@@ -28,14 +28,18 @@ import BusinessConfigSection from '../components/business/BusinessConfigSection'
 import ServicesSection from '../components/business/ServicesSection';
 import ClientsSection from '../components/business/ClientsSection';
 import StatsSection from '../components/business/StatsSection';
+import { notifySuccess, notifyError } from '../lib/toast';
+import { supabase } from '../lib/supabase';
 
 type BusinessDashboardProps = {
   user: UserProfile | null;
 };
 
 const BusinessDashboard = ({ user }: BusinessDashboardProps) => {
-  const [activeTab, setActiveTab] = useState('appointments');
-  const location = useLocation();
+  const [searchParams, setSearchParams] = useSearchParams();
+  // Tab persistence: initialize from URL or default to 'appointments'
+  const defaultTab = searchParams.get('tab') || 'appointments';
+  const [activeTab, setActiveTab] = useState<string>(defaultTab);
   const [businessData, setBusinessData] = useState<Business | null>(null);
   const [businessAppointments, setBusinessAppointments] = useState<any[]>([]);
   const [loadingBusinessAppointments, setLoadingBusinessAppointments] = useState(true);
@@ -50,7 +54,7 @@ const BusinessDashboard = ({ user }: BusinessDashboardProps) => {
   const [loadingBusinessClients, setLoadingBusinessClients] = useState(true);
   const [clientsMessage, setClientsMessage] = useState<{ text: string; type: 'success' | 'error' } | null>(null);
   const [totalServices, setTotalServices] = useState(0);
-  const days = ['Domingo', 'Lunes', 'Martes', 'Miércoles', 'Jueves', 'Viernes', 'Sábado'];
+  const days = ['Lunes', 'Martes', 'Miércoles', 'Jueves', 'Viernes', 'Sábado', 'Domingo'];
 
   // Estado para configuración del negocio
   const [businessConfig, setBusinessConfig] = useState<BusinessConfig>({
@@ -270,13 +274,67 @@ const BusinessDashboard = ({ user }: BusinessDashboardProps) => {
     };
   }, [user]);
 
+  // Real-time updates: subscribe to appointment and review changes
   useEffect(() => {
-    const params = new URLSearchParams(location.search);
-    const tab = params.get('tab');
-    if (tab) {
-      setActiveTab(tab);
-    }
-  }, [location.search]);
+    if (!businessData) return;
+    const businessId = businessData.id;
+
+    // Reload appointments with attached reviews
+    const reload = async () => {
+      const { success: appSuccess, data: appData } = await getBusinessAppointments(businessId);
+      if (!appSuccess || !appData) return;
+      try {
+        const { success: revSuccess, data: revData } = await getBusinessReviews(businessId);
+        const reviewMap = revData && revSuccess
+          ? revData.reduce<Record<string, Review>>((map, r) => { map[r.appointment_id] = r; return map; }, {})
+          : {};
+        const enriched = appData.map(app => ({ ...app, review: reviewMap[app.id] }));
+        setBusinessAppointments(enriched);
+      } catch {
+        setBusinessAppointments(appData);
+      }
+    };
+
+    // Subscribe via Realtime channel
+    const channel = supabase
+      .channel(`business-realtime-${businessId}`)
+      // Appointment INSERT: reload and reset pages
+      .on('postgres_changes', { event: 'INSERT', schema: 'public', table: 'appointments', filter: `business_id=eq.${businessId}` }, () => {
+        reload();
+        setAppointmentsPage(1);
+        setHistoryPage(1);
+        notifySuccess('Nueva solicitud recibida');
+      })
+      // Appointment UPDATE & DELETE: reload
+      .on('postgres_changes', { event: 'UPDATE', schema: 'public', table: 'appointments', filter: `business_id=eq.${businessId}` }, reload)
+      .on('postgres_changes', { event: 'DELETE', schema: 'public', table: 'appointments', filter: `business_id=eq.${businessId}` }, reload)
+      // Review INSERT: update review in specific appointment
+      .on('postgres_changes', { event: 'INSERT', schema: 'public', table: 'reviews', filter: `business_id=eq.${businessId}` }, payload => {
+        const newReview = payload.new as Review;
+        setBusinessAppointments(prev => prev.map(app => app.id === newReview.appointment_id ? { ...app, review: newReview } : app));
+        notifySuccess('Nueva reseña recibida');
+      })
+      // Review UPDATE & DELETE: update or remove review
+      .on('postgres_changes', { event: 'UPDATE', schema: 'public', table: 'reviews', filter: `business_id=eq.${businessId}` }, payload => {
+        const updated = payload.new as Review;
+        setBusinessAppointments(prev => prev.map(app => app.id === updated.appointment_id ? { ...app, review: updated } : app));
+      })
+      .on('postgres_changes', { event: 'DELETE', schema: 'public', table: 'reviews', filter: `business_id=eq.${businessId}` }, payload => {
+        const deleted = payload.old as Review;
+        setBusinessAppointments(prev => prev.map(app => app.id === deleted.appointment_id ? { ...app, review: undefined } : app));
+      })
+      .subscribe();
+
+    return () => {
+      supabase.removeChannel(channel);
+    };
+  }, [businessData]);
+
+  // Handle tab change and update URL search param
+  const handleTabChange = (tab: string) => {
+    setActiveTab(tab);
+    setSearchParams({ tab });
+  };
 
   const handleUpdateAppointmentStatus = async (id: string, newStatus: 'pending' | 'confirmed' | 'completed' | 'cancelled') => {
     try {
@@ -285,9 +343,18 @@ const BusinessDashboard = ({ user }: BusinessDashboardProps) => {
         const { success, data } = await getBusinessAppointments(businessData.id);
         if (success && data) {
           setBusinessAppointments(data);
+          const statusText =
+            newStatus === 'confirmed' ? 'confirmada' :
+            newStatus === 'completed' ? 'completada' :
+            newStatus === 'cancelled' ? 'cancelada' :
+            'actualizada';
+          notifySuccess(`Cita ${statusText} correctamente`);
+        } else {
+          notifyError('Error al actualizar el estado de la cita');
         }
       }
-    } catch (err) {
+    } catch (err: any) {
+      notifyError(err.message || 'Error al actualizar el estado de la cita');
     }
   };
 
@@ -318,8 +385,10 @@ const BusinessDashboard = ({ user }: BusinessDashboardProps) => {
       });
       setBusinessData(updated);
       setBusinessMessage({ text: 'Datos del negocio actualizados correctamente', type: 'success' });
+      notifySuccess('Datos del negocio actualizados correctamente');
     } catch (err: any) {
       setBusinessMessage({ text: err.message || 'Error al actualizar datos del negocio', type: 'error' });
+      notifyError(err.message || 'Error al actualizar datos del negocio');
     } finally {
       setSavingBusiness(false);
     }
@@ -343,8 +412,10 @@ const BusinessDashboard = ({ user }: BusinessDashboardProps) => {
       const payload = businessHours.map(({ business_id, day_of_week, start_time, end_time, is_closed }) => ({ business_id, day_of_week, start_time, end_time, is_closed }));
       await updateBusinessHoursAPI(payload);
       setHoursMessage({ text: 'Horarios actualizados correctamente', type: 'success' });
+      notifySuccess('Horarios actualizados correctamente');
     } catch (err: any) {
       setHoursMessage({ text: err.message || 'Error al actualizar horarios', type: 'error' });
+      notifyError(err.message || 'Error al actualizar horarios');
     } finally {
       setSavingBusinessHours(false);
     }
@@ -368,11 +439,13 @@ const BusinessDashboard = ({ user }: BusinessDashboardProps) => {
 
       if (success) {
         setConfigMessage({ text: 'Configuración guardada correctamente', type: 'success' });
+        notifySuccess('Configuración guardada correctamente');
       } else {
         throw new Error(error || 'Error al guardar la configuración');
       }
     } catch (err: any) {
       setConfigMessage({ text: err.message || 'Error al actualizar la configuración', type: 'error' });
+      notifyError(err.message || 'Error al actualizar la configuración');
     } finally {
       setSavingBusinessConfig(false);
     }
@@ -449,7 +522,7 @@ const BusinessDashboard = ({ user }: BusinessDashboardProps) => {
 
             {businessData && (
               <button
-                onClick={() => setActiveTab('stats')}
+                onClick={() => handleTabChange('stats')}
                 className="dark:text-white dark:hover:text-black inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md text-indigo-600 border-indigo-600 hover:bg-indigo-50"
               >
                 Estadísticas
@@ -467,7 +540,7 @@ const BusinessDashboard = ({ user }: BusinessDashboardProps) => {
           <div className="border-b border-gray-200">
             <nav className="-mb-px flex space-x-2 overflow-x-auto">
               <button
-                onClick={() => setActiveTab('appointments')}
+                onClick={() => handleTabChange('appointments')}
                 className={`${activeTab === 'appointments'
                   ? 'border-indigo-500 text-indigo-600 dark:text-white'
                   : 'border-transparent text-gray-500 hover:text-gray-400 hover:border-gray-300'
@@ -476,7 +549,7 @@ const BusinessDashboard = ({ user }: BusinessDashboardProps) => {
                 Agenda
               </button>
               <button
-                onClick={() => setActiveTab('history')}
+                onClick={() => handleTabChange('history')}
                 className={`${activeTab === 'history'
                   ? 'border-indigo-500 text-indigo-600 dark:text-white'
                   : 'border-transparent text-gray-500 hover:text-gray-400 hover:border-gray-300'
@@ -485,7 +558,7 @@ const BusinessDashboard = ({ user }: BusinessDashboardProps) => {
                 Historial
               </button>
               <button
-                onClick={() => setActiveTab('services')}
+                onClick={() => handleTabChange('services')}
                 className={`${activeTab === 'services'
                   ? 'border-indigo-500 text-indigo-600 dark:text-white'
                   : 'border-transparent text-gray-500 hover:text-gray-400 hover:border-gray-300'
@@ -494,7 +567,7 @@ const BusinessDashboard = ({ user }: BusinessDashboardProps) => {
                 Servicios
               </button>
               <button
-                onClick={() => setActiveTab('clients')}
+                onClick={() => handleTabChange('clients')}
                 className={`${activeTab === 'clients'
                   ? 'border-indigo-500 text-indigo-600 dark:text-white'
                   : 'border-transparent text-gray-500 hover:text-gray-400 hover:border-gray-300'
@@ -503,7 +576,7 @@ const BusinessDashboard = ({ user }: BusinessDashboardProps) => {
                 Clientes
               </button>
               <button
-                onClick={() => setActiveTab('profile')}
+                onClick={() => handleTabChange('profile')}
                 className={`${activeTab === 'profile'
                   ? 'border-indigo-500 text-indigo-600 dark:text-white'
                   : 'border-transparent text-gray-500 hover:text-gray-400 hover:border-gray-300'
@@ -512,7 +585,7 @@ const BusinessDashboard = ({ user }: BusinessDashboardProps) => {
                 Datos
               </button>
               <button
-                onClick={() => setActiveTab('availability')}
+                onClick={() => handleTabChange('availability')}
                 className={`${activeTab === 'availability'
                   ? 'border-indigo-500 text-indigo-600 dark:text-white'
                   : 'border-transparent text-gray-500 hover:text-gray-400 hover:border-gray-300'
@@ -521,7 +594,7 @@ const BusinessDashboard = ({ user }: BusinessDashboardProps) => {
                 Horarios
               </button>
               <button
-                onClick={() => setActiveTab('settings')}
+                onClick={() => handleTabChange('settings')}
                 className={`${activeTab === 'settings'
                   ? 'border-indigo-500 text-indigo-600 dark:text-white'
                   : 'border-transparent text-gray-500 hover:text-gray-400 hover:border-gray-300'
@@ -569,11 +642,11 @@ const BusinessDashboard = ({ user }: BusinessDashboardProps) => {
                 {Math.ceil(upcomingAppointments.length / itemsPerPage) > 1 && (
                   <div className="flex justify-center mt-4">
                     <nav className="flex items-center space-x-2">
-                      <button onClick={() => setAppointmentsPage(appointmentsPage - 1)} disabled={appointmentsPage === 1} aria-label="Anterior" className="px-3 bg-opacity-10 dark:text-white py-1 bg-white border border-gray-300 text-gray-700 hover:bg-gray-10 disabled:opacity-50 disabled:cursor-not-allowed">◀</button>
+                      <button onClick={() => setAppointmentsPage(appointmentsPage - 1)} disabled={appointmentsPage === 1} aria-label="Anterior" className="px-3 bg-opacity-10 dark:text-white py-1 bg-gray-50 border border-gray-300 text-gray-700 hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed">◀</button>
                       {Array.from({ length: Math.ceil(upcomingAppointments.length / itemsPerPage) }, (_, i) => i + 1).map(page => (
-                        <button key={page} onClick={() => setAppointmentsPage(page)} className={`px-3 py-1 ${appointmentsPage === page ? 'bg-indigo-600 text-white' : 'bg-white border border-gray-300 text-gray-700 hover:bg-gray-10'}`}>{page}</button>
+                        <button key={page} onClick={() => setAppointmentsPage(page)} className={`px-3 py-1 ${appointmentsPage === page ? 'bg-indigo-600 text-white' : 'bg-gray-50 border border-gray-300 text-gray-700 hover:bg-gray-50'}`}>{page}</button>
                       ))}
-                      <button onClick={() => setAppointmentsPage(appointmentsPage + 1)} disabled={appointmentsPage === Math.ceil(upcomingAppointments.length / itemsPerPage)} aria-label="Siguiente" className="px-3 bg-opacity-10 dark:text-white py-1 bg-white border border-gray-300 text-gray-700 hover:bg-gray-10 disabled:opacity-50 disabled:cursor-not-allowed">▶</button>
+                      <button onClick={() => setAppointmentsPage(appointmentsPage + 1)} disabled={appointmentsPage === Math.ceil(upcomingAppointments.length / itemsPerPage)} aria-label="Siguiente" className="px-3 bg-opacity-10 dark:text-white py-1 bg-gray-50 border border-gray-300 text-gray-700 hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed">▶</button>
                     </nav>
                   </div>
                 )}
@@ -590,11 +663,11 @@ const BusinessDashboard = ({ user }: BusinessDashboardProps) => {
                 {Math.ceil(pastAppointments.length / itemsPerPage) > 1 && (
                   <div className="flex justify-center mt-4">
                     <nav className="flex items-center space-x-2">
-                      <button onClick={() => setHistoryPage(historyPage - 1)} disabled={historyPage === 1} aria-label="Anterior" className="px-3 py-1 rounded-md bg-white border border-gray-300 text-gray-700 hover:bg-gray-10 disabled:opacity-50 disabled:cursor-not-allowed">◀</button>
+                      <button onClick={() => setHistoryPage(historyPage - 1)} disabled={historyPage === 1} aria-label="Anterior" className="px-3 py-1 rounded-md bg-gray-50 border border-gray-300 text-gray-700 hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed">◀</button>
                       {Array.from({ length: Math.ceil(pastAppointments.length / itemsPerPage) }, (_, i) => i + 1).map(page => (
-                        <button key={page} onClick={() => setHistoryPage(page)} className={`px-3 py-1 rounded-md ${historyPage === page ? 'bg-indigo-600 text-white' : 'bg-white border border-gray-300 text-gray-700 hover:bg-gray-10'}`}>{page}</button>
+                        <button key={page} onClick={() => setHistoryPage(page)} className={`px-3 py-1 rounded-md ${historyPage === page ? 'bg-indigo-600 text-white' : 'bg-gray-50 border border-gray-300 text-gray-700 hover:bg-gray-50'}`}>{page}</button>
                       ))}
-                      <button onClick={() => setHistoryPage(historyPage + 1)} disabled={historyPage === Math.ceil(pastAppointments.length / itemsPerPage)} aria-label="Siguiente" className="px-3 py-1 rounded-md bg-white border border-gray-300 text-gray-700 hover:bg-gray-10 disabled:opacity-50 disabled:cursor-not-allowed">▶</button>
+                      <button onClick={() => setHistoryPage(historyPage + 1)} disabled={historyPage === Math.ceil(pastAppointments.length / itemsPerPage)} aria-label="Siguiente" className="px-3 py-1 rounded-md bg-gray-50 border border-gray-300 text-gray-700 hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed">▶</button>
                     </nav>
                   </div>
                 )}
@@ -622,11 +695,11 @@ const BusinessDashboard = ({ user }: BusinessDashboardProps) => {
                 {Math.ceil(businessClients.length / itemsPerPage) > 1 && (
                   <div className="flex justify-center mt-4">
                     <nav className="flex items-center space-x-2">
-                      <button onClick={() => setClientsPage(clientsPage - 1)} disabled={clientsPage === 1} aria-label="Anterior" className="px-3 py-1 rounded-md bg-white border border-gray-300 text-gray-700 hover:bg-gray-10 disabled:opacity-50 disabled:cursor-not-allowed">◀</button>
+                      <button onClick={() => setClientsPage(clientsPage - 1)} disabled={clientsPage === 1} aria-label="Anterior" className="px-3 py-1 rounded-md bg-gray-50 border border-gray-300 text-gray-700 hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed">◀</button>
                       {Array.from({ length: Math.ceil(businessClients.length / itemsPerPage) }, (_, i) => i + 1).map(page => (
-                        <button key={page} onClick={() => setClientsPage(page)} className={`px-3 py-1 rounded-md ${clientsPage === page ? 'bg-indigo-600 text-white' : 'bg-white border border-gray-300 text-gray-700 hover:bg-gray-10'}`}>{page}</button>
+                        <button key={page} onClick={() => setClientsPage(page)} className={`px-3 py-1 rounded-md ${clientsPage === page ? 'bg-indigo-600 text-white' : 'bg-gray-50 border border-gray-300 text-gray-700 hover:bg-gray-50'}`}>{page}</button>
                       ))}
-                      <button onClick={() => setClientsPage(clientsPage + 1)} disabled={clientsPage === Math.ceil(businessClients.length / itemsPerPage)} aria-label="Siguiente" className="px-3 py-1 rounded-md bg-white border border-gray-300 text-gray-700 hover:bg-gray-10 disabled:opacity-50 disabled:cursor-not-allowed">▶</button>
+                      <button onClick={() => setClientsPage(clientsPage + 1)} disabled={clientsPage === Math.ceil(businessClients.length / itemsPerPage)} aria-label="Siguiente" className="px-3 py-1 rounded-md bg-gray-50 border border-gray-300 text-gray-700 hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed">▶</button>
                     </nav>
                   </div>
                 )}

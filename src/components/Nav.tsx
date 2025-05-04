@@ -74,7 +74,7 @@ const Nav = ({ user }: NavProps) => {
   }, [isUserDropdownOpen]);
 
   return (
-    <header className="bg-white dark:bg-gray-800 shadow-md fixed w-full z-50">
+    <header className="bg-gray-50 dark:bg-gray-800 shadow-md fixed w-full z-50">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex justify-between h-16">
           <div className="flex">
@@ -132,11 +132,11 @@ const Nav = ({ user }: NavProps) => {
                   </svg>
                 </button>
                 {isUserDropdownOpen && (
-                  <div ref={dropdownRef} className="origin-top-right absolute right-0 mt-2 w-48 rounded-md shadow-lg bg-white dark:bg-gray-600 ring-1 ring-black ring-opacity-5 z-20">
+                  <div ref={dropdownRef} className="origin-top-right absolute right-0 mt-2 w-48 rounded-md shadow-lg bg-gray-50 dark:bg-gray-600 ring-1 ring-black ring-opacity-5 z-20">
                     <div className="py-1">
-                      <Link to="/dashboard" onClick={() => setIsUserDropdownOpen(false)} className="block px-4 py-2 text-sm text-gray-700 dark:text-white dark:hover:text-black hover:bg-gray-100">Mi Perfil</Link>
-                      {hasBusiness && <Link to="/business/dashboard" onClick={() => setIsUserDropdownOpen(false)} className="block px-4 py-2 text-sm text-gray-700 dark:text-white dark:hover:text-black hover:bg-gray-100">Mi Negocio</Link>}
-                      <button onClick={() => { setIsUserDropdownOpen(false); handleLogout(); }} className="w-full text-left px-4 py-2 text-sm text-gray-700 dark:text-white dark:hover:text-black hover:bg-gray-100">Cerrar Sesión</button>
+                      <Link to="/dashboard" onClick={() => setIsUserDropdownOpen(false)} className="block px-4 py-2 text-sm text-gray-700 dark:text-white dark:hover:text-black hover:bg-gray-500">Mi Perfil</Link>
+                      {hasBusiness && <Link to="/business/dashboard" onClick={() => setIsUserDropdownOpen(false)} className="block px-4 py-2 text-sm text-gray-700 dark:text-white dark:hover:text-black hover:bg-gray-500">Mi Negocio</Link>}
+                      <button onClick={() => { setIsUserDropdownOpen(false); handleLogout(); }} className="w-full text-left px-4 py-2 text-sm text-gray-700 dark:text-white dark:hover:text-black hover:bg-gray-500">Cerrar Sesión</button>
                     </div>
                   </div>
                 )}
@@ -150,7 +150,7 @@ const Nav = ({ user }: NavProps) => {
           <div className="flex items-center sm:hidden">
             <button
               onClick={() => setIsMenuOpen(prev => !prev)}
-              className="inline-flex items-center justify-center p-2 rounded-md text-gray-400 hover:text-gray-500 hover:bg-gray-100"
+              className="inline-flex items-center justify-center p-2 rounded-md text-gray-400 hover:text-gray-500 hover:bg-gray-500"
               aria-expanded={isMenuOpen}
             >
               <span className="sr-only">Abrir menú</span>

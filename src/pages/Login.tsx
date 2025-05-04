@@ -4,6 +4,7 @@ import { signIn } from '../lib/supabase';
 import { useAppDispatch } from '../hooks/useAppDispatch';
 import { setUser, setUserProfile } from '../store/userSlice';
 import { obtenerPerfilUsuario } from '../lib/api';
+import { notifySuccess, notifyError } from '../lib/toast';
 
 const Login = () => {
   const navigate = useNavigate();
@@ -23,29 +24,35 @@ const Login = () => {
       const { data, error } = await signIn(email, password);
       
       if (error) {
-        
+        let errorMsg = '';
         if (error.message.includes('Invalid login credentials')) {
-          setError('Credenciales incorrectas. Por favor verifica tu correo y contraseña.');
+          errorMsg = 'Credenciales incorrectas. Por favor verifica tu correo y contraseña.';
         } else if (error.message.includes('Email not confirmed')) {
-          setError('Tu cuenta de correo aún no ha sido confirmada. Por favor revisa tu bandeja de entrada.');
+          errorMsg = 'Tu cuenta de correo aún no ha sido confirmada. Por favor revisa tu bandeja de entrada.';
         } else {
-          setError(error.message || 'Ocurrió un error al iniciar sesión');
+          errorMsg = error.message || 'Ocurrió un error al iniciar sesión';
         }
-        
+        setError(errorMsg);
+        notifyError(errorMsg);
         throw error;
       }
       
       if (data.user) {
         dispatch(setUser(data.user));
+        let nombreUsuario = data.user.user_metadata?.full_name || data.user.email;
         try {
           const { success, perfil } = await obtenerPerfilUsuario(data.user.id);
           if (success && perfil) {
             dispatch(setUserProfile(perfil));
+            nombreUsuario = perfil.full_name || nombreUsuario;
           }
         } catch {}
+        notifySuccess(`Bienvenido de nuevo ${nombreUsuario}`);
         navigate('/');
       } else {
-        setError('No se pudo obtener la información del usuario. Inténtalo nuevamente.');
+        const errorMsg = 'No se pudo obtener la información del usuario. Inténtalo nuevamente.';
+        setError(errorMsg);
+        notifyError(errorMsg);
       }
     } catch (err: any) {
     } finally {
@@ -68,7 +75,7 @@ const Login = () => {
       </div>
 
       <div className="mt-8 sm:mx-auto sm:w-full px-2 sm:max-w-md">
-        <div className="bg-white dark:bg-opacity-10 py-8 px-4 shadow sm:rounded-lg sm:px-10">
+        <div className="bg-gray-50 dark:bg-opacity-10 py-8 px-4 shadow sm:rounded-lg sm:px-10">
           {error && (
             <div className="mb-4 bg-red-50 p-4 rounded-md">
               <div className="flex">

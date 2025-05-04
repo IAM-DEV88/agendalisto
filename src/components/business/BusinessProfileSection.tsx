@@ -153,7 +153,7 @@ const BusinessProfileSection: React.FC<BusinessProfileSectionProps> = ({
 
   return (
     <div>      
-      <div className="dark:bg-opacity-10 bg-white shadow overflow-hidden sm:rounded-lg">
+      <div className="dark:bg-opacity-10 bg-gray-50 shadow overflow-hidden sm:rounded-lg">
         <div className="px-4 py-5 sm:p-6">
           <form onSubmit={handleSubmit}>
             <div className="grid grid-cols-1 gap-y-6 gap-x-4 sm:grid-cols-6">
@@ -230,7 +230,7 @@ const BusinessProfileSection: React.FC<BusinessProfileSectionProps> = ({
                   id="category_id"
                   value={businessData.category_id || ''}
                   onChange={onChange}
-                  className="mt-1 block w-full border-gray-300 bg-white rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500 dark:bg-gray-900 p-2"
+                  className="mt-1 block w-full border-gray-300 bg-gray-50 rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500 dark:bg-gray-900 p-2"
                 >
                   <option value="" disabled>Selecciona una categoría</option>
                   {categories.map(cat => (

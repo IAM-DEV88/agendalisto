@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { Appointment, Review, createBusinessReview, getBusinessReviews } from '../../lib/api';
 import { Star } from 'lucide-react';
 import { Link } from 'react-router-dom';
+import { notifySuccess, notifyError } from '../../lib/toast';
 
 interface PastAppointmentsProps {
   appointments: Appointment[];
@@ -79,14 +80,17 @@ const PastAppointments: React.FC<PastAppointmentsProps> = ({
         newReview.rating,
         newReview.comment
       );
-      if (success) {
+      if (success && data) {
         // Update local reviews state so the review is shown and button hidden
-        if (data) setReviews(prev => ({ ...prev, [appointment.id]: data }));
+        setReviews(prev => ({ ...prev, [appointment.id]: data }));
         setShowReviewFormId(null);
         setNewReview({ rating: 5, comment: '' });
+        notifySuccess('Reseña enviada correctamente');
       } else {
+        notifyError('Error al enviar la reseña');
       }
-    } catch (err) {
+    } catch (err: any) {
+      notifyError(err.message || 'Error al enviar la reseña');
     } finally {
       setSubmittingReview(false);
     }
@@ -103,7 +107,7 @@ const PastAppointments: React.FC<PastAppointmentsProps> = ({
           <button
             onClick={() => onPageChange(currentPage - 1)}
             disabled={currentPage === 1}
-            className="px-3 py-1 rounded-md bg-white border border-gray-300 text-gray-700 hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed"
+            className="px-3 py-1 rounded-md bg-gray-50 border border-gray-300 text-gray-700 hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed"
           >
             Anterior
           </button>
@@ -115,7 +119,7 @@ const PastAppointments: React.FC<PastAppointmentsProps> = ({
               className={`px-3 py-1 rounded-md ${
                 currentPage === page
                   ? 'bg-indigo-600 text-white'
-                  : 'bg-white border border-gray-300 text-gray-700 hover:bg-gray-50'
+                  : 'bg-gray-50 border border-gray-300 text-gray-700 hover:bg-gray-50'
               }`}
             >
               {page}
@@ -125,7 +129,7 @@ const PastAppointments: React.FC<PastAppointmentsProps> = ({
           <button
             onClick={() => onPageChange(currentPage + 1)}
             disabled={currentPage === totalPages}
-            className="px-3 py-1 rounded-md bg-white border border-gray-300 text-gray-700 hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed"
+            className="px-3 py-1 rounded-md bg-gray-50 border border-gray-300 text-gray-700 hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed"
           >
             Siguiente
           </button>
@@ -142,12 +146,12 @@ const PastAppointments: React.FC<PastAppointmentsProps> = ({
           <div className="animate-spin rounded-full h-10 w-10 border-t-2 border-b-2 border-indigo-500"></div>
         </div>
       ) : appointments.length === 0 ? (
-        <div className="dark:bg-opacity-10 bg-white shadow overflow-hidden sm:rounded-md p-6 text-center">
+        <div className="dark:bg-opacity-10 bg-gray-50 shadow overflow-hidden sm:rounded-md p-6 text-center">
           <p className="text-gray-500 dark:text-white">No tienes citas pasadas.</p>
         </div>
       ) : (
         <>
-          <div className="dark:bg-opacity-10 bg-white shadow overflow-hidden sm:rounded-md">
+          <div className="dark:bg-opacity-10 bg-gray-50 shadow overflow-hidden sm:rounded-md">
             <ul className="divide-y divide-gray-200">
               {appointments
                 .slice((currentPage - 1) * itemsPerPage, currentPage * itemsPerPage)
@@ -176,14 +180,14 @@ const PastAppointments: React.FC<PastAppointmentsProps> = ({
                         {reviews[appointment.id] ? null : appointment.status === 'completed' ? (
                           <button
                             onClick={() => setShowReviewFormId(appointment.id)}
-                            className="inline-flex items-center px-2.5 py-1.5 border border-gray-300 text-xs font-medium text-gray-700 bg-white hover:bg-gray-50"
+                            className="inline-flex items-center px-2.5 py-1.5 border border-gray-300 text-xs font-medium text-gray-700 bg-gray-50 hover:bg-gray-50"
                           >
                             Dejar reseña
                           </button>
                         ) : (
                           <button
                             onClick={() => onReschedule(appointment)}
-                            className="inline-flex items-center px-2.5 py-1.5 border border-gray-300 text-xs font-medium text-gray-700 bg-white hover:bg-gray-50"
+                            className="inline-flex items-center px-2.5 py-1.5 border border-gray-300 text-xs font-medium text-gray-700 bg-gray-50 hover:bg-gray-50"
                           >
                             Reagendar
                           </button>
@@ -227,7 +231,7 @@ const PastAppointments: React.FC<PastAppointmentsProps> = ({
                     </div>
                   )}
                   {showReviewFormId === appointment.id && (
-                    <div className="px-4 py-4 sm:px-6 bg-gray-50 rounded-md border border-gray-200 mt-4">
+                    <div className="px-4 py-4 sm:px-6 dark:bg-opacity-10 bg-gray-50 rounded-md border border-gray-200 mt-4">
                       <h3 className="text-lg font-medium text-gray-900 mb-2">Escribe tu reseña</h3>
                       <div className="mb-4">
                         <label className="block text-sm font-medium text-gray-700 mb-1">Calificación</label>
@@ -259,7 +263,7 @@ const PastAppointments: React.FC<PastAppointmentsProps> = ({
                         <button
                           type="button"
                           onClick={() => setShowReviewFormId(null)}
-                          className="px-3 py-1 border border-gray-300 rounded-md text-gray-700 bg-white hover:bg-gray-50"
+                          className="px-3 py-1 border border-gray-300 rounded-md text-gray-700 bg-gray-50 hover:bg-gray-50"
                         >
                           Cancelar
                         </button>

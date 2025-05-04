@@ -172,19 +172,19 @@ const BusinessHeader: React.FC<BusinessHeaderProps> = ({ businessData, averageRa
   };
   
   return (
-    <div className="bg-white dark:bg-white dark:bg-opacity-10 shadow-md overflow-hidden">
+    <div className="bg-gray-50 dark:bg-gray-50 dark:bg-opacity-10 shadow-md overflow-hidden">
       <div className="h-48 md:h-64 bg-indigo-100 relative">
         {logoUrl ? (
           <>
             <img
               src={logoUrl}
               alt={businessData.name}
-              className="w-full h-full object-cover"
+              className="w-full h-full object-contain"
               onLoad={handleImageLoaded}
               onError={handleImageError}
             />
             {imageState === 'loading' && (
-              <div className="absolute inset-0 flex items-center justify-center bg-gray-100 bg-opacity-50">
+              <div className="absolute inset-0 flex items-center justify-center bg-gray-500 bg-opacity-50">
                 <span className="text-gray-500">Cargando imagen...</span>
               </div>
             )}
@@ -266,7 +266,7 @@ const BusinessHeader: React.FC<BusinessHeaderProps> = ({ businessData, averageRa
               href={`https://facebook.com/${businessData.facebook}`}
               target="_blank"
               rel="noopener noreferrer"
-              className="bg-gray-100 p-2 rounded-full hover:bg-indigo-100 transition-colors"
+              className="bg-gray-500 p-2 rounded-full hover:bg-indigo-100 transition-colors"
             >
               <Facebook className="h-5 w-5 text-indigo-600" />
             </a>
@@ -276,7 +276,7 @@ const BusinessHeader: React.FC<BusinessHeaderProps> = ({ businessData, averageRa
               href={`https://instagram.com/${businessData.instagram}`}
               target="_blank"
               rel="noopener noreferrer"
-              className="bg-gray-100 p-2 rounded-full hover:bg-indigo-100 transition-colors"
+              className="bg-gray-500 p-2 rounded-full hover:bg-indigo-100 transition-colors"
             >
               <Instagram className="h-5 w-5 text-indigo-600" />
             </a>

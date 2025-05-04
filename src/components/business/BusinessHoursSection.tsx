@@ -27,7 +27,7 @@ const BusinessHoursSection: React.FC<BusinessHoursSectionProps> = ({
         </div>
       ) : (
         <form onSubmit={onSave}>
-          <div className="bg-white dark:bg-opacity-10 shadow-md p-4">
+          <div className="bg-gray-50 dark:bg-opacity-10 shadow-md p-4">
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
               {/* Horario Regular */}
               <div>

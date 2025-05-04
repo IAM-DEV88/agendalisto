@@ -2,6 +2,7 @@ import { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { signUp } from '../lib/supabase';
 import { supabase } from '../lib/supabase';
+import { notifySuccess, notifyError } from '../lib/toast';
 
 const Register = () => {
   const navigate = useNavigate();
@@ -62,7 +63,7 @@ const Register = () => {
         // Marcar como registrado incluso si falla la actualización de metadatos
         setRegistered(true);
         setError('');
-        
+        notifySuccess('Registro exitoso');
         // Mostrar mensaje de éxito antes de redireccionar
         setTimeout(() => {
           navigate('/login');
@@ -71,13 +72,16 @@ const Register = () => {
     } catch (err: any) {
       
       // Manejar mensajes de error comunes
+      let errorMsg: string;
       if (err.message.includes('Email already registered')) {
-        setError('Este correo electrónico ya está registrado. Intenta iniciar sesión.');
+        errorMsg = 'Este correo electrónico ya está registrado. Intenta iniciar sesión.';
       } else if (err.message.includes('Database error')) {
-        setError('Hubo un problema con el servidor. Por favor, intenta de nuevo más tarde.');
+        errorMsg = 'Hubo un problema con el servidor. Por favor, intenta de nuevo más tarde.';
       } else {
-        setError(err.message || 'Error al registrar usuario. Intenta nuevamente.');
+        errorMsg = err.message || 'Error al registrar usuario. Intenta nuevamente.';
       }
+      setError(errorMsg);
+      notifyError(errorMsg);
     } finally {
       setLoading(false);
     }
@@ -98,7 +102,7 @@ const Register = () => {
       </div>
 
       <div className="mt-2 sm:mx-auto m-2 sm:w-full sm:max-w-md">
-        <div className="bg-white dark:bg-opacity-10 py-6 px-4 shadow sm:rounded-lg sm:px-10">
+        <div className="bg-gray-50 dark:bg-opacity-10 py-6 px-4 shadow sm:rounded-lg sm:px-10">
           {error && (
             <div className="mb-4 bg-red-50 p-4 rounded-md">
               <div className="flex">

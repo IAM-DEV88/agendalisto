@@ -147,7 +147,7 @@ const UserProfileSection: React.FC<UserProfileSectionProps> = ({
   return (
     <>
       <div className="mt-2">
-        <div className="dark:bg-opacity-10 bg-white shadow overflow-hidden sm:rounded-lg">
+        <div className="dark:bg-opacity-10 bg-gray-50 shadow overflow-hidden sm:rounded-lg">
           <div className="px-4 py-5 sm:p-6">
             {message && (
               <div className={`mb-4 p-4 rounded ${message.type === 'success' ? 'bg-green-50 text-green-800' : 'bg-red-50 text-red-800'

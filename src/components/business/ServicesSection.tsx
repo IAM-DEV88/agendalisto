@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { Service } from '../../lib/api';
+import { notifySuccess, notifyError } from '../../lib/toast';
 
 interface ServicesSectionProps {
   businessId: string;
@@ -88,10 +89,15 @@ const ServicesSection: React.FC<ServicesSectionProps> = ({
     try {
       if (editingService) {
         await updateService(editingService.id, serviceData);
+        notifySuccess('Servicio actualizado correctamente');
       } else {
         await createService(serviceData);
+        notifySuccess('Servicio creado correctamente');
       }
     } catch (err: any) {
+      const errMsg = err.message || 'Error al guardar el servicio';
+      setError(errMsg);
+      notifyError(errMsg);
     } finally {
       setModalOpen(false);
       resetForm();
@@ -110,11 +116,16 @@ const ServicesSection: React.FC<ServicesSectionProps> = ({
       
       if (success) {
         await loadServices();
+        notifySuccess('Servicio eliminado correctamente');
       } else {
-        setError('Error al eliminar el servicio');
+        const errMsg = 'Error al eliminar el servicio';
+        setError(errMsg);
+        notifyError(errMsg);
       }
     } catch (err: any) {
-      setError(err.message || 'Error al eliminar el servicio');
+      const errMsg = err.message || 'Error al eliminar el servicio';
+      setError(errMsg);
+      notifyError(errMsg);
     }
   };
 
@@ -195,7 +206,7 @@ const ServicesSection: React.FC<ServicesSectionProps> = ({
             return pagedServices.map((service) => (
               <div
                 key={service.id}
-                className={`dark:bg-opacity-10 bg-white overflow-hidden flex flex-col shadow rounded-lg ${
+                className={`dark:bg-opacity-10 bg-gray-50 overflow-hidden flex flex-col shadow rounded-lg ${
                   !service.is_active ? 'opacity-75' : ''
                 }`}
               >
@@ -206,7 +217,7 @@ const ServicesSection: React.FC<ServicesSectionProps> = ({
                       <p className="dark:text-white mt-1 text-sm text-gray-500">{service.description}</p>
                     </div>
                     {!service.is_active && (
-                      <span className="dark:text-white inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-gray-100 text-gray-800">
+                      <span className="dark:text-white inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-gray-500 text-gray-800">
                         Inactivo
                       </span>
                     )}
@@ -231,7 +242,7 @@ const ServicesSection: React.FC<ServicesSectionProps> = ({
                 <div className="dark:bg-opacity-10 bg-gray-50 px-6 py-3 flex justify-end space-x-3">
                   <button
                     onClick={() => handleEdit(service)}
-                    className="inline-flex items-center px-3 py-1.5 border border-gray-300 shadow-sm text-sm font-medium rounded-md text-gray-700 bdarg-white hover:bg-gray-600 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 dark:bg-gray-100"
+                    className="inline-flex items-center px-3 py-1.5 border border-gray-300 shadow-sm text-sm font-medium rounded-md text-gray-700 bdarg-white hover:bg-gray-600 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 dark:bg-gray-500"
                   >
                     <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4 mr-1.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 0L11.828 15H9v-2.828l8.586-8.586z" />
@@ -240,7 +251,7 @@ const ServicesSection: React.FC<ServicesSectionProps> = ({
                   </button>
                   <button
                     onClick={() => handleDelete(service.id)}
-                    className="inline-flex items-center px-3 py-1.5 border border-red-300 shadow-sm text-sm font-medium rounded-md text-red-700 bg-white hover:bg-red-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500"
+                    className="inline-flex items-center px-3 py-1.5 border border-red-300 shadow-sm text-sm font-medium rounded-md text-red-700 bg-gray-50 hover:bg-red-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500"
                   >
                     <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4 mr-1.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
@@ -260,20 +271,20 @@ const ServicesSection: React.FC<ServicesSectionProps> = ({
                 onClick={() => setCurrentPage(prev => prev - 1)}
                 disabled={currentPage === 1}
                 aria-label="Anterior"
-                className="px-3 py-1 rounded-md bg-white border border-gray-300 text-gray-700 hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed"
+                className="px-3 py-1 rounded-md bg-gray-50 border border-gray-300 text-gray-700 hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed"
               >◀</button>
               {Array.from({ length: Math.ceil(services.length / itemsPerPage) }, (_, i) => i + 1).map(page => (
                 <button
                   key={page}
                   onClick={() => setCurrentPage(page)}
-                  className={`px-3 py-1 rounded-md ${currentPage === page ? 'bg-indigo-600 text-white' : 'bg-white border border-gray-300 text-gray-700 hover:bg-gray-50'}`}
+                  className={`px-3 py-1 rounded-md ${currentPage === page ? 'bg-indigo-600 text-white' : 'bg-gray-50 border border-gray-300 text-gray-700 hover:bg-gray-50'}`}
                 >{page}</button>
               ))}
               <button
                 onClick={() => setCurrentPage(prev => prev + 1)}
                 disabled={currentPage === Math.ceil(services.length / itemsPerPage)}
                 aria-label="Siguiente"
-                className="px-3 py-1 rounded-md bg-white border border-gray-300 text-gray-700 hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed"
+                className="px-3 py-1 rounded-md bg-gray-50 border border-gray-300 text-gray-700 hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed"
               >▶</button>
             </nav>
           </div>
@@ -291,7 +302,7 @@ const ServicesSection: React.FC<ServicesSectionProps> = ({
 
             <div className="inline-block align-bottom dark:bg-opacity-10 rounded-lg text-left overflow-hidden shadow-xl transform transition-all sm:my-8 sm:align-middle sm:max-w-lg sm:w-full">
               <form onSubmit={handleSubmit}>
-                <div className="bg-white dark:bg-gray-900 px-4 pt-20 pb-4 sm:p-6 sm:pb-4">
+                <div className="bg-gray-50 dark:bg-gray-900 px-4 pt-20 pb-4 sm:p-6 sm:pb-4">
                   <div className="mb-4">
                     <h3 className="text-lg font-medium text-gray-900">
                       {editingService ? 'Editar Servicio' : 'Nuevo Servicio'}
@@ -401,7 +412,7 @@ const ServicesSection: React.FC<ServicesSectionProps> = ({
                       setModalOpen(false);
                       resetForm();
                     }}
-                    className="mt-3 w-full inline-flex justify-center rounded-md border border-gray-300 shadow-sm px-4 py-2 bg-white text-base font-medium text-gray-700 hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 sm:mt-0 sm:ml-3 sm:w-auto sm:text-sm"
+                    className="mt-3 w-full inline-flex justify-center rounded-md border border-gray-300 shadow-sm px-4 py-2 bg-gray-50 text-base font-medium text-gray-700 hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 sm:mt-0 sm:ml-3 sm:w-auto sm:text-sm"
                   >
                     Cancelar
                   </button>

@@ -18,6 +18,8 @@ import { useSelector } from 'react-redux';
 import { useAppDispatch } from './hooks/useAppDispatch';
 import type { RootState } from './store';
 import { setUser, setUserProfile, setLoading, setAuthInitialized } from './store/userSlice';
+import { Toaster } from 'react-hot-toast';
+import { notifySuccess } from './lib/toast';
 
 function App() {
   const dispatch = useAppDispatch();
@@ -122,13 +124,14 @@ function App() {
         
         dispatch(setLoading(true));
         
-        if (session?.user) {
+        if (event === 'SIGNED_IN' && session?.user) {
           const currentUserId = user?.id || null;
           
           // Solo actualizar user/userProfile si el ID cambió o no hay perfil actual
           if (!currentUserId || currentUserId !== session.user.id || !userProfile) {
             dispatch(setUser(session.user));
             
+            notifySuccess('Sesión iniciada');
             // Cargar perfil solo si es un usuario diferente o no hay perfil
             if (!userProfile || currentUserId !== session.user.id) {
               await loadProfile(session.user.id);
@@ -138,6 +141,7 @@ function App() {
         } else if (event === 'SIGNED_OUT') {
           dispatch(setUser(null));
           dispatch(setUserProfile(null));
+          notifySuccess('Sesión cerrada');
         }
         
         dispatch(setLoading(false));
@@ -158,12 +162,47 @@ function App() {
         dispatch(setUserProfile(event.detail.profile));
       }
     };
-    
     window.addEventListener('userProfileUpdated', handleProfileUpdate as EventListener);
     return () => {
       window.removeEventListener('userProfileUpdated', handleProfileUpdate as EventListener);
     };
-  }, [dispatch]); // Sin dependencias - solo se ejecuta una vez
+  }, [dispatch]);
+
+  // Real-time notifications para citas
+  useEffect(() => {
+    if (!authInitialized || !user || !userProfile) return;
+    const channel = supabase
+      .channel('public:appointments')
+      .on('postgres_changes', { event: 'INSERT', schema: 'public', table: 'appointments' }, ({ new: appt }: any) => {
+        // Notificar al negocio de una nueva reserva
+        if (userProfile.business_id === appt.business_id) {
+          notifySuccess('Nueva reserva recibida');
+        }
+        if (user.id === appt.user_id) {
+          notifySuccess('Tu reserva ha sido solicitada');
+        }
+      })
+      .on('postgres_changes', { event: 'UPDATE', schema: 'public', table: 'appointments' }, ({ new: appt }: any) => {
+        // Estatus de cita modificado
+        if (user.id === appt.user_id) {
+          let msg = '';
+          if (appt.status === 'confirmed') msg = 'Tu cita ha sido confirmada';
+          else if (appt.status === 'completed') msg = 'Tu cita ha sido completada';
+          else if (appt.status === 'cancelled') msg = 'Tu cita ha sido cancelada';
+          if (msg) notifySuccess(msg);
+        }
+        if (userProfile.business_id === appt.business_id) {
+          let msg = '';
+          if (appt.status === 'confirmed') msg = `Reserva confirmada por ${appt.profiles?.full_name || ''}`;
+          else if (appt.status === 'cancelled') msg = `Reserva cancelada por ${appt.profiles?.full_name || ''}`;
+          if (msg) notifySuccess(msg);
+        }
+      })
+      .subscribe();
+    return () => {
+      supabase.removeChannel(channel);
+    };
+  }, [authInitialized, user, userProfile]);
 
   // Mostrar sólo loading inicial hasta que authInitialized sea true
   if (!authInitialized) {
@@ -178,7 +217,7 @@ function App() {
     <Router>
       <div className="min-h-screen flex flex-col bg-gray-50 dark:bg-gray-900 text-gray-900 dark:text-gray-100">
         <Nav user={userProfile} />
-        <main className="flex-grow pt-14 bg-white dark:bg-gray-800 shadow-md">
+        <main className="flex-grow pt-14 bg-gray-50 dark:bg-gray-800 shadow-md">
           <Routes>
             <Route path="/" element={<Home />} />
             <Route path="/login" element={<Login />} />
@@ -204,6 +243,8 @@ function App() {
           </Routes>
         </main>
         <Footer />
+        {/* Toaster para mostrar notificaciones */}
+        <Toaster />
       </div>
     </Router>
   );

@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useMemo } from 'react';
 import { X, Clock, Calendar, CheckCircle } from 'lucide-react';
 import { createAppointment, Service, getBusinessHours, getBusinessAppointments, BusinessHours, Appointment } from '../../../lib/api';
+import { notifyError, notifyLoading, dismissToast } from '../../../lib/toast';
 
 interface BookingFormProps {
   businessId: string;
@@ -136,7 +137,9 @@ const BookingForm: React.FC<BookingFormProps> = ({
       return;
     }
 
+    let toastId: string = '';
     try {
+      toastId = notifyLoading('Enviando solicitud...');
       setSubmitting(true);
       setError(null);
 
@@ -158,13 +161,20 @@ const BookingForm: React.FC<BookingFormProps> = ({
 
       const result = await createAppointment(appointmentData);
       
+      dismissToast(toastId);
       if (result) {
         setBookingSuccess(true);
+        // Aquí podrías notificar al negocio o usuario si quieres usar el nombre, actualmente no es usado.
       } else {
-        setError('Error al crear la reserva. Por favor, inténtalo de nuevo.');
+        const errorMsg = 'Error al enviar la solicitud. Por favor, inténtalo de nuevo.';
+        setError(errorMsg);
+        notifyError(errorMsg);
       }
     } catch (err: any) {
-      setError(err.message || 'Error al crear la reserva');
+      dismissToast(toastId);
+      const errorMsg = err.message || 'Error al enviar la solicitud';
+      setError(errorMsg);
+      notifyError(errorMsg);
     } finally {
       setSubmitting(false);
     }
@@ -179,11 +189,11 @@ const BookingForm: React.FC<BookingFormProps> = ({
         <div className="flex justify-center mb-4">
           <CheckCircle className="h-16 w-16 text-green-500" />
         </div>
-        <h3 className="text-xl font-medium text-gray-900 mb-2">¡Reserva confirmada!</h3>
+        <h3 className="text-xl font-medium text-gray-900 mb-2">¡Solicitud enviada!</h3>
         <p className="text-gray-600 mb-6">
-          Tu reserva ha sido registrada correctamente.
-          {notifyEmail && <><br />Se enviará confirmación por correo electrónico.</>}
-          {notifyWhatsapp && <><br />Se enviará notificación por WhatsApp.</>}
+          Tu solicitud ha sido enviada correctamente.
+          {notifyEmail && <><br />Recibirás confirmación por correo electrónico cuando se confirme tu solicitud.</>}
+          {notifyWhatsapp && <><br />Recibirás notificación por WhatsApp cuando se confirme tu solicitud.</>}
         </p>
         <button
           onClick={onClose}
@@ -198,7 +208,7 @@ const BookingForm: React.FC<BookingFormProps> = ({
   return (
     <div>
       <div className="flex justify-between items-center mb-4">
-        <h2 className="text-xl font-semibold">Reservar Cita</h2>
+        <h2 className="text-xl font-semibold">Solicitar Reserva</h2>
         <button
           onClick={onClose}
           className="text-gray-400 hover:text-gray-500"
@@ -208,7 +218,7 @@ const BookingForm: React.FC<BookingFormProps> = ({
       </div>
 
       {service && (
-        <div className="mb-4 p-4 bg-opacity-10 bg-white rounded-lg">
+        <div className="mb-4 p-4 bg-opacity-10 bg-gray-50 rounded-lg">
           <h3 className="font-medium text-gray-900">{service.name}</h3>
           <div className="flex justify-between items-center mt-2">
             <div className="flex items-center text-sm text-gray-500">
@@ -312,7 +322,7 @@ const BookingForm: React.FC<BookingFormProps> = ({
             disabled={submitting}
             className="w-full bg-indigo-600 text-white py-2 px-4 rounded-md font-medium hover:bg-indigo-700 transition-colors disabled:opacity-50"
           >
-            {submitting ? 'Procesando...' : 'Confirmar Reserva'}
+            {submitting ? 'Procesando...' : 'Enviar Solicitud'}
           </button>
         </div>
       </form>

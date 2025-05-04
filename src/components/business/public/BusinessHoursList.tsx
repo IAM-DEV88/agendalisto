@@ -6,7 +6,7 @@ interface BusinessHoursListProps {
 }
 
 const BusinessHoursList: React.FC<BusinessHoursListProps> = ({ businessHours }) => {
-  const days = ['Domingo', 'Lunes', 'Martes', 'Miércoles', 'Jueves', 'Viernes', 'Sábado'];
+  const days = ['Lunes', 'Martes', 'Miércoles', 'Jueves', 'Viernes', 'Sábado', 'Domingo'];
   
   const formatTime = (time: string) => {
     if (!time) return '';

@@ -51,7 +51,7 @@ const BusinessConfigSection: React.FC<BusinessConfigSectionProps> = ({
       ) : (
         <form onSubmit={onSave} className="space-y-2">
           {/* Reservas Online */}
-          <div className="bg-white dark:bg-opacity-10 shadow p-4">
+          <div className="bg-gray-50 dark:bg-opacity-10 shadow p-4">
             <h2 className="text-lg font-medium dark:text-white text-gray-900 mb-4">Reservas Online</h2>
             <div className="space-y-4">
               <div className="flex items-start">
@@ -111,7 +111,7 @@ const BusinessConfigSection: React.FC<BusinessConfigSectionProps> = ({
           </div>
 
           {/* Información Visible */}
-          <div className="bg-white dark:bg-opacity-10 shadow p-4">
+          <div className="bg-gray-50 dark:bg-opacity-10 shadow p-4">
             <h2 className="text-lg font-medium dark:text-white text-gray-900 mb-4">Información Visible</h2>
             <div className="space-y-4">
               <div className="flex items-start">
@@ -207,7 +207,7 @@ const BusinessConfigSection: React.FC<BusinessConfigSectionProps> = ({
           </div>
 
           {/* Notificaciones */}
-          <div className="bg-white dark:bg-opacity-10 shadow p-4">
+          <div className="bg-gray-50 dark:bg-opacity-10 shadow p-4">
             <h2 className="text-lg font-medium dark:text-white text-gray-900 mb-4">Notificaciones</h2>
             <div className="space-y-4">
               <div className="flex items-start">
