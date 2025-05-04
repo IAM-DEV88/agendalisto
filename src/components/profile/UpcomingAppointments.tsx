@@ -93,7 +93,7 @@ const UpcomingAppointments: React.FC<UpcomingAppointmentsProps> = ({
         <div className="dark:bg-opacity-10 bg-gray-50 shadow overflow-hidden sm:rounded-md p-6 text-center">
           <p className="text-gray-500 dark:text-white">No tienes citas programadas.</p>
           <Link to="/explore" className="mt-4 inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium shadow-sm text-white bg-indigo-600 hover:bg-indigo-700">
-            Explorar servicios
+            Explorar
           </Link>
         </div>
       ) : (
@@ -129,7 +129,22 @@ const UpcomingAppointments: React.FC<UpcomingAppointmentsProps> = ({
                            appointment.status === 'cancelled' ? 'Cancelada' : 'Completada'}
                         </p>
                       </div>
-                      <div className="flex space-x-2">
+                      
+                    </div>
+                    <div className="mt-2">
+                      <div className="flex sm:flex-row flex-col">
+                        <div className="dark:text-white text-sm text-gray-500">
+                          {appointment.services?.name || 'Servicio sin nombre'}
+                        </div>
+                        <div className="mt-2 dark:text-white text-sm text-gray-500">
+                          Duración: {appointment.services?.duration || 0} min
+                        </div>
+                        <div className="mt-2 dark:text-white text-sm text-gray-500">
+                          {formatDate(appointment.start_time)}
+                        </div>
+                      </div>
+                    </div>
+                    <div className="mt-2 flex space-x-2">
                         {['pending', 'confirmed'].includes(appointment.status) && (
                           <>
                             <button
@@ -155,22 +170,6 @@ const UpcomingAppointments: React.FC<UpcomingAppointmentsProps> = ({
                           </button>
                         )}
                       </div>
-                    </div>
-                    <div className="mt-2 sm:flex sm:justify-between">
-                      <div className="sm:flex">
-                        <p className="flex dark:text-white items-center text-sm text-gray-500">
-                          {appointment.services?.name || 'Servicio sin nombre'}
-                        </p>
-                        <p className="mt-2 dark:text-white flex items-center text-sm text-gray-500 sm:mt-0 sm:ml-6">
-                          Duración: {appointment.services?.duration || 0} min
-                        </p>
-                      </div>
-                      <div className="mt-2 flex items-center text-sm text-gray-500 sm:mt-0">
-                        <p className="dark:text-white">
-                          {formatDate(appointment.start_time)}
-                        </p>
-                      </div>
-                    </div>
                   </div>
                 </li>
               ))}

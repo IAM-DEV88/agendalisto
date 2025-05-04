@@ -39,7 +39,7 @@ const AppointmentsSection: React.FC<AppointmentsSectionProps> = ({
           <ul className="divide-y divide-gray-200">
             {appointments.map((appointment) => (
               <li key={appointment.id} className="px-4 py-4 sm:px-6">
-                <div className="flex items-center justify-between">
+                <div className="flex gap-y-2 flex-col justify-between">
                   <div>
                     <p className="text-sm font-medium text-indigo-600 dark:text-indigo-200">{appointment.services?.name}</p>
                     <p className="text-sm text-gray-500 dark:text-white">Cliente: {appointment.profiles?.full_name || appointment.user_id}</p>
