@@ -27,6 +27,7 @@ import ClientsSection from '../components/business/ClientsSection';
 import StatsSection from '../components/business/StatsSection';
 import { notifySuccess, notifyError } from '../lib/toast';
 import { useBusinessAppointments } from '../hooks/useBusinessAppointments';
+import { useSwipeable } from 'react-swipeable';
 
 type BusinessDashboardProps = {
   user: UserProfile | null;
@@ -227,6 +228,21 @@ const BusinessDashboard = ({ user }: BusinessDashboardProps) => {
     setActiveTab(tab);
     setSearchParams({ tab });
   };
+
+  // Swipe handlers para cambiar tabs con gesto horizontal
+  const tabOrder = ['stats','appointments','history','services','clients','profile','availability','settings'] as const;
+  const swipeHandlers = useSwipeable({
+    onSwipedLeft: () => {
+      const idx = tabOrder.indexOf(activeTab as typeof tabOrder[number]);
+      if (idx < tabOrder.length - 1) handleTabChange(tabOrder[idx + 1]);
+    },
+    onSwipedRight: () => {
+      const idx = tabOrder.indexOf(activeTab as typeof tabOrder[number]);
+      if (idx > 0) handleTabChange(tabOrder[idx - 1]);
+    },
+    trackMouse: true,
+    trackTouch: true,
+  });
 
   const handleUpdateAppointmentStatus = async (id: string, newStatus: 'pending' | 'confirmed' | 'completed' | 'cancelled') => {
     try {
@@ -487,7 +503,7 @@ const BusinessDashboard = ({ user }: BusinessDashboardProps) => {
             </nav>
           </div>
 
-          <div className="mt-2">
+          <div className="mt-2" {...swipeHandlers}>
             {activeTab === 'stats' && businessData && (
               <StatsSection
                 totalAppointments={businessAppointments.length}

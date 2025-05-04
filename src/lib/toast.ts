@@ -1,7 +1,8 @@
 import { toast, ToastOptions } from 'react-hot-toast';
 
 const defaultOptions: ToastOptions = {
-  position: 'top-right',
+  position: 'bottom-left',
+  duration: 5000,
   style: {
     fontSize: '14px',
   },

@@ -17,6 +17,7 @@ import type { RootState } from '../store';
 import { setActiveTab } from '../store/uiSlice';
 import { notifySuccess, notifyError } from '../lib/toast';
 import { useAppointments } from '../hooks/useAppointments';
+import { useSwipeable } from 'react-swipeable';
 
 type ProfileDashboardProps = {
   user: UserProfile | null;
@@ -77,6 +78,20 @@ const ProfileDashboard = ({ user }: ProfileDashboardProps) => {
   const itemsPerPage = 5;
 
   const navigate = useNavigate();
+
+  // Swipe handlers para cambiar tabs con gesto horizontal
+  const tabOrder = ['upcoming','past','profile'] as const;
+  const swipeHandlers = useSwipeable({
+    onSwipedLeft: () => {
+      const idx = tabOrder.indexOf(activeTab);
+      if (idx < tabOrder.length - 1) dispatch(setActiveTab(tabOrder[idx + 1]));
+    },
+    onSwipedRight: () => {
+      const idx = tabOrder.indexOf(activeTab);
+      if (idx > 0) dispatch(setActiveTab(tabOrder[idx - 1]));
+    },
+    trackMouse: true,
+  });
 
   useEffect(() => {
     // Actualizar estado cuando cambia el usuario
@@ -222,7 +237,7 @@ const ProfileDashboard = ({ user }: ProfileDashboardProps) => {
             </nav>
           </div>
 
-          <div>
+          <div {...swipeHandlers}>
             {/* Pestaña de citas próximas */}
             {activeTab === 'upcoming' && (
               <UpcomingAppointments

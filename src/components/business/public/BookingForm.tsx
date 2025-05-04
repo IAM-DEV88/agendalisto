@@ -83,7 +83,8 @@ const BookingForm: React.FC<BookingFormProps> = ({
   useEffect(() => {
     if (!formData.date || !businessHours.length) return;
     // JS getDay(): 0=Sunday..6=Saturday; DB day_of_week: 0=Monday..6=Sunday
-    const jsDay = new Date(formData.date).getDay();
+    // Parseamos la fecha como local al añadir 'T00:00' para evitar el parsing en UTC
+    const jsDay = new Date(`${formData.date}T00:00`).getDay();
     const selectedDay = (jsDay + 6) % 7;
     const todaysHours = businessHours.find(h => h.day_of_week === selectedDay);
     if (todaysHours && todaysHours.is_closed) {
@@ -100,7 +101,8 @@ const BookingForm: React.FC<BookingFormProps> = ({
   const availableTimeSlots = useMemo(() => {
     if (!formData.date || loadingSlots || !service) return [];
     // JS getDay(): 0=Sunday..6=Saturday; DB day_of_week: 0=Monday..6=Sunday
-    const jsDay = new Date(formData.date).getDay();
+    // Parseamos la fecha como local al añadir 'T00:00' para evitar el parsing en UTC
+    const jsDay = new Date(`${formData.date}T00:00`).getDay();
     const selectedDay = (jsDay + 6) % 7;
     const todaysHours = businessHours.find(h => h.day_of_week === selectedDay);
     if (!todaysHours || todaysHours.is_closed) return [];
