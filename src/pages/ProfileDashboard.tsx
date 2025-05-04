@@ -2,7 +2,6 @@ import { useState, useEffect } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { supabase } from '../lib/supabase';
 import {
-  getUserAppointments,
   updateUserProfile,
   getUserBusiness,
   updateAppointmentStatus,
@@ -17,6 +16,7 @@ import { useAppDispatch } from '../hooks/useAppDispatch';
 import type { RootState } from '../store';
 import { setActiveTab } from '../store/uiSlice';
 import { notifySuccess, notifyError } from '../lib/toast';
+import { useAppointments } from '../hooks/useAppointments';
 
 type ProfileDashboardProps = {
   user: UserProfile | null;
@@ -55,10 +55,10 @@ const slugify = (str: string): string =>
 const ProfileDashboard = ({ user }: ProfileDashboardProps) => {
   const dispatch = useAppDispatch();
   const activeTab = useSelector((state: RootState) => state.ui.activeTab);
-  const [appointments, setAppointments] = useState<any[]>([]);
-  const [pastAppointments, setPastAppointments] = useState<any[]>([]);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
+  // Realtime appointments via custom hook
+  const { appointments, pastAppointments, loading, error } = useAppointments(user?.id || null);
+  console.log('useAppointments:', { appointments, pastAppointments, loading, error });
+  // Estado para indicar si el usuario tiene un negocio
   const [hasBusiness, setHasBusiness] = useState(false);
 
   // Estado para el perfil de usuario
@@ -88,95 +88,6 @@ const ProfileDashboard = ({ user }: ProfileDashboardProps) => {
         avatar_url: user.avatar_url || '',
       });
     }
-  }, [user]);
-
-  useEffect(() => {
-    const fetchAppointments = async () => {
-      if (!user) {
-        setLoading(false);
-        return;
-      }
-
-      setLoading(true);
-      setError(null);
-
-      // Agregar un temporizador para evitar que se quede cargando indefinidamente
-      const timeoutId = setTimeout(() => {
-        if (loading) {
-          setLoading(false);
-          setError('La operación ha tomado demasiado tiempo. Por favor, recarga la página.');
-        }
-      }, 15000); // 15 segundos es un tiempo razonable para la carga
-
-      try {
-        const { success, data } = await getUserAppointments(user.id);
-        if (success && data) {
-          // Separar citas pasadas y futuras
-          const now = new Date();
-          const upcoming: Appointment[] = [];
-          const past: Appointment[] = [];
-
-          data.forEach((appointment: Appointment) => {
-            const appointmentDate = new Date(appointment.start_time);
-
-            if (appointmentDate > now) {
-              upcoming.push(appointment);
-            } else {
-              past.push(appointment);
-            }
-          });
-
-          setAppointments(upcoming);
-          setPastAppointments(past);
-        } else {
-          setError('No se pudieron cargar tus citas. Por favor, intenta de nuevo más tarde.');
-        }
-      } catch (err) {
-        setError('No se pudieron cargar tus citas. Por favor, intenta de nuevo más tarde.');
-      } finally {
-        clearTimeout(timeoutId);
-        setLoading(false);
-      }
-    };
-
-    fetchAppointments();
-
-    // Limpieza para evitar memory leaks
-    return () => {
-      setLoading(false);
-    };
-  }, [user]);
-
-  // Suscripción a cambios en citas para actualizaciones en vivo de perfil de usuario
-  useEffect(() => {
-    if (!user) return;
-
-    const channel = supabase
-      .channel(`user-appointments-${user.id}`)
-      .on('postgres_changes', {
-        event: '*',
-        schema: 'public',
-        table: 'appointments',
-        filter: `user_id=eq.${user.id}`
-      }, async () => {
-        const { success, data } = await getUserAppointments(user.id);
-        if (success && data) {
-          const now = new Date();
-          const upcoming: Appointment[] = [];
-          const past: Appointment[] = [];
-          data.forEach((appt: Appointment) => {
-            if (new Date(appt.start_time) > now) upcoming.push(appt);
-            else past.push(appt);
-          });
-          setAppointments(upcoming);
-          setPastAppointments(past);
-        }
-      })
-      .subscribe();
-
-    return () => {
-      supabase.removeChannel(channel);
-    };
   }, [user]);
 
   useEffect(() => {
@@ -269,34 +180,11 @@ const ProfileDashboard = ({ user }: ProfileDashboardProps) => {
 
   const handleCancel = async (appointment: Appointment) => {
     if (!user) return;
-    setLoading(true);
-    setError(null);
     try {
       await updateAppointmentStatus(appointment.id, 'cancelled');
-      // Refresh appointments
-      const { success, data } = await getUserAppointments(user.id);
-      if (success && data) {
-        const now = new Date();
-        const upcoming: Appointment[] = [];
-        const past: Appointment[] = [];
-        data.forEach((appt: Appointment) => {
-          if (new Date(appt.start_time) > now) upcoming.push(appt);
-          else past.push(appt);
-        });
-        setAppointments(upcoming);
-        setPastAppointments(past);
-        notifySuccess(`Cita cancelada por ${user.full_name}`);
-      } else {
-        const errMsg = 'Error al cancelar la cita. Por favor, intenta de nuevo.';
-        setError(errMsg);
-        notifyError(errMsg);
-      }
-    } catch (err) {
-      const errMsg = 'Error al cancelar la cita. Por favor, intenta de nuevo.';
-      setError(errMsg);
-      notifyError(errMsg);
-    } finally {
-      setLoading(false);
+      notifySuccess(`Cita cancelada por ${user.full_name}`);
+    } catch (err: any) {
+      notifyError(err.message || 'Error al cancelar la cita');
     }
   };
 

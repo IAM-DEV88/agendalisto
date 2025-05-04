@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import { getUserAppointments } from '../lib/api';
 import type { Appointment } from '../lib/api';
+import { supabase } from '../lib/supabase';
 
 export function useAppointments(userId: string | null) {
   const [appointments, setAppointments] = useState<Appointment[]>([]);
@@ -9,58 +10,58 @@ export function useAppointments(userId: string | null) {
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
-    // Variable para controlar si el componente está montado
+    console.log('[useAppointments] mount, userId=', userId);
+    // Variable para controlar si el componente sigue montado
     let isMounted = true;
-    
-    // Función para cargar citas
+
+    // Función para cargar citas (separate para reuso)
     async function loadAppointments() {
-      if (!userId) {
-        return;
-      }
-      
-      // Solo actualizar estado si el componente sigue montado
-      if (isMounted) setLoading(true);
-      
+      if (!userId || !isMounted) return;
+      setLoading(true);
       try {
         const { success, data, error: apiError } = await getUserAppointments(userId);
-        
-        // No realizar cambios si el componente se desmontó
         if (!isMounted) return;
-        
         if (success && data) {
           const now = new Date();
           const upcoming: Appointment[] = [];
           const past: Appointment[] = [];
-          
           data.forEach((appointment) => {
-            const date = new Date(appointment.start_time);
-            if (date > now) upcoming.push(appointment);
+            const dt = new Date(appointment.start_time);
+            if (dt > now) upcoming.push(appointment);
             else past.push(appointment);
           });
-          
+          console.log('[useAppointments] loadAppointments:', upcoming.length, 'upcoming,', past.length, 'past');
           setAppointments(upcoming);
           setPastAppointments(past);
           setError(null);
         } else {
-          const msg = apiError instanceof Error ? apiError.message : String(apiError);
-          setError(msg);
+          setError(String(apiError || 'Error al cargar citas'));
         }
       } catch (err) {
-        // No realizar cambios si el componente se desmontó
         if (!isMounted) return;
         setError('Error al cargar las citas');
       } finally {
-        // No realizar cambios si el componente se desmontó
         if (isMounted) setLoading(false);
       }
     }
 
+    // Inicial fetch y setup realtime subscription
     loadAppointments();
-    
-    // Limpiar y marcar como desmontado
-    return () => {
-      isMounted = false;
-    };
+    if (userId) {
+      const channel = supabase
+        .channel(`user-appointments-${userId}`)
+        .on('postgres_changes', { event: '*', schema: 'public', table: 'appointments', filter: `user_id=eq.${userId}` }, async (payload) => {
+          console.log('[useAppointments] realtime payload', payload);
+          await loadAppointments();
+        })
+        .subscribe();
+      return () => {
+        isMounted = false;
+        console.log('[useAppointments] cleanup channel', channel);
+        supabase.removeChannel(channel);
+      };
+    }
+    return () => { isMounted = false; };
   }, [userId]);
 
   return { appointments, pastAppointments, loading, error };

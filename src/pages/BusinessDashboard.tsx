@@ -2,9 +2,7 @@ import { useState, useEffect } from 'react';
 import { Link, useSearchParams } from 'react-router-dom';
 import {
   getUserBusiness,
-  getBusinessAppointments,
   updateAppointmentStatus,
-  getBusinessReviews,
   getBusinessClients,
   updateBusiness,
   getBusinessHours,
@@ -18,7 +16,6 @@ import {
   Business,
   BusinessHours,
   BusinessConfig,
-  Review,
 } from '../lib/api';
 import { UserProfile } from '../lib/supabase';
 import AppointmentsSection from '../components/business/AppointmentsSection';
@@ -29,7 +26,7 @@ import ServicesSection from '../components/business/ServicesSection';
 import ClientsSection from '../components/business/ClientsSection';
 import StatsSection from '../components/business/StatsSection';
 import { notifySuccess, notifyError } from '../lib/toast';
-import { supabase } from '../lib/supabase';
+import { useBusinessAppointments } from '../hooks/useBusinessAppointments';
 
 type BusinessDashboardProps = {
   user: UserProfile | null;
@@ -41,8 +38,9 @@ const BusinessDashboard = ({ user }: BusinessDashboardProps) => {
   const defaultTab = searchParams.get('tab') || 'appointments';
   const [activeTab, setActiveTab] = useState<string>(defaultTab);
   const [businessData, setBusinessData] = useState<Business | null>(null);
-  const [businessAppointments, setBusinessAppointments] = useState<any[]>([]);
-  const [loadingBusinessAppointments, setLoadingBusinessAppointments] = useState(true);
+  // Realtime business appointments via hook
+  const { appointments: businessAppointments, loading: loadingBusinessAppointments, error: businessAppointmentsError } = useBusinessAppointments(businessData?.id || null);
+  console.log('[useBusinessAppointments]', { businessAppointments, loadingBusinessAppointments, businessAppointmentsError });
   const [businessHours, setBusinessHoursState] = useState<BusinessHours[]>([]);
   const [loadingBusinessHours, setLoadingBusinessHours] = useState(true);
   const [savingBusiness, setSavingBusiness] = useState(false);
@@ -88,7 +86,6 @@ const BusinessDashboard = ({ user }: BusinessDashboardProps) => {
           text: 'La carga de los datos del negocio ha tomado demasiado tiempo. Por favor, recarga la página.',
           type: 'error'
         });
-        setLoadingBusinessAppointments(false);
         setLoadingBusinessHours(false);
         setLoadingBusinessConfig(false);
       }, 20000); // 20 segundos máximo para toda la operación
@@ -98,52 +95,6 @@ const BusinessDashboard = ({ user }: BusinessDashboardProps) => {
         const { success, business, error: businessError } = await getUserBusiness(user.id);
         if (success && business) {
           setBusinessData(business);
-
-          // Cargar citas del negocio
-          setLoadingBusinessAppointments(true);
-          const appointmentTimeoutId = setTimeout(() => {
-            setLoadingBusinessAppointments(false);
-            setBusinessMessage({
-              text: 'No se pudieron cargar las citas del negocio. Por favor, recarga la página.',
-              type: 'error'
-            });
-          }, 15000);
-
-          try {
-            const { success: appSuccess, data: appData, error: appError } = await getBusinessAppointments(business.id);
-            clearTimeout(appointmentTimeoutId);
-
-            if (appSuccess && appData) {
-              try {
-                const { success: revSuccess, data: revData } = await getBusinessReviews(business.id);
-                if (revSuccess && revData) {
-                  const reviewMap: Record<string, Review> = revData.reduce((map, review) => {
-                    map[review.appointment_id] = review;
-                    return map;
-                  }, {} as Record<string, Review>);
-                  const enrichedAppointments = appData.map(app => ({ ...app, review: reviewMap[app.id] }));
-                  setBusinessAppointments(enrichedAppointments);
-                } else {
-                  setBusinessAppointments(appData);
-                }
-              } catch (revErr) {
-                setBusinessAppointments(appData);
-              }
-            } else {
-              setBusinessMessage({
-                text: (appError as any)?.message || 'No se pudieron cargar las citas del negocio.',
-                type: 'error'
-              });
-            }
-            setLoadingBusinessAppointments(false);
-          } catch (appErr) {
-            clearTimeout(appointmentTimeoutId);
-            setBusinessMessage({
-              text: 'Error al cargar las citas del negocio.',
-              type: 'error'
-            });
-            setLoadingBusinessAppointments(false);
-          }
 
           // Cargar horarios del negocio
           setLoadingBusinessHours(true);
@@ -247,7 +198,6 @@ const BusinessDashboard = ({ user }: BusinessDashboardProps) => {
             text: businessError ? `Error: ${businessError}` : 'No se encontró información de tu negocio',
             type: 'error'
           });
-          setLoadingBusinessAppointments(false);
           setLoadingBusinessHours(false);
           setLoadingBusinessConfig(false);
         }
@@ -256,7 +206,6 @@ const BusinessDashboard = ({ user }: BusinessDashboardProps) => {
           text: 'Error al cargar los datos del negocio. Por favor, recarga la página.',
           type: 'error'
         });
-        setLoadingBusinessAppointments(false);
         setLoadingBusinessHours(false);
         setLoadingBusinessConfig(false);
       } finally {
@@ -268,67 +217,10 @@ const BusinessDashboard = ({ user }: BusinessDashboardProps) => {
 
     // Limpieza al desmontar
     return () => {
-      setLoadingBusinessAppointments(false);
       setLoadingBusinessHours(false);
       setLoadingBusinessConfig(false);
     };
   }, [user]);
-
-  // Real-time updates: subscribe to appointment and review changes
-  useEffect(() => {
-    if (!businessData) return;
-    const businessId = businessData.id;
-
-    // Reload appointments with attached reviews
-    const reload = async () => {
-      const { success: appSuccess, data: appData } = await getBusinessAppointments(businessId);
-      if (!appSuccess || !appData) return;
-      try {
-        const { success: revSuccess, data: revData } = await getBusinessReviews(businessId);
-        const reviewMap = revData && revSuccess
-          ? revData.reduce<Record<string, Review>>((map, r) => { map[r.appointment_id] = r; return map; }, {})
-          : {};
-        const enriched = appData.map(app => ({ ...app, review: reviewMap[app.id] }));
-        setBusinessAppointments(enriched);
-      } catch {
-        setBusinessAppointments(appData);
-      }
-    };
-
-    // Subscribe via Realtime channel
-    const channel = supabase
-      .channel(`business-realtime-${businessId}`)
-      // Appointment INSERT: reload and reset pages
-      .on('postgres_changes', { event: 'INSERT', schema: 'public', table: 'appointments', filter: `business_id=eq.${businessId}` }, () => {
-        reload();
-        setAppointmentsPage(1);
-        setHistoryPage(1);
-        notifySuccess('Nueva solicitud recibida');
-      })
-      // Appointment UPDATE & DELETE: reload
-      .on('postgres_changes', { event: 'UPDATE', schema: 'public', table: 'appointments', filter: `business_id=eq.${businessId}` }, reload)
-      .on('postgres_changes', { event: 'DELETE', schema: 'public', table: 'appointments', filter: `business_id=eq.${businessId}` }, reload)
-      // Review INSERT: update review in specific appointment
-      .on('postgres_changes', { event: 'INSERT', schema: 'public', table: 'reviews', filter: `business_id=eq.${businessId}` }, payload => {
-        const newReview = payload.new as Review;
-        setBusinessAppointments(prev => prev.map(app => app.id === newReview.appointment_id ? { ...app, review: newReview } : app));
-        notifySuccess('Nueva reseña recibida');
-      })
-      // Review UPDATE & DELETE: update or remove review
-      .on('postgres_changes', { event: 'UPDATE', schema: 'public', table: 'reviews', filter: `business_id=eq.${businessId}` }, payload => {
-        const updated = payload.new as Review;
-        setBusinessAppointments(prev => prev.map(app => app.id === updated.appointment_id ? { ...app, review: updated } : app));
-      })
-      .on('postgres_changes', { event: 'DELETE', schema: 'public', table: 'reviews', filter: `business_id=eq.${businessId}` }, payload => {
-        const deleted = payload.old as Review;
-        setBusinessAppointments(prev => prev.map(app => app.id === deleted.appointment_id ? { ...app, review: undefined } : app));
-      })
-      .subscribe();
-
-    return () => {
-      supabase.removeChannel(channel);
-    };
-  }, [businessData]);
 
   // Handle tab change and update URL search param
   const handleTabChange = (tab: string) => {
@@ -339,20 +231,12 @@ const BusinessDashboard = ({ user }: BusinessDashboardProps) => {
   const handleUpdateAppointmentStatus = async (id: string, newStatus: 'pending' | 'confirmed' | 'completed' | 'cancelled') => {
     try {
       await updateAppointmentStatus(id, newStatus);
-      if (businessData) {
-        const { success, data } = await getBusinessAppointments(businessData.id);
-        if (success && data) {
-          setBusinessAppointments(data);
-          const statusText =
-            newStatus === 'confirmed' ? 'confirmada' :
-            newStatus === 'completed' ? 'completada' :
-            newStatus === 'cancelled' ? 'cancelada' :
-            'actualizada';
-          notifySuccess(`Cita ${statusText} correctamente`);
-        } else {
-          notifyError('Error al actualizar el estado de la cita');
-        }
-      }
+      const statusText =
+        newStatus === 'confirmed' ? 'confirmada' :
+        newStatus === 'completed' ? 'completada' :
+        newStatus === 'cancelled' ? 'cancelada' :
+        'actualizada';
+      notifySuccess(`Cita ${statusText} correctamente`);
     } catch (err: any) {
       notifyError(err.message || 'Error al actualizar el estado de la cita');
     }
@@ -499,8 +383,6 @@ const BusinessDashboard = ({ user }: BusinessDashboardProps) => {
     peakHourCounts[hour] = (peakHourCounts[hour] || 0) + 1;
   });
   const peakHour = Number(Object.entries(peakHourCounts).sort((a, b) => b[1] - a[1])[0]?.[0]) || 0;
-  const avgRatingAppointments = businessAppointments.filter(a => typeof a.review?.rating === 'number');
-  const avgRating = avgRatingAppointments.length > 0 ? avgRatingAppointments.reduce((sum, a) => sum + (a.review?.rating ?? 0), 0) / avgRatingAppointments.length : 0;
   const lifetimeValueAvg = businessClients.length > 0 ? totalRevenue / businessClients.length : 0;
 
   return (
@@ -627,7 +509,6 @@ const BusinessDashboard = ({ user }: BusinessDashboardProps) => {
                 newClients={newClientsCount}
                 returningClients={returningClientsCount}
                 lifetimeValueAvg={lifetimeValueAvg}
-                avgRating={avgRating}
               />
             )}
             {/* Tab de Agenda */}
