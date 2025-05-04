@@ -2,6 +2,7 @@ import React, { useState, useEffect, useMemo } from 'react';
 import { X, Clock, Calendar, CheckCircle } from 'lucide-react';
 import { createAppointment, Service, getBusinessHours, getBusinessAppointments, BusinessHours, Appointment } from '../../../lib/api';
 import { notifyError, notifyLoading, dismissToast } from '../../../lib/toast';
+import { Link } from 'react-router-dom';
 
 interface BookingFormProps {
   businessId: string;
@@ -52,7 +53,21 @@ const BookingForm: React.FC<BookingFormProps> = ({
         setLoadingSlots(true);
         const hours = await getBusinessHours(businessId);
         const apptsRes = await getBusinessAppointments(businessId);
-        setBusinessHours(hours);
+        // Build full week: idx 0=Monday .. 6=Sunday; missing days as closed
+        const fullWeek = Array.from({ length: 7 }, (_, idx) => {
+          const found = hours.find(h => h.day_of_week === idx);
+          return (
+            found || {
+              id: `${businessId}-${idx}`,
+              business_id: businessId,
+              day_of_week: idx,
+              start_time: '00:00',
+              end_time: '00:00',
+              is_closed: true,
+            }
+          );
+        });
+        setBusinessHours(fullWeek);
         setAppointments(apptsRes.success && apptsRes.data ? apptsRes.data : []);
       } catch (err) {
       } finally {
@@ -67,7 +82,9 @@ const BookingForm: React.FC<BookingFormProps> = ({
   // Reset error and time selection if selected date is a closed day
   useEffect(() => {
     if (!formData.date || !businessHours.length) return;
-    const selectedDay = new Date(formData.date).getDay();
+    // JS getDay(): 0=Sunday..6=Saturday; DB day_of_week: 0=Monday..6=Sunday
+    const jsDay = new Date(formData.date).getDay();
+    const selectedDay = (jsDay + 6) % 7;
     const todaysHours = businessHours.find(h => h.day_of_week === selectedDay);
     if (todaysHours && todaysHours.is_closed) {
       setError('El negocio está cerrado ese día');
@@ -77,53 +94,43 @@ const BookingForm: React.FC<BookingFormProps> = ({
     }
   }, [formData.date, businessHours]);
 
-  // Generate available time slots
-  const generateTimeSlots = () => {
-    const slots = [];
-    // From 9:00 to 20:00 in 30-minute intervals
-    for (let hour = 9; hour <= 20; hour++) {
-      for (let minute = 0; minute < 60; minute += 30) {
-        if (hour === 20 && minute === 30) break; // Skip 20:30
-        const formattedHour = hour.toString().padStart(2, '0');
-        const formattedMinute = minute.toString().padStart(2, '0');
-        slots.push(`${formattedHour}:${formattedMinute}`);
-      }
-    }
-    return slots;
-  };
+  // Removed static slot generator; slots will be built per business hours
 
-  const timeSlots = generateTimeSlots();
-
-  // Compute available slots based on business hours and existing appointments
+  // Compute available slots dynamically based on business hours and service duration (supports cross-midnight)
   const availableTimeSlots = useMemo(() => {
     if (!formData.date || loadingSlots || !service) return [];
-    const selectedDay = new Date(formData.date).getDay();
+    // JS getDay(): 0=Sunday..6=Saturday; DB day_of_week: 0=Monday..6=Sunday
+    const jsDay = new Date(formData.date).getDay();
+    const selectedDay = (jsDay + 6) % 7;
     const todaysHours = businessHours.find(h => h.day_of_week === selectedDay);
     if (!todaysHours || todaysHours.is_closed) return [];
-    const [startH, startM] = todaysHours.start_time.split(':').map(Number);
-    const [endH, endM] = todaysHours.end_time.split(':').map(Number);
+    // Support time strings with ':' or '.' separators
+    const [startH, startM] = todaysHours.start_time.replace('.', ':').split(':').map(Number);
+    const [endH, endM] = todaysHours.end_time.replace('.', ':').split(':').map(Number);
     const businessStart = startH * 60 + startM;
-    const businessEnd = endH * 60 + endM;
-    return timeSlots.filter(slot => {
-      const [slotH, slotM] = slot.split(':').map(Number);
-      const slotStart = slotH * 60 + slotM;
-      const slotEnd = slotStart + service.duration;
-      if (slotStart < businessStart || slotEnd > businessEnd) {
-        return false;
-      }
-      const overlapping = appointments.some(appt => {
+    let businessEnd = endH * 60 + endM;
+    // If closing time is at or before opening, assume next-day closing
+    if (businessEnd <= businessStart) {
+      businessEnd += 24 * 60;
+    }
+    const slots: string[] = [];
+    for (let minutes = businessStart; minutes + service.duration <= businessEnd; minutes += 30) {
+      const h = Math.floor(minutes / 60);
+      const m = minutes % 60;
+      slots.push(`${String(h).padStart(2,'0')}:${String(m).padStart(2,'0')}`);
+    }
+    return slots.filter(slot => {
+      const slotTime = new Date(`${formData.date}T${slot}`).getTime();
+      const slotEnd = slotTime + service.duration * 60000;
+      return !appointments.some(appt => {
         const apptDate = appt.start_time.split('T')[0];
-        if (apptDate !== formData.date) return false;
-        if (appt.status === 'cancelled') return false;
+        if (apptDate !== formData.date || appt.status === 'cancelled') return false;
         const apptStart = new Date(appt.start_time).getTime();
         const apptEnd = new Date(appt.end_time).getTime();
-        const slotStartTime = new Date(`${formData.date}T${slot}`).getTime();
-        const slotEndTime = slotStartTime + service.duration * 60000;
-        return slotStartTime < apptEnd && slotEndTime > apptStart;
+        return slotTime < apptEnd && slotEnd > apptStart;
       });
-      return !overlapping;
     });
-  }, [formData.date, loadingSlots, businessHours, appointments, timeSlots, service]);
+  }, [formData.date, loadingSlots, businessHours, appointments, service]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -180,8 +187,14 @@ const BookingForm: React.FC<BookingFormProps> = ({
     }
   };
 
-  // Calculate min date (today)
-  const today = new Date().toISOString().split('T')[0];
+  // Calculate min date (today) in local timezone
+  const today = (() => {
+    const now = new Date();
+    const year = now.getFullYear();
+    const month = String(now.getMonth() + 1).padStart(2, '0');
+    const day = String(now.getDate()).padStart(2, '0');
+    return `${year}-${month}-${day}`;
+  })();
 
   if (bookingSuccess) {
     return (
@@ -195,6 +208,12 @@ const BookingForm: React.FC<BookingFormProps> = ({
           {notifyEmail && <><br />Recibirás confirmación por correo electrónico cuando se confirme tu solicitud.</>}
           {notifyWhatsapp && <><br />Recibirás notificación por WhatsApp cuando se confirme tu solicitud.</>}
         </p>
+        <Link
+          to="/dashboard/"
+          className="inline-block px-4 py-2 m-2 bg-indigo-600 text-white rounded-md hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2"
+        >
+          Ver mis reservas
+        </Link>
         <button
           onClick={onClose}
           className="px-4 py-2 bg-indigo-600 text-white rounded-md hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2"

@@ -7,9 +7,10 @@ import { notifySuccess, notifyError } from '../../../lib/toast';
 interface ReviewsSectionProps {
   businessId: string;
   currentUser: any;
+  allowReview?: boolean;
 }
 
-const ReviewsSection: React.FC<ReviewsSectionProps> = ({ businessId, currentUser }) => {
+const ReviewsSection: React.FC<ReviewsSectionProps> = ({ businessId, currentUser, allowReview = true }) => {
   const [reviews, setReviews] = useState<Review[]>([]);
   const [loading, setLoading] = useState(true);
   const [showReviewForm, setShowReviewForm] = useState(false);
@@ -116,7 +117,7 @@ const ReviewsSection: React.FC<ReviewsSectionProps> = ({ businessId, currentUser
       {loading ? (
         <div className="text-center py-4">Cargando reseñas...</div>
       ) : null}
-      {!currentUser ? (
+      {allowReview && !currentUser ? (
         <div className="mb-6 bg-yellow-50 border border-yellow-200 rounded-lg p-4">
           <p className="text-yellow-800 text-sm">
             <Link to="/login" className="text-yellow-700 underline">
@@ -125,7 +126,9 @@ const ReviewsSection: React.FC<ReviewsSectionProps> = ({ businessId, currentUser
             para dejar una reseña.
           </p>
         </div>
-      ) : !showReviewForm && canReview ? (
+      ) : null}
+
+      {allowReview && !showReviewForm && canReview ? (
         <button
           onClick={() => setShowReviewForm(true)}
           className="mb-6 px-4 py-2 bg-indigo-600 text-white rounded-md hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2"
@@ -134,7 +137,7 @@ const ReviewsSection: React.FC<ReviewsSectionProps> = ({ businessId, currentUser
         </button>
       ) : null}
 
-      {showReviewForm && currentUser && (
+      {allowReview && showReviewForm && currentUser && (
         <div className="mb-8 p-6 bg-gray-50 rounded-lg border border-gray-200">
           <h3 className="text-lg font-medium text-gray-900 mb-4">Escribe tu reseña</h3>
           <form onSubmit={handleSubmitReview}>

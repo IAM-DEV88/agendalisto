@@ -260,7 +260,7 @@ function BusinessPublicPage() {
         {/* Mobile Reviews Section */}
         <div className="mt-6 md:hidden">
           <div className="bg-gray-50 dark:bg-gray-50 dark:bg-opacity-10 shadow-md p-6">
-            <ReviewsSection businessId={businessData.id} currentUser={user} />
+            <ReviewsSection businessId={businessData.id} currentUser={user} allowReview={false} />
           </div>
         </div>
 
@@ -308,7 +308,7 @@ function BusinessPublicPage() {
             {/* Reviews Section */}
             <div className="mt-6 hidden md:block">
               <div className="bg-gray-50 dark:bg-gray-50 dark:bg-opacity-10 shadow-md p-6">
-                <ReviewsSection businessId={businessData.id} currentUser={user} />
+                <ReviewsSection businessId={businessData.id} currentUser={user} allowReview={false} />
               </div>
             </div>
 
