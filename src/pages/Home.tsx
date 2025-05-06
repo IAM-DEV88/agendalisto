@@ -1,12 +1,13 @@
 import { Link } from 'react-router-dom';
 import { useAuthSession } from '../hooks/useAuthSession';
 import { useState, useEffect } from 'react';
-import { getBusinessCategories, BusinessCategory } from '../lib/api';
+import { getBusinessCategories, BusinessCategory, getTopMilestones } from '../lib/api';
 import { Swiper, SwiperSlide } from 'swiper/react';
 import { Pagination, Autoplay } from 'swiper/modules';
 import 'swiper/css';
 import 'swiper/css/pagination';
 import { supabase } from '../lib/supabase';
+import type { Milestone } from '../lib/api';
 
 const Home = () => {
   const { user, loading } = useAuthSession();
@@ -31,6 +32,10 @@ const Home = () => {
   const [categories, setCategories] = useState<BusinessCategory[]>([]);
   const [loadingCategories, setLoadingCategories] = useState(true);
 
+  // Milestones
+  const [milestones, setMilestones] = useState<Milestone[]>([]);
+  const [loadingMilestones, setLoadingMilestones] = useState(true);
+
   useEffect(() => {
     const fetchCategories = async () => {
       const { success, data, error } = await getBusinessCategories();
@@ -42,6 +47,16 @@ const Home = () => {
       setLoadingCategories(false);
     };
     fetchCategories();
+  }, []);
+
+  useEffect(() => {
+    const fetchMilestones = async () => {
+      const { success, data, error } = await getTopMilestones(3);
+      if (success && data) setMilestones(data);
+      else console.error('Error fetching milestones', error);
+      setLoadingMilestones(false);
+    };
+    fetchMilestones();
   }, []);
 
   return (
@@ -121,6 +136,33 @@ const Home = () => {
       ) : (
         <p className="text-center my-8">Cargando categorías...</p>
       )}
+
+      {/* Milestones section */}
+      <div className="max-w-7xl mx-auto py-8">
+        <h2 className="text-2xl font-bold mb-4">Hitos Destacados</h2>
+        {loadingMilestones ? (
+          <p className="text-center">Cargando hitos...</p>
+        ) : milestones.length ? (
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+            {milestones.map((m) => (
+              <div key={m.id} className="p-4 border rounded-lg">
+                <h3 className="text-lg font-semibold">{m.title}</h3>
+                <p className="text-sm mb-2">{m.description}</p>
+                <p className="text-sm">Recaudado: {m.current_amount} / {m.goal_amount}</p>
+              </div>
+            ))}
+          </div>
+        ) : (
+          <p className="text-center">No hay hitos disponibles.</p>
+        )}
+        { !loading && (
+          <div className="text-center mt-6">
+            <Link to="/crowdfunding" className="px-6 py-3 bg-indigo-600 text-white rounded hover:bg-indigo-500">
+              Apoya nuestros hitos
+            </Link>
+          </div>
+        )}
+      </div>
     </div>
   );
 };

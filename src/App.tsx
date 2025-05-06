@@ -11,6 +11,7 @@ import BusinessDashboard from './pages/BusinessDashboard';
 import BusinessPublicPage from './pages/BusinessPublicPage';
 import ForgotPassword from './pages/ForgotPassword';
 import ExploreBusinesses from './pages/ExploreBusinesses';
+import Crowdfunding from './pages/Crowdfunding';
 import Nav from './components/Nav';
 import Footer from './components/Footer';
 import ProtectedRoute from './components/ProtectedRoute';
@@ -224,6 +225,7 @@ function App() {
             <Route path="/register" element={<Register />} />
             <Route path="/forgot-password" element={<ForgotPassword />} />
             <Route path="/explore" element={<ExploreBusinesses />} />
+            <Route path="/crowdfunding" element={<Crowdfunding />} />
             <Route path="/dashboard" element={
               <ProtectedRoute user={user}>
                 <ProfileDashboard user={userProfile} />

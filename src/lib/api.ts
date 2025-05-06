@@ -644,3 +644,49 @@ export async function getBusinessCategories(): Promise<{ success: boolean; data:
     return { success: false, data: null, error: err.message || 'Error fetching categories' };
   }
 }
+
+export type Milestone = {
+  id: string;
+  title: string;
+  cta: string;
+  description: string;
+  goal_amount: number;
+  current_amount: number;
+  deadline: string | null;
+  created_at: string;
+  updated_at: string;
+};
+
+export const getMilestones = async (): Promise<{ success: boolean; data?: Milestone[]; error?: string }> => {
+  try {
+    const { data, error } = await supabase.from('milestones').select('*');
+    if (error) throw error;
+    return { success: true, data: (data as Milestone[]) || [] };
+  } catch (err: any) {
+    return { success: false, error: err.message };
+  }
+};
+
+export const getTopMilestones = async (limit = 3): Promise<{ success: boolean; data?: Milestone[]; error?: string }> => {
+  try {
+    const { data, error } = await supabase.from('milestones').select('*').order('current_amount', { ascending: false }).limit(limit);
+    if (error) throw error;
+    return { success: true, data: (data as Milestone[]) || [] };
+  } catch (err: any) {
+    return { success: false, error: err.message };
+  }
+};
+
+export const contributeToMilestone = async (id: string, amount: number): Promise<{ success: boolean; data?: Milestone; error?: string }> => {
+  try {
+    // Get existing current_amount
+    const { data: existing, error: fetchError } = await supabase.from('milestones').select('current_amount').eq('id', id).single();
+    if (fetchError || !existing) throw fetchError || new Error('Milestone not found');
+    const newAmount = Number((existing as any).current_amount) + amount;
+    const { data, error } = await supabase.from('milestones').update({ current_amount: newAmount }).eq('id', id).single();
+    if (error) throw error;
+    return { success: true, data: data as Milestone };
+  } catch (err: any) {
+    return { success: false, error: err.message };
+  }
+};
