@@ -138,7 +138,7 @@ const Home = () => {
       )}
 
       {/* Milestones section */}
-      <div className="max-w-7xl mx-4 mx-auto py-8">
+      <div className="max-w-7xl mx-4 sm:mx-auto py-8">
         <h2 className="text-2xl font-bold mb-4">Hitos Destacados</h2>
         {loadingMilestones ? (
           <p className="text-center">Cargando hitos...</p>

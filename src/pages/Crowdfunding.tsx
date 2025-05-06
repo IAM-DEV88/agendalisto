@@ -5,6 +5,10 @@ import { getTopMilestones } from '../lib/api';
 
 const Crowdfunding = () => {
   const [milestones, setMilestones] = useState<Milestone[]>([]);
+  // PayPal business email from env (add to .env.local)
+  const paypalBusinessEmail = 'jaguerx88@gmail.com';
+  // IPN listener URL (use your Netlify site domain)
+  const ipnUrl = 'https://agendaya.netlify.com/.netlify/functions/ipn-listener';
 
   useEffect(() => {
     (async () => {
@@ -14,7 +18,7 @@ const Crowdfunding = () => {
   }, []);
 
   return (
-    <div className="max-w-4xl mx-4 mx-auto py-8">
+    <div className="max-w-4xl mx-4 sm:mx-auto py-8">
       <h1 className="text-3xl font-bold mb-4">Crowdfunding: Hitos de la plataforma</h1>
       <p className="mb-6">Puedes apoyar un hito con la cantidad que desees.</p>
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
@@ -34,12 +38,13 @@ const Crowdfunding = () => {
                 target="_blank"
               >
                 <input type="hidden" name="cmd" value="_donations" />
-                <input type="hidden" name="hosted_button_id" value="P5EECEAC85YTQ" />
-                <input type="hidden" name="notify_url" value="https://agendaya.netlify.com/.netlify/functions/ipn-listener" />
+                <input type="hidden" name="business" value={paypalBusinessEmail} />
+                <input type="hidden" name="item_name" value={m.title} />
                 <input type="hidden" name="custom" value={m.id} />
+                <input type="hidden" name="notify_url" value={ipnUrl} />
                 <button
                   type="submit"
-                  className="px-4 py-2 bg-indigo-600 text-white rounded hover:bg-indigo-500"
+                  className="px-6 py-2 bg-indigo-600 text-white rounded hover:bg-indigo-500"
                 >
                   Contribuir
                 </button>
