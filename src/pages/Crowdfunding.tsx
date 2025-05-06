@@ -14,7 +14,7 @@ const Crowdfunding = () => {
   }, []);
 
   return (
-    <div className="max-w-4xl mx-auto py-8">
+    <div className="max-w-4xl mx-4 mx-auto py-8">
       <h1 className="text-3xl font-bold mb-4">Crowdfunding: Hitos de la plataforma</h1>
       <p className="mb-6">Puedes apoyar un hito con la cantidad que desees.</p>
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
@@ -27,15 +27,23 @@ const Crowdfunding = () => {
             <p className="text-sm text-gray-600 mb-2">{m.description}</p>
             <p className="text-sm mb-2">Recaudado: {m.current_amount} / {m.goal_amount}</p>
             <p className="font-medium text-indigo-600 mb-4">{m.cta}</p>
-            <div className="mt-4">
-              <a
-                href="https://www.paypal.com/donate/?hosted_button_id=P5EECEAC85YTQ"
+            <div className="mt-4 text-center">
+              <form
+                action="https://www.paypal.com/cgi-bin/webscr"
+                method="post"
                 target="_blank"
-                rel="noopener noreferrer"
-                className="px-4 py-2 bg-indigo-600 text-white rounded hover:bg-indigo-500"
               >
-                Contribuir
-              </a>
+                <input type="hidden" name="cmd" value="_donations" />
+                <input type="hidden" name="hosted_button_id" value="P5EECEAC85YTQ" />
+                <input type="hidden" name="notify_url" value="https://agendaya.netlify.com/.netlify/functions/ipn-listener" />
+                <input type="hidden" name="custom" value={m.id} />
+                <button
+                  type="submit"
+                  className="px-4 py-2 bg-indigo-600 text-white rounded hover:bg-indigo-500"
+                >
+                  Contribuir
+                </button>
+              </form>
             </div>
           </div>
         ))}
