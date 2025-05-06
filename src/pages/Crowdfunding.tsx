@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import { Gift } from 'lucide-react';
 import type { Milestone } from '../lib/api';
-import { getTopMilestones, contributeToMilestone } from '../lib/api';
+import { getTopMilestones } from '../lib/api';
 
 const Crowdfunding = () => {
   const [milestones, setMilestones] = useState<Milestone[]>([]);
