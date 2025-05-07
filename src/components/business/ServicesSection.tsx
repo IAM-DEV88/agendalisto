@@ -1,18 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { notifySuccess, notifyError } from '../../lib/toast';
-
-interface Service {
-  id: string;
-  business_id: string;
-  name: string;
-  description: string;
-  duration: number;
-  price: number;
-  is_active: boolean;
-  provider: string;
-  created_at?: string;
-  updated_at?: string;
-}
+import type { Service } from '../../lib/api';
 
 interface ServicesSectionProps {
   businessId: string;

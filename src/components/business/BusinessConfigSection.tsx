@@ -8,7 +8,7 @@ interface BusinessConfigSectionProps {
   loading: boolean;
   saving: boolean;
   message: { text: string; type: 'success' | 'error' } | null;
-  onSave: (e: React.FormEvent) => void;
+  onSave: (e: React.FormEvent) => Promise<void>;
   onConfigChange: (field: keyof BusinessConfig, value: any) => void;
 }
 

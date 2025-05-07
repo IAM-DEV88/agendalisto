@@ -54,18 +54,16 @@ const ProfileDashboard = () => {
   const { user } = useAuth();
   const dispatch = useAppDispatch();
   const activeTab = useSelector((state: RootState) => state.ui.activeTab);
-  // Realtime appointments via custom hook
   const { appointments, pastAppointments, loading, error } = useAppointments(user?.id || null);
-  console.log('useAppointments:', { appointments, pastAppointments, loading, error });
-  // Estado para indicar si el usuario tiene un negocio
   const [hasBusiness, setHasBusiness] = useState(false);
+  const [userProfile, setUserProfile] = useState<UserProfile | null>(null);
 
   // Estado para el perfil de usuario
   const [profileData, setProfileData] = useState({
-    full_name: user?.full_name || '',
-    email: user?.email || '',
-    phone: user?.phone || '',
-    avatar_url: user?.avatar_url || '',
+    full_name: '',
+    email: '',
+    phone: '',
+    avatar_url: '',
   });
   const [saving, setSaving] = useState(false);
   const [profileMessage, setProfileMessage] = useState<{ text: string, type: 'success' | 'error' } | null>(null);
@@ -74,14 +72,39 @@ const ProfileDashboard = () => {
   const [currentPage, setCurrentPage] = useState(1);
   const [pendingPage, setPendingPage] = useState(1);
   const [pastCurrentPage, setPastCurrentPage] = useState(1);
-  const [itemsPerPage, setItemsPerPage] = useState(user?.items_per_page || 5);
+  const [itemsPerPage, setItemsPerPage] = useState(5);
   const [itemsPerPageMessage, setItemsPerPageMessage] = useState<{ text: string; type: 'success' | 'error' } | null>(null);
 
-  // Remove localStorage loading since we're using profile value
+  // Load user profile data
   useEffect(() => {
-    if (user?.items_per_page) {
-      setItemsPerPage(user.items_per_page);
-    }
+    const loadUserProfile = async () => {
+      if (!user?.id) return;
+      
+      try {
+        const { data: profile, error } = await supabase
+          .from('profiles')
+          .select('*')
+          .eq('id', user.id)
+          .single();
+          
+        if (error) throw error;
+        
+        if (profile) {
+          setUserProfile(profile as UserProfile);
+          setProfileData({
+            full_name: profile.full_name || '',
+            email: user.email || '',
+            phone: profile.phone || '',
+            avatar_url: profile.avatar_url || '',
+          });
+          setItemsPerPage(profile.items_per_page || 5);
+        }
+      } catch (err) {
+        console.error('Error loading user profile:', err);
+      }
+    };
+
+    loadUserProfile();
   }, [user]);
 
   // Cálculo de conteos y filtros
@@ -114,18 +137,6 @@ const ProfileDashboard = () => {
     const btn = document.getElementById(`tab-${activeTab}`);
     btn?.scrollIntoView({ behavior: 'smooth', inline: 'center', block: 'nearest' });
   }, [activeTab]);
-
-  useEffect(() => {
-    // Actualizar estado cuando cambia el usuario
-    if (user) {
-      setProfileData({
-        full_name: user.full_name || '',
-        email: user.email || '',
-        phone: user.phone || '',
-        avatar_url: user.avatar_url || '',
-      });
-    }
-  }, [user]);
 
   useEffect(() => {
     const checkBusiness = async () => {
@@ -216,10 +227,10 @@ const ProfileDashboard = () => {
   };
 
   const handleCancel = async (appointment: Appointment) => {
-    if (!user) return;
+    if (!userProfile) return;
     try {
       await updateAppointmentStatus(appointment.id, 'cancelled');
-      notifySuccess(`Cita cancelada por ${user.full_name}`);
+      notifySuccess(`Cita cancelada por ${userProfile.full_name}`);
     } catch (err: any) {
       notifyError(err.message || 'Error al cancelar la cita');
     }
@@ -234,7 +245,7 @@ const ProfileDashboard = () => {
   };
 
   const handleSaveItemsPerPage = async () => {
-    if (!user) return;
+    if (!user || !userProfile) return;
     
     try {
       setItemsPerPageMessage(null);
@@ -252,7 +263,11 @@ const ProfileDashboard = () => {
       }
 
       // Update global state with new items_per_page
-      dispatchUserProfileUpdated(session.user, { ...user, items_per_page: itemsPerPage });
+      const updatedProfile: UserProfile = {
+        ...userProfile,
+        items_per_page: itemsPerPage
+      };
+      dispatchUserProfileUpdated(session.user, updatedProfile);
       
       // Show success message in UI and toast
       setItemsPerPageMessage({ text: 'Configuración guardada correctamente', type: 'success' });

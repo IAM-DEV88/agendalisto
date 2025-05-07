@@ -16,6 +16,8 @@ import {
   Business,
   BusinessHours,
   BusinessConfig,
+  type Service,
+  type UserProfile
 } from '../lib/api';
 import AppointmentsSection from '../components/business/AppointmentsSection';
 import BusinessProfileSection from '../components/business/BusinessProfileSection';
@@ -29,14 +31,21 @@ import { useBusinessAppointments } from '../hooks/useBusinessAppointments';
 import { useSwipeable } from 'react-swipeable';
 import { useItemsPerPage } from '../hooks/useItemsPerPage';
 import { useAuth } from '../hooks/useAuth';
+import { useAppointments } from '../hooks/useAppointments';
+import { useSelector } from 'react-redux';
+import { useAppDispatch } from '../hooks/useAppDispatch';
+import type { RootState } from '../store';
+import { setActiveTab } from '../store/uiSlice';
 
 export const BusinessDashboard: React.FC = () => {
   const { user } = useAuth();
+  const dispatch = useAppDispatch();
+  const activeTab = useSelector((state: RootState) => state.ui.activeTab);
   const { itemsPerPage } = useItemsPerPage(user?.id);
   const [searchParams, setSearchParams] = useSearchParams();
   // Tab persistence: initialize from URL or default to 'appointments'
   const defaultTab = searchParams.get('tab') || 'appointments';
-  const [activeTab, setActiveTab] = useState<string>(defaultTab);
+  const [activeTabState, setActiveTabState] = useState<string>(defaultTab);
   const [businessData, setBusinessData] = useState<Business | null>(null);
   // Realtime business appointments via hook
   const { appointments: businessAppointments, loading: loadingBusinessAppointments, error: businessAppointmentsError } = useBusinessAppointments(businessData?.id || null);
@@ -47,10 +56,10 @@ export const BusinessDashboard: React.FC = () => {
   const [savingBusinessHours, setSavingBusinessHours] = useState(false);
   const [businessMessage, setBusinessMessage] = useState<{ text: string; type: 'success' | 'error' } | null>(null);
   const [hoursMessage, setHoursMessage] = useState<{ text: string; type: 'success' | 'error' } | null>(null);
-  const [configMessage, setConfigMessage] = useState<{ text: string; type: 'success' | 'error' } | null>(null);
+  const [configMessage, setConfigMessageState] = useState<{ text: string; type: 'success' | 'error' } | null>(null);
   const [businessClients, setBusinessClients] = useState<UserProfile[]>([]);
   const [loadingBusinessClients, setLoadingBusinessClients] = useState(true);
-  const [clientsMessage, setClientsMessage] = useState<{ text: string; type: 'success' | 'error' } | null>(null);
+  const [clientsMessage, setClientsMessageState] = useState<{ text: string; type: 'success' | 'error' } | null>(null);
   const [totalServices, setTotalServices] = useState(0);
   const days = ['Lunes', 'Martes', 'Miércoles', 'Jueves', 'Viernes', 'Sábado', 'Domingo'];
 
@@ -131,7 +140,7 @@ export const BusinessDashboard: React.FC = () => {
           setLoadingBusinessConfig(true);
           const configTimeoutId = setTimeout(() => {
             setLoadingBusinessConfig(false);
-            setConfigMessage({
+            setConfigMessageState({
               text: 'No se pudo cargar la configuración del negocio. Por favor, recarga la página.',
               type: 'error'
             });
@@ -144,7 +153,7 @@ export const BusinessDashboard: React.FC = () => {
             if (configSuccess && config) {
               setBusinessConfig(config);
             } else {
-              setConfigMessage({
+              setConfigMessageState({
                 text: configError || 'No se pudo cargar la configuración del negocio.',
                 type: 'error'
               });
@@ -152,7 +161,7 @@ export const BusinessDashboard: React.FC = () => {
             setLoadingBusinessConfig(false);
           } catch (configErr) {
             clearTimeout(configTimeoutId);
-            setConfigMessage({
+            setConfigMessageState({
               text: 'Error al cargar la configuración del negocio.',
               type: 'error'
             });
@@ -173,7 +182,7 @@ export const BusinessDashboard: React.FC = () => {
           }
           const clientsTimeoutId = setTimeout(() => {
             setLoadingBusinessClients(false);
-            setClientsMessage({
+            setClientsMessageState({
               text: 'No se pudieron cargar los clientes del negocio. Por favor, recarga la página.',
               type: 'error'
             });
@@ -184,12 +193,12 @@ export const BusinessDashboard: React.FC = () => {
             if (clientsSuccess && clientsData) {
               setBusinessClients(clientsData);
             } else {
-              setClientsMessage({ text: clientsError || 'No se pudieron cargar los clientes del negocio.', type: 'error' });
+              setClientsMessageState({ text: clientsError || 'No se pudieron cargar los clientes del negocio.', type: 'error' });
             }
             setLoadingBusinessClients(false);
           } catch (clientsErr) {
             clearTimeout(clientsTimeoutId);
-            setClientsMessage({ text: 'Error al cargar los clientes del negocio.', type: 'error' });
+            setClientsMessageState({ text: 'Error al cargar los clientes del negocio.', type: 'error' });
             setLoadingBusinessClients(false);
           }
         } else {
@@ -224,7 +233,7 @@ export const BusinessDashboard: React.FC = () => {
 
   // Handle tab change and update URL search param
   const handleTabChange = (tab: string) => {
-    setActiveTab(tab);
+    setActiveTabState(tab);
     setSearchParams({ tab });
   };
 
@@ -232,11 +241,11 @@ export const BusinessDashboard: React.FC = () => {
   const tabOrder = ['stats','appointments','pending','history','services','clients','profile','availability','settings'] as const;
   const swipeHandlers = useSwipeable({
     onSwipedLeft: () => {
-      const idx = tabOrder.indexOf(activeTab as typeof tabOrder[number]);
+      const idx = tabOrder.indexOf(activeTabState as typeof tabOrder[number]);
       if (idx < tabOrder.length - 1) handleTabChange(tabOrder[idx + 1]);
     },
     onSwipedRight: () => {
-      const idx = tabOrder.indexOf(activeTab as typeof tabOrder[number]);
+      const idx = tabOrder.indexOf(activeTabState as typeof tabOrder[number]);
       if (idx > 0) handleTabChange(tabOrder[idx - 1]);
     },
     trackMouse: true,
@@ -245,9 +254,9 @@ export const BusinessDashboard: React.FC = () => {
 
   // Efecto para desplazar el tab activo al centro de la vista
   useEffect(() => {
-    const btn = document.getElementById(`tab-${activeTab}`);
+    const btn = document.getElementById(`tab-${activeTabState}`);
     btn?.scrollIntoView({ behavior: 'smooth', inline: 'center', block: 'nearest' });
-  }, [activeTab]);
+  }, [activeTabState]);
 
   const handleUpdateAppointmentStatus = async (id: string, newStatus: 'pending' | 'confirmed' | 'completed' | 'cancelled') => {
     try {
@@ -338,19 +347,19 @@ export const BusinessDashboard: React.FC = () => {
   const handleConfigSave = async (e: React.FormEvent) => {
     e.preventDefault();
     setSavingBusinessConfig(true);
-    setConfigMessage(null);
+    setConfigMessageState(null);
 
     try {
       const result = await updateBusinessConfig(businessData?.id || '', businessConfig);
       if (result.success) {
-        setConfigMessage({ text: 'Configuración guardada correctamente', type: 'success' });
+        setConfigMessageState({ text: 'Configuración guardada correctamente', type: 'success' });
         notifySuccess('Configuración guardada correctamente');
       } else {
-        setConfigMessage({ text: result.error || 'Error al guardar la configuración', type: 'error' });
+        setConfigMessageState({ text: result.error || 'Error al guardar la configuración', type: 'error' });
         notifyError(result.error || 'Error al guardar la configuración');
       }
     } catch (err: any) {
-      setConfigMessage({ text: err.message || 'Error al guardar la configuración', type: 'error' });
+      setConfigMessageState({ text: err.message || 'Error al guardar la configuración', type: 'error' });
       notifyError(err.message || 'Error al guardar la configuración');
     } finally {
       setSavingBusinessConfig(false);
@@ -410,7 +419,7 @@ export const BusinessDashboard: React.FC = () => {
   const lifetimeValueAvg = businessClients.length > 0 ? totalRevenue / businessClients.length : 0;
 
   return (
-    <div>
+    <div className="min-h-screen bg-gray-100 dark:bg-gray-900">
       <div className="max-w-7xl mx-auto py-6 sm:px-6 lg:px-8">
         <div className="px-4 py-2 sm:px-0">
           <div className="flex items-center justify-between mb-4 sm:flex sm:items-baseline">
@@ -437,7 +446,7 @@ export const BusinessDashboard: React.FC = () => {
             </div>
           </div>
 
-          {businessMessage && activeTab !== 'profile' && activeTab !== 'availability' && activeTab !== 'settings' && (
+          {businessMessage && activeTabState !== 'profile' && activeTabState !== 'availability' && activeTabState !== 'settings' && (
             <div className={`mb-4 p-4 rounded ${businessMessage.type === 'success' ? 'bg-green-50 text-green-800' : 'bg-red-50 text-red-800'}`}>
               {businessMessage.text}
             </div>
@@ -445,56 +454,56 @@ export const BusinessDashboard: React.FC = () => {
 
           <div className="border-b border-gray-200">
             <nav className="-mb-px flex space-x-2 overflow-x-auto whitespace-nowrap">
-              <button id="tab-pending" onClick={() => handleTabChange('pending')} className={`${activeTab === 'pending'
+              <button id="tab-pending" onClick={() => handleTabChange('pending')} className={`${activeTabState === 'pending'
                 ? 'border-indigo-500 text-indigo-600 dark:text-white'
                 : 'border-transparent text-gray-500 hover:text-gray-400 hover:border-gray-300'
                 } whitespace-nowrap py-4 px-1 border-b-2 font-medium text-sm`}
               >
                 Pendientes:<span className="ml-1 text-gray-500 dark:text-gray-400">{pendingAppointments.length}</span>
               </button>
-              <button id="tab-appointments" onClick={() => handleTabChange('appointments')} className={`${activeTab === 'appointments'
+              <button id="tab-appointments" onClick={() => handleTabChange('appointments')} className={`${activeTabState === 'appointments'
                 ? 'border-indigo-500 text-indigo-600 dark:text-white'
                 : 'border-transparent text-gray-500 hover:text-gray-400 hover:border-gray-300'
                 } whitespace-nowrap py-4 px-1 border-b-2 font-medium text-sm`}
               >
                 Agendado:<span className="ml-1 text-gray-500 dark:text-gray-400">{confirmedAppointments.length}</span>
               </button>
-              <button id="tab-history" onClick={() => handleTabChange('history')} className={`${activeTab === 'history'
+              <button id="tab-history" onClick={() => handleTabChange('history')} className={`${activeTabState === 'history'
                 ? 'border-indigo-500 text-indigo-600 dark:text-white'
                 : 'border-transparent text-gray-500 hover:text-gray-400 hover:border-gray-300'
                 } whitespace-nowrap py-4 px-1 border-b-2 font-medium text-sm`}
               >
                 Historial:<span className="ml-1 text-gray-500 dark:text-gray-400">{pastAppointments.length}</span>
               </button>
-              <button id="tab-services" onClick={() => handleTabChange('services')} className={`${activeTab === 'services'
+              <button id="tab-services" onClick={() => handleTabChange('services')} className={`${activeTabState === 'services'
                 ? 'border-indigo-500 text-indigo-600 dark:text-white'
                 : 'border-transparent text-gray-500 hover:text-gray-400 hover:border-gray-300'
                 } whitespace-nowrap py-4 px-1 border-b-2 font-medium text-sm`}
               >
                 Servicios:<span className="ml-1 text-gray-500 dark:text-gray-400">{totalServices}</span>
               </button>
-              <button id="tab-clients" onClick={() => handleTabChange('clients')} className={`${activeTab === 'clients'
+              <button id="tab-clients" onClick={() => handleTabChange('clients')} className={`${activeTabState === 'clients'
                 ? 'border-indigo-500 text-indigo-600 dark:text-white'
                 : 'border-transparent text-gray-500 hover:text-gray-400 hover:border-gray-300'
                 } whitespace-nowrap py-4 px-1 border-b-2 font-medium text-sm`}
               >
                 Clientes:<span className="ml-1 text-gray-500 dark:text-gray-400">{businessClients.length}</span>
               </button>
-              <button id="tab-profile" onClick={() => handleTabChange('profile')} className={`${activeTab === 'profile'
+              <button id="tab-profile" onClick={() => handleTabChange('profile')} className={`${activeTabState === 'profile'
                 ? 'border-indigo-500 text-indigo-600 dark:text-white'
                 : 'border-transparent text-gray-500 hover:text-gray-400 hover:border-gray-300'
                 } whitespace-nowrap py-4 px-1 border-b-2 font-medium text-sm`}
               >
                 Datos
               </button>
-              <button id="tab-availability" onClick={() => handleTabChange('availability')} className={`${activeTab === 'availability'
+              <button id="tab-availability" onClick={() => handleTabChange('availability')} className={`${activeTabState === 'availability'
                 ? 'border-indigo-500 text-indigo-600 dark:text-white'
                 : 'border-transparent text-gray-500 hover:text-gray-400 hover:border-gray-300'
                 } whitespace-nowrap py-4 px-1 border-b-2 font-medium text-sm`}
               >
                 Horarios
               </button>
-              <button id="tab-settings" onClick={() => handleTabChange('settings')} className={`${activeTab === 'settings'
+              <button id="tab-settings" onClick={() => handleTabChange('settings')} className={`${activeTabState === 'settings'
                 ? 'border-indigo-500 text-indigo-600 dark:text-white'
                 : 'border-transparent text-gray-500 hover:text-gray-400 hover:border-gray-300'
                 } whitespace-nowrap py-4 px-1 border-b-2 font-medium text-sm`}
@@ -505,7 +514,7 @@ export const BusinessDashboard: React.FC = () => {
           </div>
 
           <div className="mt-2" {...swipeHandlers}>
-            {activeTab === 'stats' && businessData && (
+            {activeTabState === 'stats' && businessData && (
               <StatsSection
                 totalAppointments={businessAppointments.length}
                 upcomingAppointments={confirmedAppointments.length}
@@ -529,7 +538,7 @@ export const BusinessDashboard: React.FC = () => {
               />
             )}
             {/* Tab de Pendientes */}
-            {activeTab === 'pending' && (
+            {activeTabState === 'pending' && (
               <>
                 <AppointmentsSection
                   appointments={pagedPending}
@@ -551,7 +560,7 @@ export const BusinessDashboard: React.FC = () => {
               </>
             )}
             {/* Tab de Agendado */}
-            {activeTab === 'appointments' && (
+            {activeTabState === 'appointments' && (
               <>
                 <AppointmentsSection
                   appointments={pagedConfirmed}
@@ -572,7 +581,7 @@ export const BusinessDashboard: React.FC = () => {
                 )}
               </>
             )}
-            {activeTab === 'history' && (
+            {activeTabState === 'history' && (
               <>
                 <AppointmentsSection
                   appointments={pagedPast}
@@ -594,7 +603,7 @@ export const BusinessDashboard: React.FC = () => {
               </>
             )}
 
-            {activeTab === 'services' && businessData && (
+            {activeTabState === 'services' && businessData && (
               <ServicesSection
                 businessId={businessData.id}
                 getServices={getBusinessServices}
@@ -605,7 +614,7 @@ export const BusinessDashboard: React.FC = () => {
               />
             )}
 
-            {activeTab === 'clients' && (
+            {activeTabState === 'clients' && (
               <>
                 <ClientsSection
                   clients={pagedClients}
@@ -628,7 +637,7 @@ export const BusinessDashboard: React.FC = () => {
             )}
 
             {/* Tab de Datos del Negocio */}
-            {activeTab === 'profile' && businessData && (
+            {activeTabState === 'profile' && businessData && (
               <BusinessProfileSection
                 businessData={businessData}
                 saving={savingBusiness}
@@ -639,7 +648,7 @@ export const BusinessDashboard: React.FC = () => {
             )}
 
             {/* Tab de Horarios */}
-            {activeTab === 'availability' && (
+            {activeTabState === 'availability' && (
               <BusinessHoursSection
                 businessHours={businessHours}
                 loading={loadingBusinessHours}
@@ -652,7 +661,7 @@ export const BusinessDashboard: React.FC = () => {
             )}
 
             {/* Tab de Configuración */}
-            {activeTab === 'settings' && (
+            {activeTabState === 'settings' && (
               <BusinessConfigSection
                 config={businessConfig}
                 loading={loadingBusinessConfig}
@@ -660,7 +669,6 @@ export const BusinessDashboard: React.FC = () => {
                 message={configMessage}
                 onSave={handleConfigSave}
                 onConfigChange={handleConfigChange}
-                itemsPerPage={itemsPerPage}
               />
             )}
           </div>

@@ -35,7 +35,7 @@ export interface Service {
   created_at: string;
   updated_at: string;
   is_active: boolean;
-  provider?: string;
+  provider: string;
 }
 
 export type BusinessHours = {
