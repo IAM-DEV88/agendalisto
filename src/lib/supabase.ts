@@ -5,28 +5,8 @@ if (!SUPABASE_URL || !SUPABASE_ANON_KEY) {
   throw new Error('Missing Supabase URL or Anon Key. Please set them in your .env file.');
 }
 
-// Configuración simple pero robusta para Supabase
-const supabaseOptions = {
-  auth: {
-    autoRefreshToken: true,
-    persistSession: true,
-    detectSessionInUrl: true
-  },
-  // Enable realtime subscriptions (default settings)
-  // Remove the eventsPerSecond limit to allow live updates
-  realtime: {
-    params: {
-      eventsPerSecond: 10
-    }
-  },
-  global: {
-    headers: {
-      Accept: 'application/json'
-    }
-  }
-};
-
-export const supabase = createClient(SUPABASE_URL, SUPABASE_ANON_KEY, supabaseOptions);
+// Use default Supabase client settings (includes API key and auth automatically)
+export const supabase = createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
 // Escuchar cambios de autenticación de manera simple
 supabase.auth.onAuthStateChange(() => {

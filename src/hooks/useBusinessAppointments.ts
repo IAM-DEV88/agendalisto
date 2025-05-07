@@ -35,18 +35,26 @@ export function useBusinessAppointments(businessId: string | null) {
 
     load();
     if (businessId) {
-      const channel = supabase
+      const appointmentChannel = supabase
         .channel(`business-appointments-${businessId}`)
-        .on('postgres_changes', { event: '*', schema: 'public', table: 'appointments', filter: `business_id=eq.${businessId}` }, async payload => {
-          console.log('[useBusinessAppointments] realtime payload', payload);
+        .on('postgres_changes', { event: '*', schema: 'public', table: 'appointments', filter: `business_id=eq.${businessId}` }, async () => {
+          console.log('[useBusinessAppointments] appointment change');
+          await load();
+        })
+        .subscribe();
+      const reviewChannel = supabase
+        .channel(`business-reviews-${businessId}`)
+        .on('postgres_changes', { event: 'INSERT', schema: 'public', table: 'reviews', filter: `business_id=eq.${businessId}` }, async () => {
+          console.log('[useBusinessAppointments] review change');
           await load();
         })
         .subscribe();
 
       return () => {
         isMounted = false;
-        console.log('[useBusinessAppointments] cleanup channel', channel);
-        supabase.removeChannel(channel);
+        console.log('[useBusinessAppointments] cleanup channels');
+        supabase.removeChannel(appointmentChannel);
+        supabase.removeChannel(reviewChannel);
       };
     }
 
@@ -55,5 +63,24 @@ export function useBusinessAppointments(businessId: string | null) {
     };
   }, [businessId]);
 
-  return { appointments, loading, error };
+  // Function to manually refresh the appointments list
+  const refreshAppointments = async () => {
+    if (!businessId) return;
+    setLoading(true);
+    try {
+      const { success, data, error: apiError } = await getBusinessAppointments(businessId);
+      if (success && data) {
+        setAppointments(data);
+        setError(null);
+      } else {
+        setError(String(apiError || 'Error loading business appointments'));
+      }
+    } catch (err: any) {
+      setError(err.message || 'Error loading business appointments');
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  return { appointments, loading, error, refreshAppointments };
 } 

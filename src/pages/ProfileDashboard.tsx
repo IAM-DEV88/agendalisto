@@ -1,12 +1,6 @@
 import { useState, useEffect } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { supabase } from '../lib/supabase';
-import {
-  updateUserProfile,
-  getUserBusiness,
-  updateAppointmentStatus,
-} from '../lib/api';
-import { UserProfile } from '../lib/supabase';
 import { dispatchUserProfileUpdated } from '../lib/events';
 import UpcomingAppointments from '../components/profile/UpcomingAppointments';
 import PastAppointments from '../components/profile/PastAppointments';
@@ -15,9 +9,17 @@ import { useSelector } from 'react-redux';
 import { useAppDispatch } from '../hooks/useAppDispatch';
 import type { RootState } from '../store';
 import { setActiveTab } from '../store/uiSlice';
-import { notifySuccess, notifyError } from '../lib/toast';
 import { useAppointments } from '../hooks/useAppointments';
 import { useSwipeable } from 'react-swipeable';
+import { UserProfile } from '../lib/supabase';
+import { ApiClient } from '../lib/apiClient';
+import { useToast } from '../hooks/useToast';
+import { useUIConfig } from '../hooks/useUIConfig';
+
+// UI Components
+import TabNav, { Tab } from '../components/ui/TabNav';
+import SectionHeader from '../components/ui/SectionHeader';
+import MessageAlert from '../components/ui/MessageAlert';
 
 type ProfileDashboardProps = {
   user: UserProfile | null;
@@ -56,9 +58,12 @@ const slugify = (str: string): string =>
 const ProfileDashboard = ({ user }: ProfileDashboardProps) => {
   const dispatch = useAppDispatch();
   const activeTab = useSelector((state: RootState) => state.ui.activeTab);
+  const { itemsPerPage, saveItemsPerPage } = useUIConfig();
+  const toast = useToast();
+
   // Realtime appointments via custom hook
-  const { appointments, pastAppointments, loading, error } = useAppointments(user?.id || null);
-  console.log('useAppointments:', { appointments, pastAppointments, loading, error });
+  const { appointments, loading, error } = useAppointments(user?.id || null);
+
   // Estado para indicar si el usuario tiene un negocio
   const [hasBusiness, setHasBusiness] = useState(false);
 
@@ -72,19 +77,11 @@ const ProfileDashboard = ({ user }: ProfileDashboardProps) => {
   const [saving, setSaving] = useState(false);
   const [profileMessage, setProfileMessage] = useState<{ text: string, type: 'success' | 'error' } | null>(null);
 
-  // Estados para la paginación y configuración de registros por página
+  // Estados para la paginación
   const [currentPage, setCurrentPage] = useState(1);
   const [pendingPage, setPendingPage] = useState(1);
   const [pastCurrentPage, setPastCurrentPage] = useState(1);
-  const [itemsPerPage, setItemsPerPage] = useState(user?.items_per_page || 5);
   const [itemsPerPageMessage, setItemsPerPageMessage] = useState<{ text: string; type: 'success' | 'error' } | null>(null);
-
-  // Remove localStorage loading since we're using profile value
-  useEffect(() => {
-    if (user?.items_per_page) {
-      setItemsPerPage(user.items_per_page);
-    }
-  }, [user]);
 
   // Cálculo de conteos y filtros
   const confirmedAppointments = appointments.filter(a => a.status === 'confirmed');
@@ -101,21 +98,15 @@ const ProfileDashboard = ({ user }: ProfileDashboardProps) => {
   const tabOrder = ['upcoming', 'pending', 'past', 'profile', 'general'] as const;
   const swipeHandlers = useSwipeable({
     onSwipedLeft: () => {
-      const idx = tabOrder.indexOf(activeTab);
+      const idx = tabOrder.indexOf(activeTab as typeof tabOrder[number]);
       if (idx < tabOrder.length - 1) dispatch(setActiveTab(tabOrder[idx + 1]));
     },
     onSwipedRight: () => {
-      const idx = tabOrder.indexOf(activeTab);
+      const idx = tabOrder.indexOf(activeTab as typeof tabOrder[number]);
       if (idx > 0) dispatch(setActiveTab(tabOrder[idx - 1]));
     },
     trackMouse: true,
   });
-
-  // Efecto para desplazar el tab activo al centro de la vista
-  useEffect(() => {
-    const btn = document.getElementById(`tab-${activeTab}`);
-    btn?.scrollIntoView({ behavior: 'smooth', inline: 'center', block: 'nearest' });
-  }, [activeTab]);
 
   useEffect(() => {
     // Actualizar estado cuando cambia el usuario
@@ -132,18 +123,11 @@ const ProfileDashboard = ({ user }: ProfileDashboardProps) => {
   useEffect(() => {
     const checkBusiness = async () => {
       if (user?.id) {
-        // Agregar un temporizador para evitar que se quede cargando indefinidamente
-        const timeoutId = setTimeout(() => {
-          setHasBusiness(false);
-        }, 10000); // 10 segundos para esta operación
-
         try {
-          const { success, business } = await getUserBusiness(user.id);
-          setHasBusiness(success && business !== null);
+          const response = await ApiClient.getUserBusiness(user.id);
+          setHasBusiness(response.success && response.data !== null);
         } catch (err) {
           setHasBusiness(false);
-        } finally {
-          clearTimeout(timeoutId);
         }
       }
     };
@@ -178,31 +162,33 @@ const ProfileDashboard = ({ user }: ProfileDashboardProps) => {
       }
 
       // Actualizar perfil del usuario
-      const updatedProfile = await updateUserProfile(user.id, {
+      const response = await ApiClient.updateUserProfile(user.id, {
         full_name: profileData.full_name,
         phone: profileData.phone,
         avatar_url: profileData.avatar_url || undefined,
         updated_at: new Date().toISOString()
       });
 
-      if (updatedProfile) {
+      if (response.success && response.data) {
         // Actualizar el estado local con los datos actualizados
         setProfileData({
           ...profileData,
-          ...updatedProfile
+          ...response.data
         });
 
         // Disparar evento personalizado para actualizar el estado global
-        dispatchUserProfileUpdated(session.user, updatedProfile);
+        dispatchUserProfileUpdated(session.user, response.data);
 
         const successMsg = 'Perfil actualizado correctamente';
         setProfileMessage({ text: successMsg, type: 'success' });
-        notifySuccess(successMsg);
+        toast.success(successMsg);
+      } else {
+        throw new Error(response.error || 'Error al actualizar perfil');
       }
     } catch (error: any) {
       const errorMsg = error.message || 'Error al actualizar perfil';
       setProfileMessage({ text: errorMsg, type: 'error' });
-      notifyError(errorMsg);
+      toast.error(errorMsg);
     } finally {
       setSaving(false);
     }
@@ -220,52 +206,48 @@ const ProfileDashboard = ({ user }: ProfileDashboardProps) => {
   const handleCancel = async (appointment: Appointment) => {
     if (!user) return;
     try {
-      await updateAppointmentStatus(appointment.id, 'cancelled');
-      notifySuccess(`Cita cancelada por ${user.full_name}`);
+      const response = await ApiClient.updateAppointmentStatus(appointment.id, 'cancelled');
+      if (response.success) {
+        toast.success(`Cita cancelada por ${user.full_name}`);
+      } else {
+        toast.error(response.error || 'Error al cancelar la cita');
+      }
     } catch (err: any) {
-      notifyError(err.message || 'Error al cancelar la cita');
+      toast.error(err.message || 'Error al cancelar la cita');
     }
   };
 
-  const handleItemsPerPageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const val = parseInt(e.target.value);
-    if (!isNaN(val) && val > 0) {
-      setItemsPerPage(val);
-      setItemsPerPageMessage(null);
+  const handleItemsPerPageChange = (value: number) => {
+    if (value >= 1 && value <= 50) {
+      dispatch({ type: 'ui/setItemsPerPage', payload: value });
     }
   };
 
   const handleSaveItemsPerPage = async () => {
     if (!user) return;
-    
+
     try {
       setItemsPerPageMessage(null);
-      const { error } = await supabase
-        .from('profiles')
-        .update({ items_per_page: itemsPerPage })
-        .eq('id', user.id);
+      const success = await saveItemsPerPage(user.id);
 
-      if (error) throw error;
-
-      // Get current session to update global state
-      const { data: { session } } = await supabase.auth.getSession();
-      if (!session?.user) {
-        throw new Error('No se pudo obtener la sesión del usuario');
+      if (success) {
+        setItemsPerPageMessage({ text: 'Configuración guardada correctamente', type: 'success' });
+      } else {
+        setItemsPerPageMessage({ text: 'Error al guardar la configuración', type: 'error' });
       }
-
-      // Update global state with new items_per_page
-      dispatchUserProfileUpdated(session.user, { ...user, items_per_page: itemsPerPage });
-      
-      // Show success message in UI and toast
-      setItemsPerPageMessage({ text: 'Configuración guardada correctamente', type: 'success' });
-      notifySuccess('Configuración guardada correctamente');
-    } catch (error) {
-      console.error('Error saving items per page:', error);
-      // Show error message in UI and toast
-      setItemsPerPageMessage({ text: 'Error al guardar la configuración', type: 'error' });
-      notifyError('Error al guardar la configuración');
+    } catch (error: any) {
+      setItemsPerPageMessage({ text: error.message || 'Error al guardar la configuración', type: 'error' });
     }
   };
+
+  // Prepare tabs for TabNav component
+  const tabs: Tab[] = [
+    { id: 'upcoming', label: 'Próximas citas', count: upcomingCount },
+    { id: 'pending', label: 'Pendientes', count: pendingCount },
+    { id: 'past', label: 'Historial', count: pastCount },
+    { id: 'profile', label: 'Mis Datos' },
+    { id: 'general', label: 'General' }
+  ];
 
   return (
     <div>
@@ -273,9 +255,7 @@ const ProfileDashboard = ({ user }: ProfileDashboardProps) => {
         <div className="px-4 py-2 sm:px-0">
           {/* Show error message if any */}
           {error && (
-            <div className="mb-4 p-4 bg-red-50 text-red-800 dark:bg-red-900 dark:text-white rounded-none">
-              {error}
-            </div>
+            <MessageAlert message={{ text: error, type: 'error' }} />
           )}
           <div>
             <div className="flex items-center justify-between mb-8 sm:flex sm:items-baseline">
@@ -292,110 +272,123 @@ const ProfileDashboard = ({ user }: ProfileDashboardProps) => {
             </div>
           </div>
 
-          {/* Sub-navegación del perfil */}
-          <div className="border-b border-gray-200 mt-4">
-            <nav className="-mb-px flex space-x-2 overflow-x-auto whitespace-nowrap">
-              <button id="tab-upcoming" onClick={() => dispatch(setActiveTab('upcoming'))} className={`whitespace-nowrap pb-4 px-1 border-b-2 font-medium text-sm ${activeTab === 'upcoming' ? 'border-indigo-500 text-indigo-600 dark:text-white' : 'border-transparent text-gray-500 hover:text-gray-400 hover:border-gray-300'}`}>
-                Próximas citas:<span className="ml-1 text-gray-500 dark:text-gray-400">{upcomingCount}</span>
-              </button>
-              <button id="tab-pending" onClick={() => dispatch(setActiveTab('pending'))} className={`whitespace-nowrap pb-4 px-1 border-b-2 font-medium text-sm ${activeTab === 'pending' ? 'border-indigo-500 text-indigo-600 dark:text-white' : 'border-transparent text-gray-500 hover:text-gray-400 hover:border-gray-300'}`}>
-                Pendientes:<span className="ml-1 text-gray-500 dark:text-gray-400">{pendingCount}</span>
-              </button>
-              <button id="tab-past" onClick={() => dispatch(setActiveTab('past'))} className={`whitespace-nowrap pb-4 px-1 border-b-2 font-medium text-sm ${activeTab === 'past' ? 'border-indigo-500 text-indigo-600 dark:text-white' : 'border-transparent text-gray-500 hover:text-gray-400 hover:border-gray-300'}`}>
-                Historial:<span className="ml-1 text-gray-500 dark:text-gray-400">{pastCount}</span>
-              </button>
-              <button id="tab-profile" onClick={() => dispatch(setActiveTab('profile'))} className={`whitespace-nowrap pb-4 px-1 border-b-2 font-medium text-sm ${activeTab === 'profile' ? 'border-indigo-500 text-indigo-600 dark:text-white' : 'border-transparent text-gray-500 hover:text-gray-400 hover:border-gray-300'}`}>
-                Mis Datos
-              </button>
-              <button id="tab-general" onClick={() => dispatch(setActiveTab('general'))} className={`whitespace-nowrap pb-4 px-1 border-b-2 font-medium text-sm ${activeTab === 'general' ? 'border-indigo-500 text-indigo-600 dark:text-white' : 'border-transparent text-gray-500 hover:text-gray-400 hover:border-gray-300'}`}>
-                General
-              </button>
-            </nav>
-          </div>
+          {/* Use TabNav component */}
+          <TabNav
+            tabs={tabs}
+            activeTabId={activeTab}
+            onTabChange={(tabId) => dispatch(setActiveTab(tabId as typeof tabOrder[number]))}
+          />
 
           <div {...swipeHandlers}>
             {/* Pestaña de citas próximas (confirmadas) */}
             {activeTab === 'upcoming' && (
-              <UpcomingAppointments
-                appointments={confirmedAppointments}
-                loading={loading}
-                currentPage={currentPage}
-                onPageChange={setCurrentPage}
-                itemsPerPage={itemsPerPage}
-                onReschedule={handleReschedule}
-                onCancel={handleCancel}
-              />
+              <>
+                <SectionHeader
+                  title="Próximas Citas"
+                  description="Citas confirmadas y programadas."
+                />
+                <UpcomingAppointments
+                  appointments={confirmedAppointments}
+                  loading={loading}
+                  currentPage={currentPage}
+                  onPageChange={setCurrentPage}
+                  itemsPerPage={itemsPerPage}
+                  onReschedule={handleReschedule}
+                  onCancel={handleCancel}
+                />
+              </>
             )}
 
             {/* Pestaña de citas pendientes */}
             {activeTab === 'pending' && (
-              <UpcomingAppointments
-                appointments={pendingAppointments}
-                loading={loading}
-                currentPage={pendingPage}
-                onPageChange={setPendingPage}
-                itemsPerPage={itemsPerPage}
-                onReschedule={handleReschedule}
-                onCancel={handleCancel}
-              />
+              <>
+                <SectionHeader
+                  title="Citas Pendientes"
+                  description="Solicitudes pendientes de confirmación."
+                />
+                <UpcomingAppointments
+                  appointments={pendingAppointments}
+                  loading={loading}
+                  currentPage={pendingPage}
+                  onPageChange={setPendingPage}
+                  itemsPerPage={itemsPerPage}
+                  onReschedule={handleReschedule}
+                  onCancel={handleCancel}
+                />
+              </>
             )}
 
             {/* Pestaña de historial (completadas) */}
             {activeTab === 'past' && (
-              <PastAppointments
-                appointments={completedAppointments}
-                loading={loading}
-                currentPage={pastCurrentPage}
-                onPageChange={setPastCurrentPage}
-                itemsPerPage={itemsPerPage}
-                onReschedule={handleReschedule}
-              />
+              <>
+                <SectionHeader
+                  title="Historial de Citas"
+                  description="Citas completadas y pasadas."
+                />
+                <PastAppointments
+                  appointments={completedAppointments}
+                  loading={loading}
+                  currentPage={pastCurrentPage}
+                  onPageChange={setPastCurrentPage}
+                  itemsPerPage={itemsPerPage}
+                  onReschedule={handleReschedule}
+                />
+              </>
             )}
 
             {/* Pestaña de Perfil */}
             {activeTab === 'profile' && (
-              <UserProfileSection
-                profileData={profileData}
-                saving={saving}
-                message={profileMessage}
-                onSave={handleProfileSubmit}
-                onChange={handleProfileChange}
-              />
+              <>
+                <SectionHeader
+                  title="Información Personal"
+                  description="Actualiza tus datos personales."
+                />
+                <UserProfileSection
+                  profileData={profileData}
+                  saving={saving}
+                  message={profileMessage}
+                  onSave={handleProfileSubmit}
+                  onChange={handleProfileChange}
+                />
+              </>
             )}
 
             {activeTab === 'general' && (
-              <div className="p-6 mt-2 dark:bg-opacity-10 bg-gray-50 
-              rounded-md">
-                <div>
-                  <h3 className="text-lg font-medium text-gray-900 dark:text-white">Configuración General</h3>
-                  <div className="mt-4 space-y-4">
-                    <div>
+              <div>
+                <SectionHeader
+                  title="Configuración General"
+                  description="Personaliza tu experiencia en la plataforma."
+                />
+                <div className="p-6 mt-2 dark:bg-opacity-10 bg-gray-50 mt-4 space-y-4">
+                  <div>
+                    <div className="mt-1 flex items-center space-x-2">
                       <label htmlFor="itemsPerPage" className="block text-sm font-medium text-gray-700 dark:text-gray-300">
                         Registros por página
                       </label>
-                      <div className="mt-1 flex items-center space-x-2">
-                        <input
-                          type="number"
-                          id="itemsPerPage"
-                          value={itemsPerPage}
-                          onChange={handleItemsPerPageChange}
-                          min="1"
-                          className="block w-24 rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm dark:bg-gray-700 dark:border-gray-600 dark:text-white"
-                        />
-                        <button
-                          type="button"
-                          onClick={handleSaveItemsPerPage}
-                          className="inline-flex items-center px-3 py-2 border border-transparent text-sm leading-4 font-medium rounded-md text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
-                        >
-                          Guardar
-                        </button>
-                      </div>
-                      {itemsPerPageMessage && (
-                        <p className={`mt-2 text-sm ${itemsPerPageMessage.type === 'success' ? 'text-green-600' : 'text-red-600'}`}>
-                          {itemsPerPageMessage.text}
-                        </p>
-                      )}
+                      <input
+                        type="number"
+                        id="itemsPerPage"
+                        value={itemsPerPage}
+                        onChange={(e) => handleItemsPerPageChange(parseInt(e.target.value))}
+                        min="1"
+                        className="block w-24 rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm dark:bg-gray-700 dark:border-gray-600 dark:text-white"
+                      />
                     </div>
+                    <div className="mt-2 flex flex-col">
+                      <p className="mt-2 text-sm text-gray-400">
+                        Número de registros que se mostrarán por página en las listas.
+                      </p>
+                      <button
+                        type="button"
+                        onClick={handleSaveItemsPerPage}
+                        className="ml-auto mt-2 px-3 py-2 border border-transparent text-sm leading-4 font-medium rounded-md text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
+                      >
+                        Guardar
+                      </button>
+                    </div>
+                    {itemsPerPageMessage && (
+                      <MessageAlert message={itemsPerPageMessage} />
+                    )}
                   </div>
                 </div>
               </div>

@@ -182,7 +182,7 @@ export async function getBusinessAppointments(businessId: string) {
   try {
     const { data, error } = await supabase
       .from('appointments')
-      .select(`*, profiles (full_name, phone), services (name, duration, price)`) 
+      .select(`*, profiles (full_name, phone), services (name, duration, price), reviews (id, rating, comment, user_id, created_at)`) 
       .eq('business_id', businessId)
       .order('start_time', { ascending: true });
     if (error) throw error;

@@ -5,12 +5,10 @@ import { supabase } from '../lib/supabase';
 
 export function useAppointments(userId: string | null) {
   const [appointments, setAppointments] = useState<Appointment[]>([]);
-  const [pastAppointments, setPastAppointments] = useState<Appointment[]>([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
-    console.log('[useAppointments] mount, userId=', userId);
     // Variable para controlar si el componente sigue montado
     let isMounted = true;
 
@@ -22,17 +20,7 @@ export function useAppointments(userId: string | null) {
         const { success, data, error: apiError } = await getUserAppointments(userId);
         if (!isMounted) return;
         if (success && data) {
-          const now = new Date();
-          const upcoming: Appointment[] = [];
-          const past: Appointment[] = [];
-          data.forEach((appointment) => {
-            const dt = new Date(appointment.start_time);
-            if (dt > now) upcoming.push(appointment);
-            else past.push(appointment);
-          });
-          console.log('[useAppointments] loadAppointments:', upcoming.length, 'upcoming,', past.length, 'past');
-          setAppointments(upcoming);
-          setPastAppointments(past);
+          setAppointments(data);
           setError(null);
         } else {
           setError(String(apiError || 'Error al cargar citas'));
@@ -50,19 +38,18 @@ export function useAppointments(userId: string | null) {
     if (userId) {
       const channel = supabase
         .channel(`user-appointments-${userId}`)
-        .on('postgres_changes', { event: '*', schema: 'public', table: 'appointments', filter: `user_id=eq.${userId}` }, async (payload) => {
-          console.log('[useAppointments] realtime payload', payload);
+        .on('postgres_changes', { event: '*', schema: 'public', table: 'appointments', filter: `user_id=eq.${userId}` }, async () => {
+          console.log('[useAppointments] detected change in appointments');
           await loadAppointments();
         })
         .subscribe();
       return () => {
         isMounted = false;
-        console.log('[useAppointments] cleanup channel', channel);
         supabase.removeChannel(channel);
       };
     }
     return () => { isMounted = false; };
   }, [userId]);
 
-  return { appointments, pastAppointments, loading, error };
+  return { appointments, loading, error };
 } 

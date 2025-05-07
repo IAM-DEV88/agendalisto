@@ -6,7 +6,7 @@ interface BusinessHoursSectionProps {
   loading: boolean;
   saving: boolean;
   message: { text: string; type: 'success' | 'error' } | null;
-  onSave: (e: React.FormEvent) => Promise<void>;
+  onSave: (e: React.FormEvent) => Promise<boolean | void>;
   onHoursChange: (index: number, field: keyof Omit<BusinessHours, 'id'>, value: any) => void;
   days: string[];
 }

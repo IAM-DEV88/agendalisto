@@ -86,6 +86,8 @@ const PastAppointments: React.FC<PastAppointmentsProps> = ({
         setShowReviewFormId(null);
         setNewReview({ rating: 5, comment: '' });
         notifySuccess('Reseña enviada correctamente');
+        // Notify business dashboard of new review
+        window.dispatchEvent(new CustomEvent('businessReviewAdded', { detail: { businessId: appointment.business_id } }));
       } else {
         notifyError('Error al enviar la reseña');
       }

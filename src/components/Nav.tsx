@@ -2,7 +2,6 @@ import { Link, useNavigate, useLocation } from 'react-router-dom';
 import { useState, useEffect, useRef } from 'react';
 import { signOut, supabase } from '../lib/supabase';
 import { UserProfile } from '../lib/supabase';
-import { getUserBusiness } from '../lib/api';
 import { useTheme } from '../contexts/ThemeContext';
 import { Sun, Moon } from 'lucide-react';
 
@@ -16,7 +15,7 @@ const Nav = ({ user }: NavProps) => {
   const location = useLocation();
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [isUserDropdownOpen, setIsUserDropdownOpen] = useState(false);
-  const [hasBusiness, setHasBusiness] = useState(false);
+  const hasBusiness = !!user?.business_id;
   const dropdownRef = useRef<HTMLDivElement>(null);
   const buttonRef = useRef<HTMLButtonElement>(null);
 
@@ -31,24 +30,6 @@ const Nav = ({ user }: NavProps) => {
   // Para prevenir errores cuando user es null
   const isLoggedIn = !!user;
   const userName = user?.full_name || 'Usuario';
-
-  // Verificar si el usuario tiene un negocio
-  useEffect(() => {
-    const checkUserBusiness = async () => {
-      if (user?.id) {
-        try {
-          const { success, business } = await getUserBusiness(user.id);
-          setHasBusiness(success && business !== null);
-        } catch (err) {
-          setHasBusiness(false);
-        }
-      } else {
-        setHasBusiness(false);
-      }
-    };
-
-    checkUserBusiness();
-  }, [user]);
 
   // Close both menus when route changes
   useEffect(() => {
