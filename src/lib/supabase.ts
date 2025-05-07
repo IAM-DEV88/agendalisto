@@ -88,7 +88,7 @@ export const updatePassword = async (newPassword: string) => {
 };
 
 // User profile types
-export type UserProfile = {
+export interface UserProfile {
   id: string;
   full_name: string;
   phone: string;
@@ -98,4 +98,5 @@ export type UserProfile = {
   updated_at: string;
   business_id?: string;
   avatar_url?: string;
-}; 
+  items_per_page?: number;
+} 

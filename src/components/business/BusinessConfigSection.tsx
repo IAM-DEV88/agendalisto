@@ -1,23 +1,38 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import { BusinessConfig } from '../../lib/api';
+import { useItemsPerPage } from '../../hooks/useItemsPerPage';
+import { useAuth } from '../../hooks/useAuth';
 
 interface BusinessConfigSectionProps {
   config: BusinessConfig;
   loading: boolean;
   saving: boolean;
   message: { text: string; type: 'success' | 'error' } | null;
-  onSave: (e: React.FormEvent) => Promise<void>;
-  onConfigChange: (field: string, value: any) => void;
+  onSave: (e: React.FormEvent) => void;
+  onConfigChange: (field: keyof BusinessConfig, value: any) => void;
+  itemsPerPage: number;
 }
 
-const BusinessConfigSection: React.FC<BusinessConfigSectionProps> = ({
+export const BusinessConfigSection: React.FC<BusinessConfigSectionProps> = ({
   config,
   loading,
   saving,
   message,
   onSave,
-  onConfigChange
+  onConfigChange,
+  itemsPerPage: initialItemsPerPage
 }) => {
+  const { user } = useAuth();
+  const { localItemsPerPage, setLocalItemsPerPage, saveItemsPerPage } = useItemsPerPage(user?.id);
+
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    const result = await saveItemsPerPage(localItemsPerPage);
+    if (result.success) {
+      onSave(e);
+    }
+  };
+
   return (
     <div>      
       {message && (
@@ -46,10 +61,10 @@ const BusinessConfigSection: React.FC<BusinessConfigSectionProps> = ({
       
       {loading ? (
         <div className="flex justify-center py-8">
-          <div className="animate-spin h-10 w-10 border-t-2 border-b-2 border-indigo-500"></div>
+          <div className="animate-spin rounded-full h-10 w-10 border-t-2 border-b-2 border-indigo-500"></div>
         </div>
       ) : (
-        <form onSubmit={onSave} className="space-y-2">
+        <form onSubmit={handleSubmit} className="space-y-2">
           {/* Reservas Online */}
           <div className="bg-gray-50 dark:bg-opacity-10 shadow p-4">
             <h2 className="text-lg font-medium dark:text-white text-gray-900 mb-4">Reservas Online</h2>
@@ -244,6 +259,36 @@ const BusinessConfigSection: React.FC<BusinessConfigSectionProps> = ({
                   </label>
                   <p className="text-gray-500 dark:text-white">Recibir notificaciones de reservas por WhatsApp.</p>
                 </div>
+              </div>
+            </div>
+          </div>
+
+          {/* Paginación */}
+          <div className="bg-gray-800 rounded-lg p-6">
+            <h3 className="text-lg font-medium text-white mb-4">Paginación</h3>
+            <div className="space-y-4">
+              <div>
+                <label htmlFor="items_per_page" className="block text-sm font-medium text-gray-300">
+                  Registros por página
+                </label>
+                <div className="mt-1 flex items-center space-x-2">
+                  <input
+                    type="number"
+                    id="items_per_page"
+                    name="items_per_page"
+                    min="1"
+                    max="50"
+                    value={localItemsPerPage}
+                    onChange={(e) => setLocalItemsPerPage(Math.max(1, Math.min(50, parseInt(e.target.value) || 1)))}
+                    className="block w-24 rounded-md border-gray-600 bg-gray-700 text-white shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm"
+                  />
+                  <span className="text-sm text-gray-400">
+                    (1-50)
+                  </span>
+                </div>
+                <p className="mt-2 text-sm text-gray-400">
+                  Número de registros que se mostrarán por página en las listas.
+                </p>
               </div>
             </div>
           </div>

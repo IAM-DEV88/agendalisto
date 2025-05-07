@@ -1,13 +1,14 @@
 import React, { useState, useEffect } from 'react';
-import { Service } from '../../lib/api';
+import type { Service } from '../../lib/api';
 import { notifySuccess, notifyError } from '../../lib/toast';
 
 interface ServicesSectionProps {
   businessId: string;
-  getServices: (businessId: string) => Promise<{ success: boolean, data?: Service[], error?: string }>;
-  createService: (service: Omit<Service, 'id' | 'created_at' | 'updated_at'>) => Promise<any>;
-  updateService: (id: string, service: Partial<Service>) => Promise<any>;
-  deleteService: (id: string) => Promise<boolean>;
+  getServices: (businessId: string) => Promise<{ success: boolean; data?: Service[]; error?: string }>;
+  createService: (service: Omit<Service, 'id' | 'created_at' | 'updated_at'>) => Promise<{ success: boolean; data?: Service; error?: string }>;
+  updateService: (id: string, service: Partial<Service>) => Promise<{ success: boolean; data?: Service; error?: string }>;
+  deleteService: (id: string) => Promise<{ success: boolean; error?: string }>;
+  itemsPerPage: number;
 }
 
 const ServicesSection: React.FC<ServicesSectionProps> = ({
@@ -15,10 +16,10 @@ const ServicesSection: React.FC<ServicesSectionProps> = ({
   getServices,
   createService,
   updateService,
-  deleteService
+  deleteService,
+  itemsPerPage,
 }) => {
   const [services, setServices] = useState<Service[]>([]);
-  const itemsPerPage = 4;
   const [currentPage, setCurrentPage] = useState(1);
   const [loading, setLoading] = useState(true);
   const [modalOpen, setModalOpen] = useState(false);
@@ -112,13 +113,13 @@ const ServicesSection: React.FC<ServicesSectionProps> = ({
     }
 
     try {
-      const success = await deleteService(id);
+      const response = await deleteService(id);
       
-      if (success) {
+      if (response.success) {
         await loadServices();
         notifySuccess('Servicio eliminado correctamente');
       } else {
-        const errMsg = 'Error al eliminar el servicio';
+        const errMsg = response.error || 'Error al eliminar el servicio';
         setError(errMsg);
         notifyError(errMsg);
       }

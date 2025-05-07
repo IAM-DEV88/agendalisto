@@ -28,12 +28,17 @@ import StatsSection from '../components/business/StatsSection';
 import { notifySuccess, notifyError } from '../lib/toast';
 import { useBusinessAppointments } from '../hooks/useBusinessAppointments';
 import { useSwipeable } from 'react-swipeable';
+import { supabase } from '../lib/supabase';
+import { useItemsPerPage } from '../hooks/useItemsPerPage';
+import { useAuth } from '../hooks/useAuth';
 
 type BusinessDashboardProps = {
   user: UserProfile | null;
 };
 
-const BusinessDashboard = ({ user }: BusinessDashboardProps) => {
+export const BusinessDashboard: React.FC = () => {
+  const { user } = useAuth();
+  const { itemsPerPage } = useItemsPerPage(user?.id);
   const [searchParams, setSearchParams] = useSearchParams();
   // Tab persistence: initialize from URL or default to 'appointments'
   const defaultTab = searchParams.get('tab') || 'appointments';
@@ -71,9 +76,9 @@ const BusinessDashboard = ({ user }: BusinessDashboardProps) => {
   const [loadingBusinessConfig, setLoadingBusinessConfig] = useState(true);
   const [savingBusinessConfig, setSavingBusinessConfig] = useState(false);
 
-  // Paginación para Agenda, Historial y Clientes
-  const itemsPerPage = 4;
+  // Paginación para Agenda, Historial, Pendientes y Clientes
   const [appointmentsPage, setAppointmentsPage] = useState(1);
+  const [pendingPage, setPendingPage] = useState(1);
   const [historyPage, setHistoryPage] = useState(1);
   const [clientsPage, setClientsPage] = useState(1);
 
@@ -230,7 +235,7 @@ const BusinessDashboard = ({ user }: BusinessDashboardProps) => {
   };
 
   // Swipe handlers para cambiar tabs con gesto horizontal
-  const tabOrder = ['stats','appointments','history','services','clients','profile','availability','settings'] as const;
+  const tabOrder = ['stats','appointments','pending','history','services','clients','profile','availability','settings'] as const;
   const swipeHandlers = useSwipeable({
     onSwipedLeft: () => {
       const idx = tabOrder.indexOf(activeTab as typeof tabOrder[number]);
@@ -328,42 +333,45 @@ const BusinessDashboard = ({ user }: BusinessDashboardProps) => {
   };
 
   // Manejar cambios en la configuración
-  const handleConfigChange = (field: string, value: any) => {
-    setBusinessConfig(prev => ({ ...prev, [field]: value }));
+  const handleConfigChange = (field: keyof BusinessConfig, value: any) => {
+    setBusinessConfig(prev => ({
+      ...prev,
+      [field]: value
+    }));
   };
 
   // Manejar envío del formulario de configuración
-  const handleConfigSubmit = async (e: React.FormEvent) => {
+  const handleConfigSave = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!businessData) return;
-
     setSavingBusinessConfig(true);
     setConfigMessage(null);
 
     try {
-      const { success, error } = await updateBusinessConfig(businessData.id, businessConfig);
-
-      if (success) {
+      const result = await updateBusinessConfig(businessData?.id || '', businessConfig);
+      if (result.success) {
         setConfigMessage({ text: 'Configuración guardada correctamente', type: 'success' });
         notifySuccess('Configuración guardada correctamente');
       } else {
-        throw new Error(error || 'Error al guardar la configuración');
+        setConfigMessage({ text: result.error || 'Error al guardar la configuración', type: 'error' });
+        notifyError(result.error || 'Error al guardar la configuración');
       }
     } catch (err: any) {
-      setConfigMessage({ text: err.message || 'Error al actualizar la configuración', type: 'error' });
-      notifyError(err.message || 'Error al actualizar la configuración');
+      setConfigMessage({ text: err.message || 'Error al guardar la configuración', type: 'error' });
+      notifyError(err.message || 'Error al guardar la configuración');
     } finally {
       setSavingBusinessConfig(false);
     }
   };
 
-  // Filtrar citas próximas y pasadas
+  // Filtrar citas según estado y fecha
   const now = new Date();
-  const upcomingAppointments = businessAppointments.filter(a => new Date(a.start_time) > now);
-  const pastAppointments = businessAppointments.filter(a => new Date(a.start_time) <= now);
+  const pendingAppointments = businessAppointments.filter(a => a.status === 'pending');
+  const confirmedAppointments = businessAppointments.filter(a => a.status === 'confirmed');
+  const pastAppointments = businessAppointments.filter(a => a.status === 'completed' || new Date(a.start_time) <= now);
 
   // Paginación de resultados
-  const pagedUpcoming = upcomingAppointments.slice((appointmentsPage - 1) * itemsPerPage, appointmentsPage * itemsPerPage);
+  const pagedPending = pendingAppointments.slice((pendingPage - 1) * itemsPerPage, pendingPage * itemsPerPage);
+  const pagedConfirmed = confirmedAppointments.slice((appointmentsPage - 1) * itemsPerPage, appointmentsPage * itemsPerPage);
   const pagedPast = pastAppointments.slice((historyPage - 1) * itemsPerPage, historyPage * itemsPerPage);
   const pagedClients = businessClients.slice((clientsPage - 1) * itemsPerPage, clientsPage * itemsPerPage);
 
@@ -443,33 +451,40 @@ const BusinessDashboard = ({ user }: BusinessDashboardProps) => {
 
           <div className="border-b border-gray-200">
             <nav className="-mb-px flex space-x-2 overflow-x-auto whitespace-nowrap">
+              <button id="tab-pending" onClick={() => handleTabChange('pending')} className={`${activeTab === 'pending'
+                ? 'border-indigo-500 text-indigo-600 dark:text-white'
+                : 'border-transparent text-gray-500 hover:text-gray-400 hover:border-gray-300'
+                } whitespace-nowrap py-4 px-1 border-b-2 font-medium text-sm`}
+              >
+                Pendientes:<span className="ml-1 text-gray-500 dark:text-gray-400">{pendingAppointments.length}</span>
+              </button>
               <button id="tab-appointments" onClick={() => handleTabChange('appointments')} className={`${activeTab === 'appointments'
                 ? 'border-indigo-500 text-indigo-600 dark:text-white'
                 : 'border-transparent text-gray-500 hover:text-gray-400 hover:border-gray-300'
                 } whitespace-nowrap py-4 px-1 border-b-2 font-medium text-sm`}
               >
-                Agenda
+                Agendado:<span className="ml-1 text-gray-500 dark:text-gray-400">{confirmedAppointments.length}</span>
               </button>
               <button id="tab-history" onClick={() => handleTabChange('history')} className={`${activeTab === 'history'
                 ? 'border-indigo-500 text-indigo-600 dark:text-white'
                 : 'border-transparent text-gray-500 hover:text-gray-400 hover:border-gray-300'
                 } whitespace-nowrap py-4 px-1 border-b-2 font-medium text-sm`}
               >
-                Historial
+                Historial:<span className="ml-1 text-gray-500 dark:text-gray-400">{pastAppointments.length}</span>
               </button>
               <button id="tab-services" onClick={() => handleTabChange('services')} className={`${activeTab === 'services'
                 ? 'border-indigo-500 text-indigo-600 dark:text-white'
                 : 'border-transparent text-gray-500 hover:text-gray-400 hover:border-gray-300'
                 } whitespace-nowrap py-4 px-1 border-b-2 font-medium text-sm`}
               >
-                Servicios
+                Servicios:<span className="ml-1 text-gray-500 dark:text-gray-400">{totalServices}</span>
               </button>
               <button id="tab-clients" onClick={() => handleTabChange('clients')} className={`${activeTab === 'clients'
                 ? 'border-indigo-500 text-indigo-600 dark:text-white'
                 : 'border-transparent text-gray-500 hover:text-gray-400 hover:border-gray-300'
                 } whitespace-nowrap py-4 px-1 border-b-2 font-medium text-sm`}
               >
-                Clientes
+                Clientes:<span className="ml-1 text-gray-500 dark:text-gray-400">{businessClients.length}</span>
               </button>
               <button id="tab-profile" onClick={() => handleTabChange('profile')} className={`${activeTab === 'profile'
                 ? 'border-indigo-500 text-indigo-600 dark:text-white'
@@ -499,7 +514,7 @@ const BusinessDashboard = ({ user }: BusinessDashboardProps) => {
             {activeTab === 'stats' && businessData && (
               <StatsSection
                 totalAppointments={businessAppointments.length}
-                upcomingAppointments={upcomingAppointments.length}
+                upcomingAppointments={confirmedAppointments.length}
                 pastAppointments={pastAppointments.length}
                 totalClients={businessClients.length}
                 totalServices={totalServices}
@@ -519,23 +534,45 @@ const BusinessDashboard = ({ user }: BusinessDashboardProps) => {
                 lifetimeValueAvg={lifetimeValueAvg}
               />
             )}
-            {/* Tab de Agenda */}
-            {activeTab === 'appointments' && (
+            {/* Tab de Pendientes */}
+            {activeTab === 'pending' && (
               <>
                 <AppointmentsSection
-                  appointments={pagedUpcoming}
+                  appointments={pagedPending}
                   loading={loadingBusinessAppointments}
                   onUpdateStatus={handleUpdateAppointmentStatus}
                 />
-                {/* Paginación Agenda */}
-                {Math.ceil(upcomingAppointments.length / itemsPerPage) > 1 && (
+                {/* Paginación Pendientes */}
+                {Math.ceil(pendingAppointments.length / itemsPerPage) > 1 && (
                   <div className="flex justify-center mt-4">
                     <nav className="flex items-center space-x-2">
-                      <button onClick={() => setAppointmentsPage(appointmentsPage - 1)} disabled={appointmentsPage === 1} aria-label="Anterior" className="px-3 bg-opacity-10 dark:text-white py-1 bg-gray-50 border border-gray-300 text-gray-700 hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed">◀</button>
-                      {Array.from({ length: Math.ceil(upcomingAppointments.length / itemsPerPage) }, (_, i) => i + 1).map(page => (
+                      <button onClick={() => setPendingPage(pendingPage - 1)} disabled={pendingPage === 1} className="px-3 py-1 rounded bg-gray-50 border border-gray-300 text-gray-700 hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed">◀</button>
+                      {Array.from({ length: Math.ceil(pendingAppointments.length / itemsPerPage) }, (_, i) => i + 1).map(page => (
+                        <button key={page} onClick={() => setPendingPage(page)} className={`px-3 py-1 ${pendingPage === page ? 'bg-indigo-600 text-white' : 'bg-gray-50 border border-gray-300 text-gray-700 hover:bg-gray-50'}`}>{page}</button>
+                      ))}
+                      <button onClick={() => setPendingPage(pendingPage + 1)} disabled={pendingPage === Math.ceil(pendingAppointments.length / itemsPerPage)} className="px-3 py-1 rounded bg-gray-50 border border-gray-300 text-gray-700 hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed">▶</button>
+                    </nav>
+                  </div>
+                )}
+              </>
+            )}
+            {/* Tab de Agendado */}
+            {activeTab === 'appointments' && (
+              <>
+                <AppointmentsSection
+                  appointments={pagedConfirmed}
+                  loading={loadingBusinessAppointments}
+                  onUpdateStatus={handleUpdateAppointmentStatus}
+                />
+                {/* Paginación Agendado */}
+                {Math.ceil(confirmedAppointments.length / itemsPerPage) > 1 && (
+                  <div className="flex justify-center mt-4">
+                    <nav className="flex items-center space-x-2">
+                      <button onClick={() => setAppointmentsPage(appointmentsPage - 1)} disabled={appointmentsPage === 1} className="px-3 py-1 rounded bg-gray-50 border border-gray-300 text-gray-700 hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed">◀</button>
+                      {Array.from({ length: Math.ceil(confirmedAppointments.length / itemsPerPage) }, (_, i) => i + 1).map(page => (
                         <button key={page} onClick={() => setAppointmentsPage(page)} className={`px-3 py-1 ${appointmentsPage === page ? 'bg-indigo-600 text-white' : 'bg-gray-50 border border-gray-300 text-gray-700 hover:bg-gray-50'}`}>{page}</button>
                       ))}
-                      <button onClick={() => setAppointmentsPage(appointmentsPage + 1)} disabled={appointmentsPage === Math.ceil(upcomingAppointments.length / itemsPerPage)} aria-label="Siguiente" className="px-3 bg-opacity-10 dark:text-white py-1 bg-gray-50 border border-gray-300 text-gray-700 hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed">▶</button>
+                      <button onClick={() => setAppointmentsPage(appointmentsPage + 1)} disabled={appointmentsPage === Math.ceil(confirmedAppointments.length / itemsPerPage)} className="px-3 py-1 rounded bg-gray-50 border border-gray-300 text-gray-700 hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed">▶</button>
                     </nav>
                   </div>
                 )}
@@ -570,6 +607,7 @@ const BusinessDashboard = ({ user }: BusinessDashboardProps) => {
                 createService={createBusinessService}
                 updateService={updateBusinessService}
                 deleteService={deleteBusinessService}
+                itemsPerPage={itemsPerPage}
               />
             )}
 
@@ -626,8 +664,9 @@ const BusinessDashboard = ({ user }: BusinessDashboardProps) => {
                 loading={loadingBusinessConfig}
                 saving={savingBusinessConfig}
                 message={configMessage}
-                onSave={handleConfigSubmit}
+                onSave={handleConfigSave}
                 onConfigChange={handleConfigChange}
+                itemsPerPage={itemsPerPage}
               />
             )}
           </div>

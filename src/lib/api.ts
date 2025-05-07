@@ -25,18 +25,18 @@ export type Business = {
   config?: BusinessConfig;
 };
 
-export type Service = {
+export interface Service {
   id: string;
   business_id: string;
   name: string;
   description: string;
   duration: number;
   price: number;
-  provider: string;
-  is_active: boolean;
   created_at: string;
   updated_at: string;
-};
+  is_active: boolean;
+  provider?: string;
+}
 
 export type BusinessHours = {
   id: string;

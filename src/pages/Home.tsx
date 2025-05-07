@@ -68,12 +68,12 @@ const Home = () => {
             <div className="mt-10 mx-auto max-w-7xl px-4 sm:mt-12 sm:px-6 md:mt-16 lg:mt-20 lg:px-8 xl:mt-28">
               <div className="sm:text-center lg:text-left">
                 <h1 className="text-4xl tracking-tight font-extrabold text-white sm:text-5xl md:text-6xl">
-                  <span className="block">Gestiona tus citas</span>
-                  <span className="block text-indigo-200">de forma sencilla</span>
+                  <span className="block">Haz lo que sabes, </span>
+                  <span className="block text-indigo-200">gana lo que mereces</span>
                 </h1>
                 <p className="mt-3 text-base text-indigo-200 sm:mt-5 sm:text-lg sm:max-w-xl sm:mx-auto md:mt-5 md:text-xl lg:mx-0">
-                  Plataforma para la gestión de reservas y citas para negocios y servicios.
-                  Organiza tu agenda y permite a tus clientes reservar con facilidad.
+                Publica tus servicios, recibe valoraciones y empieza a trabajar.
+                Conecta con quienes necesitan lo que haces.
                 </p>
                 <div className="mt-5 sm:mt-8 sm:flex sm:justify-center lg:justify-start">
                   <div className="rounded-md shadow">
@@ -127,7 +127,7 @@ const Home = () => {
                       {cat.name}
                     </Link>
                   </h3>
-                  <p className="mt-2 text-sm text-gray-600 dark:text-gray-400">{cat.description}</p>
+                  <p className="mt-2 mb-4 text-sm text-gray-600 dark:text-gray-400">{cat.description}</p>
                 </div>
               </SwiperSlide>
             ))}
@@ -139,7 +139,9 @@ const Home = () => {
 
       {/* Milestones section */}
       <div className="max-w-7xl mx-4 sm:mx-auto py-8">
-        <h2 className="text-2xl font-bold mb-4">Hitos Destacados</h2>
+        <h2 className="text-2xl font-bold mb-4">Nuestra Ruta de Crecimiento
+
+</h2>
         {loadingMilestones ? (
           <p className="text-center">Cargando hitos...</p>
         ) : milestones.length ? (
@@ -148,7 +150,7 @@ const Home = () => {
               <div key={m.id} className="p-4 border rounded-lg">
                 <h3 className="text-lg font-semibold">{m.title}</h3>
                 <p className="text-sm mb-2">{m.description}</p>
-                <p className="text-sm">Recaudado: {m.current_amount} / {m.goal_amount}</p>
+                <p className="text-sm">Recaudado: {m.current_amount} / {m.goal_amount} COP</p>
               </div>
             ))}
           </div>
@@ -158,7 +160,9 @@ const Home = () => {
         { !loading && (
           <div className="text-center mt-6">
             <Link to="/crowdfunding" className="px-6 py-3 bg-indigo-600 text-white rounded hover:bg-indigo-500">
-              Apoya nuestros hitos
+            Ayúdanos a llegar más lejos
+
+
             </Link>
           </div>
         )}

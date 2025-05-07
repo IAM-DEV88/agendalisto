@@ -19,19 +19,19 @@ const Crowdfunding = () => {
 
   return (
     <div className="max-w-4xl mx-4 sm:mx-auto py-8">
-      <h1 className="text-3xl font-bold mb-4">Crowdfunding: Hitos de la plataforma</h1>
-      <p className="mb-6">Puedes apoyar un hito con la cantidad que desees.</p>
+      <h1 className="text-3xl font-bold mb-4">Crowdfunding: Nuestra Ruta de Crecimiento</h1>
+      <p className="mb-6">Puedes apoyar una ruta con la cantidad que desees.</p>
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
         {milestones.map((m) => (
-          <div key={m.id} className="p-4 border rounded-lg shadow">
+          <div key={m.id} className="p-4 flex flex-col border rounded-lg shadow">
             <div className="flex items-center mb-2">
               <Gift className="h-6 w-6 text-indigo-600 mr-2" />
               <h2 className="text-xl font-semibold">{m.title}</h2>
             </div>
             <p className="text-sm text-gray-600 mb-2">{m.description}</p>
-            <p className="text-sm mb-2">Recaudado: {m.current_amount} / {m.goal_amount}</p>
+            <p className="text-sm mb-2">Recaudado: {m.current_amount} / {m.goal_amount} COP</p>
             <p className="font-medium text-indigo-600 mb-4">{m.cta}</p>
-            <div className="mt-4 text-center">
+            <div className="mt-auto text-center">
               <form
                 action="https://www.paypal.com/cgi-bin/webscr"
                 method="post"

@@ -72,15 +72,33 @@ const ProfileDashboard = ({ user }: ProfileDashboardProps) => {
   const [saving, setSaving] = useState(false);
   const [profileMessage, setProfileMessage] = useState<{ text: string, type: 'success' | 'error' } | null>(null);
 
-  // Estados para la paginación
+  // Estados para la paginación y configuración de registros por página
   const [currentPage, setCurrentPage] = useState(1);
+  const [pendingPage, setPendingPage] = useState(1);
   const [pastCurrentPage, setPastCurrentPage] = useState(1);
-  const itemsPerPage = 5;
+  const [itemsPerPage, setItemsPerPage] = useState(user?.items_per_page || 5);
+  const [itemsPerPageMessage, setItemsPerPageMessage] = useState<{ text: string; type: 'success' | 'error' } | null>(null);
+
+  // Remove localStorage loading since we're using profile value
+  useEffect(() => {
+    if (user?.items_per_page) {
+      setItemsPerPage(user.items_per_page);
+    }
+  }, [user]);
+
+  // Cálculo de conteos y filtros
+  const confirmedAppointments = appointments.filter(a => a.status === 'confirmed');
+  const pendingAppointments = appointments.filter(a => a.status === 'pending');
+  const completedAppointments = appointments.filter(a => a.status === 'completed');
+
+  const upcomingCount = confirmedAppointments.length;
+  const pendingCount = pendingAppointments.length;
+  const pastCount = completedAppointments.length;
 
   const navigate = useNavigate();
 
   // Swipe handlers para cambiar tabs con gesto horizontal
-  const tabOrder = ['upcoming','past','profile'] as const;
+  const tabOrder = ['upcoming', 'pending', 'past', 'profile', 'general'] as const;
   const swipeHandlers = useSwipeable({
     onSwipedLeft: () => {
       const idx = tabOrder.indexOf(activeTab);
@@ -209,6 +227,46 @@ const ProfileDashboard = ({ user }: ProfileDashboardProps) => {
     }
   };
 
+  const handleItemsPerPageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const val = parseInt(e.target.value);
+    if (!isNaN(val) && val > 0) {
+      setItemsPerPage(val);
+      setItemsPerPageMessage(null);
+    }
+  };
+
+  const handleSaveItemsPerPage = async () => {
+    if (!user) return;
+    
+    try {
+      setItemsPerPageMessage(null);
+      const { error } = await supabase
+        .from('profiles')
+        .update({ items_per_page: itemsPerPage })
+        .eq('id', user.id);
+
+      if (error) throw error;
+
+      // Get current session to update global state
+      const { data: { session } } = await supabase.auth.getSession();
+      if (!session?.user) {
+        throw new Error('No se pudo obtener la sesión del usuario');
+      }
+
+      // Update global state with new items_per_page
+      dispatchUserProfileUpdated(session.user, { ...user, items_per_page: itemsPerPage });
+      
+      // Show success message in UI and toast
+      setItemsPerPageMessage({ text: 'Configuración guardada correctamente', type: 'success' });
+      notifySuccess('Configuración guardada correctamente');
+    } catch (error) {
+      console.error('Error saving items per page:', error);
+      // Show error message in UI and toast
+      setItemsPerPageMessage({ text: 'Error al guardar la configuración', type: 'error' });
+      notifyError('Error al guardar la configuración');
+    }
+  };
+
   return (
     <div>
       <div className="max-w-7xl mx-auto py-6 sm:px-6 lg:px-8">
@@ -237,17 +295,29 @@ const ProfileDashboard = ({ user }: ProfileDashboardProps) => {
           {/* Sub-navegación del perfil */}
           <div className="border-b border-gray-200 mt-4">
             <nav className="-mb-px flex space-x-2 overflow-x-auto whitespace-nowrap">
-              <button id="tab-upcoming" onClick={() => dispatch(setActiveTab('upcoming'))} className={`whitespace-nowrap pb-4 px-1 border-b-2 font-medium text-sm ${activeTab === 'upcoming' ? 'border-indigo-500 text-indigo-600 dark:text-white' : 'border-transparent text-gray-500 hover:text-gray-400 hover:border-gray-300'}`}>Próximas citas</button>
-              <button id="tab-past" onClick={() => dispatch(setActiveTab('past'))} className={`whitespace-nowrap pb-4 px-1 border-b-2 font-medium text-sm ${activeTab === 'past' ? 'border-indigo-500 text-indigo-600 dark:text-white' : 'border-transparent text-gray-500 hover:text-gray-400 hover:border-gray-300'}`}>Historial</button>
-              <button id="tab-profile" onClick={() => dispatch(setActiveTab('profile'))} className={`whitespace-nowrap pb-4 px-1 border-b-2 font-medium text-sm ${activeTab === 'profile' ? 'border-indigo-500 text-indigo-600 dark:text-white' : 'border-transparent text-gray-500 hover:text-gray-400 hover:border-gray-300'}`}>Mis Datos</button>
+              <button id="tab-upcoming" onClick={() => dispatch(setActiveTab('upcoming'))} className={`whitespace-nowrap pb-4 px-1 border-b-2 font-medium text-sm ${activeTab === 'upcoming' ? 'border-indigo-500 text-indigo-600 dark:text-white' : 'border-transparent text-gray-500 hover:text-gray-400 hover:border-gray-300'}`}>
+                Próximas citas:<span className="ml-1 text-gray-500 dark:text-gray-400">{upcomingCount}</span>
+              </button>
+              <button id="tab-pending" onClick={() => dispatch(setActiveTab('pending'))} className={`whitespace-nowrap pb-4 px-1 border-b-2 font-medium text-sm ${activeTab === 'pending' ? 'border-indigo-500 text-indigo-600 dark:text-white' : 'border-transparent text-gray-500 hover:text-gray-400 hover:border-gray-300'}`}>
+                Pendientes:<span className="ml-1 text-gray-500 dark:text-gray-400">{pendingCount}</span>
+              </button>
+              <button id="tab-past" onClick={() => dispatch(setActiveTab('past'))} className={`whitespace-nowrap pb-4 px-1 border-b-2 font-medium text-sm ${activeTab === 'past' ? 'border-indigo-500 text-indigo-600 dark:text-white' : 'border-transparent text-gray-500 hover:text-gray-400 hover:border-gray-300'}`}>
+                Historial:<span className="ml-1 text-gray-500 dark:text-gray-400">{pastCount}</span>
+              </button>
+              <button id="tab-profile" onClick={() => dispatch(setActiveTab('profile'))} className={`whitespace-nowrap pb-4 px-1 border-b-2 font-medium text-sm ${activeTab === 'profile' ? 'border-indigo-500 text-indigo-600 dark:text-white' : 'border-transparent text-gray-500 hover:text-gray-400 hover:border-gray-300'}`}>
+                Mis Datos
+              </button>
+              <button id="tab-general" onClick={() => dispatch(setActiveTab('general'))} className={`whitespace-nowrap pb-4 px-1 border-b-2 font-medium text-sm ${activeTab === 'general' ? 'border-indigo-500 text-indigo-600 dark:text-white' : 'border-transparent text-gray-500 hover:text-gray-400 hover:border-gray-300'}`}>
+                General
+              </button>
             </nav>
           </div>
 
           <div {...swipeHandlers}>
-            {/* Pestaña de citas próximas */}
+            {/* Pestaña de citas próximas (confirmadas) */}
             {activeTab === 'upcoming' && (
               <UpcomingAppointments
-                appointments={appointments}
+                appointments={confirmedAppointments}
                 loading={loading}
                 currentPage={currentPage}
                 onPageChange={setCurrentPage}
@@ -257,10 +327,23 @@ const ProfileDashboard = ({ user }: ProfileDashboardProps) => {
               />
             )}
 
-            {/* Pestaña de historial */}
+            {/* Pestaña de citas pendientes */}
+            {activeTab === 'pending' && (
+              <UpcomingAppointments
+                appointments={pendingAppointments}
+                loading={loading}
+                currentPage={pendingPage}
+                onPageChange={setPendingPage}
+                itemsPerPage={itemsPerPage}
+                onReschedule={handleReschedule}
+                onCancel={handleCancel}
+              />
+            )}
+
+            {/* Pestaña de historial (completadas) */}
             {activeTab === 'past' && (
               <PastAppointments
-                appointments={pastAppointments}
+                appointments={completedAppointments}
                 loading={loading}
                 currentPage={pastCurrentPage}
                 onPageChange={setPastCurrentPage}
@@ -278,6 +361,44 @@ const ProfileDashboard = ({ user }: ProfileDashboardProps) => {
                 onSave={handleProfileSubmit}
                 onChange={handleProfileChange}
               />
+            )}
+
+            {activeTab === 'general' && (
+              <div className="p-6 mt-2 dark:bg-opacity-10 bg-gray-50 
+              rounded-md">
+                <div>
+                  <h3 className="text-lg font-medium text-gray-900 dark:text-white">Configuración General</h3>
+                  <div className="mt-4 space-y-4">
+                    <div>
+                      <label htmlFor="itemsPerPage" className="block text-sm font-medium text-gray-700 dark:text-gray-300">
+                        Registros por página
+                      </label>
+                      <div className="mt-1 flex items-center space-x-2">
+                        <input
+                          type="number"
+                          id="itemsPerPage"
+                          value={itemsPerPage}
+                          onChange={handleItemsPerPageChange}
+                          min="1"
+                          className="block w-24 rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm dark:bg-gray-700 dark:border-gray-600 dark:text-white"
+                        />
+                        <button
+                          type="button"
+                          onClick={handleSaveItemsPerPage}
+                          className="inline-flex items-center px-3 py-2 border border-transparent text-sm leading-4 font-medium rounded-md text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
+                        >
+                          Guardar
+                        </button>
+                      </div>
+                      {itemsPerPageMessage && (
+                        <p className={`mt-2 text-sm ${itemsPerPageMessage.type === 'success' ? 'text-green-600' : 'text-red-600'}`}>
+                          {itemsPerPageMessage.text}
+                        </p>
+                      )}
+                    </div>
+                  </div>
+                </div>
+              </div>
             )}
           </div>
         </div>
