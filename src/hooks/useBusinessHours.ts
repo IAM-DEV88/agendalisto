@@ -21,15 +21,19 @@ export const useBusinessHours = (businessId: string | undefined): UseBusinessHou
   const days = ['Lunes', 'Martes', 'Miércoles', 'Jueves', 'Viernes', 'Sábado', 'Domingo'];
 
   useEffect(() => {
+    console.log('[useBusinessHours] effect triggered for businessId=', businessId);
     const loadHours = async () => {
+      console.log('[useBusinessHours] loadHours start, businessId=', businessId);
       if (!businessId) {
         setLoading(false);
+        console.log('[useBusinessHours] no businessId, loading set to false');
         return;
       }
 
       setLoading(true);
       try {
         const hours = await getBusinessHours(businessId);
+        console.log('[useBusinessHours] fetched hours', hours);
         
         // Ensure full week array
         const fullWeek = days.map((_, idx) => {
@@ -48,6 +52,7 @@ export const useBusinessHours = (businessId: string | undefined): UseBusinessHou
         
         setBusinessHoursState(fullWeek);
       } catch (err: any) {
+        console.error('[useBusinessHours] error loading hours', err);
         setMessage({ 
           text: err.message || 'Error al cargar los horarios del negocio', 
           type: 'error' 
@@ -55,6 +60,7 @@ export const useBusinessHours = (businessId: string | undefined): UseBusinessHou
         toast.error(err.message || 'Error al cargar los horarios del negocio');
       } finally {
         setLoading(false);
+        console.log('[useBusinessHours] loadHours complete, loading=false');
       }
     };
 
