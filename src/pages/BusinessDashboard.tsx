@@ -230,7 +230,7 @@ export const BusinessDashboard: React.FC = () => {
   };
 
   // Swipe handlers para cambiar tabs con gesto horizontal
-  const tabOrder = ['stats','appointments','pending','history','services','clients','profile','availability','settings'] as const;
+  const tabOrder = ['stats', 'pending', 'appointments', 'history', 'services', 'clients', 'profile', 'availability', 'settings'] as const;
   const swipeHandlers = useSwipeable({
     onSwipedLeft: () => {
       const idx = tabOrder.indexOf(activeTab as typeof tabOrder[number]);
