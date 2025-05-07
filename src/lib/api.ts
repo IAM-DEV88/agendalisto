@@ -35,7 +35,7 @@ export interface Service {
   created_at: string;
   updated_at: string;
   is_active: boolean;
-  provider: string;
+  provider?: string;
 }
 
 export type BusinessHours = {
@@ -497,34 +497,40 @@ export async function updateBusinessConfig(businessId: string, config: BusinessC
 }
 
 // Functions for managing business services
-export const createBusinessService = async (businessId: string, service: Omit<Service, 'id'>): Promise<{ success: boolean; data?: Service; error?: string }> => {
+export const createBusinessService = async (service: Omit<Service, 'id' | 'created_at' | 'updated_at'>) => {
   try {
     const { data, error } = await supabase
       .from('services')
-      .insert([{ ...service, business_id: businessId }])
+      .insert({
+        ...service, 
+        created_at: new Date().toISOString(),
+        updated_at: new Date().toISOString()
+      })
+      .single();
+
+    if (error) throw error;
+    return data;
+  } catch (err: any) {
+    throw err;
+  }
+};
+
+export const updateBusinessService = async (id: string, updates: Partial<Service>) => {
+  try {
+    const { data, error } = await supabase
+      .from('services')
+      .update({ 
+        ...updates, 
+        updated_at: new Date().toISOString() 
+      })
+      .eq('id', id)
       .select()
       .single();
 
     if (error) throw error;
-    return { success: true, data };
+    return data;
   } catch (err: any) {
-    console.error('Error creating service:', err);
-    return { success: false, error: err.message };
-  }
-};
-
-export const updateBusinessService = async (id: string, service: Partial<Service>): Promise<{ success: boolean; error?: string }> => {
-  try {
-    const { error } = await supabase
-      .from('services')
-      .update(service)
-      .eq('id', id);
-
-    if (error) throw error;
-    return { success: true };
-  } catch (err: any) {
-    console.error('Error updating service:', err);
-    return { success: false, error: err.message };
+    throw err;
   }
 };
 
@@ -537,9 +543,9 @@ export const deleteBusinessService = async (id: string): Promise<{ success: bool
 
     if (error) throw error;
     return { success: true };
-  } catch (err: any) {
-    console.error('Error deleting service:', err);
-    return { success: false, error: err.message };
+  } catch (error: any) {
+    console.error('Error al eliminar servicio:', error);
+    return { success: false, error: error.message || 'Error al eliminar servicio' };
   }
 };
 

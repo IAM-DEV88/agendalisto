@@ -238,7 +238,7 @@ function App() {
             } />
             <Route path="/business/dashboard" element={
               <ProtectedRoute user={user}>
-                <BusinessDashboard user={userProfile} />
+                <BusinessDashboard />
               </ProtectedRoute>
             } />
             <Route path="/:slug" element={<BusinessPublicPage />} />

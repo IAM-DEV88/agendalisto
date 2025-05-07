@@ -18,7 +18,10 @@ import { setActiveTab } from '../store/uiSlice';
 import { notifySuccess, notifyError } from '../lib/toast';
 import { useAppointments } from '../hooks/useAppointments';
 import { useSwipeable } from 'react-swipeable';
-import { useAuth } from '../hooks/useAuth';
+
+type ProfileDashboardProps = {
+  user: UserProfile | null;
+};
 
 interface Appointment {
   id: string;
@@ -50,20 +53,21 @@ const slugify = (str: string): string =>
     .replace(/\s+/g, '-')
     .replace(/[^\w\-]+/g, '');
 
-const ProfileDashboard = () => {
-  const { user } = useAuth();
+const ProfileDashboard = ({ user }: ProfileDashboardProps) => {
   const dispatch = useAppDispatch();
   const activeTab = useSelector((state: RootState) => state.ui.activeTab);
+  // Realtime appointments via custom hook
   const { appointments, pastAppointments, loading, error } = useAppointments(user?.id || null);
+  console.log('useAppointments:', { appointments, pastAppointments, loading, error });
+  // Estado para indicar si el usuario tiene un negocio
   const [hasBusiness, setHasBusiness] = useState(false);
-  const [userProfile, setUserProfile] = useState<UserProfile | null>(null);
 
   // Estado para el perfil de usuario
   const [profileData, setProfileData] = useState({
-    full_name: '',
-    email: '',
-    phone: '',
-    avatar_url: '',
+    full_name: user?.full_name || '',
+    email: user?.email || '',
+    phone: user?.phone || '',
+    avatar_url: user?.avatar_url || '',
   });
   const [saving, setSaving] = useState(false);
   const [profileMessage, setProfileMessage] = useState<{ text: string, type: 'success' | 'error' } | null>(null);
@@ -72,39 +76,14 @@ const ProfileDashboard = () => {
   const [currentPage, setCurrentPage] = useState(1);
   const [pendingPage, setPendingPage] = useState(1);
   const [pastCurrentPage, setPastCurrentPage] = useState(1);
-  const [itemsPerPage, setItemsPerPage] = useState(5);
+  const [itemsPerPage, setItemsPerPage] = useState(user?.items_per_page || 5);
   const [itemsPerPageMessage, setItemsPerPageMessage] = useState<{ text: string; type: 'success' | 'error' } | null>(null);
 
-  // Load user profile data
+  // Remove localStorage loading since we're using profile value
   useEffect(() => {
-    const loadUserProfile = async () => {
-      if (!user?.id) return;
-      
-      try {
-        const { data: profile, error } = await supabase
-          .from('profiles')
-          .select('*')
-          .eq('id', user.id)
-          .single();
-          
-        if (error) throw error;
-        
-        if (profile) {
-          setUserProfile(profile as UserProfile);
-          setProfileData({
-            full_name: profile.full_name || '',
-            email: user.email || '',
-            phone: profile.phone || '',
-            avatar_url: profile.avatar_url || '',
-          });
-          setItemsPerPage(profile.items_per_page || 5);
-        }
-      } catch (err) {
-        console.error('Error loading user profile:', err);
-      }
-    };
-
-    loadUserProfile();
+    if (user?.items_per_page) {
+      setItemsPerPage(user.items_per_page);
+    }
   }, [user]);
 
   // Cálculo de conteos y filtros
@@ -137,6 +116,18 @@ const ProfileDashboard = () => {
     const btn = document.getElementById(`tab-${activeTab}`);
     btn?.scrollIntoView({ behavior: 'smooth', inline: 'center', block: 'nearest' });
   }, [activeTab]);
+
+  useEffect(() => {
+    // Actualizar estado cuando cambia el usuario
+    if (user) {
+      setProfileData({
+        full_name: user.full_name || '',
+        email: user.email || '',
+        phone: user.phone || '',
+        avatar_url: user.avatar_url || '',
+      });
+    }
+  }, [user]);
 
   useEffect(() => {
     const checkBusiness = async () => {
@@ -227,10 +218,10 @@ const ProfileDashboard = () => {
   };
 
   const handleCancel = async (appointment: Appointment) => {
-    if (!userProfile) return;
+    if (!user) return;
     try {
       await updateAppointmentStatus(appointment.id, 'cancelled');
-      notifySuccess(`Cita cancelada por ${userProfile.full_name}`);
+      notifySuccess(`Cita cancelada por ${user.full_name}`);
     } catch (err: any) {
       notifyError(err.message || 'Error al cancelar la cita');
     }
@@ -245,7 +236,7 @@ const ProfileDashboard = () => {
   };
 
   const handleSaveItemsPerPage = async () => {
-    if (!user || !userProfile) return;
+    if (!user) return;
     
     try {
       setItemsPerPageMessage(null);
@@ -263,11 +254,7 @@ const ProfileDashboard = () => {
       }
 
       // Update global state with new items_per_page
-      const updatedProfile: UserProfile = {
-        ...userProfile,
-        items_per_page: itemsPerPage
-      };
-      dispatchUserProfileUpdated(session.user, updatedProfile);
+      dispatchUserProfileUpdated(session.user, { ...user, items_per_page: itemsPerPage });
       
       // Show success message in UI and toast
       setItemsPerPageMessage({ text: 'Configuración guardada correctamente', type: 'success' });

@@ -1,12 +1,12 @@
 import React, { useState, useEffect } from 'react';
-import { notifySuccess, notifyError } from '../../lib/toast';
 import type { Service } from '../../lib/api';
+import { notifySuccess, notifyError } from '../../lib/toast';
 
 interface ServicesSectionProps {
   businessId: string;
   getServices: (businessId: string) => Promise<{ success: boolean; data?: Service[]; error?: string }>;
-  createService: (businessId: string, service: Omit<Service, 'id' | 'created_at' | 'updated_at'>) => Promise<{ success: boolean; data?: Service; error?: string }>;
-  updateService: (id: string, service: Partial<Service>) => Promise<{ success: boolean; error?: string }>;
+  createService: (service: Omit<Service, 'id' | 'created_at' | 'updated_at'>) => Promise<{ success: boolean; data?: Service; error?: string }>;
+  updateService: (id: string, service: Partial<Service>) => Promise<{ success: boolean; data?: Service; error?: string }>;
   deleteService: (id: string) => Promise<{ success: boolean; error?: string }>;
   itemsPerPage: number;
 }
@@ -84,31 +84,28 @@ const ServicesSection: React.FC<ServicesSectionProps> = ({
       duration: parseInt(formData.duration),
       price: parseFloat(formData.price),
       is_active: formData.is_active,
-      provider: formData.provider
+      provider: formData.provider || '',
+      category: '',
+      active: true
     };
 
     try {
       if (editingService) {
-        const result = await updateService(editingService.id, serviceData);
-        if (result.success) {
-          notifySuccess('Servicio actualizado correctamente');
-        } else {
-          notifyError(result.error || 'Error al actualizar el servicio');
-        }
+        await updateService(editingService.id, serviceData);
+        notifySuccess('Servicio actualizado correctamente');
       } else {
-        const result = await createService(businessId, serviceData);
-        if (result.success) {
-          notifySuccess('Servicio creado correctamente');
-        } else {
-          notifyError(result.error || 'Error al crear el servicio');
-        }
+        await createService(serviceData);
+        notifySuccess('Servicio creado correctamente');
       }
-
-      // Refresh services list
-      loadServices();
-      resetForm();
     } catch (err: any) {
-      notifyError(err.message || 'Error al guardar el servicio');
+      const errMsg = err.message || 'Error al guardar el servicio';
+      setError(errMsg);
+      notifyError(errMsg);
+    } finally {
+      setModalOpen(false);
+      resetForm();
+      await loadServices();
+      setError(null);
     }
   };
 
@@ -144,7 +141,7 @@ const ServicesSection: React.FC<ServicesSectionProps> = ({
       duration: service.duration.toString(),
       price: service.price.toString(),
       is_active: service.is_active,
-      provider: service.provider
+      provider: service.provider || ''
     });
     setModalOpen(true);
   };
