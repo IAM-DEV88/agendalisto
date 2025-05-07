@@ -46,9 +46,19 @@ const Crowdfunding = () => {
                   type="submit"
                   className="px-6 py-2 bg-indigo-600 text-white rounded hover:bg-indigo-500"
                 >
-                  Contribuir
+                  Donar por PayPal
                 </button>
               </form>
+            </div>
+            <div className="mt-4 text-center">
+              <a
+                href="https://checkout.wompi.co/l/test_VPOS_vi9OQO"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="px-6 py-2 bg-green-600 text-white rounded hover:bg-green-500"
+              >
+                Donar por Wompi
+              </a>
             </div>
           </div>
         ))}
