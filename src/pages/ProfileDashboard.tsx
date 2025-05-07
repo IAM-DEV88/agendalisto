@@ -18,10 +18,7 @@ import { setActiveTab } from '../store/uiSlice';
 import { notifySuccess, notifyError } from '../lib/toast';
 import { useAppointments } from '../hooks/useAppointments';
 import { useSwipeable } from 'react-swipeable';
-
-type ProfileDashboardProps = {
-  user: UserProfile | null;
-};
+import { useAuth } from '../hooks/useAuth';
 
 interface Appointment {
   id: string;
@@ -53,7 +50,8 @@ const slugify = (str: string): string =>
     .replace(/\s+/g, '-')
     .replace(/[^\w\-]+/g, '');
 
-const ProfileDashboard = ({ user }: ProfileDashboardProps) => {
+const ProfileDashboard = () => {
+  const { user } = useAuth();
   const dispatch = useAppDispatch();
   const activeTab = useSelector((state: RootState) => state.ui.activeTab);
   // Realtime appointments via custom hook

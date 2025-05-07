@@ -497,44 +497,38 @@ export async function updateBusinessConfig(businessId: string, config: BusinessC
 }
 
 // Functions for managing business services
-export const createBusinessService = async (service: Omit<Service, 'id' | 'created_at' | 'updated_at'>) => {
+export const createBusinessService = async (businessId: string, service: Omit<Service, 'id'>): Promise<{ success: boolean; data?: Service; error?: string }> => {
   try {
     const { data, error } = await supabase
       .from('services')
-      .insert({
-        ...service, 
-        created_at: new Date().toISOString(),
-        updated_at: new Date().toISOString()
-      })
-      .single();
-
-    if (error) throw error;
-    return data;
-  } catch (err: any) {
-    throw err;
-  }
-};
-
-export const updateBusinessService = async (id: string, updates: Partial<Service>) => {
-  try {
-    const { data, error } = await supabase
-      .from('services')
-      .update({ 
-        ...updates, 
-        updated_at: new Date().toISOString() 
-      })
-      .eq('id', id)
+      .insert([{ ...service, business_id: businessId }])
       .select()
       .single();
 
     if (error) throw error;
-    return data;
+    return { success: true, data };
   } catch (err: any) {
-    throw err;
+    console.error('Error creating service:', err);
+    return { success: false, error: err.message };
   }
 };
 
-export const deleteBusinessService = async (id: string) => {
+export const updateBusinessService = async (id: string, service: Partial<Service>): Promise<{ success: boolean; error?: string }> => {
+  try {
+    const { error } = await supabase
+      .from('services')
+      .update(service)
+      .eq('id', id);
+
+    if (error) throw error;
+    return { success: true };
+  } catch (err: any) {
+    console.error('Error updating service:', err);
+    return { success: false, error: err.message };
+  }
+};
+
+export const deleteBusinessService = async (id: string): Promise<{ success: boolean; error?: string }> => {
   try {
     const { error } = await supabase
       .from('services')
@@ -542,9 +536,10 @@ export const deleteBusinessService = async (id: string) => {
       .eq('id', id);
 
     if (error) throw error;
-    return true;
+    return { success: true };
   } catch (err: any) {
-    throw err;
+    console.error('Error deleting service:', err);
+    return { success: false, error: err.message };
   }
 };
 

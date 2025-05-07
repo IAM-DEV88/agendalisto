@@ -17,7 +17,6 @@ import {
   BusinessHours,
   BusinessConfig,
 } from '../lib/api';
-import { UserProfile } from '../lib/supabase';
 import AppointmentsSection from '../components/business/AppointmentsSection';
 import BusinessProfileSection from '../components/business/BusinessProfileSection';
 import BusinessHoursSection from '../components/business/BusinessHoursSection';
@@ -28,13 +27,8 @@ import StatsSection from '../components/business/StatsSection';
 import { notifySuccess, notifyError } from '../lib/toast';
 import { useBusinessAppointments } from '../hooks/useBusinessAppointments';
 import { useSwipeable } from 'react-swipeable';
-import { supabase } from '../lib/supabase';
 import { useItemsPerPage } from '../hooks/useItemsPerPage';
 import { useAuth } from '../hooks/useAuth';
-
-type BusinessDashboardProps = {
-  user: UserProfile | null;
-};
 
 export const BusinessDashboard: React.FC = () => {
   const { user } = useAuth();

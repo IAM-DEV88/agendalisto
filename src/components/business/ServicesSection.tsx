@@ -1,12 +1,24 @@
 import React, { useState, useEffect } from 'react';
-import type { Service } from '../../lib/api';
 import { notifySuccess, notifyError } from '../../lib/toast';
+
+interface Service {
+  id: string;
+  business_id: string;
+  name: string;
+  description: string;
+  duration: number;
+  price: number;
+  is_active: boolean;
+  provider: string;
+  created_at?: string;
+  updated_at?: string;
+}
 
 interface ServicesSectionProps {
   businessId: string;
   getServices: (businessId: string) => Promise<{ success: boolean; data?: Service[]; error?: string }>;
-  createService: (service: Omit<Service, 'id' | 'created_at' | 'updated_at'>) => Promise<{ success: boolean; data?: Service; error?: string }>;
-  updateService: (id: string, service: Partial<Service>) => Promise<{ success: boolean; data?: Service; error?: string }>;
+  createService: (businessId: string, service: Omit<Service, 'id' | 'created_at' | 'updated_at'>) => Promise<{ success: boolean; data?: Service; error?: string }>;
+  updateService: (id: string, service: Partial<Service>) => Promise<{ success: boolean; error?: string }>;
   deleteService: (id: string) => Promise<{ success: boolean; error?: string }>;
   itemsPerPage: number;
 }
@@ -89,21 +101,26 @@ const ServicesSection: React.FC<ServicesSectionProps> = ({
 
     try {
       if (editingService) {
-        await updateService(editingService.id, serviceData);
-        notifySuccess('Servicio actualizado correctamente');
+        const result = await updateService(editingService.id, serviceData);
+        if (result.success) {
+          notifySuccess('Servicio actualizado correctamente');
+        } else {
+          notifyError(result.error || 'Error al actualizar el servicio');
+        }
       } else {
-        await createService(serviceData);
-        notifySuccess('Servicio creado correctamente');
+        const result = await createService(businessId, serviceData);
+        if (result.success) {
+          notifySuccess('Servicio creado correctamente');
+        } else {
+          notifyError(result.error || 'Error al crear el servicio');
+        }
       }
-    } catch (err: any) {
-      const errMsg = err.message || 'Error al guardar el servicio';
-      setError(errMsg);
-      notifyError(errMsg);
-    } finally {
-      setModalOpen(false);
+
+      // Refresh services list
+      loadServices();
       resetForm();
-      await loadServices();
-      setError(null);
+    } catch (err: any) {
+      notifyError(err.message || 'Error al guardar el servicio');
     }
   };
 

@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React from 'react';
 import { BusinessConfig } from '../../lib/api';
 import { useItemsPerPage } from '../../hooks/useItemsPerPage';
 import { useAuth } from '../../hooks/useAuth';
@@ -10,7 +10,6 @@ interface BusinessConfigSectionProps {
   message: { text: string; type: 'success' | 'error' } | null;
   onSave: (e: React.FormEvent) => void;
   onConfigChange: (field: keyof BusinessConfig, value: any) => void;
-  itemsPerPage: number;
 }
 
 export const BusinessConfigSection: React.FC<BusinessConfigSectionProps> = ({
@@ -19,8 +18,7 @@ export const BusinessConfigSection: React.FC<BusinessConfigSectionProps> = ({
   saving,
   message,
   onSave,
-  onConfigChange,
-  itemsPerPage: initialItemsPerPage
+  onConfigChange
 }) => {
   const { user } = useAuth();
   const { localItemsPerPage, setLocalItemsPerPage, saveItemsPerPage } = useItemsPerPage(user?.id);
