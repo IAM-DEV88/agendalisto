@@ -3,7 +3,7 @@ import { Link } from 'react-router-dom';
 import { Business } from '../lib/api';
 import { ApiClient } from '../lib/apiClient';
 import { supabase } from '../lib/supabase';
-import { AppointmentStatus, Appointment } from '../types/appointment';
+import { AppointmentStatus } from '../types/appointment';
 import { useBusinessAppointments } from '../hooks/useBusinessAppointments';
 import { useToast } from '../hooks/useToast';
 import { useUIConfig } from '../hooks/useUIConfig';
@@ -40,7 +40,7 @@ export const BusinessDashboard: React.FC = () => {
   const [savingBusiness, setSavingBusiness] = useState(false);
   
   // Use custom hooks for business data
-  const { appointments, loading: loadingBusinessAppointments, refreshAppointments } = useBusinessAppointments(businessData?.id || null);
+  const { appointments, refreshAppointments } = useBusinessAppointments(businessData?.id || null);
   const { config: businessConfig, loading: loadingBusinessConfig, saving: savingBusinessConfig, 
     message: configMessage, updateConfig: handleConfigChange, saveConfig: handleConfigSave } = 
     useBusinessConfig(businessData?.id);
