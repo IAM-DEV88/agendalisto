@@ -69,7 +69,15 @@ const AppointmentModal: React.FC<AppointmentModalProps> = ({
               <div>
                 <span className="info-grid-label">Estado</span>
                 <p className="info-grid-value">
-                  <span className={`status-${appointment?.status}`}>
+                  <span className={`px-2 py-1 text-sm font-medium rounded-sm inline-flex items-center justify-center ${
+                    appointment?.status === 'confirmed' 
+                      ? 'bg-green-100 text-green-800 dark:bg-green-800 dark:text-green-100'
+                      : appointment?.status === 'pending'
+                      ? 'bg-yellow-100 text-yellow-800 dark:bg-yellow-800 dark:text-yellow-100'
+                      : appointment?.status === 'cancelled'
+                      ? 'bg-red-800 text-red-100'
+                      : 'bg-blue-800 text-white'
+                  }`}>
                     {appointment?.status ? getStatusText(appointment.status) : ''}
                   </span>
                 </p>
@@ -77,22 +85,12 @@ const AppointmentModal: React.FC<AppointmentModalProps> = ({
             </div>
           </div>
 
-          {/* Timeline de Estados */}
+          {/* Notas de la Cita */}
           <div className="modal-section">
-            <h4 className="modal-section-title">Historial de Estados</h4>
-            <div className="timeline">
-              {appointment?.status_history?.map((history: any, index: number) => (
-                <div key={index} className="timeline-item">
-                  <div className="timeline-dot" />
-                  <div className="timeline-content">
-                    <p className="font-medium">{getStatusText(history.status)}</p>
-                    <p className="text-xs">
-                      {format(new Date(history.timestamp), "Pp", { locale: es })}
-                    </p>
-                  </div>
-                </div>
-              ))}
-            </div>
+            <h4 className="modal-section-title">Notas</h4>
+            <p className="modal-section-content">
+              {appointment?.notes || 'Sin notas adicionales'}
+            </p>
           </div>
 
           {/* Sección de Reseña si aplica */}

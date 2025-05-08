@@ -38,27 +38,6 @@
     @apply w-full flex items-center justify-center px-8 py-3 font-medium text-white bg-indigo-800 hover:bg-indigo-700 md:py-4 md:text-lg md:px-10 transition-colors duration-200;
   }
 
-  /* Status Labels */
-  .status-label {
-    @apply px-2 py-1 text-sm font-medium rounded-sm;
-  }
-
-  .status-confirmed {
-    @apply status-label bg-green-100 text-green-800 dark:bg-green-800 dark:text-green-100;
-  }
-
-  .status-pending {
-    @apply status-label bg-yellow-100 text-yellow-800 dark:bg-yellow-800 dark:text-yellow-100;
-  }
-
-  .status-cancelled {
-    @apply status-label bg-red-800 text-red-100 dark:text-red-100;
-  }
-
-  .status-completed {
-    @apply status-label bg-blue-800 text-white;
-  }
-
   /* Action Buttons */
   .btn-action {
     @apply px-3 py-1 text-sm font-medium rounded-sm transition-colors duration-200;
@@ -94,7 +73,7 @@
 
   /* List Entry Styles */
   .list-entry {
-    @apply flex flex-row items-center justify-between px-4 py-3 hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors duration-200 cursor-pointer;
+    @apply flex flex-row items-center justify-between px-4 py-3 hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors duration-200 cursor-pointer gap-x-2;
   }
 
   .list-entry-content {
@@ -202,18 +181,6 @@
   :root {
     color: #213547;
     background-color: #ffffff;
-  }
-}
-
-/* Remove rounding for standard rounded-* classes globally, keep rounded-full */
-@layer utilities {
-  .rounded,
-  .rounded-sm,
-  .rounded-md,
-  .rounded-lg,
-  .rounded-xl,
-  .rounded-2xl {
-    border-radius: 0 !important;
   }
 }
 

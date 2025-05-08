@@ -45,8 +45,16 @@ const UserAppointmentList: React.FC<UserAppointmentListProps> = ({
               <div className="list-entry-time">
                 {format(new Date(appointment.start_time), "PPP p", { locale: es })}
               </div>
-              <div className='self-center mr-2 mt-2'>
-                <span className={`status-${appointment.status}`}>
+              <div className='self-center'>
+                <span className={`px-2 py-1 text-sm font-medium rounded-sm inline-flex self-center items-center justify-center ${
+                  appointment.status === 'confirmed' 
+                    ? 'bg-green-100 text-green-800 dark:bg-green-800 dark:text-green-100'
+                    : appointment.status === 'pending'
+                    ? 'bg-yellow-100 text-yellow-800 dark:bg-yellow-800 dark:text-yellow-100'
+                    : appointment.status === 'cancelled'
+                    ? 'bg-red-800 text-red-100'
+                    : 'bg-blue-800 text-white'
+                }`}>
                   {getStatusText(appointment.status)}
                 </span>
               </div>
