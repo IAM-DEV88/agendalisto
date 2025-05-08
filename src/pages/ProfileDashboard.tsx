@@ -258,8 +258,8 @@ const ProfileDashboard = ({ user }: ProfileDashboardProps) => {
 
   return (
     <div>
-      <div className="max-w-7xl mx-auto py-6 sm:px-6 lg:px-8">
-        <div className="px-4 py-2 sm:px-0">
+      <div className="max-w-7xl mx-auto mt-8 sm:px-6 lg:px-8">
+        <div className="px-4sm:px-0">
           {/* Show error message if any */}
           {error && (
             <MessageAlert message={{ text: error, type: 'error' }} />
@@ -276,7 +276,7 @@ const ProfileDashboard = ({ user }: ProfileDashboardProps) => {
                 <h3 className="text-lg dark:text-white leading-6 font-medium text-gray-900">Mi Perfil</h3>
               </div>
               {hasBusiness ? (
-                <Link to="/business/dashboard" className="inline-flex dark:text-white dark:hover:text-black items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md text-indigo-600 border-indigo-600 hover:bg-indigo-50">
+                <Link to="/business/dashboard" className="inline-flex dark:text-white dark:hover:text-black self-center px-4 py-2 border border-transparent text-sm font-medium rounded-md text-indigo-600 border-indigo-600 hover:bg-indigo-50">
                   Mi Negocio
                 </Link>
               ) : (
@@ -294,7 +294,7 @@ const ProfileDashboard = ({ user }: ProfileDashboardProps) => {
             onTabChange={(tabId) => dispatch(setActiveTab(tabId as typeof tabOrder[number]))}
           />
 
-          <div {...swipeHandlers}>
+          <div {...swipeHandlers} className="mt-6">
             {/* Pestaña de citas próximas (confirmadas) */}
             {activeTab === 'upcoming' && (
               <>

@@ -12,7 +12,7 @@ export const SectionHeader: React.FC<SectionHeaderProps> = ({
   actionButton 
 }) => {
   return (
-    <div className="sm:flex sm:items-center sm:justify-between mb-6">
+    <div className="sm:flex sm:items-center sm:justify-between mb-2">
       <div>
         <h2 className="text-xl font-semibold text-gray-900 dark:text-white">{title}</h2>
         {description && (

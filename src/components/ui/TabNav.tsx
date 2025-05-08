@@ -25,7 +25,7 @@ export const TabNav: React.FC<TabNavProps> = ({
 
   return (
     <div className="border-b border-gray-200">
-      <nav className="-mb-px flex flex-nowrap sm:flex-wrap space-x-2 overflow-x-auto md:overflow-visible whitespace-nowrap md:whitespace-normal">
+      <nav className="-mb-px flex flex-wrap space-x-2  overflow-visible whitespace-nowrap whitespace-normal">
         {tabs.map((tab) => (
           <button
             key={tab.id}
@@ -34,7 +34,7 @@ export const TabNav: React.FC<TabNavProps> = ({
             className={`${
               activeTabId === tab.id
                 ? 'border-indigo-500 text-indigo-600 dark:text-white group'
-                : 'border-transparent text-gray-600 hover:text-gray-300 hover:border-gray-300 group'
+                : 'border-transparent text-gray-400 hover:text-gray-300 hover:border-gray-300 group'
             } whitespace-nowrap py-4 px-1 border-b-2 font-medium text-sm`}
           >
             <div className="flex items-center">
