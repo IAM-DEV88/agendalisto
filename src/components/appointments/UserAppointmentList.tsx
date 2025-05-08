@@ -25,7 +25,7 @@ const UserAppointmentList: React.FC<UserAppointmentListProps> = ({
 
   return (
     <div className="space-y-4">
-      <div className="divide-y divide-gray-200 dark:divide-gray-700">
+      <div>
         {appointments.map((appointment) => (
           <div key={appointment.id} className="list-entry">
             <div className="list-entry-content">
@@ -45,14 +45,17 @@ const UserAppointmentList: React.FC<UserAppointmentListProps> = ({
               <div className="list-entry-time">
                 {format(new Date(appointment.start_time), "PPP p", { locale: es })}
               </div>
+              <div className='self-center mr-2 mt-2'>
+                <span className={`status-${appointment.status}`}>
+                  {getStatusText(appointment.status)}
+                </span>
+              </div>
             </div>
             
             <div className="list-entry-actions">
-              <span className={`status-${appointment.status}`}>
-                {getStatusText(appointment.status)}
-              </span>
+              
               {showActions && (
-                <div className="flex gap-2 mt-2">
+                <>
                   {['pending', 'confirmed'].includes(appointment.status) && onCancel && (
                     <button
                       onClick={() => onCancel(appointment)}
@@ -77,7 +80,7 @@ const UserAppointmentList: React.FC<UserAppointmentListProps> = ({
                       Dejar reseña
                     </button>
                   )}
-                </div>
+                </>
               )}
               {appointment.review && (
                 <span className="text-yellow-400 text-sm">

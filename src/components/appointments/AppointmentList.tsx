@@ -25,7 +25,7 @@ const AppointmentList: React.FC<AppointmentListProps> = ({
   };
 
   return (
-    <div className="divide-y divide-gray-200 dark:divide-gray-700">
+    <div>
       {appointments.map((appointment) => (
         <div
           key={appointment.id}

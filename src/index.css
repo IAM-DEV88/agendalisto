@@ -94,17 +94,15 @@
 
   /* List Entry Styles */
   .list-entry {
-    @apply flex items-center justify-between px-4 py-3 border-b border-gray-200 
-    hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors duration-200
-    cursor-pointer;
+    @apply flex flex-row items-center justify-between px-4 py-3 hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors duration-200 cursor-pointer;
   }
 
   .list-entry-content {
-    @apply flex items-center space-x-4 flex-grow min-w-0;
+    @apply flex flex-grow flex-col sm:flex-row justify-between;
   }
 
   .list-entry-info {
-    @apply flex flex-col flex-grow min-w-0;
+    @apply flex flex-col min-w-0;
   }
 
   .list-entry-title {
@@ -116,11 +114,11 @@
   }
 
   .list-entry-time {
-    @apply text-xs text-gray-500 dark:text-gray-400 whitespace-nowrap;
+    @apply text-xs text-gray-500 md:self-center dark:text-gray-400 whitespace-nowrap;
   }
 
   .list-entry-actions {
-    @apply flex items-center space-x-2 ml-4;
+    @apply flex flex-col sm:flex-row items-center gap-2;
   }
 
   /* Modal Styles */

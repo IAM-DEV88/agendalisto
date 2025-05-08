@@ -25,7 +25,7 @@ export const TabNav: React.FC<TabNavProps> = ({
 
   return (
     <div className="border-b border-gray-200">
-      <nav className="-mb-px flex flex-wrap space-x-2  overflow-visible whitespace-nowrap whitespace-normal">
+      <nav className="-mb-px flex flex-wrap space-x-2 overflow-visible whitespace-nowrap whitespace-normal">
         {tabs.map((tab) => (
           <button
             key={tab.id}
@@ -33,17 +33,17 @@ export const TabNav: React.FC<TabNavProps> = ({
             onClick={() => onTabChange(tab.id)}
             className={`${
               activeTabId === tab.id
-                ? 'border-indigo-500 text-indigo-600 dark:text-indigo-300 group'
-                : 'border-transparent text-gray-400 hover:text-gray-300 hover:border-gray-300 group'
-            } whitespace-nowrap py-4 px-1 border-b-2 font-medium text-sm`}
+                ? 'border-indigo-600 text-indigo-800 dark:text-indigo-200 font-bold border-b-2'
+                : 'border-transparent text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-300 border-b-2'
+            } whitespace-nowrap py-4 px-1 font-medium text-sm`}
           >
             <div className="flex items-center">
-              <span className="text-inherit">{tab.label}</span>
+              <span className={`${activeTabId === tab.id ? 'text-indigo-600 dark:text-indigo-300' : 'text-gray-500 dark:text-gray-400'}`}>{tab.label}</span>
               {tab.count !== undefined && (
-                <span className={`ml-1 inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-small ${
+                <span className={`ml-1 inline-flex items-center px-2 py-0.5 rounded-full text-xs ${
                   activeTabId === tab.id
-                    ? 'text-inherit'
-                    : 'text-inherit'
+                    ? 'bg-indigo-600 text-white'
+                    : 'bg-gray-200 text-gray-700 dark:bg-gray-700 dark:text-gray-300'
                 }`}>
                   {tab.count}
                 </span>

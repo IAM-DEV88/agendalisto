@@ -10,7 +10,6 @@ import { ApiClient } from '../lib/apiClient';
 import { useToast } from '../hooks/useToast';
 import { useUIConfig } from '../hooks/useUIConfig';
 import UserAppointmentList from '../components/appointments/UserAppointmentList';
-import '../styles/appointments.css';
 import { Appointment } from '../types/appointment';
 
 // UI Components
