@@ -33,18 +33,17 @@ export const TabNav: React.FC<TabNavProps> = ({
             onClick={() => onTabChange(tab.id)}
             className={`${
               activeTabId === tab.id
-                ? 'border-indigo-500 text-indigo-600 dark:text-white group'
+                ? 'border-indigo-500 text-indigo-600 dark:text-indigo-300 group'
                 : 'border-transparent text-gray-400 hover:text-gray-300 hover:border-gray-300 group'
             } whitespace-nowrap py-4 px-1 border-b-2 font-medium text-sm`}
           >
             <div className="flex items-center">
-              <span>{tab.label}</span>
+              <span className="text-inherit">{tab.label}</span>
               {tab.count !== undefined && (
-                <span className={`bg-white-100 text-indigo-800 
-                    dark:bg-gray-700 dark:text-gray-200 ml-1 inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-small ${
+                <span className={`ml-1 inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-small ${
                   activeTabId === tab.id
-                    ? 'text-indigo-600 dark:text-white'
-                    : 'text-gray-600 group-hover:text-gray-300 dark:text-gray-500'
+                    ? 'text-inherit'
+                    : 'text-inherit'
                 }`}>
                   {tab.count}
                 </span>

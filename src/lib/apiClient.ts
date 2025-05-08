@@ -5,7 +5,8 @@ import {
   BusinessConfig, 
   BusinessHours, 
   Service,
-  Appointment
+  Appointment,
+  Review
 } from './api';
 
 // Generic API response type for consistency
@@ -333,6 +334,43 @@ export class ApiClient {
       return { success: true };
     } catch (err: any) {
       return { success: false, error: err.message || 'Error saving items per page' };
+    }
+  }
+
+  // Reviews management
+  static async getBusinessReviews(businessId: string): Promise<ApiResponse<Review[]>> {
+    try {
+      const { data, error } = await supabase
+        .from('reviews')
+        .select('*')
+        .eq('business_id', businessId);
+        
+      if (error) throw error;
+      return { success: true, data: data as Review[] };
+    } catch (err: any) {
+      return { success: false, error: err.message || 'Error fetching business reviews' };
+    }
+  }
+
+  static async createBusinessReview(appointmentId: string, businessId: string, userId: string, rating: number, comment: string): Promise<ApiResponse<Review>> {
+    try {
+      const { data, error } = await supabase
+        .from('reviews')
+        .insert({
+          appointment_id: appointmentId,
+          business_id: businessId,
+          user_id: userId,
+          rating: rating,
+          comment: comment,
+          created_at: new Date().toISOString()
+        })
+        .select()
+        .single();
+        
+      if (error) throw error;
+      return { success: true, data: data as Review };
+    } catch (err: any) {
+      return { success: false, error: err.message || 'Error creating business review' };
     }
   }
 } 

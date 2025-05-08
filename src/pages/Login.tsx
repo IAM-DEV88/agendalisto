@@ -63,10 +63,10 @@ const Login = () => {
   return (
     <div className="flex flex-col justify-center py-12 sm:px-6 lg:px-8">
       <div className="sm:mx-auto sm:w-full sm:max-w-md">
-        <h2 className="dark:text-white text-center text-3xl font-extrabold text-gray-900">
+        <h2 className=" text-center text-3xl font-extrabold text-gray-900">
           Inicia sesión en tu cuenta
         </h2>
-        <p className="mt-2 dark:text-white text-center text-sm text-gray-600">
+        <p className="mt-2  text-center text-sm text-gray-600">
           ¿No tienes una cuenta?{' '}
           <Link to="/register" className="font-medium text-indigo-600 hover:text-indigo-500">
             Regístrate
@@ -93,7 +93,7 @@ const Login = () => {
 
           <form className="space-y-6" onSubmit={handleSubmit}>
             <div>
-              <label htmlFor="email" className="block dark:text-white text-sm font-medium text-gray-700">
+              <label htmlFor="email" className="block  text-sm font-medium text-gray-700">
                 Correo electrónico
               </label>
               <div className="mt-1">
@@ -111,7 +111,7 @@ const Login = () => {
             </div>
 
             <div>
-              <label htmlFor="password" className="block dark:text-white text-sm font-medium text-gray-700">
+              <label htmlFor="password" className="block  text-sm font-medium text-gray-700">
                 Contraseña
               </label>
               <div className="mt-1">

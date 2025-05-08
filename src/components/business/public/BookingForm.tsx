@@ -204,8 +204,8 @@ const BookingForm: React.FC<BookingFormProps> = ({
         <div className="flex justify-center mb-4">
           <CheckCircle className="h-16 w-16 text-green-500" />
         </div>
-        <h3 className="text-xl font-medium text-gray-900 mb-2">¡Solicitud enviada!</h3>
-        <p className="text-gray-600 mb-6">
+        <h3 className="text-xl font-medium mb-2">¡Solicitud enviada!</h3>
+        <p className="mb-6">
           Tu solicitud ha sido enviada correctamente.
           {notifyEmail && <><br />Recibirás confirmación por correo electrónico cuando se confirme tu solicitud.</>}
           {notifyWhatsapp && <><br />Recibirás notificación por WhatsApp cuando se confirme tu solicitud.</>}
@@ -240,14 +240,14 @@ const BookingForm: React.FC<BookingFormProps> = ({
 
       {service && (
         <div className="mb-4 p-4 bg-opacity-10 bg-gray-50 rounded-lg">
-          <h3 className="font-medium text-gray-900">{service.name}</h3>
+          <h3 className="font-medium text-gray-900 ">{service.name}</h3>
           <div className="flex justify-between items-center mt-2">
             <div className="flex items-center text-sm text-gray-500">
-              <Clock className="h-4 w-4 mr-1" />
-              <span>{service.duration} min</span>
+              <Clock className="h-4 w-4 mr-1 " />
+              <span className="">{service.duration} min</span>
             </div>
             {showPrices && (
-              <span className="text-lg font-semibold text-gray-900">
+              <span className="text-lg font-semibold text-gray-900 ">
                 ${service.price.toFixed(2)}
               </span>
             )}
@@ -271,15 +271,15 @@ const BookingForm: React.FC<BookingFormProps> = ({
               onChange={e => setConfirmationChecked(e.target.checked)}
               className="h-4 w-4 text-indigo-600 border-gray-300 rounded"
             />
-            <label htmlFor="confirmCancellation" className="ml-2 text-sm text-gray-700">
+            <label htmlFor="confirmCancellation" className="ml-2 text-sm text-gray-700 ">
               Confirmo que entiendo las condiciones de cancelación (mínimo {minCancellationHours}h de antelación)
             </label>
           </div>
         )}
         <div className="space-y-4">
           <div>
-            <label htmlFor="date" className="block text-sm font-medium text-gray-700 mb-1">
-              <Calendar className="h-4 w-4 inline mr-1" />
+            <label htmlFor="date" className="block text-sm font-medium text-gray-700  mb-1">
+              <Calendar className="h-4 w-4 inline mr-1 " />
               Fecha
             </label>
             <input
@@ -294,8 +294,8 @@ const BookingForm: React.FC<BookingFormProps> = ({
           </div>
 
           <div>
-            <label htmlFor="time" className="block text-sm font-medium text-gray-700 mb-1">
-              <Clock className="h-4 w-4 inline mr-1" />
+            <label htmlFor="time" className="block text-sm font-medium text-gray-700  mb-1">
+              <Clock className="h-4 w-4 inline mr-1 " />
               Hora
             </label>
             <select
@@ -324,7 +324,7 @@ const BookingForm: React.FC<BookingFormProps> = ({
           </div>
 
           <div>
-            <label htmlFor="notes" className="block text-sm font-medium text-gray-700 mb-1">
+            <label htmlFor="notes" className="block text-sm font-medium text-gray-700  mb-1">
               Notas adicionales (opcional)
             </label>
             <textarea

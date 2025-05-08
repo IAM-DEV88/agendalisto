@@ -44,8 +44,8 @@ const AppointmentsSection: React.FC<AppointmentsSectionProps> = ({
                   <div className="flex gap-y-2 flex-col justify-between">
                     <div>
                       <p className="text-sm font-medium text-indigo-600 dark:text-indigo-200">{appointment.services?.name}</p>
-                      <p className="text-sm text-gray-500 dark:text-white">Cliente: {appointment.profiles?.full_name || appointment.user_id}</p>
-                      <p className="text-sm text-gray-500 dark:text-white">Fecha: {formatDate(appointment.start_time)}</p>
+                      <p className="text-sm text-gray-500 ">Cliente: {appointment.profiles?.full_name || appointment.user_id}</p>
+                      <p className="text-sm text-gray-500 ">Fecha: {formatDate(appointment.start_time)}</p>
                       {appointment.status === 'completed' && (
                         review ? (
                           <div className="flex mt-1">
@@ -57,7 +57,7 @@ const AppointmentsSection: React.FC<AppointmentsSectionProps> = ({
                             ))}
                           </div>
                         ) : (
-                          <p className="text-sm text-yellow-500 mt-1">Pendiente de reseña</p>
+                          <p className="status-pending">Pendiente de reseña</p>
                         )
                       )}
                     </div>
@@ -66,13 +66,13 @@ const AppointmentsSection: React.FC<AppointmentsSectionProps> = ({
                         <>
                           <button
                             onClick={() => onUpdateStatus?.(appointment.id, 'confirmed')}
-                            className="inline-flex items-center px-2.5 py-1.5 border border-gray-300 text-xs font-medium text-gray-700 bg-gray-50 hover:bg-gray-50"
+                            className="btn-confirm"
                           >
                             Confirmar
                           </button>
                           <button
                             onClick={() => onUpdateStatus?.(appointment.id, 'cancelled')}
-                            className="inline-flex items-center px-2.5 py-1.5 border border-gray-300 text-xs font-medium text-red-700 bg-gray-50 hover:bg-gray-50"
+                            className="btn-cancel"
                           >
                             Cancelar
                           </button>
@@ -81,7 +81,7 @@ const AppointmentsSection: React.FC<AppointmentsSectionProps> = ({
                       {appointment.status === 'confirmed' && (
                         <button
                           onClick={() => onUpdateStatus?.(appointment.id, 'completed')}
-                          className="inline-flex items-center px-2.5 py-1.5 border border-gray-300 text-xs font-medium text-gray-700 bg-gray-50 hover:bg-gray-50"
+                          className="btn-complete"
                         >
                           Completar
                         </button>

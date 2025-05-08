@@ -48,10 +48,10 @@ const ReviewsSection: React.FC<ReviewsSectionProps> = ({ businessId }) => {
                   <User className="h-5 w-5 text-gray-500" />
                 </div>
                 <div>
-                  <div className="font-medium dark:text-white text-gray-900">
+                  <div className="font-medium  text-gray-900">
                     Usuario
                   </div>
-                  <div className="text-xs dark:text-white text-gray-500">
+                  <div className="text-xs  text-gray-500">
                     {new Date(review.created_at).toLocaleDateString()}
                   </div>
                 </div>
@@ -66,7 +66,7 @@ const ReviewsSection: React.FC<ReviewsSectionProps> = ({ businessId }) => {
                   ))}
                 </div>
               </div>
-              <p className="text-gray-600">
+              <p className="text-gray-600 ">
                 {review.comment}
               </p>
             </div>

@@ -21,14 +21,14 @@ const ClientsSection: React.FC<ClientsSectionProps> = ({ clients, loading, messa
         </div>
       ) : clients.length === 0 ? (
         <div className="dark:bg-opacity-10 bg-gray-50 shadow overflow-hidden sm:rounded-md p-6 text-center">
-          <p className="text-gray-500 dark:text-white">No hay clientes.</p>
+          <p className="text-gray-500 ">No hay clientes.</p>
         </div>
       ) : (
         <div className="dark:bg-opacity-10 bg-gray-50 shadow overflow-hidden sm:rounded-md">
           <ul className="divide-y divide-gray-200">
             {clients.map((client) => (
               <li key={client.id} className="px-4 py-4 sm:px-6">
-                <p className="text-sm font-medium text-gray-900 dark:text-white">{client.full_name}</p>
+                <p className="text-sm font-medium text-gray-900 ">{client.full_name}</p>
                 <p className="text-sm text-gray-500 dark:text-gray-400">Email: {client.email}</p>
                 <p className="text-sm text-gray-500 dark:text-gray-400">Teléfono: {client.phone}</p>
               </li>

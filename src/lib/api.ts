@@ -1,5 +1,9 @@
 import { supabase } from './supabase';
 import { UserProfile } from './supabase';
+import { Appointment, AppointmentStatus, Review } from '../types/appointment';
+
+// Re-export types from appointment.ts
+export type { Appointment, AppointmentStatus, Review };
 
 // Type definitions for data models
 export type Business = {
@@ -45,42 +49,6 @@ export type BusinessHours = {
   start_time: string;
   end_time: string;
   is_closed: boolean;
-};
-
-export type Appointment = {
-  id: string;
-  business_id: string;
-  service_id: string;
-  user_id: string;
-  start_time: string;
-  end_time: string;
-  status: 'pending' | 'confirmed' | 'completed' | 'cancelled';
-  notes: string | null;
-  created_at: string;
-  updated_at: string;
-  businesses?: {
-    name: string;
-    address: string;
-  };
-  services?: {
-    name: string;
-    duration: number;
-    price: number;
-  };
-  profiles?: {
-    full_name: string;
-    phone: string;
-  };
-};
-
-export type Review = {
-  id: string;
-  appointment_id: string;
-  user_id: string;
-  business_id: string;
-  rating: number;
-  comment: string | null;
-  created_at: string;
 };
 
 // Definir el tipo BusinessConfig para la configuración de negocios
@@ -203,16 +171,20 @@ export const createAppointment = async (appointment: Omit<Appointment, 'id' | 'c
   return data;
 };
 
-export const updateAppointmentStatus = async (id: string, status: Appointment['status']) => {
-  const { data, error } = await supabase
-    .from('appointments')
-    .update({ status, updated_at: new Date().toISOString() })
-    .eq('id', id)
-    .select()
-    .single();
-  
-  if (error) throw error;
-  return data;
+export const updateAppointmentStatus = async (id: string, status: AppointmentStatus) => {
+  try {
+    const { data, error } = await supabase
+      .from('appointments')
+      .update({ status })
+      .eq('id', id)
+      .select()
+      .single();
+
+    if (error) throw error;
+    return { success: true, data };
+  } catch (error: any) {
+    return { success: false, error: error.message };
+  }
 };
 
 // Function to get unique clients of a business based on appointments

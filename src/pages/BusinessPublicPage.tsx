@@ -154,21 +154,21 @@ function BusinessPublicPage() {
           <div className="flex border-b border-gray-200">
             <button
               onClick={() => setActiveTab('services')}
-              className={`flex-1 py-3 px-4 text-center font-medium ${activeTab === 'services' ? 'dark:text-white border-b-2 border-indigo-600' : 'text-gray-500'
+              className={`flex-1 py-3 px-4 text-center font-medium ${activeTab === 'services' ? ' border-b-2 border-indigo-600' : 'text-gray-500'
                 }`}
             >
               Servicios
             </button>
             <button
               onClick={() => setActiveTab('hours')}
-              className={`flex-1 py-3 px-4 text-center font-medium ${activeTab === 'hours' ? 'dark:text-white border-b-2 border-indigo-600' : 'text-gray-500'
+              className={`flex-1 py-3 px-4 text-center font-medium ${activeTab === 'hours' ? ' border-b-2 border-indigo-600' : 'text-gray-500'
                 }`}
             >
               Horarios
             </button>
             <button
               onClick={() => setActiveTab('location')}
-              className={`flex-1 py-3 px-4 text-center font-medium ${activeTab === 'location' ? 'dark:text-white border-b-2 border-indigo-600' : 'text-gray-500'
+              className={`flex-1 py-3 px-4 text-center font-medium ${activeTab === 'location' ? ' border-b-2 border-indigo-600' : 'text-gray-500'
                 }`}
             >
               Ubicación

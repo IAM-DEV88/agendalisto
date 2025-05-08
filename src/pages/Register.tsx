@@ -90,10 +90,10 @@ const Register = () => {
   return (
     <div className="flex flex-col justify-center py-6 sm:px-6 lg:px-8">
       <div className="sm:mx-auto sm:w-full sm:max-w-md">
-        <h2 className="dark:text-white text-center text-3xl font-extrabold text-gray-900">
+        <h2 className=" text-center text-3xl font-extrabold text-gray-900">
           Crea tu cuenta
         </h2>
-        <p className="mt-2 dark:text-white text-center text-sm text-gray-600">
+        <p className="mt-2  text-center text-sm text-gray-600">
           ¿Ya tienes una cuenta?{' '}
           <Link to="/login" className="font-medium text-indigo-600 hover:text-indigo-500">
             Inicia sesión
@@ -127,7 +127,7 @@ const Register = () => {
                   </svg>
                 </div>
                 <div className="ml-3">
-                  <h3 className="text-sm dark:text-white font-medium text-green-800">
+                  <h3 className="text-sm  font-medium text-green-800">
                     ¡Registro exitoso! Redirigiendo al inicio de sesión...
                   </h3>
                 </div>
@@ -136,7 +136,7 @@ const Register = () => {
           ) : (
             <form className="space-y-2" onSubmit={handleSubmit}>
               <div>
-                <label htmlFor="fullName" className="block dark:text-white text-sm font-medium text-gray-700">
+                <label htmlFor="fullName" className="block  text-sm font-medium text-gray-700">
                   Nombre completo
                 </label>
                 <div className="mt-1">
@@ -154,7 +154,7 @@ const Register = () => {
               </div>
 
               <div>
-                <label htmlFor="email" className="block dark:text-white text-sm font-medium text-gray-700">
+                <label htmlFor="email" className="block  text-sm font-medium text-gray-700">
                   Correo electrónico
                 </label>
                 <div className="mt-1">
@@ -172,7 +172,7 @@ const Register = () => {
               </div>
 
               <div>
-                <label htmlFor="phone" className="block dark:text-white text-sm font-medium text-gray-700">
+                <label htmlFor="phone" className="block  text-sm font-medium text-gray-700">
                   Teléfono
                 </label>
                 <div className="mt-1">
@@ -190,7 +190,7 @@ const Register = () => {
               </div>
 
               <div>
-                <label htmlFor="password" className="block dark:text-white text-sm font-medium text-gray-700">
+                <label htmlFor="password" className="block  text-sm font-medium text-gray-700">
                   Contraseña
                 </label>
                 <div className="mt-1">
@@ -208,7 +208,7 @@ const Register = () => {
               </div>
 
               <div>
-                <label htmlFor="confirmPassword" className="block dark:text-white text-sm font-medium text-gray-700">
+                <label htmlFor="confirmPassword" className="block  text-sm font-medium text-gray-700">
                   Confirmar contraseña
                 </label>
                 <div className="mt-1">

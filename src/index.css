@@ -17,6 +17,187 @@
   html.dark {
     color-scheme: dark;
   }
+  label, h1, h2, h3, h4, h5, h6, p, span {
+    @apply text-black dark:text-white;
+  }
+  a:not(.btn-secondary, .btn-primary, .btn-tertiary,.btn) {
+    @apply text-black dark:text-white;
+  }
+}
+
+@layer components {
+  .btn-primary {
+    @apply w-full flex items-center justify-center px-8 py-3 font-medium text-white bg-indigo-900 hover:bg-indigo-500 md:py-4 md:text-lg md:px-10 transition-colors duration-200 hover:text-indigo-900;
+  }
+  
+  .btn-secondary {
+    @apply w-full flex items-center justify-center px-8 py-3 font-medium text-indigo-700 bg-indigo-100 hover:bg-indigo-500 md:py-4 md:text-lg md:px-10 transition-colors duration-200 hover:text-indigo-100;
+  }
+  
+  .btn-tertiary {
+    @apply w-full flex items-center justify-center px-8 py-3 font-medium text-white bg-indigo-800 hover:bg-indigo-700 md:py-4 md:text-lg md:px-10 transition-colors duration-200;
+  }
+
+  /* Status Labels */
+  .status-label {
+    @apply px-2 py-1 text-sm font-medium rounded-sm;
+  }
+
+  .status-confirmed {
+    @apply status-label bg-green-100 text-green-800 dark:bg-green-800 dark:text-green-100;
+  }
+
+  .status-pending {
+    @apply status-label bg-yellow-100 text-yellow-800 dark:bg-yellow-800 dark:text-yellow-100;
+  }
+
+  .status-cancelled {
+    @apply status-label bg-red-800 text-red-100 dark:text-red-100;
+  }
+
+  .status-completed {
+    @apply status-label bg-blue-800 text-white;
+  }
+
+  /* Action Buttons */
+  .btn-action {
+    @apply px-3 py-1 text-sm font-medium rounded-sm transition-colors duration-200;
+  }
+
+  .btn-complete {
+    @apply btn-action border border-green-500 text-green-700 hover:bg-green-500 hover:text-white
+    dark:text-green-500 dark:hover:bg-green-600 dark:hover:text-white;
+  }
+
+  .btn-cancel {
+    @apply btn-action border border-red-500 text-red-700 hover:bg-red-500 hover:text-white
+    dark:text-red-500 dark:hover:bg-red-600 dark:hover:text-white;
+  }
+
+  .btn-confirm {
+    @apply btn-action border border-blue-500 text-blue-700 hover:bg-blue-500 hover:text-white
+    dark:text-blue-500 dark:hover:bg-blue-600 dark:hover:text-white;
+  }
+
+  .btn-pending {
+    @apply btn-action border border-yellow-500 text-yellow-700 hover:bg-yellow-500 hover:text-white
+    dark:text-yellow-500 dark:hover:bg-yellow-600 dark:hover:text-white;
+  }
+  .btn-reschedule {
+    @apply btn-action border border-gray-500 text-gray-700 hover:bg-gray-500 hover:text-white
+    dark:text-gray-500 dark:hover:bg-gray-600 dark:hover:text-white;
+  }
+  .btn-review {
+    @apply btn-action border border-yellow-500 text-yellow-700 hover:bg-yellow-500 hover:text-white
+    dark:text-yellow-500 dark:hover:bg-yellow-600 dark:hover:text-white;
+  }
+
+  /* List Entry Styles */
+  .list-entry {
+    @apply flex items-center justify-between px-4 py-3 border-b border-gray-200 
+    hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors duration-200
+    cursor-pointer;
+  }
+
+  .list-entry-content {
+    @apply flex items-center space-x-4 flex-grow min-w-0;
+  }
+
+  .list-entry-info {
+    @apply flex flex-col flex-grow min-w-0;
+  }
+
+  .list-entry-title {
+    @apply text-sm font-medium text-gray-900 dark:text-white truncate;
+  }
+
+  .list-entry-subtitle {
+    @apply text-xs text-gray-500 dark:text-gray-400 truncate;
+  }
+
+  .list-entry-time {
+    @apply text-xs text-gray-500 dark:text-gray-400 whitespace-nowrap;
+  }
+
+  .list-entry-actions {
+    @apply flex items-center space-x-2 ml-4;
+  }
+
+  /* Modal Styles */
+  .modal-overlay {
+    @apply fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50
+    backdrop-filter backdrop-blur-sm;
+  }
+
+  .modal-container {
+    @apply bg-white dark:bg-gray-800 rounded-lg shadow-xl w-full max-w-2xl mx-4
+    max-h-[90vh] overflow-y-auto;
+  }
+
+  .modal-header {
+    @apply px-6 py-4 border-b border-gray-200 dark:border-gray-700 flex items-center justify-between sticky top-0 
+    bg-white dark:bg-gray-800 z-10;
+  }
+
+  .modal-title {
+    @apply text-lg font-semibold text-gray-900 dark:text-white;
+  }
+
+  .modal-close {
+    @apply text-gray-400 hover:text-gray-500 dark:hover:text-gray-300 transition-colors duration-200;
+  }
+
+  .modal-content {
+    @apply px-6 py-4 space-y-4;
+  }
+
+  .modal-section {
+    @apply border-b border-gray-200 dark:border-gray-700 pb-4 last:border-0 last:pb-0;
+  }
+
+  .modal-section-title {
+    @apply text-sm font-medium text-gray-700 dark:text-gray-300 mb-2;
+  }
+
+  .modal-section-content {
+    @apply text-sm text-gray-900 dark:text-white;
+  }
+
+  .modal-footer {
+    @apply px-6 py-4 border-t border-gray-200 dark:border-gray-700 flex justify-end space-x-2 sticky bottom-0 
+    bg-white dark:bg-gray-800;
+  }
+
+  /* Info Grid para el Modal */
+  .info-grid {
+    @apply grid grid-cols-2 gap-4 text-sm;
+  }
+
+  .info-grid-label {
+    @apply text-gray-500 dark:text-gray-400;
+  }
+
+  .info-grid-value {
+    @apply text-gray-900 dark:text-white font-medium;
+  }
+
+  /* Timeline para estados/cambios */
+  .timeline {
+    @apply space-y-4 ml-4 border-l border-gray-200 dark:border-gray-700;
+  }
+
+  .timeline-item {
+    @apply relative pl-4 pb-4;
+  }
+
+  .timeline-dot {
+    @apply absolute -left-2 mt-1.5 w-4 h-4 rounded-full border-2 border-white dark:border-gray-800
+    bg-gray-200 dark:bg-gray-700;
+  }
+
+  .timeline-content {
+    @apply text-sm text-gray-600 dark:text-gray-400;
+  }
 }
 
 @media (prefers-color-scheme: light) {

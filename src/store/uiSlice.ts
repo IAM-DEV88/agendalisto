@@ -1,13 +1,16 @@
 import { createSlice, PayloadAction } from '@reduxjs/toolkit';
 
-// UI slice para manejar estado de interfaz persistente (pestaña activa)
+// Definir el tipo para las pestañas
+type TabId = 'appointments' | 'profile' | 'general';
+
+// UI slice para manejar estado de interfaz persistente
 interface UIState {
-  activeTab: 'upcoming' | 'pending' | 'past' | 'profile' | 'general';
+  activeTab: TabId;
   itemsPerPage: number;
 }
 
 const initialState: UIState = {
-  activeTab: 'upcoming',
+  activeTab: 'appointments',
   itemsPerPage: 5
 };
 
@@ -15,7 +18,7 @@ const uiSlice = createSlice({
   name: 'ui',
   initialState,
   reducers: {
-    setActiveTab(state, action: PayloadAction<UIState['activeTab']>) {
+    setActiveTab(state, action: PayloadAction<TabId>) {
       state.activeTab = action.payload;
     },
     setItemsPerPage(state, action: PayloadAction<number>) {

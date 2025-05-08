@@ -79,26 +79,26 @@ const Home = () => {
                 </div>
                 <div className="flex flex-col gap-2 min-w-60">
                   <div>
-                    <Link to={registerLink} className="w-full flex items-center justify-center px-8 py-3 border border-transparent text-base font-medium rounded-md text-indigo-700 bg-indigo-100 hover:bg-indigo-200 md:py-4 md:text-lg md:px-10">
+                    <Link to={registerLink} className="btn-primary">
                       {registerText}
                     </Link>
                   </div>
                   <div>
-                    <Link to={secondLink} className="w-full flex items-center justify-center px-8 py-3 border border-transparent text-base font-medium rounded-md text-white bg-indigo-800 hover:bg-indigo-700 md:py-4 md:text-lg md:px-10">
+                    <Link to={secondLink} className="btn-secondary">
                       {secondText}
                     </Link>
                   </div>
                   <div>
-                    <Link to={exploreLink} className="w-full flex items-center justify-center px-8 py-3 border border-transparent text-base font-medium rounded-md text-indigo-700 bg-indigo-100 hover:bg-indigo-200 md:py-4 md:text-lg md:px-10">
+                    <Link to={exploreLink} className="btn-primary">
                       {exploreText}
                     </Link>
                   </div>
                   {/* boton cerrar sesion */}
                   {user && (
-                  <div>
-                    <button onClick={() => supabase.auth.signOut()} className="w-full flex items-center justify-center px-8 py-3 border border-transparent text-base font-medium rounded-md text-white bg-indigo-800 hover:bg-indigo-700 md:py-4 md:text-lg md:px-10">
-                      Cerrar sesión
-                    </button>
+                    <div>
+                      <button onClick={() => supabase.auth.signOut()} className="btn-secondary">
+                        Cerrar sesión
+                      </button>
                     </div>
                   )}
                 </div>
@@ -125,7 +125,7 @@ const Home = () => {
               <SwiperSlide key={cat.id}>
                 <div className="dark:bg-gray-800 rounded-lg p-6 h-full">
                   <h3 className="text-lg font-bold">
-                    <Link to={`/explore?category=${cat.id}`} className="text-gray-800 dark:text-white hover:underline">
+                    <Link to={`/explore?category=${cat.id}`} className="text-gray-800  hover:underline">
                       {cat.name}
                     </Link>
                   </h3>

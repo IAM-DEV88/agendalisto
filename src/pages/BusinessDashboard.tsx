@@ -1,32 +1,28 @@
 import { useState, useEffect } from 'react';
 import { Link, useSearchParams } from 'react-router-dom';
-import {
-  Business,
-} from '../lib/api';
+import { Business } from '../lib/api';
 import { ApiClient } from '../lib/apiClient';
-import AppointmentsSection from '../components/business/AppointmentsSection';
-import BusinessProfileSection from '../components/business/BusinessProfileSection';
-import BusinessHoursSection from '../components/business/BusinessHoursSection';
-import BusinessConfigSection from '../components/business/BusinessConfigSection';
-import ServicesSection from '../components/business/ServicesSection';
-import ClientsSection from '../components/business/ClientsSection';
-import StatsSection from '../components/business/StatsSection';
-import { useToast } from '../hooks/useToast';
+import { supabase } from '../lib/supabase';
+import { AppointmentStatus } from '../types/appointment';
 import { useBusinessAppointments } from '../hooks/useBusinessAppointments';
-import { useSwipeable } from 'react-swipeable';
+import { useToast } from '../hooks/useToast';
 import { useUIConfig } from '../hooks/useUIConfig';
 import { useAuth } from '../hooks/useAuth';
 import { useBusinessConfig } from '../hooks/useBusinessConfig';
 import { useBusinessHours } from '../hooks/useBusinessHours';
 import { useBusinessClients } from '../hooks/useBusinessClients';
-import { supabase } from '../lib/supabase';
 
 // UI Components
 import TabNav, { Tab } from '../components/ui/TabNav';
-import Pagination from '../components/ui/Pagination';
 import SectionHeader from '../components/ui/SectionHeader';
-import MessageAlert from '../components/ui/MessageAlert';
-import BusinessHistorySection from '../components/business/BusinessHistorySection';
+import StatsSection from '../components/business/StatsSection';
+import ClientsSection from '../components/business/ClientsSection';
+import BusinessProfileSection from '../components/business/BusinessProfileSection';
+import BusinessConfigSection from '../components/business/BusinessConfigSection';
+import BusinessHoursSection from '../components/business/BusinessHoursSection';
+import ServicesSection from '../components/business/ServicesSection';
+import AppointmentList from '../components/appointments/AppointmentList';
+import Pagination from '../components/ui/Pagination';
 
 // Helper to create slug from business name
 const slugify = (str: string): string =>
@@ -39,10 +35,6 @@ export const BusinessDashboard: React.FC = () => {
   const { user } = useAuth();
   const { itemsPerPage } = useUIConfig();
   const toast = useToast();
-  const [searchParams, setSearchParams] = useSearchParams();
-  // Tab persistence: initialize from URL or default to 'pending'
-  const defaultTab = searchParams.get('tab') || 'pending';
-  const [activeTab, setActiveTab] = useState<string>(defaultTab);
   const [businessData, setBusinessData] = useState<Business | null>(null);
   const [businessMessage, setBusinessMessage] = useState<{ text: string; type: 'success' | 'error' } | null>(null);
   const [savingBusiness, setSavingBusiness] = useState(false);
@@ -63,11 +55,43 @@ export const BusinessDashboard: React.FC = () => {
   const [totalServices, setTotalServices] = useState(0);
   const days = ['Lunes', 'Martes', 'Miércoles', 'Jueves', 'Viernes', 'Sábado', 'Domingo'];
 
-  // Pagination for different tabs
-  const [appointmentsPage, setAppointmentsPage] = useState(1);
-  const [pendingPage, setPendingPage] = useState(1);
-  const [historyPage, setHistoryPage] = useState(1);
-  const [clientsPage, setClientsPage] = useState(1);
+  // Pagination for different sections
+  const [pagination, setPagination] = useState({
+    pending: { page: 1, perPage: itemsPerPage },
+    confirmed: { page: 1, perPage: itemsPerPage },
+    history: { page: 1, perPage: itemsPerPage },
+    clients: { page: 1, perPage: itemsPerPage }
+  });
+
+  const handlePageChange = (section: keyof typeof pagination, newPage: number) => {
+    setPagination(prev => ({
+      ...prev,
+      [section]: { ...prev[section], page: newPage }
+    }));
+  };
+
+  // Calculate active appointments count (pending + confirmed)
+  const activeAppointmentsCount = businessAppointments.filter(a => a.status === 'pending').length + businessAppointments.filter(a => a.status === 'confirmed').length;
+
+  // Handle tab change
+  const [activeTab, setActiveTab] = useState('appointments');
+  const handleTabChange = (tab: string) => {
+    setActiveTab(tab);
+  };
+
+  // Agregar estado para controlar las secciones colapsables
+  const [collapsedSections, setCollapsedSections] = useState({
+    pending: true,
+    confirmed: true,
+    history: true
+  });
+
+  const toggleSection = (section: 'pending' | 'confirmed' | 'history') => {
+    setCollapsedSections(prev => ({
+      ...prev,
+      [section]: !prev[section]
+    }));
+  };
 
   useEffect(() => {
     const loadBusinessData = async () => {
@@ -133,38 +157,18 @@ export const BusinessDashboard: React.FC = () => {
     };
   }, [businessData?.id, refreshAppointments]);
 
-  // Handle tab change and update URL search param
-  const handleTabChange = (tab: string) => {
-    setActiveTab(tab);
-    setSearchParams({ tab });
-  };
-
-  // Swipe handlers para cambiar tabs con gesto horizontal
-  const tabOrder = ['pending', 'appointments', 'history', 'services', 'clients', 'stats', 'profile', 'availability', 'settings'] as const;
-  const swipeHandlers = useSwipeable({
-    onSwipedLeft: () => {
-      const idx = tabOrder.indexOf(activeTab as typeof tabOrder[number]);
-      if (idx < tabOrder.length - 1) handleTabChange(tabOrder[idx + 1]);
-    },
-    onSwipedRight: () => {
-      const idx = tabOrder.indexOf(activeTab as typeof tabOrder[number]);
-      if (idx > 0) handleTabChange(tabOrder[idx - 1]);
-    },
-    trackMouse: true,
-    trackTouch: true,
-  });
-
-  const handleUpdateAppointmentStatus = async (id: string, newStatus: 'pending' | 'confirmed' | 'completed' | 'cancelled') => {
+  const handleUpdateAppointmentStatus = async (id: string, newStatus: AppointmentStatus) => {
     try {
       const response = await ApiClient.updateAppointmentStatus(id, newStatus);
       
       if (response.success) {
-        const statusText =
-          newStatus === 'confirmed' ? 'confirmada' :
-          newStatus === 'completed' ? 'completada' :
-          newStatus === 'cancelled' ? 'cancelada' :
-          'actualizada';
+      const statusText =
+        newStatus === 'confirmed' ? 'confirmada' :
+        newStatus === 'completed' ? 'completada' :
+        newStatus === 'cancelled' ? 'cancelada' :
+        'actualizada';
         toast.success(`Cita ${statusText} correctamente`);
+        await refreshAppointments();
       } else {
         toast.error(response.error || 'Error al actualizar el estado de la cita');
       }
@@ -203,7 +207,7 @@ export const BusinessDashboard: React.FC = () => {
       
       if (response.success && response.data) {
         setBusinessData(response.data);
-        setBusinessMessage({ text: 'Datos del negocio actualizados correctamente', type: 'success' });
+      setBusinessMessage({ text: 'Datos del negocio actualizados correctamente', type: 'success' });
         toast.success('Datos del negocio actualizados correctamente');
       } else {
         setBusinessMessage({ text: response.error || 'Error al actualizar datos del negocio', type: 'error' });
@@ -223,11 +227,18 @@ export const BusinessDashboard: React.FC = () => {
   const confirmedAppointments = businessAppointments.filter(a => a.status === 'confirmed');
   const pastAppointments = businessAppointments.filter(a => a.status === 'completed' || new Date(a.start_time) <= now);
 
-  // Paginación de resultados
-  const pagedPending = pendingAppointments.slice((pendingPage - 1) * itemsPerPage, pendingPage * itemsPerPage);
-  const pagedConfirmed = confirmedAppointments.slice((appointmentsPage - 1) * itemsPerPage, appointmentsPage * itemsPerPage);
-  const pagedPast = pastAppointments.slice((historyPage - 1) * itemsPerPage, historyPage * itemsPerPage);
-  const pagedClients = businessClients.slice((clientsPage - 1) * itemsPerPage, clientsPage * itemsPerPage);
+  // Calculate paginated appointments for each section
+  const getPaginatedItems = <T extends any>(items: T[], section: keyof typeof pagination) => {
+    const { page, perPage } = pagination[section];
+    const start = (page - 1) * perPage;
+    const end = start + perPage;
+    return items.slice(start, end);
+  };
+
+  const pagedPending = getPaginatedItems(pendingAppointments, 'pending');
+  const pagedConfirmed = getPaginatedItems(confirmedAppointments, 'confirmed');
+  const pagedPast = getPaginatedItems(pastAppointments, 'history');
+  const pagedClients = getPaginatedItems(businessClients, 'clients');
 
   // Statistics for StatsSection
   const completedAppointments = businessAppointments.filter(a => a.status === 'completed');
@@ -273,51 +284,38 @@ export const BusinessDashboard: React.FC = () => {
 
   // Prepare tabs for TabNav component
   const tabs: Tab[] = [
-    { id: 'pending', label: 'Pendientes', count: pendingAppointments.length },
-    { id: 'appointments', label: 'Agendado', count: confirmedAppointments.length },
-    { id: 'history', label: 'Historial', count: pastAppointments.length },
+    { id: 'appointments', label: 'Citas', count: activeAppointmentsCount },
     { id: 'services', label: 'Servicios', count: totalServices },
-    { id: 'clients', label: 'Clientes', count: businessClients.length }
-  ];
-  // Add stats tab after clients if we have business data
-  if (businessData) {
-    tabs.push({ id: 'stats', label: 'Estadísticas' });
-  }
-  // Add remaining tabs
-  tabs.push(
-    { id: 'profile', label: 'Datos' },
-    { id: 'availability', label: 'Horarios' },
+    { id: 'clients', label: 'Clientes', count: businessClients.length },
+    { id: 'stats', label: 'Estadísticas' },
+    { id: 'profile', label: 'Perfil' },
+    { id: 'availability', label: 'Disponibilidad' },
     { id: 'settings', label: 'Configuración' }
-  );
+  ];
 
   return (
     <div>
       <div className="max-w-7xl mx-auto mt-6 sm:px-6 lg:px-8">
         <div className="px-4 py-2 sm:px-0">
           <div className="flex items-center justify-between mb-4 sm:flex sm:items-baseline">
-            {businessData && (
+          {businessData && (
               <Link to={`/${slugify(businessData.name)}`} className="flex items-center space-x-4">
                 <img
                   src={businessData.logo_url || 'https://upload.wikimedia.org/wikipedia/commons/8/89/Portrait_Placeholder.png'}
                   alt={`${businessData.name} logo`}
                   className="h-12 w-12 rounded-full object-cover"
                 />
-                <h3 className="text-lg leading-6 font-medium text-gray-900 grow dark:text-white">
+                <h3 className="text-lg leading-6 font-medium text-gray-900 grow">
                   {businessData.name}
                 </h3>
               </Link>
             )}
             <div className="flex flex-col gap-4 self-center">
-              <Link to="/dashboard" className="dark:text-white dark:hover:text-black inline-flex px-4 py-2 border border-transparent text-sm font-medium rounded-md text-indigo-600 border-indigo-600 hover:bg-indigo-50">
-                Mi Perfil
-              </Link>
+              <Link to="/dashboard" className="dark:hover:text-black inline-flex px-4 py-2 border border-transparent text-sm font-medium rounded-md text-indigo-600 border-indigo-600 hover:bg-indigo-50">
+              Mi Perfil
+            </Link>
             </div>
           </div>
-
-          {/* Show messages for tabs except profile, availability, settings */}
-          {businessMessage && activeTab !== 'profile' && activeTab !== 'availability' && activeTab !== 'settings' && (
-            <MessageAlert message={businessMessage} />
-          )}
 
           {/* Use TabNav component */}
           <TabNav 
@@ -326,11 +324,14 @@ export const BusinessDashboard: React.FC = () => {
             onTabChange={handleTabChange} 
           />
 
-          <div className="mt-6" {...swipeHandlers}>
+          <div className="mt-6">
+            {/* Tab de Estadísticas */}
             {activeTab === 'stats' && businessData && (
+              <>
+                <SectionHeader title="Estadísticas del Negocio" />
               <StatsSection
                 totalAppointments={businessAppointments.length}
-                upcomingAppointments={confirmedAppointments.length}
+                  upcomingAppointments={confirmedAppointments.length}
                 pastAppointments={pastAppointments.length}
                 totalClients={businessClients.length}
                 totalServices={totalServices}
@@ -341,73 +342,126 @@ export const BusinessDashboard: React.FC = () => {
                 avgPrice={avgPrice}
                 topServiceName={topServiceName}
                 topServiceCount={topServiceCount}
-                topClientName={topClientName}
-                topClientCount={topClientCount}
                 peakDay={peakDayName}
                 peakHour={peakHour}
-                newClients={newClientsCount}
-                returningClients={returningClientsCount}
                 lifetimeValueAvg={lifetimeValueAvg}
               />
-            )}
-            
-            {/* Tab de Pendientes */}
-            {activeTab === 'pending' && (
-              <>
-                <SectionHeader 
-                  title="Citas Pendientes" 
-                  description="Solicitudes de citas que requieren confirmación."
-                />
-                <AppointmentsSection
-                  appointments={pagedPending}
-                  loading={loadingBusinessAppointments}
-                  onUpdateStatus={handleUpdateAppointmentStatus}
-                />
-                {/* Use Pagination component */}
-                <Pagination 
-                  currentPage={pendingPage}
-                  totalPages={Math.ceil(pendingAppointments.length / itemsPerPage)}
-                  onPageChange={setPendingPage}
-                />
               </>
             )}
             
-            {/* Tab de Agendado */}
+            {/* Tab de Citas */}
             {activeTab === 'appointments' && (
               <>
-                <SectionHeader 
-                  title="Citas Confirmadas" 
-                  description="Citas confirmadas y programadas."
-                />
-                <AppointmentsSection
-                  appointments={pagedConfirmed}
-                  loading={loadingBusinessAppointments}
-                  onUpdateStatus={handleUpdateAppointmentStatus}
-                />
-                {/* Use Pagination component */}
-                <Pagination 
-                  currentPage={appointmentsPage}
-                  totalPages={Math.ceil(confirmedAppointments.length / itemsPerPage)}
-                  onPageChange={setAppointmentsPage}
-                />
+                {/* Citas Pendientes */}
+                <div className="mb-8">
+                  <div 
+                    className="flex items-center justify-between cursor-pointer" 
+                    onClick={() => toggleSection('pending')}
+                  >
+                    <SectionHeader 
+                      title={`Citas Pendientes (${pendingAppointments.length})`}
+                      description="Solicitudes de citas que requieren confirmación."
+                    />
+                    <button className="p-2">
+                      <svg 
+                        className={`w-6 h-6 transform transition-transform ${collapsedSections.pending ? '-rotate-90' : 'rotate-0'}`} 
+                        fill="none" 
+                        stroke="currentColor" 
+                        viewBox="0 0 24 24"
+                      >
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+                      </svg>
+                    </button>
+                  </div>
+                  {!collapsedSections.pending && (
+                    <>
+                      <AppointmentList
+                        appointments={pagedPending}
+                        onStatusChange={handleUpdateAppointmentStatus}
+                        showReviewSection={false}
+                      />
+                      <Pagination 
+                        currentPage={pagination.pending.page}
+                        totalPages={Math.ceil(pendingAppointments.length / pagination.pending.perPage)}
+                        onPageChange={(page) => handlePageChange('pending', page)}
+                      />
+                    </>
+                  )}
+                </div>
+
+                {/* Citas Confirmadas */}
+                <div className="mb-8">
+                  <div 
+                    className="flex items-center justify-between cursor-pointer" 
+                    onClick={() => toggleSection('confirmed')}
+                  >
+                    <SectionHeader 
+                      title={`Citas Confirmadas (${confirmedAppointments.length})`}
+                      description="Citas confirmadas y programadas."
+                    />
+                    <button className="p-2">
+                      <svg 
+                        className={`w-6 h-6 transform transition-transform ${collapsedSections.confirmed ? '-rotate-90' : 'rotate-0'}`} 
+                        fill="none" 
+                        stroke="currentColor" 
+                        viewBox="0 0 24 24"
+                      >
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+                      </svg>
+                    </button>
+                  </div>
+                  {!collapsedSections.confirmed && (
+                    <>
+                      <AppointmentList
+                        appointments={pagedConfirmed}
+                        onStatusChange={handleUpdateAppointmentStatus}
+                        showReviewSection={false}
+                      />
+                      <Pagination 
+                        currentPage={pagination.confirmed.page}
+                        totalPages={Math.ceil(confirmedAppointments.length / pagination.confirmed.perPage)}
+                        onPageChange={(page) => handlePageChange('confirmed', page)}
+                      />
               </>
             )}
-            
-            {/* Tab de Historial */}
-            {activeTab === 'history' && businessData && (
-              <>
-                <SectionHeader 
-                  title="Historial de Citas" 
-                  description="Citas completadas y pasadas."
-                />
-                <BusinessHistorySection
-                  businessId={businessData!.id}
-                  appointments={pagedPast}
-                  loading={loadingBusinessAppointments}
-                  currentPage={historyPage}
-                  itemsPerPage={itemsPerPage}
-                  onPageChange={setHistoryPage}
-                />
+                </div>
+
+                {/* Historial de Citas */}
+                <div>
+                  <div 
+                    className="flex items-center justify-between cursor-pointer" 
+                    onClick={() => toggleSection('history')}
+                  >
+                    <SectionHeader 
+                      title={`Historial de Citas (${pastAppointments.length})`}
+                      description="Citas completadas y pasadas."
+                    />
+                    <button className="p-2">
+                      <svg 
+                        className={`w-6 h-6 transform transition-transform ${collapsedSections.history ? '-rotate-90' : 'rotate-0'}`} 
+                        fill="none" 
+                        stroke="currentColor" 
+                        viewBox="0 0 24 24"
+                      >
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+                      </svg>
+                    </button>
+                  </div>
+                  {!collapsedSections.history && (
+                    <>
+                      <AppointmentList
+                        appointments={pagedPast}
+                        onStatusChange={handleUpdateAppointmentStatus}
+                        showReviewSection={true}
+                      />
+                      <Pagination 
+                        currentPage={pagination.history.page}
+                        totalPages={Math.ceil(pastAppointments.length / pagination.history.perPage)}
+                        onPageChange={(page) => handlePageChange('history', page)}
+                      />
+                    </>
+                  )}
+                </div>
               </>
             )}
 
@@ -418,8 +472,8 @@ export const BusinessDashboard: React.FC = () => {
                   title="Servicios" 
                   description="Gestiona los servicios que ofreces a tus clientes."
                 />
-                <ServicesSection
-                  businessId={businessData.id}
+              <ServicesSection
+                businessId={businessData.id}
                   getServices={ApiClient.getBusinessServices}
                   createService={ApiClient.createBusinessService}
                   updateService={ApiClient.updateBusinessService}
@@ -441,48 +495,47 @@ export const BusinessDashboard: React.FC = () => {
                   loading={loadingBusinessClients}
                   message={clientsMessage}
                 />
-                {/* Use Pagination component */}
                 <Pagination 
-                  currentPage={clientsPage}
-                  totalPages={Math.ceil(businessClients.length / itemsPerPage)}
-                  onPageChange={setClientsPage}
+                  currentPage={pagination.clients.page}
+                  totalPages={Math.ceil(businessClients.length / pagination.clients.perPage)}
+                  onPageChange={(page) => handlePageChange('clients', page)}
                 />
               </>
             )}
 
-            {/* Tab de Datos del Negocio */}
+            {/* Tab de Perfil */}
             {activeTab === 'profile' && businessData && (
               <>
                 <SectionHeader 
                   title="Datos del Negocio" 
                   description="Actualiza la información de tu negocio."
                 />
-                <BusinessProfileSection
-                  businessData={businessData}
-                  saving={savingBusiness}
-                  message={businessMessage}
+              <BusinessProfileSection
+                businessData={businessData}
                   onSave={handleBusinessSubmit}
                   onChange={handleBusinessChange}
-                />
+                saving={savingBusiness}
+                message={businessMessage}
+              />
               </>
             )}
 
-            {/* Tab de Horarios */}
+            {/* Tab de Disponibilidad */}
             {activeTab === 'availability' && (
               <>
                 <SectionHeader 
                   title="Horarios de Atención" 
                   description="Configura los días y horarios de atención de tu negocio."
                 />
-                <BusinessHoursSection
-                  businessHours={businessHours}
-                  loading={loadingBusinessHours}
-                  saving={savingBusinessHours}
-                  message={hoursMessage}
-                  onSave={handleHoursSubmit}
-                  onHoursChange={handleHoursChange}
-                  days={days}
-                />
+              <BusinessHoursSection
+                businessHours={businessHours}
+                loading={loadingBusinessHours}
+                saving={savingBusinessHours}
+                message={hoursMessage}
+                onSave={handleHoursSubmit}
+                onHoursChange={handleHoursChange}
+                days={days}
+              />
               </>
             )}
 
@@ -493,14 +546,14 @@ export const BusinessDashboard: React.FC = () => {
                   title="Configuración" 
                   description="Personaliza las opciones de tu negocio."
                 />
-                <BusinessConfigSection
-                  config={businessConfig}
-                  loading={loadingBusinessConfig}
-                  saving={savingBusinessConfig}
-                  message={configMessage}
+              <BusinessConfigSection
+                config={businessConfig}
+                loading={loadingBusinessConfig}
+                saving={savingBusinessConfig}
+                message={configMessage}
                   onSave={handleConfigSave}
-                  onConfigChange={handleConfigChange}
-                />
+                onConfigChange={handleConfigChange}
+              />
               </>
             )}
           </div>

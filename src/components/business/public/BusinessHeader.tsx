@@ -201,7 +201,7 @@ const BusinessHeader: React.FC<BusinessHeaderProps> = ({ businessData, averageRa
       <div className="p-6 md:p-8">
         <div className="flex flex-wrap justify-between items-start">
           <div className="mb-4 md:mb-0">
-            <h1 className="text-2xl md:text-3xl font-bold text-gray-900 dark:text-white">{businessData.name}</h1>
+            <h1 className="text-2xl md:text-3xl font-bold text-gray-900 ">{businessData.name}</h1>
             {reviewsCount > 0 && (
               <div className="flex items-center mt-2">
                 {[...Array(5)].map((_, i) => (
@@ -210,7 +210,7 @@ const BusinessHeader: React.FC<BusinessHeaderProps> = ({ businessData, averageRa
                 <span className="ml-2 text-sm text-gray-600">{averageRating.toFixed(1)} ({reviewsCount})</span>
               </div>
             )}
-            <p className="mt-3 text-gray-600 dark:text-white">{businessData.description}</p>
+            <p className="mt-3 text-gray-600 ">{businessData.description}</p>
             {categoryName && (
               <p className="mt-2 inline-block px-2 py-1 bg-indigo-100 text-indigo-800 rounded dark:bg-indigo-800 dark:text-indigo-200 uppercase text-xs">
                 {categoryName}
@@ -222,13 +222,13 @@ const BusinessHeader: React.FC<BusinessHeaderProps> = ({ businessData, averageRa
             {businessData.address && businessData.config?.mostrar_direccion && (
               <div className="flex items-center">
                 <MapPin className="h-5 w-5 text-indigo-600 mr-2" />
-                <span className="dark:text-white">{businessData.address}</span>
+                <span className="">{businessData.address}</span>
               </div>
             )}
             {businessData.phone && businessData.config?.mostrar_telefono && (
               <div className="flex items-center">
                 <Phone className="h-5 w-5 text-indigo-600 mr-2" />
-                <a href={`tel:${businessData.phone}`} className="hover:text-indigo-600 dark:text-white">
+                <a href={`tel:${businessData.phone}`} className="hover:text-indigo-600 ">
                   {businessData.phone}
                 </a>
               </div>
@@ -236,7 +236,7 @@ const BusinessHeader: React.FC<BusinessHeaderProps> = ({ businessData, averageRa
             {businessData.email && businessData.config?.mostrar_email && (
               <div className="flex items-center">
                 <Mail className="h-5 w-5 text-indigo-600 mr-2" />
-                <a href={`mailto:${businessData.email}`} className="hover:text-indigo-600 dark:text-white">
+                <a href={`mailto:${businessData.email}`} className="hover:text-indigo-600 ">
                   {businessData.email}
                 </a>
               </div>
@@ -244,7 +244,7 @@ const BusinessHeader: React.FC<BusinessHeaderProps> = ({ businessData, averageRa
             {businessData.website && (
               <div className="flex items-center">
                 <Globe className="h-5 w-5 text-indigo-600 mr-2" />
-                <a href={businessData.website} target="_blank" rel="noopener noreferrer" className="hover:text-indigo-600 dark:text-white truncate">
+                <a href={businessData.website} target="_blank" rel="noopener noreferrer" className="hover:text-indigo-600  truncate">
                   {businessData.website.replace(/https?:\/\/(www\.)?/, '')}
                 </a>
               </div>
@@ -252,7 +252,7 @@ const BusinessHeader: React.FC<BusinessHeaderProps> = ({ businessData, averageRa
             {businessData.whatsapp && (
               <div className="flex items-center">
                 <MessageCircle className="h-5 w-5 text-indigo-600 mr-2" />
-                <a href={`https://wa.me/${businessData.whatsapp}`} target="_blank" rel="noopener noreferrer" className="hover:text-indigo-600 dark:text-white">
+                <a href={`https://wa.me/${businessData.whatsapp}`} target="_blank" rel="noopener noreferrer" className="hover:text-indigo-600 ">
                   WhatsApp
                 </a>
               </div>

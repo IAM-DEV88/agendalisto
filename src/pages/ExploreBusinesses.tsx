@@ -55,7 +55,7 @@ const ExploreBusinesses = () => {
     <div className="min-h-screen">
       <div className="max-w-7xl mx-auto py-12 px-4 sm:px-6 lg:px-8">
         <div className="text-center">
-          <h1 className="text-3xl font-extrabold text-gray-900 sm:text-4xl">
+          <h1 className="text-3xl  font-extrabold text-gray-900 sm:text-4xl">
             Explora Negocios
           </h1>
           <p className="mt-3 max-w-2xl mx-auto text-xl text-gray-500 sm:mt-4">
@@ -130,9 +130,9 @@ const ExploreBusinesses = () => {
                   />
                 </div>
                 <div className="p-6">
-                  <h3 className="text-lg font-medium text-gray-900 dark:text-white">{business.name}</h3>
-                  <p className="mt-1 text-sm text-gray-500 dark:text-white">{business.address}</p>
-                  <p className="mt-2 text-sm text-gray-600 dark:text-white line-clamp-2">{business.description}</p>
+                  <h3 className="text-lg font-medium text-gray-900 ">{business.name}</h3>
+                  <p className="mt-1 text-sm text-gray-500 ">{business.address}</p>
+                  <p className="mt-2 text-sm text-gray-600  line-clamp-2">{business.description}</p>
                   {(() => {
                     const cat = categories.find(c => c.id === business.category_id);
                     return cat ? (
@@ -142,7 +142,7 @@ const ExploreBusinesses = () => {
                     ) : null;
                   })()}
                   <div className="mt-4">
-                    <span className="inline-flex items-center px-3 py-0.5 text-sm font-medium bg-indigo-100 text-indigo-800 dark:bg-gray-50 dark:bg-opacity-10 dark:text-white">
+                    <span className="inline-flex items-center px-3 py-0.5 text-sm font-medium bg-indigo-100 text-indigo-800 dark:bg-gray-50 dark:bg-opacity-10 ">
                       Ver servicios
                     </span>
                   </div>

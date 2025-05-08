@@ -63,7 +63,7 @@ const BusinessHistorySection: React.FC<BusinessHistorySectionProps> = ({
   if (appointments.length === 0) {
     return (
       <div className="dark:bg-opacity-10 bg-gray-50 shadow overflow-hidden sm:rounded-md p-6 text-center">
-        <p className="text-gray-500 dark:text-white">No hay citas pasadas.</p>
+        <p className="text-gray-500 ">No hay citas pasadas.</p>
       </div>
     );
   }
@@ -78,11 +78,11 @@ const BusinessHistorySection: React.FC<BusinessHistorySectionProps> = ({
               <div className="flex flex-col justify-between space-y-2">
                 <div>
                   <p className="text-sm font-medium text-indigo-600 dark:text-indigo-200">{appt.services?.name}</p>
-                  <p className="text-sm text-gray-500 dark:text-white">Cliente: {appt.profiles?.full_name || appt.user_id}</p>
-                  <p className="text-sm text-gray-500 dark:text-white">Fecha: {formatDate(appt.start_time)}</p>
+                  <p className="text-sm text-gray-500 ">Cliente: {appt.profiles?.full_name || appt.user_id}</p>
+                  <p className="text-sm text-gray-500 ">Fecha: {formatDate(appt.start_time)}</p>
                 </div>
                 {appt.status === 'cancelled' ? (
-                  <p className="self-start px-2 py-0.5 leading-5 text-xs font-semibold rounded-full bg-red-100 text-red-800">
+                  <p className="self-start rounded-full status-cancelled">
                     Cancelada
                   </p>
                 ) : review ? (
@@ -95,7 +95,7 @@ const BusinessHistorySection: React.FC<BusinessHistorySectionProps> = ({
                     ))}
                   </div>
                 ) : (
-                  <p className="text-sm text-yellow-500">Sin reseña todavía</p>
+                  <p className="self-start rounded-full status-pending">Sin reseña todavía</p>
                 )}
               </div>
             </li>

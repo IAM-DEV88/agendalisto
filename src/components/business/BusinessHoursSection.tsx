@@ -35,7 +35,7 @@ const BusinessHoursSection: React.FC<BusinessHoursSectionProps> = ({
                   {businessHours.map((hour, idx) => (
                     <div key={hour.day_of_week} className="border-b py-2">
                       <div className="flex items-center justify-between">
-                        <span className="text-gray-700 dark:text-white">{days[hour.day_of_week]}</span>
+                        <span className="text-gray-700 ">{days[hour.day_of_week]}</span>
                         <label className="inline-flex items-center">
                           <input
                             type="checkbox"
@@ -43,7 +43,7 @@ const BusinessHoursSection: React.FC<BusinessHoursSectionProps> = ({
                             onChange={e => onHoursChange(idx, 'is_closed', e.target.checked)}
                             className="h-4 w-4 mr-2 text-indigo-600 focus:ring-indigo-500 dark:bg-gray-900"
                           />
-                          <span className="text-gray-500 dark:text-white">Cerrado</span>
+                          <span className="text-gray-500 ">Cerrado</span>
                         </label>
                       </div>
                       {!hour.is_closed && (
@@ -52,14 +52,14 @@ const BusinessHoursSection: React.FC<BusinessHoursSectionProps> = ({
                             type="time"
                             value={hour.start_time}
                             onChange={e => onHoursChange(idx, 'start_time', e.target.value)}
-                            className="border rounded-md p-2 text-sm dark:bg-gray-900 dark:text-white"
+                            className="border rounded-md p-2 text-sm dark:bg-gray-900 "
                           />
-                          <span className="text-gray-700 dark:text-white">-</span>
+                          <span className="text-gray-700 ">-</span>
                           <input
                             type="time"
                             value={hour.end_time}
                             onChange={e => onHoursChange(idx, 'end_time', e.target.value)}
-                            className="border rounded-md p-2 text-sm dark:bg-gray-900 dark:text-white"
+                            className="border rounded-md p-2 text-sm dark:bg-gray-900 "
                           />
                         </div>
                       )}
@@ -69,21 +69,20 @@ const BusinessHoursSection: React.FC<BusinessHoursSectionProps> = ({
               </div>
             </div>
 
-            <div className="mt-6 flex justify-end">
+          </div>
+            <div className="mt-2 flex justify-end">
               <button 
                 type="submit" 
                 disabled={saving} 
-                className="px-4 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 disabled:opacity-50 flex items-center gap-2"
+                className={`inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium -md shadow-sm text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 ${saving ? 'opacity-70 cursor-not-allowed' : ''
+                }`}
               >
-                <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                  <path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"></path>
-                  <polyline points="17 21 17 13 7 13 7 21"></polyline>
-                  <polyline points="7 3 7 8 15 8"></polyline>
-                </svg>
-                {saving ? 'Guardando...' : 'Guardar horarios'}
+                <svg className="h-5 w-5 mr-2" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor">
+                  <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
+            </svg>
+                {saving ? 'Guardando...' : 'Guardar cambios'}
               </button>
             </div>
-          </div>
         </form>
       )}
     </div>
