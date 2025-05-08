@@ -41,7 +41,7 @@ export interface Appointment {
   services?: Service;
   profiles?: Profile;
   review?: Review;
-  notes?: string;
+  notes?: string | null;
   status_history?: StatusHistory[];
   created_at: string;
   updated_at: string;
