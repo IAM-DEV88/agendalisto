@@ -42,7 +42,7 @@ const ProfileDashboard = ({ user }: ProfileDashboardProps) => {
   const navigate = useNavigate();
 
   // Realtime appointments via custom hook
-  const { appointments, loading } = useAppointments(user?.id || null);
+  const { appointments } = useAppointments(user?.id || null);
 
   // Avatar for header
   const FALLBACK_AVATAR = 'https://upload.wikimedia.org/wikipedia/commons/8/89/Portrait_Placeholder.png';

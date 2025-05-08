@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { Link, useSearchParams } from 'react-router-dom';
+import { Link } from 'react-router-dom';
 import { Business } from '../lib/api';
 import { ApiClient } from '../lib/apiClient';
 import { supabase } from '../lib/supabase';
@@ -40,16 +40,15 @@ export const BusinessDashboard: React.FC = () => {
   const [savingBusiness, setSavingBusiness] = useState(false);
   
   // Use custom hooks for business data
-  const { appointments: businessAppointments, loading: loadingBusinessAppointments, refreshAppointments } = 
+  const { appointments: businessAppointments, refreshAppointments } = 
     useBusinessAppointments(businessData?.id || null);
-  const { config: businessConfig, loading: loadingBusinessConfig, saving: savingBusinessConfig, 
+  const { config: businessConfig, saving: savingBusinessConfig, 
     message: configMessage, updateConfig: handleConfigChange, saveConfig: handleConfigSave } = 
     useBusinessConfig(businessData?.id);
-  const { businessHours, loading: loadingBusinessHours, saving: savingBusinessHours, 
+  const { businessHours, saving: savingBusinessHours, 
     message: hoursMessage, updateHour: handleHoursChange, saveHours: handleHoursSubmit } = 
     useBusinessHours(businessData?.id);
-  const { clients: businessClients, loading: loadingBusinessClients, 
-    message: clientsMessage } = useBusinessClients(businessData?.id);
+  const { clients: businessClients, message: clientsMessage } = useBusinessClients(businessData?.id);
 
   // Business services count (can be moved to a hook in the future)
   const [totalServices, setTotalServices] = useState(0);
@@ -195,27 +194,29 @@ export const BusinessDashboard: React.FC = () => {
         description: businessData.description,
         address: businessData.address,
         phone: businessData.phone,
-        whatsapp: businessData.whatsapp,
-        instagram: businessData.instagram,
-        facebook: businessData.facebook,
         email: businessData.email,
-        category_id: businessData.category_id,
-        website: businessData.website,
-        lat: businessData.lat,
-        lng: businessData.lng
+        slug: slugify(businessData.name)
       });
-      
-      if (response.success && response.data) {
-        setBusinessData(response.data);
-      setBusinessMessage({ text: 'Datos del negocio actualizados correctamente', type: 'success' });
+
+      if (response.success) {
+        setBusinessMessage({
+          text: 'Datos del negocio actualizados correctamente',
+          type: 'success'
+        });
         toast.success('Datos del negocio actualizados correctamente');
       } else {
-        setBusinessMessage({ text: response.error || 'Error al actualizar datos del negocio', type: 'error' });
-        toast.error(response.error || 'Error al actualizar datos del negocio');
+        setBusinessMessage({
+          text: response.error || 'Error al actualizar los datos del negocio',
+          type: 'error'
+        });
+        toast.error(response.error || 'Error al actualizar los datos del negocio');
       }
     } catch (err: any) {
-      setBusinessMessage({ text: err.message || 'Error al actualizar datos del negocio', type: 'error' });
-      toast.error(err.message || 'Error al actualizar datos del negocio');
+      setBusinessMessage({
+        text: err.message || 'Error al actualizar los datos del negocio',
+        type: 'error'
+      });
+      toast.error(err.message || 'Error al actualizar los datos del negocio');
     } finally {
       setSavingBusiness(false);
     }
@@ -422,8 +423,8 @@ export const BusinessDashboard: React.FC = () => {
                         totalPages={Math.ceil(confirmedAppointments.length / pagination.confirmed.perPage)}
                         onPageChange={(page) => handlePageChange('confirmed', page)}
                       />
-              </>
-            )}
+                    </>
+                  )}
                 </div>
 
                 {/* Historial de Citas */}
@@ -492,7 +493,7 @@ export const BusinessDashboard: React.FC = () => {
                 />
                 <ClientsSection
                   clients={pagedClients}
-                  loading={loadingBusinessClients}
+                  loading={false}
                   message={clientsMessage}
                 />
                 <Pagination 
@@ -529,7 +530,7 @@ export const BusinessDashboard: React.FC = () => {
                 />
               <BusinessHoursSection
                 businessHours={businessHours}
-                loading={loadingBusinessHours}
+                loading={false}
                 saving={savingBusinessHours}
                 message={hoursMessage}
                 onSave={handleHoursSubmit}
@@ -548,7 +549,7 @@ export const BusinessDashboard: React.FC = () => {
                 />
               <BusinessConfigSection
                 config={businessConfig}
-                loading={loadingBusinessConfig}
+                loading={false}
                 saving={savingBusinessConfig}
                 message={configMessage}
                   onSave={handleConfigSave}
