@@ -1,9 +1,9 @@
 import { useState, useEffect } from 'react';
-import { Link, useSearchParams } from 'react-router-dom';
+import { Link, useSearchParams, useNavigate } from 'react-router-dom';
 import { Business } from '../lib/api';
 import { ApiClient } from '../lib/apiClient';
 import { supabase } from '../lib/supabase';
-import { AppointmentStatus } from '../types/appointment';
+import { AppointmentStatus, Appointment } from '../types/appointment';
 import { useBusinessAppointments } from '../hooks/useBusinessAppointments';
 import { useToast } from '../hooks/useToast';
 import { useUIConfig } from '../hooks/useUIConfig';
@@ -40,8 +40,7 @@ export const BusinessDashboard: React.FC = () => {
   const [savingBusiness, setSavingBusiness] = useState(false);
   
   // Use custom hooks for business data
-  const { appointments: businessAppointments, loading: loadingBusinessAppointments, refreshAppointments } = 
-    useBusinessAppointments(businessData?.id || null);
+  const { appointments, loading: loadingBusinessAppointments, refreshAppointments } = useBusinessAppointments(businessData?.id || null);
   const { config: businessConfig, loading: loadingBusinessConfig, saving: savingBusinessConfig, 
     message: configMessage, updateConfig: handleConfigChange, saveConfig: handleConfigSave } = 
     useBusinessConfig(businessData?.id);
@@ -71,7 +70,7 @@ export const BusinessDashboard: React.FC = () => {
   };
 
   // Calculate active appointments count (pending + confirmed)
-  const activeAppointmentsCount = businessAppointments.filter(a => a.status === 'pending').length + businessAppointments.filter(a => a.status === 'confirmed').length;
+  const activeAppointmentsCount = appointments.filter(a => a.status === 'pending').length + appointments.filter(a => a.status === 'confirmed').length;
 
   // Handle tab change
   const [activeTab, setActiveTab] = useState('appointments');
@@ -223,9 +222,9 @@ export const BusinessDashboard: React.FC = () => {
 
   // Filtrar citas según estado y fecha
   const now = new Date();
-  const pendingAppointments = businessAppointments.filter(a => a.status === 'pending');
-  const confirmedAppointments = businessAppointments.filter(a => a.status === 'confirmed');
-  const pastAppointments = businessAppointments.filter(a => a.status === 'completed' || new Date(a.start_time) <= now);
+  const pendingAppointments = appointments.filter(a => a.status === 'pending');
+  const confirmedAppointments = appointments.filter(a => a.status === 'confirmed');
+  const pastAppointments = appointments.filter(a => a.status === 'completed' || new Date(a.start_time) <= now);
 
   // Calculate paginated appointments for each section
   const getPaginatedItems = <T extends any>(items: T[], section: keyof typeof pagination) => {
@@ -241,41 +240,33 @@ export const BusinessDashboard: React.FC = () => {
   const pagedClients = getPaginatedItems(businessClients, 'clients');
 
   // Statistics for StatsSection
-  const completedAppointments = businessAppointments.filter(a => a.status === 'completed');
+  const completedAppointments = appointments.filter(a => a.status === 'completed');
   const totalRevenue = completedAppointments.reduce((sum, a) => sum + (a.services?.price ?? 0), 0);
-  const confirmationRate = businessAppointments.length > 0 ? (businessAppointments.filter(a => a.status === 'confirmed').length / businessAppointments.length) * 100 : 0;
-  const cancellationRate = businessAppointments.length > 0 ? (businessAppointments.filter(a => a.status === 'cancelled').length / businessAppointments.length) * 100 : 0;
+  const confirmationRate = appointments.length > 0 ? (appointments.filter(a => a.status === 'confirmed').length / appointments.length) * 100 : 0;
+  const cancellationRate = appointments.length > 0 ? (appointments.filter(a => a.status === 'cancelled').length / appointments.length) * 100 : 0;
   const avgDuration = completedAppointments.length > 0 ? completedAppointments.reduce((sum, a) => sum + (a.services?.duration ?? 0), 0) / completedAppointments.length : 0;
   const avgPrice = completedAppointments.length > 0 ? totalRevenue / completedAppointments.length : 0;
   
   // More complex statistics calculations...
   const userAppointmentCounts: Record<string, number> = {};
-  businessAppointments.forEach(a => {
+  appointments.forEach(a => {
     userAppointmentCounts[a.user_id] = (userAppointmentCounts[a.user_id] || 0) + 1;
   });
-  const newClientsCount = Object.values(userAppointmentCounts).filter(count => count === 1).length;
-  const returningClientsCount = Object.values(userAppointmentCounts).filter(count => count > 1).length;
   const serviceCounts: Record<string, number> = {};
-  businessAppointments.forEach(a => {
+  appointments.forEach(a => {
     const serviceName = a.services?.name ?? '';
     serviceCounts[serviceName] = (serviceCounts[serviceName] || 0) + 1;
   });
   const [topServiceName, topServiceCount] = Object.entries(serviceCounts).sort((a, b) => b[1] - a[1])[0] || ['-', 0];
-  const clientCounts: Record<string, number> = {};
-  businessAppointments.forEach(a => {
-    const clientName = a.profiles?.full_name ?? '';
-    clientCounts[clientName] = (clientCounts[clientName] || 0) + 1;
-  });
-  const [topClientName, topClientCount] = Object.entries(clientCounts).sort((a, b) => b[1] - a[1])[0] || ['-', 0];
   const dayCounts: Record<number, number> = {};
-  businessAppointments.forEach(a => {
+  appointments.forEach(a => {
     const dayIndex = new Date(a.start_time).getDay();
     dayCounts[dayIndex] = (dayCounts[dayIndex] || 0) + 1;
   });
   const peakDayIndex = Number(Object.entries(dayCounts).sort((a, b) => b[1] - a[1])[0]?.[0]) || 0;
   const peakDayName = days[peakDayIndex] || '-';
   const peakHourCounts: Record<number, number> = {};
-  businessAppointments.forEach(a => {
+  appointments.forEach(a => {
     const hour = new Date(a.start_time).getHours();
     peakHourCounts[hour] = (peakHourCounts[hour] || 0) + 1;
   });
@@ -292,6 +283,22 @@ export const BusinessDashboard: React.FC = () => {
     { id: 'availability', label: 'Disponibilidad' },
     { id: 'settings', label: 'Configuración' }
   ];
+
+  // Handlers for appointment actions
+  const handleConfirm = async (appointment: Appointment) => {
+    try {
+      const response = await ApiClient.updateAppointmentStatus(appointment.id, 'confirmed');
+      if (response.success) {
+        toast.success('Cita confirmada correctamente');
+        refreshAppointments();
+      } else {
+        toast.error('Error al confirmar la cita');
+      }
+    } catch (error) {
+      console.error('Error al confirmar la cita:', error);
+      toast.error('Error al confirmar la cita');
+    }
+  };
 
   return (
     <div>
@@ -330,7 +337,7 @@ export const BusinessDashboard: React.FC = () => {
               <>
                 <SectionHeader title="Estadísticas del Negocio" />
               <StatsSection
-                totalAppointments={businessAppointments.length}
+                totalAppointments={appointments.length}
                   upcomingAppointments={confirmedAppointments.length}
                 pastAppointments={pastAppointments.length}
                 totalClients={businessClients.length}

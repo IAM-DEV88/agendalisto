@@ -35,7 +35,7 @@ const ProfileDashboard = ({ user }: ProfileDashboardProps) => {
   const navigate = useNavigate();
 
   // Realtime appointments via custom hook
-  const { appointments, loading } = useAppointments(user?.id || null);
+  const { appointments } = useAppointments(user?.id || null);
 
   // Avatar for header
   const FALLBACK_AVATAR = 'https://upload.wikimedia.org/wikipedia/commons/8/89/Portrait_Placeholder.png';
@@ -92,7 +92,6 @@ const ProfileDashboard = ({ user }: ProfileDashboardProps) => {
   };
 
   // Cálculo de conteos y filtros
-  const now = new Date();
   const confirmedAppointments = appointments.filter(a => a.status === 'confirmed');
   const pendingAppointments = appointments.filter(a => a.status === 'pending');
   const pastAppointments = appointments.filter(
