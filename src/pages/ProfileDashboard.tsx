@@ -64,6 +64,15 @@ const ProfileDashboard = ({ user }: ProfileDashboardProps) => {
   // Realtime appointments via custom hook
   const { appointments, loading, error } = useAppointments(user?.id || null);
 
+  // Avatar for header
+  const FALLBACK_AVATAR = 'https://upload.wikimedia.org/wikipedia/commons/8/89/Portrait_Placeholder.png';
+  const avatarKey = user?.avatar_url;
+  const avatarUrl = avatarKey
+    ? (avatarKey.startsWith('http')
+        ? avatarKey
+        : supabase.storage.from('avatars').getPublicUrl(avatarKey).data.publicUrl)
+    : FALLBACK_AVATAR;
+
   // Estado para indicar si el usuario tiene un negocio
   const [hasBusiness, setHasBusiness] = useState(false);
 
@@ -86,7 +95,7 @@ const ProfileDashboard = ({ user }: ProfileDashboardProps) => {
   // Cálculo de conteos y filtros
   const confirmedAppointments = appointments.filter(a => a.status === 'confirmed');
   const pendingAppointments = appointments.filter(a => a.status === 'pending');
-  const completedAppointments = appointments.filter(a => a.status === 'completed');
+  const completedAppointments = appointments.filter(a => a.status === 'completed' || a.status === 'cancelled');
 
   const upcomingCount = confirmedAppointments.length;
   const pendingCount = pendingAppointments.length;
@@ -207,13 +216,11 @@ const ProfileDashboard = ({ user }: ProfileDashboardProps) => {
     if (!user) return;
     try {
       const response = await ApiClient.updateAppointmentStatus(appointment.id, 'cancelled');
-      if (response.success) {
-        toast.success(`Cita cancelada por ${user.full_name}`);
-      } else {
-        toast.error(response.error || 'Error al cancelar la cita');
+      if (!response.success) {
+        console.error(response.error || 'Error al cancelar la cita');
       }
     } catch (err: any) {
-      toast.error(err.message || 'Error al cancelar la cita');
+      console.error(err.message || 'Error al cancelar la cita');
     }
   };
 
@@ -258,8 +265,16 @@ const ProfileDashboard = ({ user }: ProfileDashboardProps) => {
             <MessageAlert message={{ text: error, type: 'error' }} />
           )}
           <div>
-            <div className="flex items-center justify-between mb-8 sm:flex sm:items-baseline">
-              <h3 className="text-lg dark:text-white leading-6 font-medium text-gray-900">Mi Perfil</h3>
+            <div className="flex items-center justify-between mb-4 sm:flex sm:items-baseline">
+              <div className="flex items-center space-x-4">
+                <img
+                  src={avatarUrl}
+                  alt="Avatar"
+                  className="h-12 w-12 rounded-full object-cover"
+                  onError={(e) => { e.currentTarget.src = FALLBACK_AVATAR; }}
+                />
+                <h3 className="text-lg dark:text-white leading-6 font-medium text-gray-900">Mi Perfil</h3>
+              </div>
               {hasBusiness ? (
                 <Link to="/business/dashboard" className="inline-flex dark:text-white dark:hover:text-black items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md text-indigo-600 border-indigo-600 hover:bg-indigo-50">
                   Mi Negocio

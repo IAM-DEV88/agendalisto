@@ -192,12 +192,6 @@ function App() {
           else if (appt.status === 'cancelled') msg = 'Tu cita ha sido cancelada';
           if (msg) notifySuccess(msg);
         }
-        if (userProfile.business_id === appt.business_id) {
-          let msg = '';
-          if (appt.status === 'confirmed') msg = `Reserva confirmada por ${appt.profiles?.full_name || ''}`;
-          else if (appt.status === 'cancelled') msg = `Reserva cancelada por ${appt.profiles?.full_name || ''}`;
-          if (msg) notifySuccess(msg);
-        }
       })
       .subscribe();
     return () => {

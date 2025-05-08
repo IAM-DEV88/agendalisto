@@ -296,8 +296,15 @@ export const BusinessDashboard: React.FC = () => {
         <div className="px-4 py-2 sm:px-0">
           <div className="flex items-center justify-between mb-4 sm:flex sm:items-baseline">
             {businessData && (
-              <Link to={`/${slugify(businessData.name)}`}>
-                <h3 className="text-lg leading-6 font-medium text-gray-900 grow dark:text-white">{businessData?.name || 'Mi Negocio'}</h3>
+              <Link to={`/${slugify(businessData.name)}`} className="flex items-center space-x-4">
+                <img
+                  src={businessData.logo_url || 'https://upload.wikimedia.org/wikipedia/commons/8/89/Portrait_Placeholder.png'}
+                  alt={`${businessData.name} logo`}
+                  className="h-12 w-12 rounded-full object-cover"
+                />
+                <h3 className="text-lg leading-6 font-medium text-gray-900 grow dark:text-white">
+                  {businessData.name}
+                </h3>
               </Link>
             )}
             <div className="flex flex-col items-center gap-4">
@@ -387,7 +394,7 @@ export const BusinessDashboard: React.FC = () => {
             )}
             
             {/* Tab de Historial */}
-            {activeTab === 'history' && (
+            {activeTab === 'history' && businessData && (
               <>
                 <SectionHeader 
                   title="Historial de Citas" 

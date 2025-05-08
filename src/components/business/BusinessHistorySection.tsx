@@ -81,7 +81,11 @@ const BusinessHistorySection: React.FC<BusinessHistorySectionProps> = ({
                   <p className="text-sm text-gray-500 dark:text-white">Cliente: {appt.profiles?.full_name || appt.user_id}</p>
                   <p className="text-sm text-gray-500 dark:text-white">Fecha: {formatDate(appt.start_time)}</p>
                 </div>
-                {review ? (
+                {appt.status === 'cancelled' ? (
+                  <p className="inline-flex ml-2 items-center px-2 py-0.5 leading-5 text-xs font-semibold rounded-full bg-red-100 text-red-800">
+                    Cancelada
+                  </p>
+                ) : review ? (
                   <div className="flex items-center space-x-1">
                     {Array.from({ length: review.rating }).map((_, i) => (
                       <Star key={`star-filled-${i}`} className="h-5 w-5 text-yellow-400" />

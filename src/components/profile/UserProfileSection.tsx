@@ -17,7 +17,6 @@ interface UserProfileSectionProps {
 const UserProfileSection: React.FC<UserProfileSectionProps> = ({
   profileData,
   saving,
-  message,
   onSave,
   onChange
 }) => {
@@ -33,58 +32,33 @@ const UserProfileSection: React.FC<UserProfileSectionProps> = ({
   
   // URLs del bucket
   
-  // Obtener URL pública del bucket de Supabase
-  const getPublicUrl = (key: string) => {
-    try {
-      // Sólo procesar claves que no sean URLs completas
-      if (!key || key.startsWith('http')) return key;
-      
-      
-      // Convertir clave de almacenamiento a URL pública
-      const { data } = supabase.storage.from('avatars').getPublicUrl(key);
-      
-      // Verificar que la URL sea válida con un fetch
-      fetch(data.publicUrl, { method: 'HEAD' })
-        .then(response => {
-          if (!response.ok) {
-            setDebugInfo(`Error ${response.status} al verificar URL`);
-          }
-        })
-        .catch(() => {
-        });
-      
-      return data.publicUrl;
-    } catch (error: any) {
+  // Generar URL firmada para preview desde Supabase (si bucket es privado)
+  const getSignedUrl = async (path: string): Promise<string | null> => {
+    if (!path) return null;
+    if (path.startsWith('http')) return path;
+    const { data, error } = await supabase.storage
+      .from('avatars')
+      .createSignedUrl(path, 60 * 60);
+    if (error || !data.signedUrl) {
+      console.error('Error al crear signed URL', error);
       return null;
     }
+    return data.signedUrl;
   };
 
   // Inicializar y actualizar previewUrl cuando cambia profileData
   useEffect(() => {
-    try {
-      
-      // Si no hay URL o está subiendo, no actualizar
-      if (!profileData.avatar_url || isUploading) return;
-      
-      // Si ya es una URL completa, usarla directamente
-      if (profileData.avatar_url.startsWith('http')) {
-        setPreviewUrl(profileData.avatar_url);
-        setDebugInfo("URL directa");
-        return;
+    if (!profileData.avatar_url || isUploading) return;
+    (async () => {
+      try {
+        const url = await getSignedUrl(profileData.avatar_url);
+        if (url) setPreviewUrl(url);
+        else setPreviewUrl(null);
+      } catch (err: any) {
+        console.error('Error al obtener signed URL', err);
+        setPreviewUrl(null);
       }
-      
-      // Generar URL pública a partir de la clave de almacenamiento
-      const url = getPublicUrl(profileData.avatar_url);
-      
-      if (url) {
-        setPreviewUrl(url);
-        setDebugInfo(`URL generada de: ${profileData.avatar_url}`);
-      } else {
-        setDebugInfo(`No se pudo generar URL de: ${profileData.avatar_url}`);
-      }
-    } catch (error: any) {
-      setDebugInfo(`Error: ${error?.message || 'desconocido'}`);
-    }
+    })();
   }, [profileData.avatar_url, isUploading]);
 
   // Handle avatar file upload using Supabase storage
@@ -144,17 +118,22 @@ const UserProfileSection: React.FC<UserProfileSectionProps> = ({
     }
   };
 
+  // Show debug info
+  useEffect(() => console.log('[AvatarPreview]', previewUrl, debugInfo), [previewUrl, debugInfo]);
+
   return (
     <>
       <div className="mt-2">
         <div className="dark:bg-opacity-10 bg-gray-50 shadow overflow-hidden sm:rounded-lg">
           <div className="px-4 py-5 sm:p-6">
-            {message && (
-              <div className={`mb-4 p-4 rounded ${message.type === 'success' ? 'bg-green-50 text-green-800' : 'bg-red-50 text-red-800'
-                }`}>
-                {message.text}
-              </div>
-            )}
+            {/* Avatar preview */}
+            <div className="flex justify-center mb-4">
+              <img
+                src={previewUrl || FALLBACK_AVATAR}
+                alt="Avatar Preview"
+                className="h-24 w-24 rounded-full object-cover"
+              />
+            </div>
 
             <form onSubmit={onSave}>
               <div className="grid grid-cols-1 gap-y-6 gap-x-4 sm:grid-cols-6">
@@ -173,7 +152,22 @@ const UserProfileSection: React.FC<UserProfileSectionProps> = ({
                     />
                   </div>
                 </div>
-
+                <div className="sm:col-span-3">
+                  <label htmlFor="avatar" className="block text-sm font-medium text-gray-700 dark:text-white">
+                    Avatar de perfil
+                  </label>
+                  <div className="mt-1">
+                    <input
+                      type="file"
+                      name="avatar"
+                      id="avatar"
+                      accept="image/*"
+                      onChange={handleAvatarUpload}
+                      disabled={isUploading}
+                      className="block w-full text-sm"
+                    />
+                  </div>
+                </div>
                 <div className="sm:col-span-3">
                   <label htmlFor="email" className="block text-sm font-medium text-gray-700 dark:text-white">
                     Correo electrónico
@@ -207,43 +201,7 @@ const UserProfileSection: React.FC<UserProfileSectionProps> = ({
                   </div>
                 </div>
 
-                <div className="sm:col-span-3">
-                  <label htmlFor="avatar" className="block text-sm font-medium text-gray-700 dark:text-white">
-                    Avatar de perfil
-                  </label>
-                  <div className="mt-1">
-                    <input
-                      type="file"
-                      name="avatar"
-                      id="avatar"
-                      accept="image/*"
-                      onChange={handleAvatarUpload}
-                      disabled={isUploading}
-                      className="block w-full text-sm"
-                    />
-                    {/* Avatar preview */}
-                    <div className="mt-2">
-                      {isUploading && (
-                        <div className="text-xs text-gray-500 mb-1">Subiendo imagen...</div>
-                      )}
-                      {debugInfo && import.meta.env.DEV && (
-                        <div className="text-xs text-gray-400 mb-1">Debug: {debugInfo}</div>
-                      )}
-                      {previewUrl && (
-                        <img 
-                          src={previewUrl}
-                          alt="Avatar" 
-                          className={`h-20 w-20 rounded-full object-cover ${isUploading ? 'opacity-70' : ''}`}
-                          onError={(e) => {
-                            // Usar imagen fallback cuando hay error
-                            e.currentTarget.src = FALLBACK_AVATAR;
-                            setDebugInfo(`Imagen fallback cargada por error en: ${previewUrl}`);
-                          }}
-                        />
-                      )}
-                    </div>
-                  </div>
-                </div>
+                
               </div>
 
               <div className="mt-6">

@@ -152,9 +152,18 @@ const BusinessProfileSection: React.FC<BusinessProfileSectionProps> = ({
   };
 
   return (
-    <div>      
+    <div>
       <div className="dark:bg-opacity-10 bg-gray-50 shadow overflow-hidden sm:rounded-lg">
         <div className="px-4 py-5 sm:p-6">
+          {/* Business logo preview (circular) */}
+          <div className="flex justify-center mb-4">
+            <img
+              src={previewUrl || FALLBACK_LOGO}
+              alt="Logo del negocio"
+              className="h-24 w-24 rounded-full object-cover"
+              onError={(e) => { e.currentTarget.src = FALLBACK_LOGO; }}
+            />
+          </div>
           <form onSubmit={handleSubmit}>
             <div className="grid grid-cols-1 gap-y-6 gap-x-4 sm:grid-cols-6">
               <div className="sm:col-span-3">
@@ -166,6 +175,18 @@ const BusinessProfileSection: React.FC<BusinessProfileSectionProps> = ({
                   value={businessData.name} 
                   onChange={onChange} 
                   className="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500 dark:bg-gray-900 p-2" 
+                />
+              </div>
+              <div className="sm:col-span-3">
+                <label htmlFor="logo" className="block text-sm font-medium text-gray-700 dark:text-white">Logo del negocio</label>
+                <input
+                  type="file"
+                  name="logo"
+                  id="logo"
+                  accept="image/*"
+                  onChange={handleLogoUpload}
+                  disabled={isUploading}
+                  className="mt-1 block w-full text-sm"
                 />
               </div>
               <div className="sm:col-span-6">
@@ -238,39 +259,7 @@ const BusinessProfileSection: React.FC<BusinessProfileSectionProps> = ({
                   ))}
                 </select>
               </div>
-              <div className="sm:col-span-3">
-                <label htmlFor="logo" className="block text-sm font-medium text-gray-700 dark:text-white">Logo del negocio</label>
-                <input
-                  type="file"
-                  name="logo"
-                  id="logo"
-                  accept="image/*"
-                  onChange={handleLogoUpload}
-                  disabled={isUploading}
-                  className="mt-1 block w-full text-sm"
-                />
-                <div className="mt-2">
-                  {isUploading && (
-                    <div className="text-xs text-gray-500 mb-1">Subiendo logo...</div>
-                  )}
-                  {selectedFile && (
-                    <div className="text-xs text-blue-500 mb-1">Archivo listo para subir: {selectedFile.name}</div>
-                  )}
-                  {previewUrl && (
-                    <>
-                      <img 
-                        src={previewUrl} 
-                        alt="Logo del negocio" 
-                        className={`h-20 w-20 object-cover rounded ${isUploading ? 'opacity-70' : ''}`}
-                        onError={(e) => {
-                          // Usar imagen fallback cuando hay error
-                          e.currentTarget.src = FALLBACK_LOGO;
-                        }}
-                      />
-                    </>
-                  )}
-                </div>
-              </div>
+              
             </div>
             <div className="mt-6">
               <button 
