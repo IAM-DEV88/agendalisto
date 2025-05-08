@@ -254,20 +254,12 @@ export const BusinessDashboard: React.FC = () => {
   businessAppointments.forEach(a => {
     userAppointmentCounts[a.user_id] = (userAppointmentCounts[a.user_id] || 0) + 1;
   });
-  const newClientsCount = Object.values(userAppointmentCounts).filter(count => count === 1).length;
-  const returningClientsCount = Object.values(userAppointmentCounts).filter(count => count > 1).length;
   const serviceCounts: Record<string, number> = {};
   businessAppointments.forEach(a => {
     const serviceName = a.services?.name ?? '';
     serviceCounts[serviceName] = (serviceCounts[serviceName] || 0) + 1;
   });
   const [topServiceName, topServiceCount] = Object.entries(serviceCounts).sort((a, b) => b[1] - a[1])[0] || ['-', 0];
-  const clientCounts: Record<string, number> = {};
-  businessAppointments.forEach(a => {
-    const clientName = a.profiles?.full_name ?? '';
-    clientCounts[clientName] = (clientCounts[clientName] || 0) + 1;
-  });
-  const [topClientName, topClientCount] = Object.entries(clientCounts).sort((a, b) => b[1] - a[1])[0] || ['-', 0];
   const dayCounts: Record<number, number> = {};
   businessAppointments.forEach(a => {
     const dayIndex = new Date(a.start_time).getDay();

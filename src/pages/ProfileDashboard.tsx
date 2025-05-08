@@ -3,12 +3,9 @@ import { Link, useNavigate } from 'react-router-dom';
 import { supabase } from '../lib/supabase';
 import { dispatchUserProfileUpdated } from '../lib/events';
 import UserProfileSection from '../components/profile/UserProfileSection';
-import { useSelector } from 'react-redux';
 import { useAppDispatch } from '../hooks/useAppDispatch';
-import type { RootState } from '../store';
 import { setActiveTab } from '../store/uiSlice';
 import { useAppointments } from '../hooks/useAppointments';
-import { useSwipeable } from 'react-swipeable';
 import { UserProfile } from '../lib/supabase';
 import { ApiClient } from '../lib/apiClient';
 import { useToast } from '../hooks/useToast';
@@ -118,22 +115,6 @@ const ProfileDashboard = ({ user }: ProfileDashboardProps) => {
   const handleTabChange = (tabId: TabId) => {
     setLocalActiveTab(tabId);
     dispatch(setActiveTab(tabId));
-  };
-
-  // Swipe handlers
-  const tabOrder = ['appointments', 'profile', 'general'] as const;
-  const currentTabIndex = tabOrder.indexOf(activeTab);
-
-  const handleSwipeLeft = () => {
-    if (currentTabIndex < tabOrder.length - 1) {
-      handleTabChange(tabOrder[currentTabIndex + 1]);
-    }
-  };
-
-  const handleSwipeRight = () => {
-    if (currentTabIndex > 0) {
-      handleTabChange(tabOrder[currentTabIndex - 1]);
-    }
   };
 
   // Verificar si el usuario tiene un negocio
