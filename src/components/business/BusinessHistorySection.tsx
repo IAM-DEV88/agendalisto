@@ -82,7 +82,7 @@ const BusinessHistorySection: React.FC<BusinessHistorySectionProps> = ({
                   <p className="text-sm text-gray-500 dark:text-white">Fecha: {formatDate(appt.start_time)}</p>
                 </div>
                 {appt.status === 'cancelled' ? (
-                  <p className="inline-flex ml-2 items-center px-2 py-0.5 leading-5 text-xs font-semibold rounded-full bg-red-100 text-red-800">
+                  <p className="self-start px-2 py-0.5 leading-5 text-xs font-semibold rounded-full bg-red-100 text-red-800">
                     Cancelada
                   </p>
                 ) : review ? (
