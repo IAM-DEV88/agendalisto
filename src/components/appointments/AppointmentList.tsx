@@ -3,6 +3,7 @@ import { format } from 'date-fns';
 import { es } from 'date-fns/locale';
 import AppointmentModal from './AppointmentModal';
 import { Appointment, AppointmentStatus } from '../../types/appointment';
+import { getStatusText } from '../../utils/appointmentUtils';
 
 interface AppointmentListProps {
   appointments: Appointment[];
@@ -47,7 +48,7 @@ const AppointmentList: React.FC<AppointmentListProps> = ({
           
           <div className="list-entry-actions">
             <span className={`status-${appointment.status}`}>
-              {appointment.status}
+              {getStatusText(appointment.status)}
             </span>
             {appointment.review && (
               <span className="text-yellow-400 text-sm">

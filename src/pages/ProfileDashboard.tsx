@@ -75,7 +75,13 @@ const ProfileDashboard = ({ user }: ProfileDashboardProps) => {
   });
 
   // Estado para el tab activo
-  const [activeTab, setActiveTab] = useState<'appointments' | 'profile' | 'general'>('appointments');
+  const [activeTab, setActiveTab] = useState<'appointments' | 'settings'>('appointments');
+
+  // Estado para secciones colapsables de configuración
+  const [collapsedConfigSections, setCollapsedConfigSections] = useState({
+    profile: true,
+    general: true
+  });
 
   const toggleSection = (section: 'upcoming' | 'pending' | 'history') => {
     setCollapsedSections(prev => ({
@@ -127,12 +133,18 @@ const ProfileDashboard = ({ user }: ProfileDashboardProps) => {
   // Prepare tabs for TabNav component
   const tabs: Tab[] = [
     { id: 'appointments', label: 'Citas', count: activeAppointmentsCount },
-    { id: 'profile', label: 'Mis Datos' },
-    { id: 'general', label: 'General' }
+    { id: 'settings', label: 'Configuración' }
   ];
 
   const handleTabChange = (tab: string) => {
-    setActiveTab(tab as 'appointments' | 'profile' | 'general');
+    setActiveTab(tab as 'appointments' | 'settings');
+  };
+
+  const toggleConfigSection = (section: keyof typeof collapsedConfigSections) => {
+    setCollapsedConfigSections(prev => ({
+      ...prev,
+      [section]: !prev[section]
+    }));
   };
 
   // Verificar si el usuario tiene un negocio
@@ -297,13 +309,17 @@ const ProfileDashboard = ({ user }: ProfileDashboardProps) => {
               {user?.full_name || 'Usuario'}
             </h3>
           </div>
-          {hasBusiness && (
-            <div className="flex flex-col gap-4 self-center">
+          <div className="flex flex-col gap-4 self-center">
+            {hasBusiness ? (
               <Link to="/business/dashboard" className="dark:hover:text-black inline-flex px-4 py-2 border border-transparent text-sm font-medium rounded-md text-indigo-600 border-indigo-600 hover:bg-indigo-50">
                 Mi Negocio
               </Link>
-            </div>
-          )}
+            ) : (
+              <Link to="/business/register" className="dark:hover:text-black inline-flex px-4 py-2 border border-transparent text-sm font-medium rounded-md text-indigo-600 border-indigo-600 hover:bg-indigo-50">
+                Registrar negocio
+              </Link>
+            )}
+          </div>
         </div>
 
         {/* Use TabNav component */}
@@ -436,49 +452,90 @@ const ProfileDashboard = ({ user }: ProfileDashboardProps) => {
             </>
           )}
 
-          {/* Tab de Perfil */}
-          {activeTab === 'profile' && (
+          {/* Tab de Configuración */}
+          {activeTab === 'settings' && (
             <>
-              <SectionHeader title="Datos personales" />
-              <UserProfileSection
-                profileData={profileData}
-                onChange={handleProfileChange}
-                onSave={handleProfileSubmit}
-                saving={saving}
-                message={profileMessage}
-              />
-            </>
-          )}
-
-          {/* Tab de Configuración General */}
-          {activeTab === 'general' && (
-            <>
-              <SectionHeader title="Configuración general" />
-              <div className="mt-4 space-y-4">
-                <div className="flex items-center space-x-4">
-                  <label htmlFor="itemsPerPage" className="text-sm font-medium text-gray-700">
-                    Elementos por página:
-                  </label>
-                  <input
-                    type="number"
-                    id="itemsPerPage"
-                    min="1"
-                    max="50"
-                    value={itemsPerPage}
-                    onChange={(e) => handleItemsPerPageChange(parseInt(e.target.value))}
-                    className="shadow-sm focus:ring-indigo-500 focus:border-indigo-500 block w-20 sm:text-sm border-gray-300 rounded-md"
+              {/* Sección de Datos Personales */}
+              <div className="mb-8">
+                <div 
+                  className="flex items-center justify-between cursor-pointer" 
+                  onClick={() => toggleConfigSection('profile')}
+                >
+                  <SectionHeader 
+                    title="Datos personales" 
+                    description="Actualiza tu información personal."
                   />
-                  <button
-                    onClick={handleSaveItemsPerPage}
-                    className="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
-                  >
-                    Guardar
+                  <button className="p-2">
+                    <svg 
+                      className={`w-6 h-6 transform transition-transform ${collapsedConfigSections.profile ? '-rotate-90' : 'rotate-0'}`} 
+                      fill="none" 
+                      stroke="currentColor" 
+                      viewBox="0 0 24 24"
+                    >
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+                    </svg>
                   </button>
                 </div>
-                {itemsPerPageMessage && (
-                  <p className={`mt-2 text-sm ${itemsPerPageMessage.type === 'success' ? 'text-green-600' : 'text-red-600'}`}>
-                    {itemsPerPageMessage.text}
-                  </p>
+                {!collapsedConfigSections.profile && (
+                  <UserProfileSection
+                    profileData={profileData}
+                    onChange={handleProfileChange}
+                    onSave={handleProfileSubmit}
+                    saving={saving}
+                    message={profileMessage}
+                  />
+                )}
+              </div>
+
+              {/* Sección de Configuración General */}
+              <div>
+                <div 
+                  className="flex items-center justify-between cursor-pointer" 
+                  onClick={() => toggleConfigSection('general')}
+                >
+                  <SectionHeader 
+                    title="Configuración general" 
+                    description="Personaliza las opciones de tu cuenta."
+                  />
+                  <button className="p-2">
+                    <svg 
+                      className={`w-6 h-6 transform transition-transform ${collapsedConfigSections.general ? '-rotate-90' : 'rotate-0'}`} 
+                      fill="none" 
+                      stroke="currentColor" 
+                      viewBox="0 0 24 24"
+                    >
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+                    </svg>
+                  </button>
+                </div>
+                {!collapsedConfigSections.general && (
+                  <div className="mt-4 space-y-4">
+                    <div className="flex items-center space-x-4">
+                      <label htmlFor="itemsPerPage" className="text-sm font-medium text-gray-700">
+                        Elementos por página:
+                      </label>
+                      <input
+                        type="number"
+                        id="itemsPerPage"
+                        min="1"
+                        max="50"
+                        value={itemsPerPage}
+                        onChange={(e) => handleItemsPerPageChange(parseInt(e.target.value))}
+                        className="shadow-sm focus:ring-indigo-500 focus:border-indigo-500 block w-20 sm:text-sm border-gray-300 rounded-md"
+                      />
+                      <button
+                        onClick={handleSaveItemsPerPage}
+                        className="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
+                      >
+                        Guardar
+                      </button>
+                    </div>
+                    {itemsPerPageMessage && (
+                      <p className={`mt-2 text-sm ${itemsPerPageMessage.type === 'success' ? 'text-green-600' : 'text-red-600'}`}>
+                        {itemsPerPageMessage.text}
+                      </p>
+                    )}
+                  </div>
                 )}
               </div>
             </>

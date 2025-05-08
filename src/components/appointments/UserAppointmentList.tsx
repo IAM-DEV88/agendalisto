@@ -3,6 +3,7 @@ import { format } from 'date-fns';
 import { es } from 'date-fns/locale';
 import { Link } from 'react-router-dom';
 import { Appointment, AppointmentStatus } from '../../types/appointment';
+import { getStatusText } from '../../utils/appointmentUtils';
 
 interface UserAppointmentListProps {
   appointments: Appointment[];
@@ -22,21 +23,6 @@ const UserAppointmentList: React.FC<UserAppointmentListProps> = ({
   // Utility to generate URL slug from business name
   const slugify = (str: string) => str.toLowerCase().replace(/\s+/g, '-').replace(/[^\w\-]+/g, '');
 
-  const getStatusText = (status: AppointmentStatus) => {
-    switch (status) {
-      case 'pending':
-        return 'Pendiente';
-      case 'confirmed':
-        return 'Confirmada';
-      case 'completed':
-        return 'Completada';
-      case 'cancelled':
-        return 'Cancelada';
-      default:
-        return status;
-    }
-  };
-
   return (
     <div className="space-y-4">
       <div className="divide-y divide-gray-200 dark:divide-gray-700">
@@ -45,19 +31,15 @@ const UserAppointmentList: React.FC<UserAppointmentListProps> = ({
             <div className="list-entry-content">
               <div className="list-entry-info">
                 <h4 className="list-entry-title">
-                  {appointment.businesses?.name ? (
-                    <Link
-                      to={`/${slugify(appointment.businesses.name)}`}
-                      className="hover:text-indigo-600"
-                    >
-                      {appointment.businesses.name}
-                    </Link>
-                  ) : (
-                    'Negocio sin nombre'
-                  )}
+                  <Link
+                    to={`/${slugify(appointment.businesses?.name || '')}`}
+                    className="hover:text-indigo-600"
+                  >
+                    {appointment.businesses?.name}
+                  </Link>
                 </h4>
                 <p className="list-entry-subtitle">
-                  {appointment.services?.name || 'Servicio sin nombre'} - {appointment.services?.duration || 0} min
+                  {appointment.services?.name}
                 </p>
               </div>
               <div className="list-entry-time">

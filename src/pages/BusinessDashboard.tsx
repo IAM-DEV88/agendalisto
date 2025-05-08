@@ -92,6 +92,21 @@ export const BusinessDashboard: React.FC = () => {
     }));
   };
 
+  // Agregar estado para secciones colapsables de configuración
+  const [collapsedConfigSections, setCollapsedConfigSections] = useState({
+    profile: true,
+    hours: true,
+    config: true,
+    stats: true
+  });
+
+  const toggleConfigSection = (section: keyof typeof collapsedConfigSections) => {
+    setCollapsedConfigSections(prev => ({
+      ...prev,
+      [section]: !prev[section]
+    }));
+  };
+
   useEffect(() => {
     const loadBusinessData = async () => {
       if (!user?.id) return;
@@ -278,9 +293,6 @@ export const BusinessDashboard: React.FC = () => {
     { id: 'appointments', label: 'Citas', count: activeAppointmentsCount },
     { id: 'services', label: 'Servicios', count: totalServices },
     { id: 'clients', label: 'Clientes', count: businessClients.length },
-    { id: 'stats', label: 'Estadísticas' },
-    { id: 'profile', label: 'Perfil' },
-    { id: 'availability', label: 'Disponibilidad' },
     { id: 'settings', label: 'Configuración' }
   ];
 
@@ -494,57 +506,149 @@ export const BusinessDashboard: React.FC = () => {
               </>
             )}
 
-            {/* Tab de Perfil */}
-            {activeTab === 'profile' && businessData && (
+            {/* Tab de Configuración Unificada */}
+            {activeTab === 'settings' && businessData && (
               <>
-                <SectionHeader 
-                  title="Datos del Negocio" 
-                  description="Actualiza la información de tu negocio."
-                />
-              <BusinessProfileSection
-                businessData={businessData}
-                  onSave={handleBusinessSubmit}
-                  onChange={handleBusinessChange}
-                saving={savingBusiness}
-                message={businessMessage}
-              />
-              </>
-            )}
+                {/* Sección de Perfil */}
+                <div className="mb-8">
+                  <div 
+                    className="flex items-center justify-between cursor-pointer" 
+                    onClick={() => toggleConfigSection('profile')}
+                  >
+                    <SectionHeader 
+                      title="Datos del Negocio" 
+                      description="Actualiza la información de tu negocio."
+                    />
+                    <button className="p-2">
+                      <svg 
+                        className={`w-6 h-6 transform transition-transform ${collapsedConfigSections.profile ? '-rotate-90' : 'rotate-0'}`} 
+                        fill="none" 
+                        stroke="currentColor" 
+                        viewBox="0 0 24 24"
+                      >
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+                      </svg>
+                    </button>
+                  </div>
+                  {!collapsedConfigSections.profile && (
+                    <BusinessProfileSection
+                      businessData={businessData}
+                      onSave={handleBusinessSubmit}
+                      onChange={handleBusinessChange}
+                      saving={savingBusiness}
+                      message={businessMessage}
+                    />
+                  )}
+                </div>
 
-            {/* Tab de Disponibilidad */}
-            {activeTab === 'availability' && (
-              <>
-                <SectionHeader 
-                  title="Horarios de Atención" 
-                  description="Configura los días y horarios de atención de tu negocio."
-                />
-              <BusinessHoursSection
-                businessHours={businessHours}
-                loading={loadingBusinessHours}
-                saving={savingBusinessHours}
-                message={hoursMessage}
-                onSave={handleHoursSubmit}
-                onHoursChange={handleHoursChange}
-                days={days}
-              />
-              </>
-            )}
+                {/* Sección de Horarios */}
+                <div className="mb-8">
+                  <div 
+                    className="flex items-center justify-between cursor-pointer" 
+                    onClick={() => toggleConfigSection('hours')}
+                  >
+                    <SectionHeader 
+                      title="Horarios de Atención"
+                      description="Configura los días y horarios de atención de tu negocio."
+                    />
+                    <button className="p-2">
+                      <svg 
+                        className={`w-6 h-6 transform transition-transform ${collapsedConfigSections.hours ? '-rotate-90' : 'rotate-0'}`} 
+                        fill="none" 
+                        stroke="currentColor" 
+                        viewBox="0 0 24 24"
+                      >
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+                      </svg>
+                    </button>
+                  </div>
+                  {!collapsedConfigSections.hours && (
+                    <BusinessHoursSection
+                      businessHours={businessHours}
+                      loading={loadingBusinessHours}
+                      saving={savingBusinessHours}
+                      message={hoursMessage}
+                      onSave={handleHoursSubmit}
+                      onHoursChange={handleHoursChange}
+                      days={days}
+                    />
+                  )}
+                </div>
 
-            {/* Tab de Configuración */}
-            {activeTab === 'settings' && (
-              <>
-                <SectionHeader 
-                  title="Configuración" 
-                  description="Personaliza las opciones de tu negocio."
-                />
-              <BusinessConfigSection
-                config={businessConfig}
-                loading={loadingBusinessConfig}
-                saving={savingBusinessConfig}
-                message={configMessage}
-                  onSave={handleConfigSave}
-                onConfigChange={handleConfigChange}
-              />
+                {/* Sección de Configuración General */}
+                <div className="mb-8">
+                  <div 
+                    className="flex items-center justify-between cursor-pointer" 
+                    onClick={() => toggleConfigSection('config')}
+                  >
+                    <SectionHeader 
+                      title="Configuración General"
+                      description="Personaliza las opciones de tu negocio."
+                    />
+                    <button className="p-2">
+                      <svg 
+                        className={`w-6 h-6 transform transition-transform ${collapsedConfigSections.config ? '-rotate-90' : 'rotate-0'}`} 
+                        fill="none" 
+                        stroke="currentColor" 
+                        viewBox="0 0 24 24"
+                      >
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+                      </svg>
+                    </button>
+                  </div>
+                  {!collapsedConfigSections.config && (
+                    <BusinessConfigSection
+                      config={businessConfig}
+                      loading={loadingBusinessConfig}
+                      saving={savingBusinessConfig}
+                      message={configMessage}
+                      onSave={handleConfigSave}
+                      onConfigChange={handleConfigChange}
+                    />
+                  )}
+                </div>
+
+                {/* Sección de Estadísticas */}
+                <div>
+                  <div 
+                    className="flex items-center justify-between cursor-pointer" 
+                    onClick={() => toggleConfigSection('stats')}
+                  >
+                    <SectionHeader 
+                      title="Estadísticas del Negocio"
+                      description="Métricas y datos importantes de tu negocio."
+                    />
+                    <button className="p-2">
+                      <svg 
+                        className={`w-6 h-6 transform transition-transform ${collapsedConfigSections.stats ? '-rotate-90' : 'rotate-0'}`} 
+                        fill="none" 
+                        stroke="currentColor" 
+                        viewBox="0 0 24 24"
+                      >
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+                      </svg>
+                    </button>
+                  </div>
+                  {!collapsedConfigSections.stats && (
+                    <StatsSection
+                      totalAppointments={appointments.length}
+                      upcomingAppointments={confirmedAppointments.length}
+                      pastAppointments={pastAppointments.length}
+                      totalClients={businessClients.length}
+                      totalServices={totalServices}
+                      totalRevenue={totalRevenue}
+                      confirmationRate={confirmationRate}
+                      cancellationRate={cancellationRate}
+                      avgDuration={avgDuration}
+                      avgPrice={avgPrice}
+                      topServiceName={topServiceName}
+                      topServiceCount={topServiceCount}
+                      peakDay={peakDayName}
+                      peakHour={peakHour}
+                      lifetimeValueAvg={lifetimeValueAvg}
+                    />
+                  )}
+                </div>
               </>
             )}
           </div>

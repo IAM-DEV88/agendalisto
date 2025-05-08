@@ -2,6 +2,7 @@ import React from 'react';
 import { format } from 'date-fns';
 import { es } from 'date-fns/locale';
 import { Appointment, AppointmentStatus } from '../../types/appointment';
+import { getStatusText } from '../../utils/appointmentUtils';
 
 interface AppointmentModalProps {
   isOpen: boolean;
@@ -19,6 +20,13 @@ const AppointmentModal: React.FC<AppointmentModalProps> = ({
   showReviewSection = false,
 }) => {
   if (!isOpen) return null;
+
+  const handleStatusChange = (status: AppointmentStatus) => {
+    if (onStatusChange) {
+      onStatusChange(status);
+      onClose(); // Cerrar el modal después de cambiar el estado
+    }
+  };
 
   return (
     <div className="modal-overlay" onClick={onClose}>
@@ -57,11 +65,12 @@ const AppointmentModal: React.FC<AppointmentModalProps> = ({
                   )}
                 </p>
               </div>
+              
               <div>
                 <span className="info-grid-label">Estado</span>
                 <p className="info-grid-value">
                   <span className={`status-${appointment?.status}`}>
-                    {appointment?.status}
+                    {appointment?.status ? getStatusText(appointment.status) : ''}
                   </span>
                 </p>
               </div>
@@ -76,7 +85,7 @@ const AppointmentModal: React.FC<AppointmentModalProps> = ({
                 <div key={index} className="timeline-item">
                   <div className="timeline-dot" />
                   <div className="timeline-content">
-                    <p className="font-medium">{history.status}</p>
+                    <p className="font-medium">{getStatusText(history.status)}</p>
                     <p className="text-xs">
                       {format(new Date(history.timestamp), "Pp", { locale: es })}
                     </p>
@@ -106,20 +115,20 @@ const AppointmentModal: React.FC<AppointmentModalProps> = ({
             <div className="flex space-x-2">
               {appointment?.status === 'pending' && (
                 <>
-                  <button className="btn-confirm" onClick={() => onStatusChange('confirmed')}>
+                  <button className="btn-confirm" onClick={() => handleStatusChange('confirmed')}>
                     Confirmar
                   </button>
-                  <button className="btn-cancel" onClick={() => onStatusChange('cancelled')}>
+                  <button className="btn-cancel" onClick={() => handleStatusChange('cancelled')}>
                     Cancelar
                   </button>
                 </>
               )}
               {appointment?.status === 'confirmed' && (
                 <>
-                  <button className="btn-complete" onClick={() => onStatusChange('completed')}>
+                  <button className="btn-complete" onClick={() => handleStatusChange('completed')}>
                     Completar
                   </button>
-                  <button className="btn-cancel" onClick={() => onStatusChange('cancelled')}>
+                  <button className="btn-cancel" onClick={() => handleStatusChange('cancelled')}>
                     Cancelar
                   </button>
                 </>
