@@ -2,7 +2,7 @@ import React from 'react';
 import { format } from 'date-fns';
 import { es } from 'date-fns/locale';
 import { Link } from 'react-router-dom';
-import { Appointment, AppointmentStatus } from '../../types/appointment';
+import { Appointment } from '../../types/appointment';
 import { getStatusText } from '../../utils/appointmentUtils';
 
 interface UserAppointmentListProps {
