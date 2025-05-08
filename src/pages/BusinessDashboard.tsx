@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { Link, useSearchParams, useNavigate } from 'react-router-dom';
+import { Link } from 'react-router-dom';
 import { Business } from '../lib/api';
 import { ApiClient } from '../lib/apiClient';
 import { supabase } from '../lib/supabase';
@@ -284,22 +284,6 @@ export const BusinessDashboard: React.FC = () => {
     { id: 'settings', label: 'Configuración' }
   ];
 
-  // Handlers for appointment actions
-  const handleConfirm = async (appointment: Appointment) => {
-    try {
-      const response = await ApiClient.updateAppointmentStatus(appointment.id, 'confirmed');
-      if (response.success) {
-        toast.success('Cita confirmada correctamente');
-        refreshAppointments();
-      } else {
-        toast.error('Error al confirmar la cita');
-      }
-    } catch (error) {
-      console.error('Error al confirmar la cita:', error);
-      toast.error('Error al confirmar la cita');
-    }
-  };
-
   return (
     <div>
       <div className="max-w-7xl mx-auto mt-6 sm:px-6 lg:px-8">
@@ -429,8 +413,8 @@ export const BusinessDashboard: React.FC = () => {
                         totalPages={Math.ceil(confirmedAppointments.length / pagination.confirmed.perPage)}
                         onPageChange={(page) => handlePageChange('confirmed', page)}
                       />
-              </>
-            )}
+                    </>
+                  )}
                 </div>
 
                 {/* Historial de Citas */}
