@@ -25,7 +25,7 @@ export const TabNav: React.FC<TabNavProps> = ({
 
   return (
     <div className="border-b border-gray-200">
-      <nav className="-mb-px flex flex-wrap space-x-2 overflow-visible whitespace-nowrap whitespace-normal">
+      <nav className="-mb-px flex flex-wrap md:space-x-2 overflow-visible whitespace-nowrap whitespace-normal">
         {tabs.map((tab) => (
           <button
             key={tab.id}
