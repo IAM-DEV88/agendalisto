@@ -258,7 +258,7 @@ const ProfileDashboard = ({ user }: ProfileDashboardProps) => {
 
   return (
     <div>
-      <div className="max-w-7xl mx-auto mt-8 sm:px-6 lg:px-8">
+      <div className="max-w-7xl mx-auto mt-8 px-4 lg:px-8">
         <div className="px-4sm:px-0">
           {/* Show error message if any */}
           {error && (
