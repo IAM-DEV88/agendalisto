@@ -78,11 +78,11 @@ export const BusinessDashboard: React.FC = () => {
     setActiveTab(tab);
   };
 
-  // Agregar estado para controlar las secciones colapsables
+  // Agregar estado para controlar las secciones colapsables - inicialmente expandidas
   const [collapsedSections, setCollapsedSections] = useState({
-    pending: true,
-    confirmed: true,
-    history: true
+    pending: false,
+    confirmed: false,
+    history: false
   });
 
   const toggleSection = (section: 'pending' | 'confirmed' | 'history') => {
