@@ -52,18 +52,19 @@ export function useAppointments(userId: string | undefined) {
     error: null
   });
 
+  const fetchAppointments = async () => {
+    if (!userId) return;
+    dispatch({ type: 'FETCH_START' });
+    const result = await ApiClient.getUserAppointments(userId);
+    if (result.success && result.data) {
+      dispatch({ type: 'FETCH_SUCCESS', payload: result.data });
+    } else {
+      dispatch({ type: 'FETCH_ERROR', payload: result.error || 'Error al cargar citas' });
+    }
+  };
+
   useEffect(() => {
     if (!userId) return;
-
-    const fetchAppointments = async () => {
-      dispatch({ type: 'FETCH_START' });
-      const result = await ApiClient.getUserAppointments(userId);
-      if (result.success && result.data) {
-        dispatch({ type: 'FETCH_SUCCESS', payload: result.data });
-      } else {
-        dispatch({ type: 'FETCH_ERROR', payload: result.error || 'Error al cargar citas' });
-      }
-    };
 
     fetchAppointments();
 
@@ -95,6 +96,7 @@ export function useAppointments(userId: string | undefined) {
 
   return {
     ...state,
-    addReview
+    addReview,
+    refreshAppointments: fetchAppointments
   };
 } 

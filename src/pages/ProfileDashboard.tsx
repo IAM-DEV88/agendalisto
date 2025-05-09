@@ -35,7 +35,7 @@ const ProfileDashboard = ({ user }: ProfileDashboardProps) => {
   const navigate = useNavigate();
 
   // Realtime appointments via custom hook
-  const { appointments, loading, error, addReview } = useAppointments(user?.id);
+  const { appointments, refreshAppointments } = useAppointments(user?.id);
 
   // Avatar for header
   const FALLBACK_AVATAR = 'https://upload.wikimedia.org/wikipedia/commons/8/89/Portrait_Placeholder.png';
@@ -260,7 +260,7 @@ const ProfileDashboard = ({ user }: ProfileDashboardProps) => {
     if (!user || !selectedAppointmentForReview) return;
 
     try {
-      const result = await ApiClient.createBusinessReview(
+      const response = await ApiClient.createBusinessReview(
         selectedAppointmentForReview.id,
         selectedAppointmentForReview.business_id,
         user.id,
@@ -268,32 +268,21 @@ const ProfileDashboard = ({ user }: ProfileDashboardProps) => {
         comment
       );
 
-      if (result.success && result.data) {
-        // Actualizar el estado local
-        const updatedAppointment = {
-          ...selectedAppointmentForReview,
-          review: result.data
-        };
-        addReview(selectedAppointmentForReview.id, result.data);
+      if (response.success) {
+        toast.success('Reseña enviada correctamente');
+        await refreshAppointments();
         
-        // Notificar al negocio
-        const event = new CustomEvent('new-review', { 
+        // Dispatch event to notify business
+        window.dispatchEvent(new CustomEvent('businessReviewAdded', {
           detail: { businessId: selectedAppointmentForReview.business_id }
-        });
-        window.dispatchEvent(event);
-
-        // Mostrar notificación de éxito
-        toast.success('¡Reseña enviada con éxito!');
+        }));
+        
         setSelectedAppointmentForReview(null);
       } else {
-        // Mostrar mensaje específico para reseña duplicada
-        const errorMessage = result.error === 'Esta cita ya tiene una reseña'
-          ? 'Ya has dejado una reseña para esta cita'
-          : result.error || 'Error al enviar la reseña';
-        toast.error(errorMessage);
+        toast.error(response.error || 'Error al enviar la reseña');
       }
-    } catch (error) {
-      toast.error('Error al enviar la reseña');
+    } catch (err: any) {
+      toast.error(err.message || 'Error al enviar la reseña');
     }
   };
 
