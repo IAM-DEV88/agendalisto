@@ -20,14 +20,14 @@ const BusinessHoursSection: React.FC<BusinessHoursSectionProps> = ({
   days
 }) => {
   return (
-    <div className="container mx-auto">
+    <div>
       {loading && businessHours.length === 0 ? (
         <div className="flex items-center justify-center min-h-[400px]">
           <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-indigo-500"></div>
         </div>
       ) : (
         <form onSubmit={onSave}>
-          <div className="bg-gray-50 dark:bg-opacity-10 shadow-md p-4">
+          <div className="bg-gray-50 dark:bg-opacity-10 shadow-md p-4 rounded-md">
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
               {/* Horario Regular */}
               <div>
@@ -74,7 +74,7 @@ const BusinessHoursSection: React.FC<BusinessHoursSectionProps> = ({
               <button 
                 type="submit" 
                 disabled={saving} 
-                className={`inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium -md shadow-sm text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 ${saving ? 'opacity-70 cursor-not-allowed' : ''
+                className={`inline-flex rounded-md items-center px-4 py-2 border border-transparent text-sm font-medium -md shadow-sm text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 ${saving ? 'opacity-70 cursor-not-allowed' : ''
                 }`}
               >
                 <svg className="h-5 w-5 mr-2" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor">

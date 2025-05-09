@@ -125,7 +125,7 @@ const UserProfileSection: React.FC<UserProfileSectionProps> = ({
     <>
       <div className="mt-2">
         <form onSubmit={onSave} className="space-y-2">
-          <div className="dark:bg-opacity-10 bg-gray-50 shadow overflow-hidden sm:rounded-lg">
+          <div className="dark:bg-opacity-10 bg-gray-50 shadow overflow-hidden rounded-lg">
             <div className="px-4 py-5 sm:p-6">
               {/* Avatar preview */}
               <div className="flex justify-center mb-4">
@@ -207,7 +207,7 @@ const UserProfileSection: React.FC<UserProfileSectionProps> = ({
             <button
               type="submit"
               disabled={saving}
-              className={`inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium -md shadow-sm text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 ${saving ? 'opacity-70 cursor-not-allowed' : ''
+              className={`inline-flex rounded-md items-center px-4 py-2 border border-transparent text-sm font-medium -md shadow-sm text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 ${saving ? 'opacity-70 cursor-not-allowed' : ''
                 }`}
             >
               <svg className="h-5 w-5 mr-2" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor">

@@ -271,12 +271,12 @@ const ProfileDashboard = ({ user }: ProfileDashboardProps) => {
       if (response.success) {
         toast.success('Reseña enviada correctamente');
         await refreshAppointments();
-        
+
         // Dispatch event to notify business
         window.dispatchEvent(new CustomEvent('businessReviewAdded', {
           detail: { businessId: selectedAppointmentForReview.business_id }
         }));
-        
+
         setSelectedAppointmentForReview(null);
       } else {
         toast.error(response.error || 'Error al enviar la reseña');
@@ -337,10 +337,10 @@ const ProfileDashboard = ({ user }: ProfileDashboardProps) => {
         </div>
 
         {/* Use TabNav component */}
-        <TabNav 
-          tabs={tabs} 
-          activeTabId={activeTab} 
-          onTabChange={handleTabChange} 
+        <TabNav
+          tabs={tabs}
+          activeTabId={activeTab}
+          onTabChange={handleTabChange}
         />
 
         <div className="mt-6">
@@ -349,19 +349,19 @@ const ProfileDashboard = ({ user }: ProfileDashboardProps) => {
             <>
               {/* Próximas Citas */}
               <div className="mb-8 border-b border-gray-200 dark:border-gray-700 pb-8">
-                <div 
-                  className="flex items-center justify-between cursor-pointer" 
+                <div
+                  className="flex items-center justify-between cursor-pointer"
                   onClick={() => toggleSection('upcoming')}
                 >
-                  <SectionHeader 
+                  <SectionHeader
                     title={`Próximas Citas (${upcomingCount})`}
                     description="Citas confirmadas y programadas."
                   />
                   <button className="p-2">
-                    <svg 
-                      className={`w-6 h-6 transform transition-transform ${collapsedSections.upcoming ? '-rotate-90' : 'rotate-0'}`} 
-                      fill="none" 
-                      stroke="currentColor" 
+                    <svg
+                      className={`w-6 h-6 transform transition-transform ${collapsedSections.upcoming ? '-rotate-90' : 'rotate-0'}`}
+                      fill="none"
+                      stroke="currentColor"
                       viewBox="0 0 24 24"
                     >
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
@@ -376,7 +376,7 @@ const ProfileDashboard = ({ user }: ProfileDashboardProps) => {
                       onCancel={handleCancel}
                     />
                     {confirmedAppointments.length > pagination.upcoming.perPage && (
-                      <Pagination 
+                      <Pagination
                         currentPage={pagination.upcoming.page}
                         totalPages={Math.ceil(confirmedAppointments.length / pagination.upcoming.perPage)}
                         onPageChange={(page) => handlePageChange('upcoming', page)}
@@ -388,19 +388,19 @@ const ProfileDashboard = ({ user }: ProfileDashboardProps) => {
 
               {/* Citas Pendientes */}
               <div className="mb-8 border-b border-gray-200 dark:border-gray-700 pb-8">
-                <div 
-                  className="flex items-center justify-between cursor-pointer" 
+                <div
+                  className="flex items-center justify-between cursor-pointer"
                   onClick={() => toggleSection('pending')}
                 >
-                  <SectionHeader 
+                  <SectionHeader
                     title={`Citas Pendientes (${pendingCount})`}
                     description="Solicitudes de citas que requieren confirmación."
                   />
                   <button className="p-2">
-                    <svg 
-                      className={`w-6 h-6 transform transition-transform ${collapsedSections.pending ? '-rotate-90' : 'rotate-0'}`} 
-                      fill="none" 
-                      stroke="currentColor" 
+                    <svg
+                      className={`w-6 h-6 transform transition-transform ${collapsedSections.pending ? '-rotate-90' : 'rotate-0'}`}
+                      fill="none"
+                      stroke="currentColor"
                       viewBox="0 0 24 24"
                     >
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
@@ -415,7 +415,7 @@ const ProfileDashboard = ({ user }: ProfileDashboardProps) => {
                       onCancel={handleCancel}
                     />
                     {pendingAppointments.length > pagination.pending.perPage && (
-                      <Pagination 
+                      <Pagination
                         currentPage={pagination.pending.page}
                         totalPages={Math.ceil(pendingAppointments.length / pagination.pending.perPage)}
                         onPageChange={(page) => handlePageChange('pending', page)}
@@ -427,19 +427,19 @@ const ProfileDashboard = ({ user }: ProfileDashboardProps) => {
 
               {/* Historial de Citas */}
               <div className="border-b border-gray-200 dark:border-gray-700 pb-8">
-                <div 
-                  className="flex items-center justify-between cursor-pointer" 
+                <div
+                  className="flex items-center justify-between cursor-pointer"
                   onClick={() => toggleSection('history')}
                 >
-                  <SectionHeader 
+                  <SectionHeader
                     title={`Historial de Citas (${pastCount})`}
                     description="Citas completadas y pasadas."
                   />
                   <button className="p-2">
-                    <svg 
-                      className={`w-6 h-6 transform transition-transform ${collapsedSections.history ? '-rotate-90' : 'rotate-0'}`} 
-                      fill="none" 
-                      stroke="currentColor" 
+                    <svg
+                      className={`w-6 h-6 transform transition-transform ${collapsedSections.history ? '-rotate-90' : 'rotate-0'}`}
+                      fill="none"
+                      stroke="currentColor"
                       viewBox="0 0 24 24"
                     >
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
@@ -454,7 +454,7 @@ const ProfileDashboard = ({ user }: ProfileDashboardProps) => {
                       onReview={handleReview}
                     />
                     {pastAppointments.length > pagination.history.perPage && (
-                      <Pagination 
+                      <Pagination
                         currentPage={pagination.history.page}
                         totalPages={Math.ceil(pastAppointments.length / pagination.history.perPage)}
                         onPageChange={(page) => handlePageChange('history', page)}
@@ -471,19 +471,19 @@ const ProfileDashboard = ({ user }: ProfileDashboardProps) => {
             <>
               {/* Sección de Datos Personales */}
               <div className="mb-8 border-b border-gray-200 dark:border-gray-700 pb-8">
-                <div 
-                  className="flex items-center justify-between cursor-pointer" 
+                <div
+                  className="flex items-center justify-between cursor-pointer"
                   onClick={() => toggleConfigSection('profile')}
                 >
-                  <SectionHeader 
-                    title="Datos personales" 
+                  <SectionHeader
+                    title="Datos personales"
                     description="Actualiza tu información personal."
                   />
                   <button className="p-2">
-                    <svg 
-                      className={`w-6 h-6 transform transition-transform ${collapsedConfigSections.profile ? '-rotate-90' : 'rotate-0'}`} 
-                      fill="none" 
-                      stroke="currentColor" 
+                    <svg
+                      className={`w-6 h-6 transform transition-transform ${collapsedConfigSections.profile ? '-rotate-90' : 'rotate-0'}`}
+                      fill="none"
+                      stroke="currentColor"
                       viewBox="0 0 24 24"
                     >
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
@@ -503,19 +503,19 @@ const ProfileDashboard = ({ user }: ProfileDashboardProps) => {
 
               {/* Sección de Configuración General */}
               <div className="border-b border-gray-200 dark:border-gray-700 pb-8">
-                <div 
-                  className="flex items-center justify-between cursor-pointer" 
+                <div
+                  className="flex items-center justify-between cursor-pointer"
                   onClick={() => toggleConfigSection('general')}
                 >
-                  <SectionHeader 
-                    title="Configuración general" 
+                  <SectionHeader
+                    title="Configuración general"
                     description="Personaliza las opciones de tu cuenta."
                   />
                   <button className="p-2">
-                    <svg 
-                      className={`w-6 h-6 transform transition-transform ${collapsedConfigSections.general ? '-rotate-90' : 'rotate-0'}`} 
-                      fill="none" 
-                      stroke="currentColor" 
+                    <svg
+                      className={`w-6 h-6 transform transition-transform ${collapsedConfigSections.general ? '-rotate-90' : 'rotate-0'}`}
+                      fill="none"
+                      stroke="currentColor"
                       viewBox="0 0 24 24"
                     >
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
@@ -523,33 +523,43 @@ const ProfileDashboard = ({ user }: ProfileDashboardProps) => {
                   </button>
                 </div>
                 {!collapsedConfigSections.general && (
-                  <div className="mt-4 space-y-4">
-                    <div className="flex items-center space-x-4">
-                      <label htmlFor="itemsPerPage" className="text-sm font-medium text-gray-700">
-                        Elementos por página:
-                      </label>
-                      <input
-                        type="number"
-                        id="itemsPerPage"
-                        min="1"
-                        max="50"
-                        value={itemsPerPage}
-                        onChange={(e) => handleItemsPerPageChange(parseInt(e.target.value))}
-                        className="shadow-sm focus:ring-indigo-500 focus:border-indigo-500 block w-20 sm:text-sm border-gray-300 rounded-md"
-                      />
+                  <>
+                    <div className='dark:bg-opacity-10 bg-gray-50 shadow overflow-hidden rounded-lg'>
+                      <div className="px-4 py-5 sm:p-6">
+                        <div className="flex items-center space-x-4">
+                          <label htmlFor="itemsPerPage" className="text-sm font-medium text-gray-700">
+                            Elementos por página:
+                          </label>
+                          <input
+                            type="number"
+                            id="itemsPerPage"
+                            min="1"
+                            max="50"
+                            value={itemsPerPage}
+                            onChange={(e) => handleItemsPerPageChange(parseInt(e.target.value))}
+                            className="shadow-sm focus:ring-indigo-500 focus:border-indigo-500 block w-20 sm:text-sm border-gray-300 rounded-md"
+                          />
+                        </div>
+                        {itemsPerPageMessage && (
+                          <p className={`mt-2 text-sm ${itemsPerPageMessage.type === 'success' ? 'text-green-600' : 'text-red-600'}`}>
+                            {itemsPerPageMessage.text}
+                          </p>
+                        )}
+                      </div>
+                    </div>
+                    <div className="flex justify-end mt-2">
                       <button
+                        type="submit"
                         onClick={handleSaveItemsPerPage}
-                        className="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
+                        className={`inline-flex rounded-md items-center px-4 py-2 border border-transparent text-sm font-medium shadow-sm text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 ${saving ? 'opacity-70 cursor-not-allowed' : ''}`}
                       >
-                        Guardar
+                        <svg className="h-5 w-5 mr-2" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor">
+                          <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
+                        </svg>
+                        {saving ? 'Guardando...' : 'Guardar cambios'}
                       </button>
                     </div>
-                    {itemsPerPageMessage && (
-                      <p className={`mt-2 text-sm ${itemsPerPageMessage.type === 'success' ? 'text-green-600' : 'text-red-600'}`}>
-                        {itemsPerPageMessage.text}
-                      </p>
-                    )}
-                  </div>
+                  </>
                 )}
               </div>
             </>

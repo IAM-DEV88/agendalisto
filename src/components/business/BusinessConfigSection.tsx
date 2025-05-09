@@ -64,7 +64,7 @@ export const BusinessConfigSection: React.FC<BusinessConfigSectionProps> = ({
       ) : (
         <form onSubmit={handleSubmit} className="space-y-2">
           {/* Reservas Online */}
-          <div className="bg-gray-50 dark:bg-opacity-10 shadow p-4">
+          <div className="bg-gray-50 dark:bg-opacity-10 shadow p-4 rounded-md">
             <h2 className="text-lg font-medium  text-gray-900 mb-4">Reservas Online</h2>
             <div className="space-y-4">
               <div className="flex items-start">
@@ -124,7 +124,7 @@ export const BusinessConfigSection: React.FC<BusinessConfigSectionProps> = ({
           </div>
 
           {/* Información Visible */}
-          <div className="bg-gray-50 dark:bg-opacity-10 shadow p-4">
+          <div className="bg-gray-50 dark:bg-opacity-10 shadow p-4 rounded-md">
             <h2 className="text-lg font-medium  text-gray-900 mb-4">Información Visible</h2>
             <div className="space-y-4">
               <div className="flex items-start">
@@ -220,7 +220,7 @@ export const BusinessConfigSection: React.FC<BusinessConfigSectionProps> = ({
           </div>
 
           {/* Notificaciones */}
-          <div className="bg-gray-50 dark:bg-opacity-10 shadow p-4">
+          <div className="bg-gray-50 dark:bg-opacity-10 shadow p-4 rounded-md">
             <h2 className="text-lg font-medium  text-gray-900 mb-4">Notificaciones</h2>
             <div className="space-y-4">
               <div className="flex items-start">
@@ -262,7 +262,7 @@ export const BusinessConfigSection: React.FC<BusinessConfigSectionProps> = ({
           </div>
 
           {/* Paginación */}
-          <div className="bg-gray-100 dark:bg-opacity-10 rounded-lg p-6">
+          <div className="bg-gray-100 dark:bg-opacity-10 rounded-md p-6">
             <h3 className="text-lg font-medium text-white mb-4">Paginación</h3>
             <div className="space-y-4">
               <div>
@@ -292,7 +292,7 @@ export const BusinessConfigSection: React.FC<BusinessConfigSectionProps> = ({
             <button
               type="submit"
               disabled={saving}
-              className={`inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium -md shadow-sm text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 ${
+              className={`inline-flex rounded-md items-center px-4 py-2 border border-transparent text-sm font-medium -md shadow-sm text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 ${
                 saving ? 'opacity-70 cursor-not-allowed' : ''
               }`}
             >

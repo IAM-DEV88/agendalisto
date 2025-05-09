@@ -18,6 +18,8 @@ const Nav = ({ user }: NavProps) => {
   const hasBusiness = !!user?.business_id;
   const dropdownRef = useRef<HTMLDivElement>(null);
   const buttonRef = useRef<HTMLButtonElement>(null);
+  const mobileMenuRef = useRef<HTMLDivElement>(null);
+  const mobileButtonRef = useRef<HTMLButtonElement>(null);
 
   const handleLogout = async () => {
     try {
@@ -45,14 +47,21 @@ const Nav = ({ user }: NavProps) => {
         !buttonRef.current.contains(event.target as Node)) {
         setIsUserDropdownOpen(false);
       }
+
+      if (isMenuOpen && mobileMenuRef.current && mobileButtonRef.current &&
+        !mobileMenuRef.current.contains(event.target as Node) &&
+        !mobileButtonRef.current.contains(event.target as Node)) {
+        setIsMenuOpen(false);
+      }
     }
-    if (isUserDropdownOpen) {
+
+    if (isUserDropdownOpen || isMenuOpen) {
       document.addEventListener('mousedown', handleClickOutside);
     }
     return () => {
       document.removeEventListener('mousedown', handleClickOutside);
     };
-  }, [isUserDropdownOpen]);
+  }, [isUserDropdownOpen, isMenuOpen]);
 
   return (
     <header className="bg-gray-50 dark:bg-gray-800 shadow-md fixed w-full z-50">
@@ -130,6 +139,7 @@ const Nav = ({ user }: NavProps) => {
 
           <div className="flex items-center sm:hidden">
             <button
+              ref={mobileButtonRef}
               onClick={() => setIsMenuOpen(prev => !prev)}
               className="inline-flex items-center justify-center p-2 rounded-md text-gray-400 hover:text-gray-500 hover:bg-gray-500"
               aria-expanded={isMenuOpen}
@@ -164,7 +174,7 @@ const Nav = ({ user }: NavProps) => {
 
       {/* Mobile menu */}
       {isMenuOpen && (
-        <div className="sm:hidden">
+        <div ref={mobileMenuRef} className="sm:hidden">
           <div className="pt-2 pb-3 space-y-1">
             <Link to="/" onClick={() => setIsMenuOpen(false)} className="block px-2 py-1 text-base font-medium text-gray-700 dark:text-gray-300 hover:text-indigo-600 hover:bg-gray-50 dark:hover:bg-gray-700">
               Inicio
