@@ -136,7 +136,26 @@ export async function getUserAppointments(userId: string) {
   try {
     const { data, error } = await supabase
       .from('appointments')
-      .select(`*, businesses (name, address), services (name, duration, price)`) 
+      .select(`
+        *,
+        businesses (
+          name,
+          address
+        ),
+        services (
+          name,
+          duration,
+          price
+        ),
+        review:reviews!appointment_id (
+          id,
+          rating,
+          comment,
+          created_at,
+          user_id,
+          business_id
+        )
+      `)
       .eq('user_id', userId)
       .order('start_time', { ascending: true });
     if (error) throw error;
@@ -150,7 +169,26 @@ export async function getBusinessAppointments(businessId: string) {
   try {
     const { data, error } = await supabase
       .from('appointments')
-      .select(`*, profiles (full_name, phone), services (name, duration, price), reviews (id, rating, comment, user_id, created_at)`) 
+      .select(`
+        *, 
+        profiles (
+          full_name, 
+          phone
+        ), 
+        services (
+          name, 
+          duration, 
+          price
+        ),
+        review:reviews!appointment_id (
+          id,
+          rating,
+          comment,
+          created_at,
+          user_id,
+          business_id
+        )
+      `) 
       .eq('business_id', businessId)
       .order('start_time', { ascending: true });
     if (error) throw error;
@@ -587,7 +625,8 @@ export async function createBusinessReview(
         business_id: businessId,
         user_id: userId,
         rating,
-        comment
+        comment,
+        created_at: new Date().toISOString()
       }])
       .select()
       .single();

@@ -48,7 +48,7 @@ const Login = () => {
           }
         } catch {}
         notifySuccess(`Bienvenido de nuevo ${nombreUsuario}`);
-        navigate('/');
+        navigate('/dashboard');
       } else {
         const errorMsg = 'No se pudo obtener la información del usuario. Inténtalo nuevamente.';
         setError(errorMsg);

@@ -1,55 +1,100 @@
-import { useState, useEffect } from 'react';
-import { getUserAppointments } from '../lib/api';
-import type { Appointment } from '../lib/api';
+import { useEffect, useReducer } from 'react';
+import * as ApiClient from '../lib/api';
+import { Appointment } from '../types/appointment';
 import { supabase } from '../lib/supabase';
 
-export function useAppointments(userId: string | null) {
-  const [appointments, setAppointments] = useState<Appointment[]>([]);
-  const [loading, setLoading] = useState(false);
-  const [error, setError] = useState<string | null>(null);
+type AppointmentsState = {
+  appointments: Appointment[];
+  loading: boolean;
+  error: string | null;
+};
+
+type AppointmentsAction = 
+  | { type: 'FETCH_START' }
+  | { type: 'FETCH_SUCCESS'; payload: Appointment[] }
+  | { type: 'FETCH_ERROR'; payload: string }
+  | { type: 'UPDATE_APPOINTMENT'; payload: Appointment }
+  | { type: 'ADD_REVIEW'; payload: { appointmentId: string; review: any } };
+
+function appointmentsReducer(state: AppointmentsState, action: AppointmentsAction): AppointmentsState {
+  switch (action.type) {
+    case 'FETCH_START':
+      return { ...state, loading: true, error: null };
+    case 'FETCH_SUCCESS':
+      return { appointments: action.payload, loading: false, error: null };
+    case 'FETCH_ERROR':
+      return { ...state, loading: false, error: action.payload };
+    case 'UPDATE_APPOINTMENT':
+      return {
+        ...state,
+        appointments: state.appointments.map(apt => 
+          apt.id === action.payload.id ? action.payload : apt
+        )
+      };
+    case 'ADD_REVIEW':
+      return {
+        ...state,
+        appointments: state.appointments.map(apt => 
+          apt.id === action.payload.appointmentId 
+            ? { ...apt, review: action.payload.review }
+            : apt
+        )
+      };
+    default:
+      return state;
+  }
+}
+
+export function useAppointments(userId: string | undefined) {
+  const [state, dispatch] = useReducer(appointmentsReducer, {
+    appointments: [],
+    loading: false,
+    error: null
+  });
 
   useEffect(() => {
-    // Variable para controlar si el componente sigue montado
-    let isMounted = true;
+    if (!userId) return;
 
-    // Función para cargar citas (separate para reuso)
-    async function loadAppointments() {
-      if (!userId || !isMounted) return;
-      setLoading(true);
-      try {
-        const { success, data, error: apiError } = await getUserAppointments(userId);
-        if (!isMounted) return;
-        if (success && data) {
-          setAppointments(data);
-          setError(null);
-        } else {
-          setError(String(apiError || 'Error al cargar citas'));
-        }
-      } catch (err) {
-        if (!isMounted) return;
-        setError('Error al cargar las citas');
-      } finally {
-        if (isMounted) setLoading(false);
+    const fetchAppointments = async () => {
+      dispatch({ type: 'FETCH_START' });
+      const result = await ApiClient.getUserAppointments(userId);
+      if (result.success && result.data) {
+        dispatch({ type: 'FETCH_SUCCESS', payload: result.data });
+      } else {
+        dispatch({ type: 'FETCH_ERROR', payload: result.error || 'Error al cargar citas' });
       }
-    }
+    };
 
-    // Inicial fetch y setup realtime subscription
-    loadAppointments();
-    if (userId) {
-      const channel = supabase
-        .channel(`user-appointments-${userId}`)
-        .on('postgres_changes', { event: '*', schema: 'public', table: 'appointments', filter: `user_id=eq.${userId}` }, async () => {
-          console.log('[useAppointments] detected change in appointments');
-          await loadAppointments();
-        })
-        .subscribe();
-      return () => {
-        isMounted = false;
-        supabase.removeChannel(channel);
-      };
-    }
-    return () => { isMounted = false; };
+    fetchAppointments();
+
+    // Subscribe to changes
+    const appointmentsChannel = supabase
+      .channel('appointments-channel')
+      .on(
+        'postgres_changes',
+        {
+          event: '*',
+          schema: 'public',
+          table: 'appointments',
+          filter: `user_id=eq.${userId}`
+        },
+        () => {
+          fetchAppointments();
+        }
+      )
+      .subscribe();
+
+    return () => {
+      appointmentsChannel.unsubscribe();
+    };
   }, [userId]);
 
-  return { appointments, loading, error };
+  const addReview = (appointmentId: string, review: any) => {
+    dispatch({ type: 'ADD_REVIEW', payload: { appointmentId, review } });
+  };
+
+  return {
+    ...state,
+    addReview
+  };
 } 

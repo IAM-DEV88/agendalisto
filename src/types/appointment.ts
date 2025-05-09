@@ -8,7 +8,6 @@ export interface Review {
   appointment_id: string;
   business_id: string;
   user_id: string;
-  updated_at: string;
 }
 
 export interface Service {

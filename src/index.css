@@ -71,35 +71,6 @@
     dark:text-yellow-500 dark:hover:bg-yellow-600 dark:hover:text-white;
   }
 
-  /* List Entry Styles */
-  .list-entry {
-    @apply flex flex-row items-center justify-between px-4 py-3 hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors duration-200 cursor-pointer gap-x-2;
-  }
-
-  .list-entry-content {
-    @apply flex flex-grow flex-col sm:flex-row justify-between;
-  }
-
-  .list-entry-info {
-    @apply flex flex-col min-w-0;
-  }
-
-  .list-entry-title {
-    @apply text-sm font-medium text-gray-900 dark:text-white truncate;
-  }
-
-  .list-entry-subtitle {
-    @apply text-xs text-gray-500 dark:text-gray-400 truncate;
-  }
-
-  .list-entry-time {
-    @apply text-xs text-gray-500 md:self-center dark:text-gray-400 whitespace-nowrap;
-  }
-
-  .list-entry-actions {
-    @apply flex flex-col sm:flex-row items-center gap-2;
-  }
-
   /* Modal Styles */
   .modal-overlay {
     @apply fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50
@@ -174,6 +145,64 @@
 
   .timeline-content {
     @apply text-sm text-gray-600 dark:text-gray-400;
+  }
+
+  /* Business Appointment Entry Styles */
+  .business-appointment-entry {
+    @apply flex flex-row items-center justify-between px-4 py-3 hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors duration-200 border border-gray-200 dark:border-gray-700 mb-4 rounded-lg cursor-pointer gap-x-2;
+  }
+
+  .business-appointment-content {
+    @apply flex flex-grow flex-col sm:flex-row justify-between;
+  }
+
+  .business-appointment-info {
+    @apply flex flex-col min-w-0;
+  }
+
+  .business-appointment-title {
+    @apply text-sm font-medium text-gray-900 dark:text-white truncate;
+  }
+
+  .business-appointment-subtitle {
+    @apply text-xs text-gray-500 dark:text-gray-400 truncate;
+  }
+
+  .business-appointment-time {
+    @apply text-xs text-gray-500 md:self-center dark:text-gray-400 whitespace-nowrap;
+  }
+
+  .business-appointment-actions {
+    @apply flex flex-col sm:flex-row items-center gap-2;
+  }
+
+  /* User Appointment Entry Styles */
+  .user-appointment-entry {
+    @apply px-4 py-3 hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors duration-200 gap-x-2 rounded-lg border border-gray-200 dark:border-gray-700 mb-4;
+  }
+
+  .user-appointment-content {
+    @apply flex flex-row justify-between;
+  }
+
+  .user-appointment-info {
+    @apply flex flex-col;
+  }
+
+  .user-appointment-title {
+    @apply text-base font-semibold text-gray-900 dark:text-white truncate;
+  }
+
+  .user-appointment-subtitle {
+    @apply text-sm text-gray-600 dark:text-gray-300 truncate;
+  }
+
+  .user-appointment-time {
+    @apply text-sm text-gray-500 md:self-center dark:text-gray-400 whitespace-nowrap mt-1;
+  }
+
+  .user-appointment-actions {
+    @apply flex flex-col sm:flex-row items-center gap-3 mt-2 sm:mt-0;
   }
 }
 

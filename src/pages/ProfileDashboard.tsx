@@ -11,6 +11,7 @@ import { useToast } from '../hooks/useToast';
 import { useUIConfig } from '../hooks/useUIConfig';
 import UserAppointmentList from '../components/appointments/UserAppointmentList';
 import { Appointment } from '../types/appointment';
+import ReviewModal from '../components/appointments/ReviewModal';
 
 // UI Components
 import TabNav, { Tab } from '../components/ui/TabNav';
@@ -34,7 +35,7 @@ const ProfileDashboard = ({ user }: ProfileDashboardProps) => {
   const navigate = useNavigate();
 
   // Realtime appointments via custom hook
-  const { appointments } = useAppointments(user?.id || null);
+  const { appointments, loading, error, addReview } = useAppointments(user?.id);
 
   // Avatar for header
   const FALLBACK_AVATAR = 'https://upload.wikimedia.org/wikipedia/commons/8/89/Portrait_Placeholder.png';
@@ -81,6 +82,8 @@ const ProfileDashboard = ({ user }: ProfileDashboardProps) => {
     profile: true,
     general: true
   });
+
+  const [selectedAppointmentForReview, setSelectedAppointmentForReview] = useState<Appointment | null>(null);
 
   const toggleSection = (section: 'upcoming' | 'pending' | 'history') => {
     setCollapsedSections(prev => ({
@@ -249,25 +252,48 @@ const ProfileDashboard = ({ user }: ProfileDashboardProps) => {
     }
   };
 
-  const handleReview = async (appointment: Appointment) => {
-    if (!user) return;
+  const handleReview = (appointment: Appointment) => {
+    setSelectedAppointmentForReview(appointment);
+  };
+
+  const handleReviewSubmit = async (rating: number, comment: string) => {
+    if (!user || !selectedAppointmentForReview) return;
+
     try {
-      const response = await ApiClient.createBusinessReview(
-        appointment.id,
-        appointment.business_id,
+      const result = await ApiClient.createBusinessReview(
+        selectedAppointmentForReview.id,
+        selectedAppointmentForReview.business_id,
         user.id,
-        5, // Default rating
-        '' // Empty comment
+        rating,
+        comment
       );
-      if (!response.success) {
-        console.error(response.error || 'Error al crear la reseña');
-        toast.error('Error al crear la reseña');
+
+      if (result.success && result.data) {
+        // Actualizar el estado local
+        const updatedAppointment = {
+          ...selectedAppointmentForReview,
+          review: result.data
+        };
+        addReview(selectedAppointmentForReview.id, result.data);
+        
+        // Notificar al negocio
+        const event = new CustomEvent('new-review', { 
+          detail: { businessId: selectedAppointmentForReview.business_id }
+        });
+        window.dispatchEvent(event);
+
+        // Mostrar notificación de éxito
+        toast.success('¡Reseña enviada con éxito!');
+        setSelectedAppointmentForReview(null);
       } else {
-        toast.success('Reseña creada correctamente');
+        // Mostrar mensaje específico para reseña duplicada
+        const errorMessage = result.error === 'Esta cita ya tiene una reseña'
+          ? 'Ya has dejado una reseña para esta cita'
+          : result.error || 'Error al enviar la reseña';
+        toast.error(errorMessage);
       }
-    } catch (err: any) {
-      console.error(err.message || 'Error al crear la reseña');
-      toast.error('Error al crear la reseña');
+    } catch (error) {
+      toast.error('Error al enviar la reseña');
     }
   };
 
@@ -333,7 +359,7 @@ const ProfileDashboard = ({ user }: ProfileDashboardProps) => {
           {activeTab === 'appointments' && (
             <>
               {/* Próximas Citas */}
-              <div className="mb-8">
+              <div className="mb-8 border-b border-gray-200 dark:border-gray-700 pb-8">
                 <div 
                   className="flex items-center justify-between cursor-pointer" 
                   onClick={() => toggleSection('upcoming')}
@@ -372,7 +398,7 @@ const ProfileDashboard = ({ user }: ProfileDashboardProps) => {
               </div>
 
               {/* Citas Pendientes */}
-              <div className="mb-8">
+              <div className="mb-8 border-b border-gray-200 dark:border-gray-700 pb-8">
                 <div 
                   className="flex items-center justify-between cursor-pointer" 
                   onClick={() => toggleSection('pending')}
@@ -411,7 +437,7 @@ const ProfileDashboard = ({ user }: ProfileDashboardProps) => {
               </div>
 
               {/* Historial de Citas */}
-              <div>
+              <div className="border-b border-gray-200 dark:border-gray-700 pb-8">
                 <div 
                   className="flex items-center justify-between cursor-pointer" 
                   onClick={() => toggleSection('history')}
@@ -455,7 +481,7 @@ const ProfileDashboard = ({ user }: ProfileDashboardProps) => {
           {activeTab === 'settings' && (
             <>
               {/* Sección de Datos Personales */}
-              <div className="mb-8">
+              <div className="mb-8 border-b border-gray-200 dark:border-gray-700 pb-8">
                 <div 
                   className="flex items-center justify-between cursor-pointer" 
                   onClick={() => toggleConfigSection('profile')}
@@ -487,7 +513,7 @@ const ProfileDashboard = ({ user }: ProfileDashboardProps) => {
               </div>
 
               {/* Sección de Configuración General */}
-              <div>
+              <div className="border-b border-gray-200 dark:border-gray-700 pb-8">
                 <div 
                   className="flex items-center justify-between cursor-pointer" 
                   onClick={() => toggleConfigSection('general')}
@@ -541,6 +567,13 @@ const ProfileDashboard = ({ user }: ProfileDashboardProps) => {
           )}
         </div>
       </div>
+
+      <ReviewModal
+        isOpen={!!selectedAppointmentForReview}
+        onClose={() => setSelectedAppointmentForReview(null)}
+        appointment={selectedAppointmentForReview}
+        onSubmit={handleReviewSubmit}
+      />
     </div>
   );
 };

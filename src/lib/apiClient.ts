@@ -354,6 +354,25 @@ export class ApiClient {
 
   static async createBusinessReview(appointmentId: string, businessId: string, userId: string, rating: number, comment: string): Promise<ApiResponse<Review>> {
     try {
+      // Verificar si ya existe una reseña para esta cita
+      const { data: existingReview, error: checkError } = await supabase
+        .from('reviews')
+        .select('id')
+        .eq('appointment_id', appointmentId)
+        .single();
+
+      if (checkError && checkError.code !== 'PGRST116') {
+        throw checkError;
+      }
+
+      if (existingReview) {
+        return { 
+          success: false, 
+          error: 'Esta cita ya tiene una reseña' 
+        };
+      }
+
+      // Si no existe una reseña, crear una nueva
       const { data, error } = await supabase
         .from('reviews')
         .insert({
@@ -362,8 +381,7 @@ export class ApiClient {
           user_id: userId,
           rating: rating,
           comment: comment,
-          created_at: new Date().toISOString(),
-          updated_at: new Date().toISOString()
+          created_at: new Date().toISOString()
         })
         .select()
         .single();

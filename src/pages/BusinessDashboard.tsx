@@ -21,7 +21,7 @@ import BusinessProfileSection from '../components/business/BusinessProfileSectio
 import BusinessConfigSection from '../components/business/BusinessConfigSection';
 import BusinessHoursSection from '../components/business/BusinessHoursSection';
 import ServicesSection from '../components/business/ServicesSection';
-import AppointmentList from '../components/appointments/AppointmentList';
+import BusinessAppointmentList from '../components/appointments/BusinessAppointmentList';
 import Pagination from '../components/ui/Pagination';
 
 // Helper to create slug from business name
@@ -144,7 +144,7 @@ export const BusinessDashboard: React.FC = () => {
   useEffect(() => {
     const handleReviewEvent = (e: any) => {
       if (e.detail?.businessId === businessData?.id) {
-        toast.success('Nueva reseña recibida');
+        toast.success('¡Nueva reseña recibida!');
         refreshAppointments();
       }
     };
@@ -159,9 +159,14 @@ export const BusinessDashboard: React.FC = () => {
     if (!businessData?.id) return;
     const reviewChannel = supabase
       .channel(`business-reviews-${businessData.id}`)
-      .on('postgres_changes', { event: 'INSERT', schema: 'public', table: 'reviews', filter: `business_id=eq.${businessData.id}` }, async () => {
+      .on('postgres_changes', { 
+        event: 'INSERT', 
+        schema: 'public', 
+        table: 'reviews', 
+        filter: `business_id=eq.${businessData.id}` 
+      }, async () => {
         console.log('[BusinessDashboard] review insert event received');
-        toast.success('Nueva reseña recibida');
+        toast.success('¡Nueva reseña recibida!');
         await refreshAppointments();
       })
       .subscribe();
@@ -356,7 +361,7 @@ export const BusinessDashboard: React.FC = () => {
             {activeTab === 'appointments' && (
               <>
                 {/* Citas Pendientes */}
-                <div className="mb-8">
+                <div className="mb-8 border-b border-gray-200 dark:border-gray-700 pb-8">
                   <div 
                     className="flex items-center justify-between cursor-pointer" 
                     onClick={() => toggleSection('pending')}
@@ -378,7 +383,7 @@ export const BusinessDashboard: React.FC = () => {
                   </div>
                   {!collapsedSections.pending && (
                     <>
-                      <AppointmentList
+                      <BusinessAppointmentList
                         appointments={pagedPending}
                         onStatusChange={handleUpdateAppointmentStatus}
                         showReviewSection={false}
@@ -393,7 +398,7 @@ export const BusinessDashboard: React.FC = () => {
                 </div>
 
                 {/* Citas Confirmadas */}
-                <div className="mb-8">
+                <div className="mb-8 border-b border-gray-200 dark:border-gray-700 pb-8">
                   <div 
                     className="flex items-center justify-between cursor-pointer" 
                     onClick={() => toggleSection('confirmed')}
@@ -415,7 +420,7 @@ export const BusinessDashboard: React.FC = () => {
                   </div>
                   {!collapsedSections.confirmed && (
                     <>
-                      <AppointmentList
+                      <BusinessAppointmentList
                         appointments={pagedConfirmed}
                         onStatusChange={handleUpdateAppointmentStatus}
                         showReviewSection={false}
@@ -430,7 +435,7 @@ export const BusinessDashboard: React.FC = () => {
                 </div>
 
                 {/* Historial de Citas */}
-                <div>
+                <div className="border-b border-gray-200 dark:border-gray-700 pb-8">
                   <div 
                     className="flex items-center justify-between cursor-pointer" 
                     onClick={() => toggleSection('history')}
@@ -452,7 +457,7 @@ export const BusinessDashboard: React.FC = () => {
                   </div>
                   {!collapsedSections.history && (
                     <>
-                      <AppointmentList
+                      <BusinessAppointmentList
                         appointments={pagedPast}
                         onStatusChange={handleUpdateAppointmentStatus}
                         showReviewSection={true}
@@ -510,7 +515,7 @@ export const BusinessDashboard: React.FC = () => {
             {activeTab === 'settings' && businessData && (
               <>
                 {/* Sección de Perfil */}
-                <div className="mb-8">
+                <div className="mb-8 border-b border-gray-200 dark:border-gray-700 pb-8">
                   <div 
                     className="flex items-center justify-between cursor-pointer" 
                     onClick={() => toggleConfigSection('profile')}
@@ -542,7 +547,7 @@ export const BusinessDashboard: React.FC = () => {
                 </div>
 
                 {/* Sección de Horarios */}
-                <div className="mb-8">
+                <div className="mb-8 border-b border-gray-200 dark:border-gray-700 pb-8">
                   <div 
                     className="flex items-center justify-between cursor-pointer" 
                     onClick={() => toggleConfigSection('hours')}
@@ -576,7 +581,7 @@ export const BusinessDashboard: React.FC = () => {
                 </div>
 
                 {/* Sección de Configuración General */}
-                <div className="mb-8">
+                <div className="mb-8 border-b border-gray-200 dark:border-gray-700 pb-8">
                   <div 
                     className="flex items-center justify-between cursor-pointer" 
                     onClick={() => toggleConfigSection('config')}
@@ -609,7 +614,7 @@ export const BusinessDashboard: React.FC = () => {
                 </div>
 
                 {/* Sección de Estadísticas */}
-                <div>
+                <div className="border-b border-gray-200 dark:border-gray-700 pb-8">
                   <div 
                     className="flex items-center justify-between cursor-pointer" 
                     onClick={() => toggleConfigSection('stats')}
