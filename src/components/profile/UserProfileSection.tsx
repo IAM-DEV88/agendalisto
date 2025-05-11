@@ -125,7 +125,7 @@ const UserProfileSection: React.FC<UserProfileSectionProps> = ({
     <>
       <div className="mt-2">
         <form onSubmit={onSave} className="space-y-2">
-          <div className="dark:bg-opacity-10 bg-gray-50 shadow overflow-hidden rounded-lg">
+          <div className="dark:bg-opacity-10 bg-gray-50 shadow overflow-hidden rounded-md">
             <div className="px-4 py-5 sm:p-6">
               {/* Avatar preview */}
               <div className="flex justify-center mb-4">

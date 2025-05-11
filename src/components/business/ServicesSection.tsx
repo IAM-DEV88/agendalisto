@@ -209,7 +209,7 @@ const ServicesSection: React.FC<ServicesSectionProps> = ({
             return pagedServices.map((service) => (
               <div
                 key={service.id}
-                className={`dark:bg-opacity-10 bg-gray-50 overflow-hidden flex flex-col shadow rounded-lg ${
+                className={`dark:bg-opacity-10 bg-gray-50 overflow-hidden flex flex-col shadow rounded-md ${
                   !service.is_active ? 'opacity-75' : ''
                 }`}
               >
@@ -303,7 +303,7 @@ const ServicesSection: React.FC<ServicesSectionProps> = ({
 
             <span className="hidden sm:inline-block sm:align-middle sm:h-screen">&#8203;</span>
 
-            <div className="inline-block align-bottom dark:bg-opacity-10 rounded-lg text-left overflow-hidden shadow-xl transform transition-all sm:my-8 sm:align-middle sm:max-w-lg sm:w-full">
+            <div className="inline-block align-bottom dark:bg-opacity-10 rounded-md text-left overflow-hidden shadow-xl transform transition-all sm:my-8 sm:align-middle sm:max-w-lg sm:w-full">
               <form onSubmit={handleSubmit}>
                 <div className="bg-gray-50 dark:bg-gray-900 px-4 pt-20 pb-4 sm:p-6 sm:pb-4">
                   <div className="mb-4">

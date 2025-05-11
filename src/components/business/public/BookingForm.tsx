@@ -239,7 +239,7 @@ const BookingForm: React.FC<BookingFormProps> = ({
       </div>
 
       {service && (
-        <div className="mb-4 p-4 bg-opacity-10 bg-gray-50 rounded-lg">
+        <div className="mb-4 p-4 bg-opacity-10 bg-gray-50 rounded-md">
           <h3 className="font-medium text-gray-900 ">{service.name}</h3>
           <div className="flex justify-between items-center mt-2">
             <div className="flex items-center text-sm text-gray-500">

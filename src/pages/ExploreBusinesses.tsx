@@ -119,7 +119,7 @@ const ExploreBusinesses = () => {
               <Link
                 key={business.slug}
                 to={`/${business.slug}`}
-                className="bg-gray-50 dark:bg-gray-50 dark:bg-opacity-10 overflow-hidden shadow hover:shadow-lg transition-shadow duration-300"
+                className="bg-gray-50 dark:bg-gray-50 dark:bg-opacity-10 overflow-hidden shadow hover:shadow-lg transition-shadow duration-300 rounded-md"
               >
                 <div className="h-48 bg-gray-200 relative">
                   <img
@@ -142,7 +142,7 @@ const ExploreBusinesses = () => {
                     ) : null;
                   })()}
                   <div className="mt-4">
-                    <span className="inline-flex items-center px-3 py-0.5 text-sm font-medium bg-indigo-100 text-indigo-800 dark:bg-gray-50 dark:bg-opacity-10 ">
+                    <span className="inline-flex items-center px-3 py-0.5 text-sm font-medium bg-indigo-100 text-indigo-800 dark:bg-gray-50 dark:bg-opacity-10 rounded-md">
                       Ver servicios
                     </span>
                   </div>

@@ -40,7 +40,7 @@
 
   /* Action Buttons */
   .btn-action {
-    @apply px-3 py-1 text-sm font-medium rounded-sm transition-colors duration-200;
+    @apply px-3 py-1 text-sm font-medium rounded-md transition-colors duration-200;
   }
 
   .btn-complete {
@@ -78,7 +78,7 @@
   }
 
   .modal-container {
-    @apply bg-white dark:bg-gray-800 rounded-lg shadow-xl w-full max-w-2xl mx-4
+    @apply bg-white dark:bg-gray-800 rounded-md shadow-xl w-full max-w-2xl mx-4
     max-h-[90vh] overflow-y-auto;
   }
 
@@ -149,7 +149,7 @@
 
   /* Business Appointment Entry Styles */
   .business-appointment-entry {
-    @apply flex flex-row items-center justify-between px-4 py-3 hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors duration-200 border border-gray-200 dark:border-gray-700 mb-4 rounded-lg cursor-pointer gap-x-2;
+    @apply flex flex-row items-center justify-between px-4 py-3 hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors duration-200 border border-gray-200 dark:border-gray-700 mb-4 rounded-md cursor-pointer gap-x-2;
   }
 
   .business-appointment-content {
@@ -178,7 +178,7 @@
 
   /* User Appointment Entry Styles */
   .user-appointment-entry {
-    @apply px-4 py-3 hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors duration-200 gap-x-2 rounded-lg border border-gray-200 dark:border-gray-700 mb-4;
+    @apply px-4 py-3 hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors duration-200 gap-x-2 rounded-md border border-gray-200 dark:border-gray-700 mb-4;
   }
 
   .user-appointment-content {

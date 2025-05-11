@@ -69,7 +69,7 @@ const AppointmentModal: React.FC<AppointmentModalProps> = ({
               <div>
                 <span className="info-grid-label">Estado</span>
                 <p className="info-grid-value">
-                  <span className={`px-2 py-1 text-sm font-medium rounded-sm inline-flex items-center justify-center ${
+                  <span className={`px-2 py-1 text-sm font-medium rounded-md inline-flex items-center justify-center ${
                     appointment?.status === 'confirmed' 
                       ? 'bg-green-100 text-green-800 dark:bg-green-800 dark:text-green-100'
                       : appointment?.status === 'pending'

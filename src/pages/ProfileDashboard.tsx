@@ -524,7 +524,7 @@ const ProfileDashboard = ({ user }: ProfileDashboardProps) => {
                 </div>
                 {!collapsedConfigSections.general && (
                   <>
-                    <div className='dark:bg-opacity-10 bg-gray-50 shadow overflow-hidden rounded-lg'>
+                    <div className='dark:bg-opacity-10 bg-gray-50 shadow overflow-hidden rounded-md'>
                       <div className="px-4 py-5 sm:p-6">
                         <div className="flex items-center space-x-4">
                           <label htmlFor="itemsPerPage" className="text-sm font-medium text-gray-700">

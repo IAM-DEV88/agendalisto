@@ -69,12 +69,12 @@ const Home = () => {
               <div className="max-w-7xl mx-auto justify-center flex flex-col md:flex-row gap-8">
                 <div className="flex flex-col gap-4 self-center">
                 <h1 className="text-4xl tracking-tight font-extrabold text-white sm:text-5xl md:text-6xl">
-                  <span className="block">Haz lo que sabes, </span>
-                  <span className="block text-indigo-200">gana lo que mereces</span>
+                  <span className="block">Haz lo que amas.</span>
+                  <span className="block text-indigo-200">Gana como mereces.</span>
                 </h1>
                 <p className="text-indigo-200 tracking-tight sm:text-2xl md:text-4xl">
-                Publica tus servicios, recibe valoraciones y empieza a trabajar.
-                Conecta con quienes necesitan lo que haces.
+                Publica tus servicios, recibe valoraciones y empieza a destacar.
+                Conecta con quienes buscan tu talento.
                 </p>
                 </div>
                 <div className="flex flex-col gap-2 min-w-60">
@@ -123,7 +123,7 @@ const Home = () => {
           >
             {categories.map((cat) => (
               <SwiperSlide key={cat.id}>
-                <div className="dark:bg-gray-800 rounded-lg p-6 h-full">
+                <div className="dark:bg-gray-800 rounded-md p-6 h-full">
                   <h3 className="text-lg font-bold">
                     <Link to={`/explore?category=${cat.id}`} className="text-gray-800  hover:underline">
                       {cat.name}
@@ -149,7 +149,7 @@ const Home = () => {
         ) : milestones.length ? (
           <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
             {milestones.map((m) => (
-              <div key={m.id} className="p-4 border rounded-lg">
+              <div key={m.id} className="p-4 border rounded-md">
                 <h3 className="text-lg font-semibold">{m.title}</h3>
                 <p className="text-sm mb-2">{m.description}</p>
                 <p className="text-sm">Recaudado: {m.current_amount} / {m.goal_amount} COP</p>

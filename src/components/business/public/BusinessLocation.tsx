@@ -18,7 +18,7 @@ const BusinessLocation: React.FC<BusinessLocationProps> = ({ address }) => {
     <div>
       <iframe
         title="Ubicación del negocio"
-        className="w-full h-48 rounded-lg border-0 mb-3"
+        className="w-full h-48 rounded-md border-0 mb-3"
         src={`https://maps.google.com/maps?q=${encodeURIComponent(address)}&t=&z=15&ie=UTF8&iwloc=&output=embed`}
         allowFullScreen
       ></iframe>

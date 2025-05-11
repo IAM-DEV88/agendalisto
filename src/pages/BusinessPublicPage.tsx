@@ -150,7 +150,7 @@ function BusinessPublicPage() {
         <BusinessHeader businessData={businessData} averageRating={averageRating} reviewsCount={reviews.length} />
 
         {/* Mobile Tabs */}
-        <div className="mt-6 bg-gray-50 dark:bg-gray-50 dark:bg-opacity-10 shadow-md overflow-hidden md:hidden">
+        <div className="mt-6 bg-gray-50 dark:bg-gray-50 dark:bg-opacity-10 shadow-md overflow-hidden md:hidden rounded-md">
           <div className="flex border-b border-gray-200">
             <button
               onClick={() => setActiveTab('services')}
@@ -259,7 +259,7 @@ function BusinessPublicPage() {
 
         {/* Mobile Reviews Section */}
         <div className="mt-6 md:hidden">
-          <div className="bg-gray-50 dark:bg-gray-50 dark:bg-opacity-10 shadow-md p-6">
+          <div className="bg-gray-50 dark:bg-gray-50 dark:bg-opacity-10 shadow-md p-6 rounded-md">
             <ReviewsSection businessId={businessData.id} />
           </div>
         </div>
@@ -268,7 +268,7 @@ function BusinessPublicPage() {
         <div className="mt-6 hidden md:grid grid-cols-1 md:grid-cols-3 gap-6">
           {/* Main Column */}
           <div className="md:col-span-2">
-            <div className="bg-gray-50 dark:bg-gray-50 dark:bg-opacity-10 shadow-md p-6 hidden md:block">
+            <div className="bg-gray-50 dark:bg-gray-50 dark:bg-opacity-10 shadow-md p-6 hidden md:block rounded-md">
               <h2 className="text-xl font-semibold mb-6">Servicios Disponibles</h2>
               <ServicesList
                 services={services}
@@ -290,7 +290,7 @@ function BusinessPublicPage() {
 
             {/* Booking Form */}
             {showBooking && user && user.id !== businessData?.owner_id && (
-              <div className="mt-6 bg-gray-50 dark:bg-gray-50 dark:bg-opacity-10 shadow-md p-6">
+              <div className="mt-6 bg-gray-50 dark:bg-gray-50 dark:bg-opacity-10 shadow-md p-6 rounded-md">
                 <BookingForm
                   businessId={businessData.id}
                   serviceId={selectedService || ''}
@@ -307,7 +307,7 @@ function BusinessPublicPage() {
             )}
             {/* Reviews Section */}
             <div className="mt-6 hidden md:block">
-              <div className="bg-gray-50 dark:bg-gray-50 dark:bg-opacity-10 shadow-md p-6">
+              <div className="bg-gray-50 dark:bg-gray-50 dark:bg-opacity-10 shadow-md p-6 rounded-md">
                 <ReviewsSection businessId={businessData.id} />
               </div>
             </div>
@@ -317,7 +317,7 @@ function BusinessPublicPage() {
           {/* Sidebar */}
           <div className="space-y-6 hidden md:block">
             {/* Hours */}
-            <div className="bg-gray-50 dark:bg-gray-50 dark:bg-opacity-10 shadow-md p-6">
+            <div className="bg-gray-50 dark:bg-gray-50 dark:bg-opacity-10 shadow-md p-6 rounded-md">
               <h2 className="text-xl font-semibold mb-4">Horarios de Atención</h2>
               <BusinessHoursList businessHours={businessHours} />
 
@@ -332,7 +332,7 @@ function BusinessPublicPage() {
 
             {/* Location */}
             {businessData?.config?.mostrar_direccion && (
-              <div className="bg-gray-50 dark:bg-gray-50 dark:bg-opacity-10 shadow-md p-6">
+              <div className="bg-gray-50 dark:bg-gray-50 dark:bg-opacity-10 shadow-md p-6 rounded-md">
                 <h2 className="text-xl font-semibold mb-4">Ubicación</h2>
                 <BusinessLocation address={businessData.address} />
 
@@ -348,7 +348,7 @@ function BusinessPublicPage() {
 
             {/* Booking Button */}
             {selectedService && businessData?.config?.permitir_reservas_online && user && user.id !== businessData?.owner_id && (
-              <div className="bg-gray-50 dark:bg-gray-50 dark:bg-opacity-10 shadow-md p-6">
+              <div className="bg-gray-50 dark:bg-gray-50 dark:bg-opacity-10 shadow-md p-6 rounded-md">
                 <h2 className="text-xl font-semibold mb-4">Reservar Cita</h2>
                 <button
                   className="w-full bg-indigo-600 text-white py-2 px-4 font-medium hover:bg-indigo-700 transition-colors"
@@ -360,7 +360,7 @@ function BusinessPublicPage() {
 
 
             {!user && (
-              <div className="bg-gray-50 dark:bg-gray-50 dark:bg-opacity-10 shadow-md p-6">
+              <div className="bg-gray-50 dark:bg-opacity-10 dark:bg-opacity-10 shadow-md p-6 rounded-md">
                 <div className="bg-yellow-50 border border-yellow-200 rounded-md p-4">
                   <p className="text-sm text-yellow-800">
                     Debes <Link to="/login" className="font-medium underline">iniciar sesión</Link> para reservar servicios.

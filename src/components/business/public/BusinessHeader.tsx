@@ -172,7 +172,7 @@ const BusinessHeader: React.FC<BusinessHeaderProps> = ({ businessData, averageRa
   };
   
   return (
-    <div className="bg-gray-50 dark:bg-gray-50 dark:bg-opacity-10 shadow-md overflow-hidden">
+    <div className="bg-gray-50 dark:bg-gray-50 dark:bg-opacity-10 shadow-md overflow-hidden rounded-md">
       <div className="h-48 md:h-64 bg-indigo-100 relative">
         {logoUrl ? (
           <>

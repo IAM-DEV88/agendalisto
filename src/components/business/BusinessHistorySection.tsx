@@ -82,7 +82,7 @@ const BusinessHistorySection: React.FC<BusinessHistorySectionProps> = ({
                   <p className="text-sm text-gray-500 ">Fecha: {formatDate(appt.start_time)}</p>
                 </div>
                 {appt.status === 'cancelled' ? (
-                  <p className="self-start px-2 py-1 text-sm font-medium rounded-sm inline-flex items-center justify-center bg-red-800 text-red-100">
+                  <p className="self-start px-2 py-1 text-sm font-medium rounded-md inline-flex items-center justify-center bg-red-800 text-red-100">
                     Cancelada
                   </p>
                 ) : review ? (
@@ -95,7 +95,7 @@ const BusinessHistorySection: React.FC<BusinessHistorySectionProps> = ({
                     ))}
                   </div>
                 ) : (
-                  <p className="self-start px-2 py-1 text-sm font-medium rounded-sm inline-flex items-center justify-center bg-yellow-100 text-yellow-800 dark:bg-yellow-800 dark:text-yellow-100">
+                  <p className="self-start px-2 py-1 text-sm font-medium rounded-md inline-flex items-center justify-center bg-yellow-100 text-yellow-800 dark:bg-yellow-800 dark:text-yellow-100">
                     Sin reseña todavía
                   </p>
                 )}

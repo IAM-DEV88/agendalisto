@@ -126,7 +126,7 @@ const Nav = ({ user }: NavProps) => {
                     <div className="py-1">
                       <Link to="/dashboard" onClick={() => setIsUserDropdownOpen(false)} className="block px-4 py-2 text-sm text-gray-700  dark:hover:text-black hover:bg-gray-500">Mi Perfil</Link>
                       {hasBusiness && <Link to="/business/dashboard" onClick={() => setIsUserDropdownOpen(false)} className="block px-4 py-2 text-sm text-gray-700  dark:hover:text-black hover:bg-gray-500">Mi Negocio</Link>}
-                      <button onClick={() => { setIsUserDropdownOpen(false); handleLogout(); }} className="w-full text-left px-4 py-2 text-sm text-gray-700  dark:hover:text-black hover:bg-gray-500">Cerrar Sesión</button>
+                      <button onClick={() => { setIsUserDropdownOpen(false); handleLogout(); }} className="w-full text-left px-4 py-2 text-sm text-gray-700 dark:text-white hover:text-gray-500 hover:bg-gray-500">Cerrar Sesión</button>
                     </div>
                   </div>
                 )}
@@ -201,7 +201,7 @@ const Nav = ({ user }: NavProps) => {
                     Mi Negocio
                   </Link>
                 )}
-                <button onClick={() => { setIsMenuOpen(false); handleLogout(); }} className="block w-full text-left px-2 py-1 text-base font-medium text-gray-700 dark:text-gray-300 hover:text-indigo-600 hover:bg-gray-50 dark:hover:bg-gray-700">
+                <button onClick={() => { setIsMenuOpen(false); handleLogout(); }} className="block w-full text-left px-2 py-1 text-base font-medium text-gray-700 dark:text-white hover:text-indigo-600 hover:bg-gray-50 dark:hover:bg-gray-700">
                   Cerrar Sesión
                 </button>
               </>
