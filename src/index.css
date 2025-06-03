@@ -17,11 +17,14 @@
   html.dark {
     color-scheme: dark;
   }
-  label, h1, h2, h3, h4, h5, h6, p, span {
+  h1, h2, h3, h4, h5, h6, span {
+    @apply text-indigo-300 dark:text-white;
+  }
+  label, p {
     @apply text-black dark:text-white;
   }
   a:not(.btn-secondary, .btn-primary, .btn-tertiary,.btn) {
-    @apply text-black dark:text-white;
+    @apply text-indigo-300 dark:text-white;
   }
 }
 

@@ -11,7 +11,7 @@ import type { Milestone } from '../lib/api';
 
 const Home = () => {
   const { user, loading } = useAuthSession();
-  let registerText = 'Registrarse';
+  let registerText = 'Registrarse GRATIS';
   let registerLink = '/register';
   let secondText = 'Iniciar Sesión';
   let secondLink = '/login';
@@ -24,7 +24,7 @@ const Home = () => {
       registerText = 'Mi negocio';
       registerLink = '/business/dashboard';
     } else {
-      registerText = 'Registrar mi negocio';
+      registerText = 'Registrar mi negocio GRATIS';
       registerLink = '/business/register';
     }
   }
@@ -152,7 +152,6 @@ const Home = () => {
               <div key={m.id} className="p-4 border rounded-md">
                 <h3 className="text-lg font-semibold">{m.title}</h3>
                 <p className="text-sm mb-2">{m.description}</p>
-                <p className="text-sm">Recaudado: {m.current_amount} / {m.goal_amount} COP</p>
               </div>
             ))}
           </div>
@@ -163,8 +162,6 @@ const Home = () => {
           <div className="text-center mt-6">
             <Link to="/crowdfunding" className="px-6 py-3 bg-indigo-600 text-white rounded hover:bg-indigo-500">
             Ayúdanos a llegar más lejos
-
-
             </Link>
           </div>
         )}
