@@ -1,11 +1,11 @@
 [build]
-  publish = "dist"
   command = "npm install --legacy-peer-deps && npm run build"
+  publish = "dist"
 
 [build.environment]
   NODE_VERSION = "20.10.0"
   NPM_FLAGS = "--legacy-peer-deps"
-  CI = false
+  CI = "false"
 
 # Redirecciones para SPA
 [[redirects]]
@@ -26,4 +26,4 @@
   port = 3000
   targetPort = 3000
   publish = "dist"
-  autoLaunch = true
+  autoLaunch = "true"
