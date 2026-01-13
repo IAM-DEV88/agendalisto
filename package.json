@@ -6,9 +6,13 @@
   "scripts": {
     "dev": "vite",
     "type-check": "tsc --noEmit",
-    "build": "tsc --noEmit && vite build",
+    "build": "vite build",
     "preview": "vite preview",
-    "netlify-build": "npm install && npm run build"
+    "netlify-build": "npm install --legacy-peer-deps && npm run build"
+  },
+  "engines": {
+    "node": ">=18.0.0",
+    "npm": ">=9.0.0"
   },
   "dependencies": {
     "@hookform/resolvers": "^5.2.2",

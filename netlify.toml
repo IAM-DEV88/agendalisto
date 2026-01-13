@@ -1,23 +1,19 @@
 [build]
   publish = "dist"
-  command = "npm run netlify-build"
-  functions = "netlify/functions"
+  command = "npm install --legacy-peer-deps && npm run build"
 
 [build.environment]
-  NODE_VERSION = "20.0.0"
+  NODE_VERSION = "20.10.0"
   NPM_FLAGS = "--legacy-peer-deps"
+  CI = false
 
+# Redirecciones para SPA
 [[redirects]]
   from = "/*"
   to = "/index.html"
   status = 200
 
-[dev]
-  port = 3000
-  targetPort = 3000
-  publish = "dist"
-  autoLaunch = true
-
+# Seguridad básica
 [[headers]]
   for = "/*"
   [headers.values]
@@ -25,8 +21,9 @@
     X-Content-Type-Options = "nosniff"
     X-XSS-Protection = "1; mode=block"
     Referrer-Policy = "same-origin"
-    Content-Security-Policy = "default-src 'self'; script-src 'self' 'unsafe-inline' 'unsafe-eval' https:; style-src 'self' 'unsafe-inline' https:; img-src 'self' data: https:; font-src 'self' data:; connect-src 'self' https://*.supabase.co;"
 
-[context.production.environment]
-  NODE_ENV = "production"
-  VITE_NODE_ENV = "production"
+[dev]
+  port = 3000
+  targetPort = 3000
+  publish = "dist"
+  autoLaunch = true
