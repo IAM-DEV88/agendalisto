@@ -319,7 +319,7 @@ const ProfileDashboard = ({ user }: ProfileDashboardProps) => {
               alt={`${user?.full_name || 'Usuario'} avatar`}
               className="h-12 w-12 rounded-full object-cover"
             />
-            <h3 className="text-lg leading-6 font-medium text-gray-900 grow">
+            <h3 className="text-lg leading-6 font-medium text-gray-900 dark:text-white grow">
               {user?.full_name || 'Usuario'}
             </h3>
           </div>
@@ -527,7 +527,7 @@ const ProfileDashboard = ({ user }: ProfileDashboardProps) => {
                     <div className='dark:bg-opacity-10 bg-gray-50 shadow overflow-hidden rounded-md'>
                       <div className="px-4 py-5 sm:p-6">
                         <div className="flex items-center space-x-4">
-                          <label htmlFor="itemsPerPage" className="text-sm font-medium text-gray-700">
+                          <label htmlFor="itemsPerPage" className="text-sm font-medium text-gray-700 dark:text-gray-300">
                             Elementos por página:
                           </label>
                           <input

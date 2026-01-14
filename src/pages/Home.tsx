@@ -77,29 +77,21 @@ const Home = () => {
                 Conecta con quienes buscan tu talento.
                 </p>
                 </div>
-                <div className="flex flex-col gap-2 min-w-60">
-                  <div>
+                <div className="grid gap-4 min-w-60">
                     <Link to={registerLink} className="btn-primary">
                       {registerText}
                     </Link>
-                  </div>
-                  <div>
                     <Link to={secondLink} className="btn-secondary">
                       {secondText}
                     </Link>
-                  </div>
-                  <div>
                     <Link to={exploreLink} className="btn-primary">
                       {exploreText}
                     </Link>
-                  </div>
                   {/* boton cerrar sesion */}
                   {user && (
-                    <div>
                       <button onClick={() => supabase.auth.signOut()} className="btn-secondary">
                         Cerrar sesión
                       </button>
-                    </div>
                   )}
                 </div>
               </div>
@@ -125,7 +117,7 @@ const Home = () => {
               <SwiperSlide key={cat.id}>
                 <div className="dark:bg-gray-800 rounded-md p-6 h-full">
                   <h3 className="text-lg font-bold">
-                    <Link to={`/explore?category=${cat.id}`} className="text-gray-800  hover:underline">
+                    <Link to={`/explore?category=${cat.id}`} className="text-gray-800 dark:text-gray-400  hover:underline">
                       {cat.name}
                     </Link>
                   </h3>

@@ -240,9 +240,9 @@ const BookingForm: React.FC<BookingFormProps> = ({
 
       {service && (
         <div className="mb-4 p-4 bg-opacity-10 bg-gray-50 rounded-md">
-          <h3 className="font-medium text-gray-900 ">{service.name}</h3>
+          <h3 className="font-medium text-gray-900 dark:text-white">{service.name}</h3>
           <div className="flex justify-between items-center mt-2">
-            <div className="flex items-center text-sm text-gray-500">
+            <div className="flex items-center text-sm text-gray-500 dark:text-gray-200">
               <Clock className="h-4 w-4 mr-1 " />
               <span className="">{service.duration} min</span>
             </div>
@@ -278,7 +278,7 @@ const BookingForm: React.FC<BookingFormProps> = ({
         )}
         <div className="space-y-4">
           <div>
-            <label htmlFor="date" className="block text-sm font-medium text-gray-700  mb-1">
+            <label htmlFor="date" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
               <Calendar className="h-4 w-4 inline mr-1 " />
               Fecha
             </label>
@@ -294,7 +294,7 @@ const BookingForm: React.FC<BookingFormProps> = ({
           </div>
 
           <div>
-            <label htmlFor="time" className="block text-sm font-medium text-gray-700  mb-1">
+            <label htmlFor="time" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
               <Clock className="h-4 w-4 inline mr-1 " />
               Hora
             </label>
@@ -324,7 +324,7 @@ const BookingForm: React.FC<BookingFormProps> = ({
           </div>
 
           <div>
-            <label htmlFor="notes" className="block text-sm font-medium text-gray-700  mb-1">
+            <label htmlFor="notes" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
               Notas adicionales (opcional)
             </label>
             <textarea

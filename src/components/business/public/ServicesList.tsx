@@ -46,9 +46,9 @@ const ServicesList: React.FC<ServicesListProps> = ({
         >
           <div className="flex justify-between items-start">
             <div>
-              <h4 className="font-medium text-gray-900 ">{service.name}</h4>
-              <p className="text-sm text-gray-600  mt-1">{service.description}</p>
-              <div className="flex items-center mt-2 text-sm text-gray-500">
+              <h4 className="font-medium text-gray-900 dark:text-white">{service.name}</h4>
+              <p className="text-sm text-gray-600 dark:text-gray-300 mt-1">{service.description}</p>
+              <div className="flex items-center mt-2 text-sm text-gray-500 dark:text-gray-200">
                 <Clock className="h-4 w-4 mr-1 " />
                 <span className="">{service.duration} min</span>
               </div>

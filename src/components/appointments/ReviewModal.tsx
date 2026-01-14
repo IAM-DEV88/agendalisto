@@ -43,14 +43,14 @@ const ReviewModal: React.FC<ReviewModalProps> = ({
         <form onSubmit={handleSubmit} className="modal-content">
           <div className="space-y-6">
             <div>
-              <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+              <label className="block text-sm font-medium text-gray-700 dark:text-gray-300dark:text-gray-300 mb-2">
                 Servicio
               </label>
               <p className="text-gray-900 dark:text-white">{appointment.services?.name}</p>
             </div>
 
             <div>
-              <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+              <label className="block text-sm font-medium text-gray-700 dark:text-gray-300dark:text-gray-300 mb-2">
                 Calificación
               </label>
               <div className="flex space-x-2">
@@ -70,7 +70,7 @@ const ReviewModal: React.FC<ReviewModalProps> = ({
             </div>
 
             <div>
-              <label htmlFor="comment" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+              <label htmlFor="comment" className="block text-sm font-medium text-gray-700 dark:text-gray-300dark:text-gray-300 mb-2">
                 Comentario
               </label>
               <textarea

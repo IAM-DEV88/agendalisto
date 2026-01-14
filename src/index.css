@@ -1,44 +1,136 @@
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
+
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
 
-/* Custom base styles and class-based theming */
+/* ========================================================================== */
+/*                                  THEMING                                   */
+/* ========================================================================== */
 @layer base {
-  html {
-    font-family: Inter, system-ui, Avenir, Helvetica, Arial, sans-serif;
-    font-weight: 400;
-    line-height: 1.5;
-    -webkit-font-smoothing: antialiased;
-    -moz-osx-font-smoothing: grayscale;
+  :root {
+    /* Light theme colors */
+    --color-background: #ffffff;
+    --color-surface: #f8fafc;
+    --color-primary: #0ea5e9;
+    --color-primary-light: #38bdf8;
+    --color-primary-dark: #0284c7;
+    --color-text: #1e293b;
+    --color-text-muted: #64748b;
+    --color-border: #e2e8f0;
+    --color-card: #ffffff;
+    --color-card-hover: #f1f5f9;
+    --color-success: #10b981;
+    --color-warning: #f59e0b;
+    --color-error: #ef4444;
+    --color-info: #3b82f6;
   }
-  html.light {
-    color-scheme: light;
-  }
-  html.dark {
-    color-scheme: dark;
-  }
-  h1, h2, h3, h4, h5, h6, span {
-    @apply text-indigo-300 dark:text-white;
-  }
-  label, p {
-    @apply text-black dark:text-white;
-  }
-  a:not(.btn-secondary, .btn-primary, .btn-tertiary,.btn) {
-    @apply text-indigo-300 dark:text-white;
+
+  .dark {
+    /* Dark theme colors */
+    --color-background: #0f172a;
+    --color-surface: #1e293b;
+    --color-primary: #38bdf8;
+    --color-primary-light: #7dd3fc;
+    --color-primary-dark: #0ea5e9;
+    --color-text: #f8fafc;
+    --color-text-muted: #94a3b8;
+    --color-border: #334155;
+    --color-card: #1e293b;
+    --color-card-hover: #334155;
+    --color-success: #34d399;
+    --color-warning: #fbbf24;
+    --color-error: #f87171;
+    --color-info: #60a5fa;
   }
 }
 
+/* ========================================================================== */
+/*                               BASE STYLES                                  */
+/* ========================================================================== */
+@layer base {
+  html {
+    font-family: 'Inter', system-ui, -apple-system, sans-serif;
+    font-weight: 400;
+    line-height: 1.6;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+    background-color: var(--color-background);
+    color: var(--color-text);
+    transition: background-color 0.2s ease, color 0.2s ease;
+  }
+
+  /* Typography */
+  h1, h2, h3, h4, h5, h6 {
+    font-weight: 600;
+    line-height: 1.2;
+    color: var(--color-text);
+    margin-bottom: 0.75em;
+  }
+
+  h1 { font-size: 2.25rem; line-height: 2.5rem; }
+  h2 { font-size: 1.875rem; line-height: 2.25rem; }
+  h3 { font-size: 1.5rem; line-height: 2rem; }
+  h4 { font-size: 1.25rem; line-height: 1.75rem; }
+  h5 { font-size: 1.125rem; line-height: 1.5rem; }
+  h6 { font-size: 1rem; line-height: 1.5rem; }
+
+  p {
+    color: var(--color-text);
+    line-height: 1.6;
+    margin-bottom: 1rem;
+  }
+
+  a:not(.btn) {
+    text-decoration: none;
+    transition: color 0.2s ease;
+  }
+
+  /* Form elements */
+  label {
+    display: block;
+    font-size: 0.875rem;
+    font-weight: 500;
+    color: var(--color-text);
+    margin-bottom: 0.5rem;
+  }
+
+  /* Form controls */
+  input[type='text'],
+  input[type='email'],
+  input[type='password'],
+  input[type='number'],
+  input[type='date'],
+  input[type='time'],
+  input[type='search'],
+  input[type='tel'],
+  textarea,
+  select {
+    @apply appearance-none block w-full px-3 py-2 border border-gray-300 shadow-sm placeholder-gray-400 rounded-md focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm bg-gray-50 dark:bg-gray-900;
+  }
+}
+
+/* ========================================================================== */
+/*                                COMPONENTS                                  */
+/* ========================================================================== */
+
+/* --------------------------------- Buttons -------------------------------- */
 @layer components {
+  .btn {
+    @apply inline-flex items-center justify-center font-medium text-center no-underline whitespace-nowrap cursor-pointer select-none border rounded-md transition-all duration-200;
+  }
+
+  /* Primary Buttons */
   .btn-primary {
-    @apply w-full flex items-center justify-center px-8 py-3 font-medium text-white bg-indigo-900 hover:bg-indigo-500 md:py-4 md:text-lg md:px-10 transition-colors duration-200 hover:text-indigo-900 rounded-md;
+    @apply w-full px-8 py-3 text-white bg-indigo-900 hover:bg-indigo-500 md:py-4 md:text-lg md:px-10 rounded-md;
   }
   
   .btn-secondary {
-    @apply w-full flex items-center justify-center px-8 py-3 font-medium text-indigo-700 bg-indigo-100 hover:bg-indigo-500 md:py-4 md:text-lg md:px-10 transition-colors duration-200 hover:text-indigo-100 rounded-md;
+    @apply w-full px-8 py-3 font-medium text-indigo-700 bg-indigo-100 hover:bg-indigo-500 md:py-4 md:text-lg md:px-10 hover:text-indigo-100 rounded-md;
   }
   
   .btn-tertiary {
-    @apply w-full flex items-center justify-center px-8 py-3 font-medium text-white bg-indigo-800 hover:bg-indigo-700 md:py-4 md:text-lg md:px-10 transition-colors duration-200;
+    @apply w-full px-8 py-3 font-medium text-white bg-indigo-800 hover:bg-indigo-700 md:py-4 md:text-lg md:px-10 rounded-md;
   }
 
   /* Action Buttons */
@@ -47,47 +139,66 @@
   }
 
   .btn-complete {
-    @apply btn-action border border-green-500 text-green-700 hover:bg-green-500 hover:text-white
-    dark:text-green-500 dark:hover:bg-green-600 dark:hover:text-white;
+    @apply btn-action border border-green-500 text-green-700 hover:bg-green-500 hover:text-white dark:text-green-500 dark:hover:bg-green-600 dark:hover:text-white;
   }
 
   .btn-cancel {
-    @apply btn-action border border-red-500 text-red-700 hover:bg-red-500 hover:text-white
-    dark:text-red-500 dark:hover:bg-red-600 dark:hover:text-white;
+    @apply btn-action border border-red-500 text-red-700 hover:bg-red-500 hover:text-white dark:text-red-500 dark:hover:bg-red-600 dark:hover:text-white;
   }
 
   .btn-confirm {
-    @apply btn-action border border-blue-500 text-blue-700 hover:bg-blue-500 hover:text-white
-    dark:text-blue-500 dark:hover:bg-blue-600 dark:hover:text-white;
+    @apply btn-action border border-blue-500 text-blue-700 hover:bg-blue-500 hover:text-white dark:text-blue-500 dark:hover:bg-blue-600 dark:hover:text-white;
   }
 
   .btn-pending {
-    @apply btn-action border border-yellow-500 text-yellow-700 hover:bg-yellow-500 hover:text-white
-    dark:text-yellow-500 dark:hover:bg-yellow-600 dark:hover:text-white;
+    @apply btn-action border border-yellow-500 text-yellow-700 hover:bg-yellow-500 hover:text-white dark:text-yellow-500 dark:hover:bg-yellow-600 dark:hover:text-white;
   }
+  
   .btn-reschedule {
-    @apply btn-action border border-gray-500 text-gray-700 hover:bg-gray-500 hover:text-white
-    dark:text-gray-500 dark:hover:bg-gray-600 dark:hover:text-white;
+    @apply btn-action border border-gray-500 text-gray-700 hover:bg-gray-500 hover:text-white dark:text-gray-500 dark:hover:bg-gray-600 dark:hover:text-white;
   }
+  
   .btn-review {
-    @apply btn-action border border-yellow-500 text-yellow-700 hover:bg-yellow-500 hover:text-white
-    dark:text-yellow-500 dark:hover:bg-yellow-600 dark:hover:text-white;
+    @apply btn-action border border-yellow-500 text-yellow-700 hover:bg-yellow-500 hover:text-white dark:text-yellow-500 dark:hover:bg-yellow-600 dark:hover:text-white;
   }
 
-  /* Modal Styles */
+  /* --------------------------------- Cards --------------------------------- */
+  .card {
+    @apply bg-white dark:bg-gray-800 rounded-md border border-gray-200 dark:border-gray-700 shadow-sm hover:shadow-md transition-all duration-200;
+  }
+
+  /* -------------------------------- Alerts --------------------------------- */
+  .alert {
+    @apply p-4 mb-4 rounded-md border-l-4;
+  }
+
+  .alert-success {
+    @apply bg-green-50 border-green-500 text-green-700 dark:bg-green-900/20 dark:text-green-400;
+  }
+
+  .alert-warning {
+    @apply bg-yellow-50 border-yellow-500 text-yellow-700 dark:bg-yellow-900/20 dark:text-yellow-400;
+  }
+
+  .alert-error {
+    @apply bg-red-50 border-red-500 text-red-700 dark:bg-red-900/20 dark:text-red-400;
+  }
+
+  .alert-info {
+    @apply bg-blue-50 border-blue-500 text-blue-700 dark:bg-blue-900/20 dark:text-blue-400;
+  }
+
+  /* ------------------------------- Modals ---------------------------------- */
   .modal-overlay {
-    @apply fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50
-    backdrop-filter backdrop-blur-sm;
+    @apply fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 backdrop-filter backdrop-blur-sm;
   }
 
   .modal-container {
-    @apply bg-white dark:bg-gray-800 rounded-md shadow-xl w-full max-w-2xl mx-4
-    max-h-[90vh] overflow-y-auto;
+    @apply bg-white dark:bg-gray-800 rounded-md shadow-xl w-full max-w-2xl mx-4 max-h-[90vh] overflow-y-auto;
   }
 
   .modal-header {
-    @apply px-6 py-4 border-b border-gray-200 dark:border-gray-700 flex items-center justify-between sticky top-0 
-    bg-white dark:bg-gray-800 z-10;
+    @apply px-6 py-4 border-b border-gray-200 dark:border-gray-700 flex items-center justify-between sticky top-0 bg-white dark:bg-gray-800 z-10;
   }
 
   .modal-title {
@@ -115,11 +226,10 @@
   }
 
   .modal-footer {
-    @apply px-6 py-4 border-t border-gray-200 dark:border-gray-700 flex justify-end space-x-2 sticky bottom-0 
-    bg-white dark:bg-gray-800;
+    @apply px-6 py-4 border-t border-gray-200 dark:border-gray-700 flex justify-end space-x-2 sticky bottom-0 bg-white dark:bg-gray-800;
   }
 
-  /* Info Grid para el Modal */
+  /* ---------------------------- Info Grid --------------------------------- */
   .info-grid {
     @apply grid grid-cols-2 gap-4 text-sm;
   }
@@ -132,7 +242,7 @@
     @apply text-gray-900 dark:text-white font-medium;
   }
 
-  /* Timeline para estados/cambios */
+  /* ------------------------------ Timeline -------------------------------- */
   .timeline {
     @apply space-y-4 ml-4 border-l border-gray-200 dark:border-gray-700;
   }
@@ -142,17 +252,16 @@
   }
 
   .timeline-dot {
-    @apply absolute -left-2 mt-1.5 w-4 h-4 rounded-full border-2 border-white dark:border-gray-800
-    bg-gray-200 dark:bg-gray-700;
+    @apply absolute -left-2 mt-1.5 w-4 h-4 rounded-full border-2 border-white dark:border-gray-800 bg-gray-200 dark:bg-gray-700;
   }
 
   .timeline-content {
     @apply text-sm text-gray-600 dark:text-gray-400;
   }
 
-  /* Business Appointment Entry Styles */
+  /* --------------------- Business Appointment Entry ----------------------- */
   .business-appointment-entry {
-    @apply flex flex-row items-center justify-between px-4 py-3 hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors duration-200 border border-gray-200 dark:border-gray-700 mb-4 rounded-md cursor-pointer gap-x-2;
+    @apply flex items-center justify-between px-4 py-3 hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors duration-200 border border-gray-200 dark:border-gray-700 mb-4 rounded-md cursor-pointer gap-x-2;
   }
 
   .business-appointment-content {
@@ -179,7 +288,7 @@
     @apply flex flex-col sm:flex-row items-center gap-2;
   }
 
-  /* User Appointment Entry Styles */
+  /* ------------------------ User Appointment Entry ------------------------ */
   .user-appointment-entry {
     @apply px-4 py-3 hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors duration-200 gap-x-2 rounded-md border border-gray-200 dark:border-gray-700 mb-4;
   }
@@ -208,22 +317,3 @@
     @apply flex flex-col sm:flex-row items-center gap-3 mt-2 sm:mt-0;
   }
 }
-
-@media (prefers-color-scheme: light) {
-  :root {
-    color: #213547;
-    background-color: #ffffff;
-  }
-}
-
-/* Global form control styling matching Login inputs */
-input[type="text"],
-input[type="email"],
-input[type="password"],
-input[type="date"],
-input[type="number"],
-select,
-textarea {
-  @apply appearance-none block w-full px-3 py-2 border border-gray-300 shadow-sm placeholder-gray-400 rounded-md
-    focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm bg-gray-50 dark:bg-gray-900;
-} 

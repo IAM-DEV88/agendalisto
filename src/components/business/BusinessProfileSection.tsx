@@ -167,7 +167,7 @@ const BusinessProfileSection: React.FC<BusinessProfileSectionProps> = ({
             </div>
             <div className="grid grid-cols-1 gap-y-6 gap-x-4 sm:grid-cols-6">
               <div className="sm:col-span-3">
-                <label htmlFor="name" className="block text-sm font-medium text-gray-700 ">Nombre</label>
+                <label htmlFor="name" className="block text-sm font-medium text-gray-700 dark:text-gray-300dark:text-gray-300">Nombre</label>
                 <input
                   type="text"
                   name="name"
@@ -178,7 +178,7 @@ const BusinessProfileSection: React.FC<BusinessProfileSectionProps> = ({
                 />
               </div>
               <div className="sm:col-span-3">
-                <label htmlFor="logo" className="block text-sm font-medium text-gray-700 ">Logo del negocio</label>
+                <label htmlFor="logo" className="block text-sm font-medium text-gray-700 dark:text-gray-300">Logo del negocio</label>
                 <input
                   type="file"
                   name="logo"
@@ -190,7 +190,7 @@ const BusinessProfileSection: React.FC<BusinessProfileSectionProps> = ({
                 />
               </div>
               <div className="sm:col-span-6">
-                <label htmlFor="description" className="block text-sm font-medium text-gray-700 ">Descripción</label>
+                <label htmlFor="description" className="block text-sm font-medium text-gray-700 dark:text-gray-300">Descripción</label>
                 <textarea
                   name="description"
                   id="description"
@@ -201,7 +201,7 @@ const BusinessProfileSection: React.FC<BusinessProfileSectionProps> = ({
                 ></textarea>
               </div>
               <div className="sm:col-span-3">
-                <label htmlFor="address" className="block text-sm font-medium text-gray-700 ">Dirección</label>
+                <label htmlFor="address" className="block text-sm font-medium text-gray-700 dark:text-gray-300">Dirección</label>
                 <input
                   type="text"
                   name="address"
@@ -212,7 +212,7 @@ const BusinessProfileSection: React.FC<BusinessProfileSectionProps> = ({
                 />
               </div>
               <div className="sm:col-span-3">
-                <label htmlFor="phone" className="block text-sm font-medium text-gray-700 ">Teléfono</label>
+                <label htmlFor="phone" className="block text-sm font-medium text-gray-700 dark:text-gray-300">Teléfono</label>
                 <input
                   type="text"
                   name="phone"
@@ -223,7 +223,7 @@ const BusinessProfileSection: React.FC<BusinessProfileSectionProps> = ({
                 />
               </div>
               <div className="sm:col-span-3">
-                <label htmlFor="website" className="block text-sm font-medium text-gray-700 ">Sitio Web</label>
+                <label htmlFor="website" className="block text-sm font-medium text-gray-700 dark:text-gray-300">Sitio Web</label>
                 <input
                   type="text"
                   name="website"
@@ -234,7 +234,7 @@ const BusinessProfileSection: React.FC<BusinessProfileSectionProps> = ({
                 />
               </div>
               <div className="sm:col-span-3">
-                <label htmlFor="email" className="block text-sm font-medium text-gray-700 ">Correo Electrónico</label>
+                <label htmlFor="email" className="block text-sm font-medium text-gray-700 dark:text-gray-300">Correo Electrónico</label>
                 <input
                   type="email"
                   name="email"
@@ -245,7 +245,7 @@ const BusinessProfileSection: React.FC<BusinessProfileSectionProps> = ({
                 />
               </div>
               <div className="sm:col-span-3">
-                <label htmlFor="category_id" className="block text-sm font-medium text-gray-700 ">Categoría</label>
+                <label htmlFor="category_id" className="block text-sm font-medium text-gray-700 dark:text-gray-300">Categoría</label>
                 <select
                   name="category_id"
                   id="category_id"

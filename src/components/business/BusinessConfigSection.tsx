@@ -104,7 +104,7 @@ export const BusinessConfigSection: React.FC<BusinessConfigSectionProps> = ({
               </div>
 
               <div>
-                <label htmlFor="tiempo_minimo_cancelacion" className="block text-sm font-medium text-gray-700 ">
+                <label htmlFor="tiempo_minimo_cancelacion" className="block text-sm font-medium text-gray-700 dark:text-gray-300">
                   Tiempo mínimo para cancelaciones (horas)
                 </label>
                 <input

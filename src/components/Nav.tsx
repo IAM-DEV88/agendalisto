@@ -99,7 +99,7 @@ const Nav = ({ user }: NavProps) => {
                 <button
                   ref={buttonRef}
                   onClick={() => setIsUserDropdownOpen(!isUserDropdownOpen)}
-                  className="flex items-center px-3 py-2 text-sm font-medium text-gray-700 hover:text-indigo-600"
+                  className="flex items-center px-3 py-2 text-sm font-medium text-gray-700 dark:text-white hover:text-indigo-600"
                 >
                   {user?.avatar_url ? (
                     <img
@@ -124,9 +124,9 @@ const Nav = ({ user }: NavProps) => {
                 {isUserDropdownOpen && (
                   <div ref={dropdownRef} className="origin-top-right absolute right-0 mt-2 w-48 rounded-md shadow-lg bg-gray-50 dark:bg-gray-600 ring-1 ring-black ring-opacity-5 z-20">
                     <div className="py-1">
-                      <Link to="/dashboard" onClick={() => setIsUserDropdownOpen(false)} className="block px-4 py-2 text-sm text-gray-700  dark:hover:text-black hover:bg-gray-500">Mi Perfil</Link>
+                      <Link to="/dashboard" onClick={() => setIsUserDropdownOpen(false)} className="block px-4 py-2 text-sm text-gray-700 dark:text-white hover:bg-gray-500">Mi Perfil</Link>
                       {hasBusiness && <Link to="/business/dashboard" onClick={() => setIsUserDropdownOpen(false)} className="block px-4 py-2 text-sm text-gray-700  dark:hover:text-black hover:bg-gray-500">Mi Negocio</Link>}
-                      <button onClick={() => { setIsUserDropdownOpen(false); handleLogout(); }} className="w-full text-left px-4 py-2 text-sm text-gray-700 dark:text-white hover:text-gray-500 hover:bg-gray-500">Cerrar Sesión</button>
+                      <button onClick={() => { setIsUserDropdownOpen(false); handleLogout(); }} className="w-full text-left px-4 py-2 text-sm text-gray-700 dark:text-white hover:text-black hover:bg-gray-500">Cerrar Sesión</button>
                     </div>
                   </div>
                 )}

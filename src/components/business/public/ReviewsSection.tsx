@@ -36,7 +36,7 @@ const ReviewsSection: React.FC<ReviewsSectionProps> = ({ businessId }) => {
       {loading ? (
         <div className="text-center py-4">Cargando reseñas...</div>
       ) : reviews.length === 0 ? (
-        <p className="text-gray-500 text-center py-4">
+        <p className="text-gray-500 text-center py-4 dark:text-gray-300">
           Aún no hay reseñas para este negocio.
         </p>
       ) : (

@@ -201,7 +201,7 @@ const BusinessHeader: React.FC<BusinessHeaderProps> = ({ businessData, averageRa
       <div className="p-6 md:p-8">
         <div className="flex flex-wrap justify-between items-start">
           <div className="mb-4 md:mb-0">
-            <h1 className="text-2xl md:text-3xl font-bold text-gray-900 ">{businessData.name}</h1>
+            <h1 className="text-2xl md:text-3xl font-bold text-gray-900 dark:text-white">{businessData.name}</h1>
             {reviewsCount > 0 && (
               <div className="flex items-center mt-2">
                 {[...Array(5)].map((_, i) => (
@@ -210,7 +210,7 @@ const BusinessHeader: React.FC<BusinessHeaderProps> = ({ businessData, averageRa
                 <span className="ml-2 text-sm text-gray-600">{averageRating.toFixed(1)} ({reviewsCount})</span>
               </div>
             )}
-            <p className="mt-3 text-gray-600 ">{businessData.description}</p>
+            <p className="mt-3 text-gray-600 dark:text-gray-300">{businessData.description}</p>
             {categoryName && (
               <p className="mt-2 inline-block px-2 py-1 bg-indigo-100 text-indigo-800 rounded dark:bg-indigo-800 dark:text-indigo-200 uppercase text-xs">
                 {categoryName}

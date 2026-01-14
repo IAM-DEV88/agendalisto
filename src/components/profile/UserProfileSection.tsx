@@ -138,7 +138,7 @@ const UserProfileSection: React.FC<UserProfileSectionProps> = ({
 
               <div className="grid grid-cols-1 gap-y-6 gap-x-4 sm:grid-cols-6">
                 <div className="sm:col-span-3">
-                  <label htmlFor="full_name" className="block text-sm font-medium text-gray-700 ">
+                  <label htmlFor="full_name" className="block text-sm font-medium text-gray-700 dark:text-gray-300">
                     Nombre completo
                   </label>
                   <div className="mt-1">
@@ -153,7 +153,7 @@ const UserProfileSection: React.FC<UserProfileSectionProps> = ({
                   </div>
                 </div>
                 <div className="sm:col-span-3">
-                  <label htmlFor="avatar" className="block text-sm font-medium text-gray-700 ">
+                  <label htmlFor="avatar" className="block text-sm font-medium text-gray-700 dark:text-gray-300">
                     Avatar de perfil
                   </label>
                   <div className="mt-1">
@@ -169,7 +169,7 @@ const UserProfileSection: React.FC<UserProfileSectionProps> = ({
                   </div>
                 </div>
                 <div className="sm:col-span-3">
-                  <label htmlFor="email" className="block text-sm font-medium text-gray-700 ">
+                  <label htmlFor="email" className="block text-sm font-medium text-gray-700 dark:text-gray-300">
                     Correo electrónico
                   </label>
                   <div className="mt-1">
@@ -181,12 +181,12 @@ const UserProfileSection: React.FC<UserProfileSectionProps> = ({
                       disabled
                       className="shadow-sm dark:bg-opacity-10 p-2 bg-gray-50 block w-full sm:text-sm border-gray-300"
                     />
-                    <p className="mt-1  text-xs text-gray-500">El correo no se puede modificar</p>
+                    <p className="mt-1 text-xs text-gray-400 dark:text-gray-400">El correo no se puede modificar</p>
                   </div>
                 </div>
 
                 <div className="sm:col-span-3">
-                  <label htmlFor="phone" className="block text-sm font-medium text-gray-700 ">
+                  <label htmlFor="phone" className="block text-sm font-medium text-gray-700 dark:text-gray-100">
                     Teléfono
                   </label>
                   <div className="mt-1">

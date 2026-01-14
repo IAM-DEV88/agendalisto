@@ -101,7 +101,7 @@ const BusinessRegister = ({ user }: BusinessRegisterProps) => {
 
                 <div className="grid grid-cols-1 gap-y-6 gap-x-4 sm:grid-cols-6">
                   <div className="sm:col-span-4">
-                    <label htmlFor="businessName" className="block text-sm font-medium text-gray-700 ">
+                    <label htmlFor="businessName" className="block text-sm font-medium text-gray-700 dark:text-gray-300">
                       Nombre del negocio
                     </label>
                     <div className="mt-1">
@@ -117,7 +117,7 @@ const BusinessRegister = ({ user }: BusinessRegisterProps) => {
                   </div>
 
                   <div className="sm:col-span-6">
-                    <label htmlFor="description" className="block text-sm font-medium text-gray-700 ">
+                    <label htmlFor="description" className="block text-sm font-medium text-gray-700 dark:text-gray-300">
                       Descripción
                     </label>
                     <div className="mt-1">
@@ -136,7 +136,7 @@ const BusinessRegister = ({ user }: BusinessRegisterProps) => {
                   </div>
 
                   <div className="sm:col-span-6">
-                    <label htmlFor="address" className="block text-sm font-medium text-gray-700 ">
+                    <label htmlFor="address" className="block text-sm font-medium text-gray-700 dark:text-gray-300">
                       Dirección
                     </label>
                     <div className="mt-1">
@@ -152,7 +152,7 @@ const BusinessRegister = ({ user }: BusinessRegisterProps) => {
                   </div>
 
                   <div className="sm:col-span-6">
-                    <label htmlFor="category" className="block text-sm font-medium text-gray-700 ">
+                    <label htmlFor="category" className="block text-sm font-medium text-gray-700 dark:text-gray-300">
                       Categoría
                     </label>
                     <div className="mt-1">
@@ -178,7 +178,7 @@ const BusinessRegister = ({ user }: BusinessRegisterProps) => {
 
                 <div className="grid grid-cols-1 gap-y-6 gap-x-4 sm:grid-cols-6">
                   <div className="sm:col-span-3">
-                    <label htmlFor="phone" className="block text-sm font-medium text-gray-700 ">
+                    <label htmlFor="phone" className="block text-sm font-medium text-gray-700 dark:text-gray-300">
                       Teléfono
                     </label>
                     <div className="mt-1">
@@ -194,7 +194,7 @@ const BusinessRegister = ({ user }: BusinessRegisterProps) => {
                   </div>
 
                   <div className="sm:col-span-3">
-                    <label htmlFor="email" className="block text-sm font-medium text-gray-700 ">
+                    <label htmlFor="email" className="block text-sm font-medium text-gray-700 dark:text-gray-300">
                       Correo electrónico
                     </label>
                     <div className="mt-1">
@@ -210,7 +210,7 @@ const BusinessRegister = ({ user }: BusinessRegisterProps) => {
                   </div>
 
                   <div className="sm:col-span-3">
-                    <label htmlFor="whatsapp" className="block text-sm font-medium text-gray-700 ">
+                    <label htmlFor="whatsapp" className="block text-sm font-medium text-gray-700 dark:text-gray-300">
                       WhatsApp (opcional)
                     </label>
                     <div className="mt-1">
@@ -225,7 +225,7 @@ const BusinessRegister = ({ user }: BusinessRegisterProps) => {
                   </div>
                   
                   <div className="sm:col-span-3">
-                    <label htmlFor="instagram" className="block text-sm font-medium text-gray-700 ">
+                    <label htmlFor="instagram" className="block text-sm font-medium text-gray-700 dark:text-gray-300">
                       Instagram (opcional)
                     </label>
                     <div className="mt-1">
@@ -245,7 +245,7 @@ const BusinessRegister = ({ user }: BusinessRegisterProps) => {
                   </div>
 
                   <div className="sm:col-span-3">
-                    <label htmlFor="facebook" className="block text-sm font-medium text-gray-700 ">
+                    <label htmlFor="facebook" className="block text-sm font-medium text-gray-700 dark:text-gray-300">
                       Facebook (opcional)
                     </label>
                     <div className="mt-1">
