@@ -35,7 +35,7 @@ const BusinessHoursSection: React.FC<BusinessHoursSectionProps> = ({
                   {businessHours.map((hour, idx) => (
                     <div key={hour.day_of_week} className="border-b py-2">
                       <div className="flex items-center justify-between">
-                        <span className="text-gray-700 ">{days[hour.day_of_week]}</span>
+                        <span className="text-gray-700 dark:text-gray-300">{days[hour.day_of_week]}</span>
                         <label className="inline-flex items-center">
                           <input
                             type="checkbox"

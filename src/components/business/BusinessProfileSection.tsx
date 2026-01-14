@@ -167,7 +167,7 @@ const BusinessProfileSection: React.FC<BusinessProfileSectionProps> = ({
             </div>
             <div className="grid grid-cols-1 gap-y-6 gap-x-4 sm:grid-cols-6">
               <div className="sm:col-span-3">
-                <label htmlFor="name" className="block text-sm font-medium text-gray-700 dark:text-gray-300dark:text-gray-300">Nombre</label>
+                <label htmlFor="name" className="block text-sm font-medium text-gray-700 dark:text-gray-300">Nombre</label>
                 <input
                   type="text"
                   name="name"

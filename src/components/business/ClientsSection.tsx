@@ -28,7 +28,7 @@ const ClientsSection: React.FC<ClientsSectionProps> = ({ clients, loading, messa
           <ul className="divide-y divide-gray-200">
             {clients.map((client) => (
               <li key={client.id} className="px-4 py-4 sm:px-6">
-                <p className="text-sm font-medium text-gray-900 ">{client.full_name}</p>
+                <p className="text-sm font-medium text-gray-900 dark:text-gray-300">{client.full_name}</p>
                 <p className="text-sm text-gray-500 dark:text-gray-400">Email: {client.email}</p>
                 <p className="text-sm text-gray-500 dark:text-gray-400">Teléfono: {client.phone}</p>
               </li>

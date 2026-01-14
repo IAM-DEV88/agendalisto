@@ -313,7 +313,7 @@ export const BusinessDashboard: React.FC = () => {
                   alt={`${businessData.name} logo`}
                   className="h-12 w-12 rounded-full object-cover"
                 />
-                <h3 className="text-lg leading-6 font-medium text-gray-900 grow">
+                <h3 className="text-lg leading-6 font-medium text-gray-900 grow dark:text-gray-300">
                   {businessData.name}
                 </h3>
               </Link>

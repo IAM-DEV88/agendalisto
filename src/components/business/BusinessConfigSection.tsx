@@ -65,7 +65,7 @@ export const BusinessConfigSection: React.FC<BusinessConfigSectionProps> = ({
         <form onSubmit={handleSubmit} className="space-y-2">
           {/* Reservas Online */}
           <div className="bg-gray-50 dark:bg-opacity-10 shadow p-4 rounded-md">
-            <h2 className="text-lg font-medium  text-gray-900 mb-4">Reservas Online</h2>
+            <h2 className="text-lg font-medium  text-gray-900 dark:text-gray-300 mb-4">Reservas Online</h2>
             <div className="space-y-4">
               <div className="flex items-start">
                 <div className="flex items-center h-5">
@@ -78,10 +78,10 @@ export const BusinessConfigSection: React.FC<BusinessConfigSectionProps> = ({
                   />
                 </div>
                 <div className="ml-3 text-sm">
-                  <label htmlFor="permitir_reservas_online" className="font-medium text-gray-700 ">
+                  <label htmlFor="permitir_reservas_online" className="font-medium text-gray-700 dark:text-gray-300">
                     Permitir reservas online
                   </label>
-                  <p className="text-gray-500 ">Los clientes podrán realizar reservas directamente desde la web.</p>
+                  <p className="text-gray-500 dark:text-gray-400">Los clientes podrán realizar reservas directamente desde la web.</p>
                 </div>
               </div>
 
@@ -96,10 +96,10 @@ export const BusinessConfigSection: React.FC<BusinessConfigSectionProps> = ({
                   />
                 </div>
                 <div className="ml-3 text-sm">
-                  <label htmlFor="requiere_confirmacion" className="font-medium text-gray-700 ">
+                  <label htmlFor="requiere_confirmacion" className="font-medium text-gray-700 dark:text-gray-300">
                     Requerir confirmación manual
                   </label>
-                  <p className="text-gray-500 ">Las reservas quedarán pendientes hasta que las confirmes manualmente.</p>
+                  <p className="text-gray-500 dark:text-gray-400">Las reservas quedarán pendientes hasta que las confirmes manualmente.</p>
                 </div>
               </div>
 
@@ -125,7 +125,7 @@ export const BusinessConfigSection: React.FC<BusinessConfigSectionProps> = ({
 
           {/* Información Visible */}
           <div className="bg-gray-50 dark:bg-opacity-10 shadow p-4 rounded-md">
-            <h2 className="text-lg font-medium  text-gray-900 mb-4">Información Visible</h2>
+            <h2 className="text-lg font-medium  text-gray-900 dark:text-gray-300 mb-4">Información Visible</h2>
             <div className="space-y-4">
               <div className="flex items-start">
                 <div className="flex items-center h-5">
@@ -138,10 +138,10 @@ export const BusinessConfigSection: React.FC<BusinessConfigSectionProps> = ({
                   />
                 </div>
                 <div className="ml-3 text-sm">
-                  <label htmlFor="mostrar_precios" className="font-medium text-gray-700 ">
+                  <label htmlFor="mostrar_precios" className="font-medium text-gray-700 dark:text-gray-300">
                     Mostrar precios
                   </label>
-                  <p className="text-gray-500 ">Los precios de los servicios serán visibles en la página pública.</p>
+                  <p className="text-gray-500 dark:text-gray-400">Los precios de los servicios serán visibles en la página pública.</p>
                 </div>
               </div>
 
@@ -156,10 +156,10 @@ export const BusinessConfigSection: React.FC<BusinessConfigSectionProps> = ({
                   />
                 </div>
                 <div className="ml-3 text-sm">
-                  <label htmlFor="mostrar_telefono" className="font-medium text-gray-700 ">
+                  <label htmlFor="mostrar_telefono" className="font-medium text-gray-700 dark:text-gray-300">
                     Mostrar teléfono
                   </label>
-                  <p className="text-gray-500 ">Tu número de teléfono será visible en la página pública.</p>
+                  <p className="text-gray-500 dark:text-gray-400">Tu número de teléfono será visible en la página pública.</p>
                 </div>
               </div>
 
@@ -174,10 +174,10 @@ export const BusinessConfigSection: React.FC<BusinessConfigSectionProps> = ({
                   />
                 </div>
                 <div className="ml-3 text-sm">
-                  <label htmlFor="mostrar_email" className="font-medium text-gray-700 ">
+                  <label htmlFor="mostrar_email" className="font-medium text-gray-700 dark:text-gray-300">
                     Mostrar email
                   </label>
-                  <p className="text-gray-500 ">Tu dirección de email será visible en la página pública.</p>
+                  <p className="text-gray-500 dark:text-gray-400">Tu dirección de email será visible en la página pública.</p>
                 </div>
               </div>
 
@@ -192,10 +192,10 @@ export const BusinessConfigSection: React.FC<BusinessConfigSectionProps> = ({
                   />
                 </div>
                 <div className="ml-3 text-sm">
-                  <label htmlFor="mostrar_redes_sociales" className="font-medium text-gray-700 ">
+                  <label htmlFor="mostrar_redes_sociales" className="font-medium text-gray-700 dark:text-gray-300">
                     Mostrar redes sociales
                   </label>
-                  <p className="text-gray-500 ">Tus perfiles de redes sociales serán visibles en la página pública.</p>
+                  <p className="text-gray-500 dark:text-gray-400">Tus perfiles de redes sociales serán visibles en la página pública.</p>
                 </div>
               </div>
 
@@ -210,10 +210,10 @@ export const BusinessConfigSection: React.FC<BusinessConfigSectionProps> = ({
                   />
                 </div>
                 <div className="ml-3 text-sm">
-                  <label htmlFor="mostrar_direccion" className="font-medium text-gray-700 ">
+                  <label htmlFor="mostrar_direccion" className="font-medium text-gray-700 dark:text-gray-300">
                     Mostrar dirección
                   </label>
-                  <p className="text-gray-500 ">Tu dirección y mapa serán visibles en la página pública.</p>
+                  <p className="text-gray-500 dark:text-gray-400">Tu dirección y mapa serán visibles en la página pública.</p>
                 </div>
               </div>
             </div>
@@ -221,7 +221,7 @@ export const BusinessConfigSection: React.FC<BusinessConfigSectionProps> = ({
 
           {/* Notificaciones */}
           <div className="bg-gray-50 dark:bg-opacity-10 shadow p-4 rounded-md">
-            <h2 className="text-lg font-medium  text-gray-900 mb-4">Notificaciones</h2>
+            <h2 className="text-lg font-medium  text-gray-900 mb-4 dark:text-gray-300">Notificaciones</h2>
             <div className="space-y-4">
               <div className="flex items-start">
                 <div className="flex items-center h-5">
@@ -234,10 +234,10 @@ export const BusinessConfigSection: React.FC<BusinessConfigSectionProps> = ({
                   />
                 </div>
                 <div className="ml-3 text-sm">
-                  <label htmlFor="notificaciones_email" className="font-medium text-gray-700 ">
+                  <label htmlFor="notificaciones_email" className="font-medium text-gray-700 dark:text-gray-300">
                     Notificaciones por email
                   </label>
-                  <p className="text-gray-500 ">Recibir notificaciones de reservas por email.</p>
+                  <p className="text-gray-500 dark:text-gray-400">Recibir notificaciones de reservas por email.</p>
                 </div>
               </div>
 
@@ -252,10 +252,10 @@ export const BusinessConfigSection: React.FC<BusinessConfigSectionProps> = ({
                   />
                 </div>
                 <div className="ml-3 text-sm">
-                  <label htmlFor="notificaciones_whatsapp" className="font-medium text-gray-700 ">
+                  <label htmlFor="notificaciones_whatsapp" className="font-medium text-gray-700 dark:text-gray-300">
                     Notificaciones por WhatsApp
                   </label>
-                  <p className="text-gray-500 ">Recibir notificaciones de reservas por WhatsApp.</p>
+                  <p className="text-gray-500 dark:text-gray-400">Recibir notificaciones de reservas por WhatsApp.</p>
                 </div>
               </div>
             </div>
