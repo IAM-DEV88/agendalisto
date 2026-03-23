@@ -310,20 +310,6 @@ function BusinessPublicPage() {
               </div>
             )}
 
-            {/* Booking Button (Desktop) */}
-            {selectedService && businessData?.config?.permitir_reservas_online && user && user.id !== businessData?.owner_id && (
-              <div className="card p-8 bg-primary-600 dark:bg-primary-900">
-                <h2 className="text-xl font-bold text-white mb-4">¿Listo para reservar?</h2>
-                <p className="text-primary-100 mb-6 text-sm">Selecciona un servicio y solicita tu cita ahora mismo.</p>
-                <button
-                  onClick={() => setShowBooking(true)}
-                  className="w-full bg-white text-primary-700 py-3 px-4 rounded-xl font-bold hover:bg-primary-50 transition-all shadow-lg"
-                >
-                  Reservar Ahora
-                </button>
-              </div>
-            )}
-
             {!user && (
               <div className="card p-8 bg-amber-50 dark:bg-amber-900/20 border-amber-200 dark:border-amber-800">
                 <p className="text-sm text-amber-800 dark:text-amber-300 font-medium">

@@ -128,7 +128,7 @@ function BookingPage() {
       </div>
 
       <div className="max-w-7xl mx-auto px-4 mt-8">
-        <div className="grid grid-cols-1 lg:grid-cols-12 gap-8">
+        <div className="grid grid-cols-1">
           
           {/* Columna Izquierda: Información del Servicio */}
           <div className="lg:col-span-5 space-y-6">
@@ -170,56 +170,6 @@ function BookingPage() {
                 </div>
               </div>
             )}
-
-            {/* Detalles del Servicio */}
-            <div className="card p-8">
-              <div className="flex justify-between items-start mb-6">
-                <h2 className="text-3xl font-black text-slate-900 dark:text-white tracking-tight leading-tight">
-                  {service.name}
-                </h2>
-                {businessData.config?.mostrar_precios && (
-                  <span className="text-3xl font-black text-primary-600 dark:text-primary-400">
-                    ${service.price.toLocaleString()}
-                  </span>
-                )}
-              </div>
-
-              <div className="flex items-center gap-6 mb-8 p-4 bg-slate-50 dark:bg-slate-800/50 rounded-2xl">
-                <div className="flex items-center gap-2 text-slate-500 dark:text-slate-400">
-                  <Clock className="w-5 h-5 text-primary-500" />
-                  <span className="font-bold">{service.duration} minutos</span>
-                </div>
-                <div className="h-4 w-px bg-slate-200 dark:bg-slate-700"></div>
-                <div className="flex items-center gap-2 text-slate-500 dark:text-slate-400">
-                  <ShieldCheck className="w-5 h-5 text-emerald-500" />
-                  <span className="font-bold">Reserva Segura</span>
-                </div>
-              </div>
-
-              <div className="space-y-4">
-                <h3 className="text-sm font-black text-slate-400 uppercase tracking-widest flex items-center gap-2">
-                  <Info className="w-4 h-4" />
-                  Descripción del servicio
-                </h3>
-                <p className="text-slate-600 dark:text-slate-400 leading-relaxed text-lg">
-                  {service.description}
-                </p>
-              </div>
-
-              {service.provider && (
-                <div className="mt-8 pt-8 border-t border-slate-100 dark:border-slate-800">
-                  <div className="flex items-center gap-4">
-                    <div className="w-12 h-12 rounded-xl bg-primary-50 dark:bg-primary-900/30 flex items-center justify-center text-primary-600">
-                      <span className="text-lg font-black">{service.provider.charAt(0)}</span>
-                    </div>
-                    <div>
-                      <p className="text-xs font-bold text-slate-400 uppercase tracking-wider">Profesional a cargo</p>
-                      <p className="text-lg font-bold text-slate-900 dark:text-white">{service.provider}</p>
-                    </div>
-                  </div>
-                </div>
-              )}
-            </div>
           </div>
 
           {/* Columna Derecha: Formulario de Reserva */}
@@ -227,6 +177,7 @@ function BookingPage() {
             <div className="card p-8 lg:p-10 border-primary-100 dark:border-primary-900/30 bg-white dark:bg-slate-900 shadow-2xl">
               <BookingForm
                 businessId={businessData.id}
+                businessName={businessData.name}
                 serviceId={service.id}
                 userId={user.id}
                 service={service}

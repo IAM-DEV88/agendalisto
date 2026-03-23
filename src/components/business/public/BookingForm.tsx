@@ -6,6 +6,7 @@ import { Link } from 'react-router-dom';
 
 interface BookingFormProps {
   businessId: string;
+  businessName: string;
   serviceId: string;
   userId: string;
   service: Service | null;
@@ -19,6 +20,7 @@ interface BookingFormProps {
 
 const BookingForm: React.FC<BookingFormProps> = ({ 
   businessId, 
+  businessName,
   serviceId, 
   userId, 
   service, 
@@ -229,7 +231,9 @@ const BookingForm: React.FC<BookingFormProps> = ({
   return (
     <div className="animate-in slide-in-from-bottom-4 duration-500">
       <div className="flex justify-between items-center mb-8 pb-4 border-b border-primary-200 dark:border-primary-800">
-        <h3 className="text-2xl font-black text-primary-900 dark:text-white tracking-tight">Reservar Cita</h3>
+        <h3 className="text-2xl font-black text-primary-900 dark:text-white tracking-tight">
+          Reservar cita con <span className="text-primary-500">{businessName}</span>
+        </h3>
         <button
           onClick={onClose}
           className="p-2 hover:bg-primary-100 dark:hover:bg-primary-900/50 text-primary-600 rounded-full transition-colors"

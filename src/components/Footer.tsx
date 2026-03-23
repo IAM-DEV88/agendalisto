@@ -33,10 +33,6 @@ const Footer = () => {
           <p className="text-sm text-slate-500 dark:text-slate-500">
             &copy; {new Date().getFullYear()} AgendaYa. Todos los derechos reservados.
           </p>
-          <div className="flex space-x-6">
-            {/* Social links placeholder */}
-            <span className="text-slate-400 dark:text-slate-600 text-sm">Hecho con ❤️ para profesionales</span>
-          </div>
         </div>
       </div>
     </footer>
