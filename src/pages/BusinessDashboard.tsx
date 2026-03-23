@@ -78,34 +78,11 @@ export const BusinessDashboard: React.FC = () => {
     setActiveTab(tab);
   };
 
-  // Agregar estado para controlar las secciones colapsables - inicialmente expandidas
-  const [collapsedSections, setCollapsedSections] = useState({
-    pending: false,
-    confirmed: false,
-    history: false
-  });
-
-  const toggleSection = (section: 'pending' | 'confirmed' | 'history') => {
-    setCollapsedSections(prev => ({
-      ...prev,
-      [section]: !prev[section]
-    }));
-  };
-
-  // Agregar estado para secciones colapsables de configuración
-  const [collapsedConfigSections, setCollapsedConfigSections] = useState({
-    profile: true,
-    hours: true,
-    config: true,
-    stats: true
-  });
-
-  const toggleConfigSection = (section: keyof typeof collapsedConfigSections) => {
-    setCollapsedConfigSections(prev => ({
-      ...prev,
-      [section]: !prev[section]
-    }));
-  };
+  // Sub-tabs for Appointments
+  const [activeAppointmentTab, setActiveAppointmentTab] = useState('pending');
+  
+  // Sub-tabs for Settings
+  const [activeSettingsTab, setActiveSettingsTab] = useState('profile');
 
   useEffect(() => {
     const loadBusinessData = async () => {
@@ -301,88 +278,78 @@ export const BusinessDashboard: React.FC = () => {
     { id: 'settings', label: 'Configuración' }
   ];
 
+  const appointmentTabs: Tab[] = [
+    { id: 'pending', label: 'Pendientes', count: pendingAppointments.length },
+    { id: 'confirmed', label: 'Confirmadas', count: confirmedAppointments.length },
+    { id: 'history', label: 'Historial', count: pastAppointments.length }
+  ];
+
+  const settingsTabs: Tab[] = [
+    { id: 'profile', label: 'Perfil' },
+    { id: 'hours', label: 'Horarios' },
+    { id: 'config', label: 'Ajustes' },
+    { id: 'stats', label: 'Estadísticas' }
+  ];
+
   return (
-    <div>
-      <div className="max-w-7xl mx-auto mt-6 sm:px-6 lg:px-8">
+    <div className="min-h-screen bg-slate-50 dark:bg-slate-950 transition-colors duration-200">
+      <div className="max-w-7xl mx-auto pt-6 pb-20 sm:px-6 lg:px-8">
         <div className="px-4 py-2 sm:px-0">
-          <div className="flex items-center justify-between mb-4 sm:flex sm:items-baseline">
-          {businessData && (
-              <Link to={`/${slugify(businessData.name)}`} className="flex items-center space-x-4">
-                <img
-                  src={businessData.logo_url || 'https://upload.wikimedia.org/wikipedia/commons/8/89/Portrait_Placeholder.png'}
-                  alt={`${businessData.name} logo`}
-                  className="h-12 w-12 rounded-full object-cover"
-                />
-                <h3 className="text-lg leading-6 font-medium text-gray-900 grow dark:text-gray-300">
-                  {businessData.name}
-                </h3>
+          <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-8">
+            {businessData && (
+              <Link to={`/${slugify(businessData.name)}`} className="flex items-center gap-4 group">
+                <div className="relative">
+                  <img
+                    src={businessData.logo_url || 'https://upload.wikimedia.org/wikipedia/commons/8/89/Portrait_Placeholder.png'}
+                    alt={`${businessData.name} logo`}
+                    className="h-16 w-16 rounded-2xl object-cover shadow-lg border-2 border-white dark:border-slate-800 transition-transform group-hover:scale-105"
+                  />
+                  <div className="absolute -bottom-1 -right-1 w-4 h-4 bg-emerald-500 border-2 border-white dark:border-slate-800 rounded-full shadow-sm"></div>
+                </div>
+                <div>
+                  <h1 className="text-2xl font-black text-slate-900 dark:text-white tracking-tight group-hover:text-primary-600 dark:group-hover:text-primary-400 transition-colors">
+                    {businessData.name}
+                  </h1>
+                  <p className="text-sm font-medium text-slate-500 dark:text-slate-400">Panel de Administración</p>
+                </div>
               </Link>
             )}
-            <div className="flex flex-col gap-4 self-center">
-              <Link to="/dashboard" className="dark:hover:text-black inline-flex px-4 py-2 border border-transparent text-sm font-medium rounded-md text-indigo-600 border-indigo-600 hover:bg-indigo-50">
-              Mi Perfil
+            
+            <Link 
+              to="/dashboard" 
+              className="inline-flex items-center justify-center px-6 py-2.5 bg-white dark:bg-slate-900 text-slate-700 dark:text-slate-200 text-sm font-bold rounded-xl border border-slate-200 dark:border-slate-800 hover:bg-slate-50 dark:hover:bg-slate-800 transition-all shadow-sm"
+            >
+              Volver a mi Perfil
             </Link>
-            </div>
           </div>
 
-          {/* Use TabNav component */}
           <TabNav 
             tabs={tabs} 
             activeTabId={activeTab} 
             onTabChange={handleTabChange} 
           />
 
-          <div className="mt-6">
-            {/* Tab de Estadísticas */}
-            {activeTab === 'stats' && businessData && (
-              <>
-                <SectionHeader title="Estadísticas del Negocio" />
-              <StatsSection
-                totalAppointments={appointments.length}
-                  upcomingAppointments={confirmedAppointments.length}
-                pastAppointments={pastAppointments.length}
-                totalClients={businessClients.length}
-                totalServices={totalServices}
-                totalRevenue={totalRevenue}
-                confirmationRate={confirmationRate}
-                cancellationRate={cancellationRate}
-                avgDuration={avgDuration}
-                avgPrice={avgPrice}
-                topServiceName={topServiceName}
-                topServiceCount={topServiceCount}
-                peakDay={peakDayName}
-                peakHour={peakHour}
-                lifetimeValueAvg={lifetimeValueAvg}
-              />
-              </>
-            )}
-            
+          <div className="mt-8 animate-in fade-in slide-in-from-bottom-4 duration-500">
             {/* Tab de Citas */}
             {activeTab === 'appointments' && (
-              <>
-                {/* Citas Pendientes */}
-                <div className="mb-8 border-b border-gray-200 dark:border-gray-700 pb-8">
-                  <div 
-                    className="flex items-center justify-between cursor-pointer" 
-                    onClick={() => toggleSection('pending')}
-                  >
-                    <SectionHeader 
-                      title={`Citas Pendientes (${pendingAppointments.length})`}
-                      description="Solicitudes de citas que requieren confirmación."
+              <div className="space-y-8">
+                <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+                  <SectionHeader 
+                    title="Gestión de Citas" 
+                    description="Administra tus reservas activas y consulta el historial"
+                  />
+                  <div className="bg-white dark:bg-slate-900 p-1 rounded-2xl border border-slate-200 dark:border-slate-800 shadow-sm self-start">
+                    <TabNav 
+                      tabs={appointmentTabs} 
+                      activeTabId={activeAppointmentTab} 
+                      onTabChange={setActiveAppointmentTab} 
                     />
-                    <button className="p-2">
-                      <svg 
-                        className={`w-6 h-6 transform transition-transform ${collapsedSections.pending ? '-rotate-90' : 'rotate-0'}`} 
-                        fill="none" 
-                        stroke="currentColor" 
-                        viewBox="0 0 24 24"
-                      >
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
-                      </svg>
-                    </button>
                   </div>
-                  {!collapsedSections.pending && (
-                    <>
+                </div>
+
+                <div className="animate-in fade-in zoom-in-95 duration-300">
+                  {activeAppointmentTab === 'pending' && (
+                    <div className="space-y-6">
                       <BusinessAppointmentList
                         appointments={pagedPending}
                         onStatusChange={handleUpdateAppointmentStatus}
@@ -393,33 +360,11 @@ export const BusinessDashboard: React.FC = () => {
                         totalPages={Math.ceil(pendingAppointments.length / pagination.pending.perPage)}
                         onPageChange={(page) => handlePageChange('pending', page)}
                       />
-                    </>
+                    </div>
                   )}
-                </div>
 
-                {/* Citas Confirmadas */}
-                <div className="mb-8 border-b border-gray-200 dark:border-gray-700 pb-8">
-                  <div 
-                    className="flex items-center justify-between cursor-pointer" 
-                    onClick={() => toggleSection('confirmed')}
-                  >
-                    <SectionHeader 
-                      title={`Citas Confirmadas (${confirmedAppointments.length})`}
-                      description="Citas confirmadas y programadas."
-                    />
-                    <button className="p-2">
-                      <svg 
-                        className={`w-6 h-6 transform transition-transform ${collapsedSections.confirmed ? '-rotate-90' : 'rotate-0'}`} 
-                        fill="none" 
-                        stroke="currentColor" 
-                        viewBox="0 0 24 24"
-                      >
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
-                      </svg>
-                    </button>
-                  </div>
-                  {!collapsedSections.confirmed && (
-                    <>
+                  {activeAppointmentTab === 'confirmed' && (
+                    <div className="space-y-6">
                       <BusinessAppointmentList
                         appointments={pagedConfirmed}
                         onStatusChange={handleUpdateAppointmentStatus}
@@ -430,33 +375,11 @@ export const BusinessDashboard: React.FC = () => {
                         totalPages={Math.ceil(confirmedAppointments.length / pagination.confirmed.perPage)}
                         onPageChange={(page) => handlePageChange('confirmed', page)}
                       />
-                    </>
+                    </div>
                   )}
-                </div>
 
-                {/* Historial de Citas */}
-                <div className="border-b border-gray-200 dark:border-gray-700 pb-8">
-                  <div 
-                    className="flex items-center justify-between cursor-pointer" 
-                    onClick={() => toggleSection('history')}
-                  >
-                    <SectionHeader 
-                      title={`Historial de Citas (${pastAppointments.length})`}
-                      description="Citas completadas y pasadas."
-                    />
-                    <button className="p-2">
-                      <svg 
-                        className={`w-6 h-6 transform transition-transform ${collapsedSections.history ? '-rotate-90' : 'rotate-0'}`} 
-                        fill="none" 
-                        stroke="currentColor" 
-                        viewBox="0 0 24 24"
-                      >
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
-                      </svg>
-                    </button>
-                  </div>
-                  {!collapsedSections.history && (
-                    <>
+                  {activeAppointmentTab === 'history' && (
+                    <div className="space-y-6">
                       <BusinessAppointmentList
                         appointments={pagedPast}
                         onStatusChange={handleUpdateAppointmentStatus}
@@ -467,37 +390,29 @@ export const BusinessDashboard: React.FC = () => {
                         totalPages={Math.ceil(pastAppointments.length / pagination.history.perPage)}
                         onPageChange={(page) => handlePageChange('history', page)}
                       />
-                    </>
+                    </div>
                   )}
                 </div>
-              </>
+              </div>
             )}
 
             {/* Tab de Servicios */}
             {activeTab === 'services' && businessData && (
-              <>
-                <SectionHeader 
-                  title="Servicios" 
-                  description="Gestiona los servicios que ofreces a tus clientes."
-                />
-              <ServicesSection
-                businessId={businessData.id}
+              <div className="animate-in fade-in zoom-in-95 duration-300">
+                <ServicesSection
+                  businessId={businessData.id}
                   getServices={ApiClient.getBusinessServices}
                   createService={ApiClient.createBusinessService}
                   updateService={ApiClient.updateBusinessService}
                   deleteService={ApiClient.deleteBusinessService}
                   itemsPerPage={itemsPerPage}
                 />
-              </>
+              </div>
             )}
 
             {/* Tab de Clientes */}
             {activeTab === 'clients' && (
-              <>
-                <SectionHeader 
-                  title="Clientes" 
-                  description="Gestiona los clientes de tu negocio."
-                />
+              <div className="space-y-6 animate-in fade-in zoom-in-95 duration-300">
                 <ClientsSection
                   clients={pagedClients}
                   loading={loadingBusinessClients}
@@ -508,34 +423,28 @@ export const BusinessDashboard: React.FC = () => {
                   totalPages={Math.ceil(businessClients.length / pagination.clients.perPage)}
                   onPageChange={(page) => handlePageChange('clients', page)}
                 />
-              </>
+              </div>
             )}
 
             {/* Tab de Configuración Unificada */}
             {activeTab === 'settings' && businessData && (
-              <>
-                {/* Sección de Perfil */}
-                <div className="mb-8 border-b border-gray-200 dark:border-gray-700 pb-8">
-                  <div 
-                    className="flex items-center justify-between cursor-pointer" 
-                    onClick={() => toggleConfigSection('profile')}
-                  >
-                    <SectionHeader 
-                      title="Datos del Negocio" 
-                      description="Actualiza la información de tu negocio."
+              <div className="space-y-8">
+                <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+                  <SectionHeader 
+                    title="Configuración" 
+                    description="Personaliza tu perfil, horarios y ajustes del negocio"
+                  />
+                  <div className="bg-white dark:bg-slate-900 p-1 rounded-2xl border border-slate-200 dark:border-slate-800 shadow-sm self-start">
+                    <TabNav 
+                      tabs={settingsTabs} 
+                      activeTabId={activeSettingsTab} 
+                      onTabChange={setActiveSettingsTab} 
                     />
-                    <button className="p-2">
-                      <svg 
-                        className={`w-6 h-6 transform transition-transform ${collapsedConfigSections.profile ? '-rotate-90' : 'rotate-0'}`} 
-                        fill="none" 
-                        stroke="currentColor" 
-                        viewBox="0 0 24 24"
-                      >
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
-                      </svg>
-                    </button>
                   </div>
-                  {!collapsedConfigSections.profile && (
+                </div>
+
+                <div className="animate-in fade-in zoom-in-95 duration-300">
+                  {activeSettingsTab === 'profile' && (
                     <BusinessProfileSection
                       businessData={businessData}
                       onSave={handleBusinessSubmit}
@@ -544,30 +453,8 @@ export const BusinessDashboard: React.FC = () => {
                       message={businessMessage}
                     />
                   )}
-                </div>
 
-                {/* Sección de Horarios */}
-                <div className="mb-8 border-b border-gray-200 dark:border-gray-700 pb-8">
-                  <div 
-                    className="flex items-center justify-between cursor-pointer" 
-                    onClick={() => toggleConfigSection('hours')}
-                  >
-                    <SectionHeader 
-                      title="Horarios de Atención"
-                      description="Configura los días y horarios de atención de tu negocio."
-                    />
-                    <button className="p-2">
-                      <svg 
-                        className={`w-6 h-6 transform transition-transform ${collapsedConfigSections.hours ? '-rotate-90' : 'rotate-0'}`} 
-                        fill="none" 
-                        stroke="currentColor" 
-                        viewBox="0 0 24 24"
-                      >
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
-                      </svg>
-                    </button>
-                  </div>
-                  {!collapsedConfigSections.hours && (
+                  {activeSettingsTab === 'hours' && (
                     <BusinessHoursSection
                       businessHours={businessHours}
                       loading={loadingBusinessHours}
@@ -578,30 +465,8 @@ export const BusinessDashboard: React.FC = () => {
                       days={days}
                     />
                   )}
-                </div>
 
-                {/* Sección de Configuración General */}
-                <div className="mb-8 border-b border-gray-200 dark:border-gray-700 pb-8">
-                  <div 
-                    className="flex items-center justify-between cursor-pointer" 
-                    onClick={() => toggleConfigSection('config')}
-                  >
-                    <SectionHeader 
-                      title="Configuración General"
-                      description="Personaliza las opciones de tu negocio."
-                    />
-                    <button className="p-2">
-                      <svg 
-                        className={`w-6 h-6 transform transition-transform ${collapsedConfigSections.config ? '-rotate-90' : 'rotate-0'}`} 
-                        fill="none" 
-                        stroke="currentColor" 
-                        viewBox="0 0 24 24"
-                      >
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
-                      </svg>
-                    </button>
-                  </div>
-                  {!collapsedConfigSections.config && (
+                  {activeSettingsTab === 'config' && (
                     <BusinessConfigSection
                       config={businessConfig}
                       loading={loadingBusinessConfig}
@@ -611,30 +476,8 @@ export const BusinessDashboard: React.FC = () => {
                       onConfigChange={handleConfigChange}
                     />
                   )}
-                </div>
 
-                {/* Sección de Estadísticas */}
-                <div className="border-b border-gray-200 dark:border-gray-700 pb-8">
-                  <div 
-                    className="flex items-center justify-between cursor-pointer" 
-                    onClick={() => toggleConfigSection('stats')}
-                  >
-                    <SectionHeader 
-                      title="Estadísticas del Negocio"
-                      description="Métricas y datos importantes de tu negocio."
-                    />
-                    <button className="p-2">
-                      <svg 
-                        className={`w-6 h-6 transform transition-transform ${collapsedConfigSections.stats ? '-rotate-90' : 'rotate-0'}`} 
-                        fill="none" 
-                        stroke="currentColor" 
-                        viewBox="0 0 24 24"
-                      >
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
-                      </svg>
-                    </button>
-                  </div>
-                  {!collapsedConfigSections.stats && (
+                  {activeSettingsTab === 'stats' && (
                     <StatsSection
                       totalAppointments={appointments.length}
                       upcomingAppointments={confirmedAppointments.length}
@@ -654,7 +497,7 @@ export const BusinessDashboard: React.FC = () => {
                     />
                   )}
                 </div>
-              </>
+              </div>
             )}
           </div>
         </div>
@@ -663,4 +506,4 @@ export const BusinessDashboard: React.FC = () => {
   );
 };
 
-export default BusinessDashboard; 
+export default BusinessDashboard;

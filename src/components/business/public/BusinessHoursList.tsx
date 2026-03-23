@@ -16,27 +16,30 @@ const BusinessHoursList: React.FC<BusinessHoursListProps> = ({ businessHours }) 
     return time;
   };
 
-  // Return full week: if no entry for a day, show as Closed
   return (
-    <ul className="space-y-2">
-      {days.map((dayName, idx) => {
-        const hour = businessHours.find(h => h.day_of_week === idx);
+    <div className="space-y-3">
+      {days.map((day, index) => {
+        const hours = businessHours.find((h) => h.day_of_week === index);
+        const isOpen = hours && !hours.is_closed;
+
         return (
-          <li key={idx} className="flex justify-between py-2 border-b border-gray-100">
-            <span className="font-medium">{dayName}</span>
-            {hour ? (
-              hour.is_closed ? (
-                <span>Cerrado</span>
-              ) : (
-                <span>{formatTime(hour.start_time)} - {formatTime(hour.end_time)}</span>
-              )
+          <div key={index} className="flex justify-between items-center py-2 group">
+            <span className={`text-sm font-bold tracking-tight ${isOpen ? 'text-slate-700 dark:text-slate-300' : 'text-slate-400 dark:text-slate-600'}`}>
+              {day}
+            </span>
+            {isOpen ? (
+              <span className="text-sm font-black text-primary-600 dark:text-primary-400 bg-primary-50 dark:bg-primary-900/20 px-3 py-1 rounded-lg border border-primary-100 dark:border-primary-800/50">
+                {formatTime(hours.start_time)} - {formatTime(hours.end_time)}
+              </span>
             ) : (
-              <span>Cerrado</span>
+              <span className="text-xs font-bold text-slate-400 dark:text-slate-600 uppercase tracking-widest bg-slate-100 dark:bg-slate-800/50 px-3 py-1 rounded-lg">
+                Cerrado
+              </span>
             )}
-          </li>
+          </div>
         );
       })}
-    </ul>
+    </div>
   );
 };
 

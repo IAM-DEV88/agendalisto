@@ -120,65 +120,73 @@ function BusinessPublicPage() {
 
   if (loading) {
     return (
-      <div className="min-h-screen flex justify-center items-center py-12 px-4 sm:px-6 lg:px-8">
-        <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-indigo-500"></div>
+      <div className="min-h-screen flex justify-center items-center py-12 px-4 sm:px-6 lg:px-8 bg-slate-50 dark:bg-slate-900 transition-colors duration-200">
+        <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-primary-600"></div>
       </div>
     );
   }
 
   if (error || !businessData) {
     return (
-      <div className="min-h-screen py-12 px-4 sm:px-6 lg:px-8">
+      <div className="min-h-screen py-12 px-4 sm:px-6 lg:px-8 bg-slate-50 dark:bg-slate-900 transition-colors duration-200">
         <div className="max-w-7xl mx-auto text-center">
-          <h2 className="text-3xl font-extrabold text-gray-900 mb-4">Negocio no encontrado</h2>
-          <p className="text-lg text-gray-600 mb-8">{error || 'El negocio que buscas no existe o ha sido eliminado.'}</p>
-          <Link
-            to="/"
-            className="inline-flex items-center px-4 py-2 border border-transparent rounded-md shadow-sm text-base font-medium text-white bg-indigo-600 hover:bg-indigo-700"
-          >
-            Volver a inicio
-          </Link>
+          <div className="card p-12 max-w-2xl mx-auto">
+            <h2 className="text-3xl font-extrabold text-slate-900 dark:text-white mb-4">Negocio no encontrado</h2>
+            <p className="text-lg text-slate-600 dark:text-slate-400 mb-8">{error || 'El negocio que buscas no existe o ha sido eliminado.'}</p>
+            <Link
+              to="/"
+              className="btn-primary inline-flex w-auto"
+            >
+              Volver a inicio
+            </Link>
+          </div>
         </div>
       </div>
     );
   }
 
   return (
-    <div className="py-6 px-4 sm:px-6 lg:px-8">
+    <div className="min-h-screen py-8 px-4 sm:px-6 lg:px-8 bg-slate-50 dark:bg-slate-900 transition-colors duration-200">
       <div className="max-w-7xl mx-auto">
         {/* Business Header */}
         <BusinessHeader businessData={businessData} averageRating={averageRating} reviewsCount={reviews.length} />
 
         {/* Mobile Tabs */}
-        <div className="mt-6 bg-gray-50 dark:bg-gray-50 dark:bg-opacity-10 shadow-md overflow-hidden md:hidden rounded-md">
-          <div className="flex border-b border-gray-200">
+        <div className="mt-8 card overflow-hidden md:hidden">
+          <div className="flex border-b border-slate-200 dark:border-slate-700 bg-slate-100/50 dark:bg-slate-800/50">
             <button
               onClick={() => setActiveTab('services')}
-              className={`flex-1 py-3 px-4 text-center font-medium ${activeTab === 'services' ? ' border-b-2 border-indigo-600' : 'text-gray-500'
-                }`}
+              className={`flex-1 py-4 px-4 text-center text-sm font-bold transition-all ${activeTab === 'services' 
+                ? 'text-primary-600 dark:text-primary-400 border-b-2 border-primary-600 dark:border-primary-400 bg-white dark:bg-slate-800' 
+                : 'text-slate-500 hover:text-slate-700 dark:hover:text-slate-300'
+              }`}
             >
               Servicios
             </button>
             <button
               onClick={() => setActiveTab('hours')}
-              className={`flex-1 py-3 px-4 text-center font-medium ${activeTab === 'hours' ? ' border-b-2 border-indigo-600' : 'text-gray-500'
-                }`}
+              className={`flex-1 py-4 px-4 text-center text-sm font-bold transition-all ${activeTab === 'hours' 
+                ? 'text-primary-600 dark:text-primary-400 border-b-2 border-primary-600 dark:border-primary-400 bg-white dark:bg-slate-800' 
+                : 'text-slate-500 hover:text-slate-700 dark:hover:text-slate-300'
+              }`}
             >
               Horarios
             </button>
             <button
               onClick={() => setActiveTab('location')}
-              className={`flex-1 py-3 px-4 text-center font-medium ${activeTab === 'location' ? ' border-b-2 border-indigo-600' : 'text-gray-500'
-                }`}
+              className={`flex-1 py-4 px-4 text-center text-sm font-bold transition-all ${activeTab === 'location' 
+                ? 'text-primary-600 dark:text-primary-400 border-b-2 border-primary-600 dark:border-primary-400 bg-white dark:bg-slate-800' 
+                : 'text-slate-500 hover:text-slate-700 dark:hover:text-slate-300'
+              }`}
             >
               Ubicación
             </button>
           </div>
 
-          <div className="p-4">
+          <div className="p-6">
             {activeTab === 'services' && (
-              <div>
-                <h3 className="text-lg font-semibold mb-4">Servicios Disponibles</h3>
+              <div className="animate-in fade-in duration-300">
+                <h3 className="text-xl font-bold text-slate-900 dark:text-white mb-6">Servicios Disponibles</h3>
                 <ServicesList
                   services={services}
                   selectedService={selectedService}
@@ -189,17 +197,15 @@ function BusinessPublicPage() {
                 />
 
                 {selectedService && businessData?.config?.permitir_reservas_online && user && user.id !== businessData?.owner_id && (
-                  <div className="mt-6">
-                    <button
-                      className="w-full bg-indigo-600 text-white py-2 px-4 font-medium hover:bg-indigo-700 transition-colors"
-                    >
+                  <div className="mt-8">
+                    <button className="btn-primary">
                       Reservar Ahora
                     </button>
                   </div>
                 )}
 
                 {showBooking && user && user.id !== businessData?.owner_id && (
-                  <div className="mt-6 bg-gray-50 dark:bg-gray-50 dark:bg-opacity-10 shadow-md p-6">
+                  <div className="mt-8 card p-6 border-primary-200 dark:border-primary-900 bg-primary-50/30 dark:bg-primary-900/10">
                     <BookingForm
                       businessId={businessData.id}
                       serviceId={selectedService || ''}
@@ -216,8 +222,8 @@ function BusinessPublicPage() {
                 )}
 
                 {user && user.id === businessData?.owner_id && (
-                  <div className="mt-6">
-                    <Link to="/business/dashboard?tab=services" className="w-full block bg-green-600 text-white py-2 px-4 rounded hover:bg-green-700">
+                  <div className="mt-8">
+                    <Link to="/business/dashboard?tab=services" className="btn-secondary text-center">
                       Gestionar Servicios
                     </Link>
                   </div>
@@ -226,13 +232,13 @@ function BusinessPublicPage() {
             )}
 
             {activeTab === 'hours' && (
-              <div>
-                <h3 className="text-lg font-semibold mb-4">Horarios de Atención</h3>
+              <div className="animate-in fade-in duration-300">
+                <h3 className="text-xl font-bold text-slate-900 dark:text-white mb-6">Horarios de Atención</h3>
                 <BusinessHoursList businessHours={businessHours} />
 
                 {user && user.id === businessData?.owner_id && (
-                  <div className="mt-6">
-                    <Link to="/business/dashboard?tab=availability" className="w-full block bg-green-600 text-white py-2 px-4 rounded hover:bg-green-700">
+                  <div className="mt-8">
+                    <Link to="/business/dashboard?tab=availability" className="btn-secondary text-center">
                       Editar Horarios
                     </Link>
                   </div>
@@ -241,13 +247,13 @@ function BusinessPublicPage() {
             )}
 
             {activeTab === 'location' && businessData?.config?.mostrar_direccion && (
-              <div>
-                <h3 className="text-lg font-semibold mb-4">Ubicación</h3>
+              <div className="animate-in fade-in duration-300">
+                <h3 className="text-xl font-bold text-slate-900 dark:text-white mb-6">Ubicación</h3>
                 <BusinessLocation address={businessData.address} />
 
                 {user && user.id === businessData?.owner_id && (
-                  <div className="mt-6">
-                    <Link to="/business/dashboard?tab=profile" className="w-full block bg-green-600 text-white py-2 px-4 rounded hover:bg-green-700">
+                  <div className="mt-8">
+                    <Link to="/business/dashboard?tab=profile" className="btn-secondary text-center">
                       Editar Datos del Negocio
                     </Link>
                   </div>
@@ -258,18 +264,18 @@ function BusinessPublicPage() {
         </div>
 
         {/* Mobile Reviews Section */}
-        <div className="mt-6 md:hidden">
-          <div className="bg-gray-50 dark:bg-gray-50 dark:bg-opacity-10 shadow-md p-6 rounded-md">
+        <div className="mt-8 md:hidden">
+          <div className="card p-6">
             <ReviewsSection businessId={businessData.id} />
           </div>
         </div>
 
-        {/* Desktop Layout - hidden on mobile to prevent duplicate booking forms */}
-        <div className="mt-6 hidden md:grid grid-cols-1 md:grid-cols-3 gap-6">
+        {/* Desktop Layout */}
+        <div className="mt-8 hidden md:grid grid-cols-1 md:grid-cols-3 gap-8">
           {/* Main Column */}
-          <div className="md:col-span-2">
-            <div className="bg-gray-50 dark:bg-gray-50 dark:bg-opacity-10 shadow-md p-6 hidden md:block rounded-md">
-              <h2 className="text-xl font-semibold mb-6">Servicios Disponibles</h2>
+          <div className="md:col-span-2 space-y-8">
+            <div className="card p-8">
+              <h2 className="text-2xl font-bold text-slate-900 dark:text-white mb-8">Servicios Disponibles</h2>
               <ServicesList
                 services={services}
                 selectedService={selectedService}
@@ -280,8 +286,8 @@ function BusinessPublicPage() {
               />
 
               {user && user.id === businessData?.owner_id && (
-                <div className="mt-6">
-                  <Link to="/business/dashboard?tab=services" className="block text-center bg-green-600 text-white py-2 px-4 rounded hover:bg-green-700">
+                <div className="mt-8">
+                  <Link to="/business/dashboard?tab=services" className="btn-secondary inline-flex w-auto px-6">
                     Gestionar Servicios
                   </Link>
                 </div>
@@ -290,7 +296,7 @@ function BusinessPublicPage() {
 
             {/* Booking Form */}
             {showBooking && user && user.id !== businessData?.owner_id && (
-              <div className="mt-6 bg-gray-50 dark:bg-gray-50 dark:bg-opacity-10 shadow-md p-6 rounded-md">
+              <div className="card p-8 border-primary-200 dark:border-primary-900 bg-primary-50/30 dark:bg-primary-900/10 animate-in zoom-in duration-300">
                 <BookingForm
                   businessId={businessData.id}
                   serviceId={selectedService || ''}
@@ -305,25 +311,23 @@ function BusinessPublicPage() {
                 />
               </div>
             )}
+            
             {/* Reviews Section */}
-            <div className="mt-6 hidden md:block">
-              <div className="bg-gray-50 dark:bg-gray-50 dark:bg-opacity-10 shadow-md p-6 rounded-md">
-                <ReviewsSection businessId={businessData.id} />
-              </div>
+            <div className="card p-8">
+              <ReviewsSection businessId={businessData.id} />
             </div>
-
           </div>
 
           {/* Sidebar */}
-          <div className="space-y-6 hidden md:block">
+          <div className="space-y-8">
             {/* Hours */}
-            <div className="bg-gray-50 dark:bg-gray-50 dark:bg-opacity-10 shadow-md p-6 rounded-md">
-              <h2 className="text-xl font-semibold mb-4">Horarios de Atención</h2>
+            <div className="card p-8">
+              <h2 className="text-xl font-bold text-slate-900 dark:text-white mb-6">Horarios de Atención</h2>
               <BusinessHoursList businessHours={businessHours} />
 
               {user && user.id === businessData?.owner_id && (
-                <div className="mt-6">
-                  <Link to="/business/dashboard?tab=availability" className="block text-center bg-green-600 text-white py-2 px-4 rounded hover:bg-green-700">
+                <div className="mt-8">
+                  <Link to="/business/dashboard?tab=availability" className="btn-secondary text-center">
                     Editar Horarios
                   </Link>
                 </div>
@@ -332,47 +336,43 @@ function BusinessPublicPage() {
 
             {/* Location */}
             {businessData?.config?.mostrar_direccion && (
-              <div className="bg-gray-50 dark:bg-gray-50 dark:bg-opacity-10 shadow-md p-6 rounded-md">
-                <h2 className="text-xl font-semibold mb-4">Ubicación</h2>
+              <div className="card p-8">
+                <h2 className="text-xl font-bold text-slate-900 dark:text-white mb-6">Ubicación</h2>
                 <BusinessLocation address={businessData.address} />
 
                 {user && user.id === businessData?.owner_id && (
-                  <div className="mt-6">
-                    <Link to="/business/dashboard?tab=profile" className="block text-center bg-green-600 text-white py-2 px-4 rounded hover:bg-green-700">
-                      Editar Datos del Negocio
+                  <div className="mt-8">
+                    <Link to="/business/dashboard?tab=profile" className="btn-secondary text-center">
+                      Editar Perfil
                     </Link>
                   </div>
                 )}
               </div>
             )}
 
-            {/* Booking Button */}
+            {/* Booking Button (Desktop) */}
             {selectedService && businessData?.config?.permitir_reservas_online && user && user.id !== businessData?.owner_id && (
-              <div className="bg-gray-50 dark:bg-gray-50 dark:bg-opacity-10 shadow-md p-6 rounded-md">
-                <h2 className="text-xl font-semibold mb-4">Reservar Cita</h2>
+              <div className="card p-8 bg-primary-600 dark:bg-primary-900">
+                <h2 className="text-xl font-bold text-white mb-4">¿Listo para reservar?</h2>
+                <p className="text-primary-100 mb-6 text-sm">Selecciona un servicio y solicita tu cita ahora mismo.</p>
                 <button
-                  className="w-full bg-indigo-600 text-white py-2 px-4 font-medium hover:bg-indigo-700 transition-colors"
+                  onClick={() => setShowBooking(true)}
+                  className="w-full bg-white text-primary-700 py-3 px-4 rounded-xl font-bold hover:bg-primary-50 transition-all shadow-lg"
                 >
                   Reservar Ahora
                 </button>
               </div>
             )}
 
-
             {!user && (
-              <div className="bg-gray-50 dark:bg-opacity-10 dark:bg-opacity-10 shadow-md p-6 rounded-md">
-                <div className="bg-yellow-50 border border-yellow-200 rounded-md p-4">
-                  <p className="text-sm text-yellow-800">
-                    Debes <Link to="/login" className="font-medium underline">iniciar sesión</Link> para reservar servicios.
-                  </p>
-                </div>
+              <div className="card p-8 bg-amber-50 dark:bg-amber-900/20 border-amber-200 dark:border-amber-800">
+                <p className="text-sm text-amber-800 dark:text-amber-300 font-medium">
+                  Debes <Link to="/login" className="underline font-bold decoration-amber-500/50 hover:text-amber-600 transition-colors">iniciar sesión</Link> para reservar servicios.
+                </p>
               </div>
             )}
-
           </div>
-
         </div>
-
       </div>
     </div>
   );

@@ -1,6 +1,8 @@
 import React, { useState, useEffect } from 'react';
+import { Camera, Save, Loader2, Globe, Phone, MapPin, Mail, Tag, Info, Settings } from 'lucide-react';
 import { Business, updateBusiness, getBusinessCategories, BusinessCategory } from '../../lib/api';
 import { supabase } from '../../lib/supabase';
+import SectionHeader from '../ui/SectionHeader';
 
 interface BusinessProfileSectionProps {
   businessData: Business;
@@ -152,106 +154,70 @@ const BusinessProfileSection: React.FC<BusinessProfileSectionProps> = ({
   };
 
   return (
-    <div>
-      <form onSubmit={handleSubmit} className="space-y-2">
-        <div className="dark:bg-opacity-10 bg-gray-50 shadow overflow-hidden rounded-md">
-          <div className="px-4 py-5 sm:p-6">
-            {/* Business logo preview (circular) */}
-            <div className="flex justify-center mb-4">
-              <img
-                src={previewUrl || FALLBACK_LOGO}
-                alt="Logo del negocio"
-                className="h-24 w-24 rounded-full object-cover"
-                onError={(e) => { e.currentTarget.src = FALLBACK_LOGO; }}
-              />
+    <div className="space-y-6">
+      <SectionHeader 
+        title="Perfil del Negocio" 
+        description="Información pública y datos de contacto de tu establecimiento"
+      />
+
+      <form onSubmit={handleSubmit} className="space-y-6">
+        <div className="card p-6 md:p-8">
+          <div className="flex flex-col md:flex-row gap-8 items-start">
+            {/* Logo Upload Section */}
+            <div className="flex-shrink-0 flex flex-col items-center gap-4 w-full md:w-auto">
+              <div className="relative group">
+                <div className="w-32 h-32 rounded-2xl overflow-hidden border-4 border-slate-100 dark:border-slate-800 shadow-xl group-hover:border-primary-500/30 transition-all">
+                  <img
+                    src={previewUrl || FALLBACK_LOGO}
+                    alt="Logo del negocio"
+                    className="w-full h-full object-cover"
+                    onError={(e) => { e.currentTarget.src = FALLBACK_LOGO; }}
+                  />
+                  {isUploading && (
+                    <div className="absolute inset-0 bg-slate-900/60 backdrop-blur-sm flex items-center justify-center">
+                      <Loader2 className="w-8 h-8 text-white animate-spin" />
+                    </div>
+                  )}
+                </div>
+                <label className="absolute -bottom-2 -right-2 p-2 bg-primary-600 hover:bg-primary-700 text-white rounded-xl shadow-lg cursor-pointer transition-all hover:scale-110">
+                  <Camera className="w-5 h-5" />
+                  <input type="file" className="hidden" accept="image/*" onChange={handleLogoUpload} disabled={isUploading} />
+                </label>
+              </div>
+              <p className="text-xs font-bold text-slate-400 uppercase tracking-wider">Logo del Negocio</p>
             </div>
-            <div className="grid grid-cols-1 gap-y-6 gap-x-4 sm:grid-cols-6">
-              <div className="sm:col-span-3">
-                <label htmlFor="name" className="block text-sm font-medium text-gray-700 dark:text-gray-300">Nombre</label>
+
+            {/* Form Fields */}
+            <div className="flex-grow grid grid-cols-1 md:grid-cols-2 gap-6 w-full">
+              <div className="space-y-2">
+                <label htmlFor="name" className="text-sm font-bold text-slate-700 dark:text-slate-300 flex items-center gap-2">
+                  <Tag className="w-4 h-4 text-slate-400" />
+                  Nombre del Negocio
+                </label>
                 <input
                   type="text"
                   name="name"
                   id="name"
                   value={businessData.name}
                   onChange={onChange}
-                  className="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500 dark:bg-gray-900 p-2"
+                  className="w-full px-4 py-2.5 rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 focus:ring-2 focus:ring-primary-500/20 focus:border-primary-500 outline-none transition-all font-medium text-slate-900 dark:text-white"
+                  placeholder="Ej: Barbería Estilo"
+                  required
                 />
               </div>
-              <div className="sm:col-span-3">
-                <label htmlFor="logo" className="block text-sm font-medium text-gray-700 dark:text-gray-300">Logo del negocio</label>
-                <input
-                  type="file"
-                  name="logo"
-                  id="logo"
-                  accept="image/*"
-                  onChange={handleLogoUpload}
-                  disabled={isUploading}
-                  className="mt-1 block w-full text-sm"
-                />
-              </div>
-              <div className="sm:col-span-6">
-                <label htmlFor="description" className="block text-sm font-medium text-gray-700 dark:text-gray-300">Descripción</label>
-                <textarea
-                  name="description"
-                  id="description"
-                  value={businessData.description}
-                  onChange={onChange}
-                  className="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500 dark:bg-gray-900 p-2"
-                  rows={3}
-                ></textarea>
-              </div>
-              <div className="sm:col-span-3">
-                <label htmlFor="address" className="block text-sm font-medium text-gray-700 dark:text-gray-300">Dirección</label>
-                <input
-                  type="text"
-                  name="address"
-                  id="address"
-                  value={businessData.address}
-                  onChange={onChange}
-                  className="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500 dark:bg-gray-900 p-2"
-                />
-              </div>
-              <div className="sm:col-span-3">
-                <label htmlFor="phone" className="block text-sm font-medium text-gray-700 dark:text-gray-300">Teléfono</label>
-                <input
-                  type="text"
-                  name="phone"
-                  id="phone"
-                  value={businessData.phone}
-                  onChange={onChange}
-                  className="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500 dark:bg-gray-900 p-2"
-                />
-              </div>
-              <div className="sm:col-span-3">
-                <label htmlFor="website" className="block text-sm font-medium text-gray-700 dark:text-gray-300">Sitio Web</label>
-                <input
-                  type="text"
-                  name="website"
-                  id="website"
-                  value={businessData.website || ''}
-                  onChange={onChange}
-                  className="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500 dark:bg-gray-900 p-2"
-                />
-              </div>
-              <div className="sm:col-span-3">
-                <label htmlFor="email" className="block text-sm font-medium text-gray-700 dark:text-gray-300">Correo Electrónico</label>
-                <input
-                  type="email"
-                  name="email"
-                  id="email"
-                  value={businessData.email}
-                  onChange={onChange}
-                  className="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500 dark:bg-gray-900 p-2"
-                />
-              </div>
-              <div className="sm:col-span-3">
-                <label htmlFor="category_id" className="block text-sm font-medium text-gray-700 dark:text-gray-300">Categoría</label>
+
+              <div className="space-y-2">
+                <label htmlFor="category_id" className="text-sm font-bold text-slate-700 dark:text-slate-300 flex items-center gap-2">
+                  <Settings className="w-4 h-4 text-slate-400" />
+                  Categoría
+                </label>
                 <select
                   name="category_id"
                   id="category_id"
                   value={businessData.category_id || ''}
                   onChange={onChange}
-                  className="mt-1 block w-full border-gray-300 bg-gray-50 rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500 dark:bg-gray-900 p-2"
+                  className="w-full px-4 py-2.5 rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 focus:ring-2 focus:ring-primary-500/20 focus:border-primary-500 outline-none transition-all font-medium text-slate-900 dark:text-white"
+                  required
                 >
                   <option value="" disabled>Selecciona una categoría</option>
                   {categories.map(cat => (
@@ -260,21 +226,100 @@ const BusinessProfileSection: React.FC<BusinessProfileSectionProps> = ({
                 </select>
               </div>
 
-            </div>
+              <div className="space-y-2 md:col-span-2">
+                <label htmlFor="description" className="text-sm font-bold text-slate-700 dark:text-slate-300 flex items-center gap-2">
+                  <Info className="w-4 h-4 text-slate-400" />
+                  Descripción
+                </label>
+                <textarea
+                  name="description"
+                  id="description"
+                  value={businessData.description}
+                  onChange={onChange}
+                  rows={3}
+                  className="w-full px-4 py-2.5 rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 focus:ring-2 focus:ring-primary-500/20 focus:border-primary-500 outline-none transition-all font-medium resize-none text-slate-900 dark:text-white"
+                  placeholder="Describe los servicios y valores de tu negocio..."
+                ></textarea>
+              </div>
 
+              <div className="space-y-2">
+                <label htmlFor="phone" className="text-sm font-bold text-slate-700 dark:text-slate-300 flex items-center gap-2">
+                  <Phone className="w-4 h-4 text-slate-400" />
+                  Teléfono de Contacto
+                </label>
+                <input
+                  type="text"
+                  name="phone"
+                  id="phone"
+                  value={businessData.phone}
+                  onChange={onChange}
+                  className="w-full px-4 py-2.5 rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 focus:ring-2 focus:ring-primary-500/20 focus:border-primary-500 outline-none transition-all font-medium text-slate-900 dark:text-white"
+                  placeholder="+56 9 1234 5678"
+                  required
+                />
+              </div>
+
+              <div className="space-y-2">
+                <label htmlFor="email" className="text-sm font-bold text-slate-700 dark:text-slate-300 flex items-center gap-2">
+                  <Mail className="w-4 h-4 text-slate-400" />
+                  Correo Electrónico
+                </label>
+                <input
+                  type="email"
+                  name="email"
+                  id="email"
+                  value={businessData.email}
+                  onChange={onChange}
+                  className="w-full px-4 py-2.5 rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 focus:ring-2 focus:ring-primary-500/20 focus:border-primary-500 outline-none transition-all font-medium text-slate-900 dark:text-white"
+                  placeholder="contacto@negocio.com"
+                  required
+                />
+              </div>
+
+              <div className="space-y-2">
+                <label htmlFor="address" className="text-sm font-bold text-slate-700 dark:text-slate-300 flex items-center gap-2">
+                  <MapPin className="w-4 h-4 text-slate-400" />
+                  Dirección
+                </label>
+                <input
+                  type="text"
+                  name="address"
+                  id="address"
+                  value={businessData.address}
+                  onChange={onChange}
+                  className="w-full px-4 py-2.5 rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 focus:ring-2 focus:ring-primary-500/20 focus:border-primary-500 outline-none transition-all font-medium text-slate-900 dark:text-white"
+                  placeholder="Calle Ficticia 123, Ciudad"
+                  required
+                />
+              </div>
+
+              <div className="space-y-2">
+                <label htmlFor="website" className="text-sm font-bold text-slate-700 dark:text-slate-300 flex items-center gap-2">
+                  <Globe className="w-4 h-4 text-slate-400" />
+                  Sitio Web (opcional)
+                </label>
+                <input
+                  type="text"
+                  name="website"
+                  id="website"
+                  value={businessData.website || ''}
+                  onChange={onChange}
+                  className="w-full px-4 py-2.5 rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 focus:ring-2 focus:ring-primary-500/20 focus:border-primary-500 outline-none transition-all font-medium text-slate-900 dark:text-white"
+                  placeholder="https://www.tu-web.com"
+                />
+              </div>
+            </div>
           </div>
         </div>
-        <div className="flex justify-end">
+
+        <div className="flex justify-end pt-4">
           <button
             type="submit"
-            disabled={saving}
-            className={`inline-flex rounded-md items-center px-4 py-2 border border-transparent text-sm font-medium -md shadow-sm text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 ${saving ? 'opacity-70 cursor-not-allowed' : ''
-              }`}
+            disabled={saving || isUploading}
+            className="inline-flex items-center px-8 py-3 bg-primary-600 hover:bg-primary-700 text-white font-bold rounded-xl transition-all shadow-lg shadow-primary-500/25 gap-2 disabled:opacity-50"
           >
-            <svg className="h-5 w-5 mr-2" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor">
-              <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
-            </svg>
-            {saving ? 'Guardando...' : 'Guardar cambios'}
+            {saving ? <Loader2 className="w-5 h-5 animate-spin" /> : <Save className="w-5 h-5" />}
+            {saving ? 'Guardando...' : 'Guardar Cambios'}
           </button>
         </div>
       </form>

@@ -1,7 +1,9 @@
 import React from 'react';
+import { Settings, Eye, Bell, ListOrdered, Save, Loader2, CheckCircle2, AlertCircle, Clock } from 'lucide-react';
 import { BusinessConfig } from '../../lib/api';
 import { useItemsPerPage } from '../../hooks/useItemsPerPage';
 import { useAuth } from '../../hooks/useAuth';
+import SectionHeader from '../ui/SectionHeader';
 
 interface BusinessConfigSectionProps {
   config: BusinessConfig;
@@ -31,275 +33,211 @@ export const BusinessConfigSection: React.FC<BusinessConfigSectionProps> = ({
     }
   };
 
+  const ConfigToggle = ({ id, label, description, checked, onChange }: { id: string, label: string, description: string, checked: boolean, onChange: (checked: boolean) => void }) => (
+    <label htmlFor={id} className="flex items-start gap-3 p-3 rounded-xl hover:bg-slate-50 dark:hover:bg-slate-800/50 transition-colors cursor-pointer group">
+      <div className="flex items-center h-5 mt-0.5">
+        <input
+          id={id}
+          type="checkbox"
+          checked={checked}
+          onChange={(e) => onChange(e.target.checked)}
+          className="w-5 h-5 rounded-md border-slate-300 text-primary-600 focus:ring-primary-500"
+        />
+      </div>
+      <div className="min-w-0">
+        <span className="block text-sm font-bold text-slate-700 dark:text-slate-200 group-hover:text-primary-600 dark:group-hover:text-primary-400 transition-colors">
+          {label}
+        </span>
+        <span className="block text-xs text-slate-500 dark:text-slate-400 mt-0.5">
+          {description}
+        </span>
+      </div>
+    </label>
+  );
+
   return (
-    <div>      
+    <div className="space-y-6">
+      <SectionHeader 
+        title="Configuración" 
+        description="Personaliza el comportamiento y la visibilidad de tu negocio en la plataforma"
+      />
+      
       {message && (
-        <div className={`mb-4 p-4  ${message.type === 'success' ? 'bg-green-50 text-green-800' : 'bg-red-50 text-red-800'}`}>
-          <div className="flex">
-            <div className="flex-shrink-0">
-              {message.type === 'error' ? (
-                <svg className="h-5 w-5 text-red-400" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor">
-                  <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clipRule="evenodd" />
-                </svg>
-              ) : (
-                <svg className="h-5 w-5 text-green-400" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor">
-                  <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd" />
-                </svg>
-              )}
-            </div>
-            <div className="ml-3">
-              <h3 className="text-sm font-medium text-gray-800">{message.type === 'success' ? 'Éxito' : 'Error'}</h3>
-              <div className="mt-2 text-sm text-gray-700">
-                <p>{message.text}</p>
-              </div>
-            </div>
-          </div>
+        <div className={`alert ${message.type === 'success' ? 'alert-success' : 'alert-error'} flex items-center gap-3 animate-in fade-in slide-in-from-top-2 duration-300`}>
+          {message.type === 'success' ? <CheckCircle2 className="w-5 h-5" /> : <AlertCircle className="w-5 h-5" />}
+          <p className="font-bold">{message.text}</p>
         </div>
       )}
       
       {loading ? (
-        <div className="flex justify-center py-8">
-          <div className="animate-spin rounded-full h-10 w-10 border-t-2 border-b-2 border-indigo-500"></div>
+        <div className="flex flex-col items-center justify-center py-12 gap-4">
+          <Loader2 className="w-10 h-10 text-primary-500 animate-spin" />
+          <p className="text-slate-500 font-medium">Cargando configuración...</p>
         </div>
       ) : (
-        <form onSubmit={handleSubmit} className="space-y-2">
-          {/* Reservas Online */}
-          <div className="bg-gray-50 dark:bg-opacity-10 shadow p-4 rounded-md">
-            <h2 className="text-lg font-medium  text-gray-900 dark:text-gray-300 mb-4">Reservas Online</h2>
-            <div className="space-y-4">
-              <div className="flex items-start">
-                <div className="flex items-center h-5">
-                  <input
-                    id="permitir_reservas_online"
-                    type="checkbox"
-                    checked={config.permitir_reservas_online}
-                    onChange={(e) => onConfigChange('permitir_reservas_online', e.target.checked)}
-                    className="focus:ring-indigo-500 h-4 w-4 text-indigo-600 border-gray-300 "
-                  />
+        <form onSubmit={handleSubmit} className="space-y-6">
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+            {/* Reservas Online */}
+            <div className="card p-6 space-y-6">
+              <div className="flex items-center gap-3 pb-4 border-b border-slate-100 dark:border-slate-800">
+                <div className="p-2 bg-primary-50 text-primary-600 dark:bg-primary-500/10 dark:text-primary-400 rounded-lg">
+                  <Settings className="w-5 h-5" />
                 </div>
-                <div className="ml-3 text-sm">
-                  <label htmlFor="permitir_reservas_online" className="font-medium text-gray-700 dark:text-gray-300">
-                    Permitir reservas online
-                  </label>
-                  <p className="text-gray-500 dark:text-gray-400">Los clientes podrán realizar reservas directamente desde la web.</p>
-                </div>
+                <h3 className="text-lg font-black text-slate-900 dark:text-white tracking-tight">Reservas Online</h3>
+              </div>
+              
+              <div className="space-y-1">
+                <ConfigToggle 
+                  id="permitir_reservas_online"
+                  label="Permitir reservas online"
+                  description="Los clientes podrán realizar reservas directamente desde la web."
+                  checked={config.permitir_reservas_online}
+                  onChange={(val) => onConfigChange('permitir_reservas_online', val)}
+                />
+
+                <ConfigToggle 
+                  id="requiere_confirmacion"
+                  label="Requerir confirmación manual"
+                  description="Las reservas quedarán pendientes hasta que las confirmes manualmente."
+                  checked={config.requiere_confirmacion}
+                  onChange={(val) => onConfigChange('requiere_confirmacion', val)}
+                />
               </div>
 
-              <div className="flex items-start">
-                <div className="flex items-center h-5">
-                  <input
-                    id="requiere_confirmacion"
-                    type="checkbox"
-                    checked={config.requiere_confirmacion}
-                    onChange={(e) => onConfigChange('requiere_confirmacion', e.target.checked)}
-                    className="focus:ring-indigo-500 h-4 w-4 text-indigo-600 border-gray-300 "
-                  />
-                </div>
-                <div className="ml-3 text-sm">
-                  <label htmlFor="requiere_confirmacion" className="font-medium text-gray-700 dark:text-gray-300">
-                    Requerir confirmación manual
-                  </label>
-                  <p className="text-gray-500 dark:text-gray-400">Las reservas quedarán pendientes hasta que las confirmes manualmente.</p>
-                </div>
-              </div>
-
-              <div>
-                <label htmlFor="tiempo_minimo_cancelacion" className="block text-sm font-medium text-gray-700 dark:text-gray-300">
+              <div className="space-y-2 px-3 pt-2">
+                <label htmlFor="tiempo_minimo_cancelacion" className="block text-sm font-bold text-slate-700 dark:text-slate-300">
                   Tiempo mínimo para cancelaciones (horas)
+                </label>
+                <div className="relative">
+                  <Clock className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
+                  <input
+                    type="number"
+                    id="tiempo_minimo_cancelacion"
+                    value={config.tiempo_minimo_cancelacion}
+                    onChange={(e) => onConfigChange('tiempo_minimo_cancelacion', parseInt(e.target.value) || 0)}
+                    min="0"
+                    max="72"
+                    className="w-full pl-10 pr-4 py-2.5 rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 focus:ring-2 focus:ring-primary-500/20 focus:border-primary-500 outline-none transition-all text-sm font-bold"
+                  />
+                </div>
+                <p className="text-xs text-slate-500 dark:text-slate-400 italic">
+                  Plazo límite para que los clientes puedan cancelar sus citas.
+                </p>
+              </div>
+            </div>
+
+            {/* Información Visible */}
+            <div className="card p-6 space-y-6">
+              <div className="flex items-center gap-3 pb-4 border-b border-slate-100 dark:border-slate-800">
+                <div className="p-2 bg-indigo-50 text-indigo-600 dark:bg-indigo-500/10 dark:text-indigo-400 rounded-lg">
+                  <Eye className="w-5 h-5" />
+                </div>
+                <h3 className="text-lg font-black text-slate-900 dark:text-white tracking-tight">Información Visible</h3>
+              </div>
+
+              <div className="space-y-1">
+                <ConfigToggle 
+                  id="mostrar_precios"
+                  label="Mostrar precios"
+                  description="Los precios de los servicios serán visibles en la página pública."
+                  checked={config.mostrar_precios}
+                  onChange={(val) => onConfigChange('mostrar_precios', val)}
+                />
+                <ConfigToggle 
+                  id="mostrar_telefono"
+                  label="Mostrar teléfono"
+                  description="Tu número de teléfono será visible en la página pública."
+                  checked={config.mostrar_telefono}
+                  onChange={(val) => onConfigChange('mostrar_telefono', val)}
+                />
+                <ConfigToggle 
+                  id="mostrar_email"
+                  label="Mostrar email"
+                  description="Tu dirección de email será visible en la página pública."
+                  checked={config.mostrar_email}
+                  onChange={(val) => onConfigChange('mostrar_email', val)}
+                />
+                <ConfigToggle 
+                  id="mostrar_redes_sociales"
+                  label="Mostrar redes sociales"
+                  description="Tus perfiles de redes sociales serán visibles en la página pública."
+                  checked={config.mostrar_redes_sociales}
+                  onChange={(val) => onConfigChange('mostrar_redes_sociales', val)}
+                />
+                <ConfigToggle 
+                  id="mostrar_direccion"
+                  label="Mostrar dirección"
+                  description="Tu dirección y mapa serán visibles en la página pública."
+                  checked={config.mostrar_direccion}
+                  onChange={(val) => onConfigChange('mostrar_direccion', val)}
+                />
+              </div>
+            </div>
+
+            {/* Notificaciones */}
+            <div className="card p-6 space-y-6">
+              <div className="flex items-center gap-3 pb-4 border-b border-slate-100 dark:border-slate-800">
+                <div className="p-2 bg-rose-50 text-rose-600 dark:bg-rose-500/10 dark:text-rose-400 rounded-lg">
+                  <Bell className="w-5 h-5" />
+                </div>
+                <h3 className="text-lg font-black text-slate-900 dark:text-white tracking-tight">Notificaciones</h3>
+              </div>
+
+              <div className="space-y-1">
+                <ConfigToggle 
+                  id="notificaciones_email"
+                  label="Notificaciones por email"
+                  description="Recibir alertas de nuevas reservas en tu correo electrónico."
+                  checked={config.notificaciones_email}
+                  onChange={(val) => onConfigChange('notificaciones_email', val)}
+                />
+                <ConfigToggle 
+                  id="notificaciones_whatsapp"
+                  label="Notificaciones por WhatsApp"
+                  description="Recibir alertas instantáneas en tu número de WhatsApp."
+                  checked={config.notificaciones_whatsapp}
+                  onChange={(val) => onConfigChange('notificaciones_whatsapp', val)}
+                />
+              </div>
+            </div>
+
+            {/* Paginación */}
+            <div className="card p-6 space-y-6">
+              <div className="flex items-center gap-3 pb-4 border-b border-slate-100 dark:border-slate-800">
+                <div className="p-2 bg-amber-50 text-amber-600 dark:bg-amber-500/10 dark:text-amber-400 rounded-lg">
+                  <ListOrdered className="w-5 h-5" />
+                </div>
+                <h3 className="text-lg font-black text-slate-900 dark:text-white tracking-tight">Preferencias de Lista</h3>
+              </div>
+
+              <div className="space-y-2 px-3">
+                <label htmlFor="items_per_page" className="block text-sm font-bold text-slate-700 dark:text-slate-300">
+                  Registros por página
                 </label>
                 <input
                   type="number"
-                  id="tiempo_minimo_cancelacion"
-                  value={config.tiempo_minimo_cancelacion}
-                  onChange={(e) => onConfigChange('tiempo_minimo_cancelacion', parseInt(e.target.value))}
-                  min="0"
-                  max="72"
-                  className="mt-1 block w-full border border-gray-300 -md shadow-sm py-2 px-3 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm"
+                  id="items_per_page"
+                  min="1"
+                  max="50"
+                  value={localItemsPerPage}
+                  onChange={(e) => setLocalItemsPerPage(Math.max(1, Math.min(50, parseInt(e.target.value) || 1)))}
+                  className="w-full px-4 py-2.5 rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 focus:ring-2 focus:ring-primary-500/20 focus:border-primary-500 outline-none transition-all text-sm font-bold"
                 />
-                <p className="mt-2 text-sm  text-gray-500">
-                  Tiempo mínimo requerido para que los clientes puedan cancelar sus citas.
+                <p className="text-xs text-slate-500 dark:text-slate-400 italic">
+                  Número de elementos que se mostrarán en tablas y listados.
                 </p>
               </div>
             </div>
           </div>
 
-          {/* Información Visible */}
-          <div className="bg-gray-50 dark:bg-opacity-10 shadow p-4 rounded-md">
-            <h2 className="text-lg font-medium  text-gray-900 dark:text-gray-300 mb-4">Información Visible</h2>
-            <div className="space-y-4">
-              <div className="flex items-start">
-                <div className="flex items-center h-5">
-                  <input
-                    id="mostrar_precios"
-                    type="checkbox"
-                    checked={config.mostrar_precios}
-                    onChange={(e) => onConfigChange('mostrar_precios', e.target.checked)}
-                    className="focus:ring-indigo-500 h-4 w-4 text-indigo-600 border-gray-300 "
-                  />
-                </div>
-                <div className="ml-3 text-sm">
-                  <label htmlFor="mostrar_precios" className="font-medium text-gray-700 dark:text-gray-300">
-                    Mostrar precios
-                  </label>
-                  <p className="text-gray-500 dark:text-gray-400">Los precios de los servicios serán visibles en la página pública.</p>
-                </div>
-              </div>
-
-              <div className="flex items-start">
-                <div className="flex items-center h-5">
-                  <input
-                    id="mostrar_telefono"
-                    type="checkbox"
-                    checked={config.mostrar_telefono}
-                    onChange={(e) => onConfigChange('mostrar_telefono', e.target.checked)}
-                    className="focus:ring-indigo-500 h-4 w-4 text-indigo-600 border-gray-300 "
-                  />
-                </div>
-                <div className="ml-3 text-sm">
-                  <label htmlFor="mostrar_telefono" className="font-medium text-gray-700 dark:text-gray-300">
-                    Mostrar teléfono
-                  </label>
-                  <p className="text-gray-500 dark:text-gray-400">Tu número de teléfono será visible en la página pública.</p>
-                </div>
-              </div>
-
-              <div className="flex items-start">
-                <div className="flex items-center h-5">
-                  <input
-                    id="mostrar_email"
-                    type="checkbox"
-                    checked={config.mostrar_email}
-                    onChange={(e) => onConfigChange('mostrar_email', e.target.checked)}
-                    className="focus:ring-indigo-500 h-4 w-4 text-indigo-600 border-gray-300 "
-                  />
-                </div>
-                <div className="ml-3 text-sm">
-                  <label htmlFor="mostrar_email" className="font-medium text-gray-700 dark:text-gray-300">
-                    Mostrar email
-                  </label>
-                  <p className="text-gray-500 dark:text-gray-400">Tu dirección de email será visible en la página pública.</p>
-                </div>
-              </div>
-
-              <div className="flex items-start">
-                <div className="flex items-center h-5">
-                  <input
-                    id="mostrar_redes_sociales"
-                    type="checkbox"
-                    checked={config.mostrar_redes_sociales}
-                    onChange={(e) => onConfigChange('mostrar_redes_sociales', e.target.checked)}
-                    className="focus:ring-indigo-500 h-4 w-4 text-indigo-600 border-gray-300 "
-                  />
-                </div>
-                <div className="ml-3 text-sm">
-                  <label htmlFor="mostrar_redes_sociales" className="font-medium text-gray-700 dark:text-gray-300">
-                    Mostrar redes sociales
-                  </label>
-                  <p className="text-gray-500 dark:text-gray-400">Tus perfiles de redes sociales serán visibles en la página pública.</p>
-                </div>
-              </div>
-
-              <div className="flex items-start">
-                <div className="flex items-center h-5">
-                  <input
-                    id="mostrar_direccion"
-                    type="checkbox"
-                    checked={config.mostrar_direccion}
-                    onChange={(e) => onConfigChange('mostrar_direccion', e.target.checked)}
-                    className="focus:ring-indigo-500 h-4 w-4 text-indigo-600 border-gray-300 "
-                  />
-                </div>
-                <div className="ml-3 text-sm">
-                  <label htmlFor="mostrar_direccion" className="font-medium text-gray-700 dark:text-gray-300">
-                    Mostrar dirección
-                  </label>
-                  <p className="text-gray-500 dark:text-gray-400">Tu dirección y mapa serán visibles en la página pública.</p>
-                </div>
-              </div>
-            </div>
-          </div>
-
-          {/* Notificaciones */}
-          <div className="bg-gray-50 dark:bg-opacity-10 shadow p-4 rounded-md">
-            <h2 className="text-lg font-medium  text-gray-900 mb-4 dark:text-gray-300">Notificaciones</h2>
-            <div className="space-y-4">
-              <div className="flex items-start">
-                <div className="flex items-center h-5">
-                  <input
-                    id="notificaciones_email"
-                    type="checkbox"
-                    checked={config.notificaciones_email}
-                    onChange={(e) => onConfigChange('notificaciones_email', e.target.checked)}
-                    className="focus:ring-indigo-500 h-4 w-4 text-indigo-600 border-gray-300 "
-                  />
-                </div>
-                <div className="ml-3 text-sm">
-                  <label htmlFor="notificaciones_email" className="font-medium text-gray-700 dark:text-gray-300">
-                    Notificaciones por email
-                  </label>
-                  <p className="text-gray-500 dark:text-gray-400">Recibir notificaciones de reservas por email.</p>
-                </div>
-              </div>
-
-              <div className="flex items-start">
-                <div className="flex items-center h-5">
-                  <input
-                    id="notificaciones_whatsapp"
-                    type="checkbox"
-                    checked={config.notificaciones_whatsapp}
-                    onChange={(e) => onConfigChange('notificaciones_whatsapp', e.target.checked)}
-                    className="focus:ring-indigo-500 h-4 w-4 text-indigo-600 border-gray-300 "
-                  />
-                </div>
-                <div className="ml-3 text-sm">
-                  <label htmlFor="notificaciones_whatsapp" className="font-medium text-gray-700 dark:text-gray-300">
-                    Notificaciones por WhatsApp
-                  </label>
-                  <p className="text-gray-500 dark:text-gray-400">Recibir notificaciones de reservas por WhatsApp.</p>
-                </div>
-              </div>
-            </div>
-          </div>
-
-          {/* Paginación */}
-          <div className="bg-gray-100 dark:bg-opacity-10 rounded-md p-6">
-            <h3 className="text-lg font-medium text-white mb-4">Paginación</h3>
-            <div className="space-y-4">
-              <div>
-                <div className="mt-1 flex items-center space-x-2">
-                <label htmlFor="items_per_page" className="block text-sm font-medium text-gray-300">
-                  Registros por página
-                </label>
-                  <input
-                    type="number"
-                    id="items_per_page"
-                    name="items_per_page"
-                    min="1"
-                    max="50"
-                    value={localItemsPerPage}
-                    onChange={(e) => setLocalItemsPerPage(Math.max(1, Math.min(50, parseInt(e.target.value) || 1)))}
-                    className="block w-24 rounded-md border-gray-600 bg-gray-700 text-white shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm"
-                  />
-                </div>
-                <p className="mt-2 text-sm text-gray-400">
-                  Número de registros que se mostrarán por página en las listas.
-                </p>
-              </div>
-            </div>
-          </div>
-
-          <div className="flex justify-end">
+          <div className="flex justify-end pt-4">
             <button
               type="submit"
               disabled={saving}
-              className={`inline-flex rounded-md items-center px-4 py-2 border border-transparent text-sm font-medium -md shadow-sm text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 ${
-                saving ? 'opacity-70 cursor-not-allowed' : ''
-              }`}
+              className="inline-flex items-center px-8 py-3 bg-primary-600 hover:bg-primary-700 text-white font-bold rounded-xl transition-all shadow-lg shadow-primary-500/25 gap-2 disabled:opacity-50"
             >
-              <svg className="h-5 w-5 mr-2" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor">
-                <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
-              </svg>
-              {saving ? 'Guardando...' : 'Guardar cambios'}
+              {saving ? <Loader2 className="w-5 h-5 animate-spin" /> : <Save className="w-5 h-5" />}
+              {saving ? 'Guardando...' : 'Guardar Configuración'}
             </button>
           </div>
         </form>

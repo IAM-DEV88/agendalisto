@@ -172,144 +172,167 @@ const BusinessHeader: React.FC<BusinessHeaderProps> = ({ businessData, averageRa
   };
   
   return (
-    <div className="bg-gray-50 dark:bg-gray-50 dark:bg-opacity-10 shadow-md overflow-hidden rounded-md">
-      <div className="h-48 md:h-64 bg-indigo-100 relative">
+    <div className="card overflow-hidden">
+      <div className="h-48 md:h-72 bg-primary-100 dark:bg-primary-900/20 relative group overflow-hidden">
         {logoUrl ? (
           <>
             <img
               src={logoUrl}
               alt={businessData.name}
-              className="w-full h-full object-contain"
+              className="w-full h-full object-cover md:object-contain transition-transform duration-500 group-hover:scale-105"
               onLoad={handleImageLoaded}
               onError={handleImageError}
             />
             {imageState === 'loading' && (
-              <div className="absolute inset-0 flex items-center justify-center bg-gray-500 bg-opacity-50">
-                <span className="text-gray-500">Cargando imagen...</span>
+              <div className="absolute inset-0 flex items-center justify-center bg-slate-100/50 dark:bg-slate-800/50 backdrop-blur-sm">
+                <div className="animate-spin rounded-full h-8 w-8 border-t-2 border-primary-600"></div>
               </div>
             )}
           </>
         ) : (
           <div className="flex items-center justify-center h-full">
-            <span className="text-indigo-600 text-4xl md:text-6xl font-bold">
+            <span className="text-primary-600 dark:text-primary-400 text-5xl md:text-8xl font-black opacity-20">
               {businessData.name.charAt(0)}
             </span>
           </div>
         )}
+        <div className="absolute inset-0 bg-gradient-to-t from-black/20 to-transparent pointer-events-none"></div>
       </div>
 
-      <div className="p-6 md:p-8">
-        <div className="flex flex-wrap justify-between items-start">
-          <div className="mb-4 md:mb-0">
-            <h1 className="text-2xl md:text-3xl font-bold text-gray-900 dark:text-white">{businessData.name}</h1>
+      <div className="p-6 md:p-10">
+        <div className="flex flex-col md:flex-row justify-between items-start gap-8">
+          <div className="flex-1">
+            <div className="flex flex-wrap items-center gap-3 mb-4">
+              <h1 className="text-3xl md:text-4xl font-black text-slate-900 dark:text-white tracking-tight">
+                {businessData.name}
+              </h1>
+              {categoryName && (
+                <span className="px-3 py-1 bg-primary-100 dark:bg-primary-900/40 text-primary-700 dark:text-primary-300 rounded-full font-bold text-xs uppercase tracking-wider">
+                  {categoryName}
+                </span>
+              )}
+            </div>
+
             {reviewsCount > 0 && (
-              <div className="flex items-center mt-2">
-                {[...Array(5)].map((_, i) => (
-                  <Star key={i} className={`h-5 w-5 ${i < Math.round(averageRating) ? 'fill-current text-yellow-400' : 'text-gray-300'}`} />
-                ))}
-                <span className="ml-2 text-sm text-gray-600">{averageRating.toFixed(1)} ({reviewsCount})</span>
+              <div className="flex items-center mb-6">
+                <div className="flex text-amber-400">
+                  {[...Array(5)].map((_, i) => (
+                    <Star key={i} className={`h-5 w-5 ${i < Math.round(averageRating) ? 'fill-current' : 'text-slate-300 dark:text-slate-600'}`} />
+                  ))}
+                </div>
+                <span className="ml-2 text-sm font-bold text-slate-700 dark:text-slate-300">
+                  {averageRating.toFixed(1)}
+                </span>
+                <span className="ml-1 text-sm text-slate-500 dark:text-slate-400">
+                  ({reviewsCount} {reviewsCount === 1 ? 'reseña' : 'reseñas'})
+                </span>
               </div>
             )}
-            <p className="mt-3 text-gray-600 dark:text-gray-300">{businessData.description}</p>
-            {categoryName && (
-              <p className="mt-2 inline-block px-2 py-1 bg-indigo-100 text-indigo-800 rounded dark:bg-indigo-800 dark:text-indigo-200 uppercase text-xs">
-                {categoryName}
-              </p>
-            )}
+
+            <p className="text-lg text-slate-600 dark:text-slate-400 leading-relaxed max-w-3xl">
+              {businessData.description}
+            </p>
+
+            <div className="flex flex-wrap gap-3 mt-8">
+              {businessData.facebook && businessData.config?.mostrar_redes_sociales && (
+                <a
+                  href={`https://facebook.com/${businessData.facebook}`}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="p-3 bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-400 rounded-xl hover:bg-primary-600 hover:text-white transition-all transform hover:-translate-y-1 shadow-sm"
+                  title="Facebook"
+                >
+                  <Facebook className="h-5 w-5" />
+                </a>
+              )}
+              {businessData.instagram && businessData.config?.mostrar_redes_sociales && (
+                <a
+                  href={`https://instagram.com/${businessData.instagram}`}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="p-3 bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-400 rounded-xl hover:bg-primary-600 hover:text-white transition-all transform hover:-translate-y-1 shadow-sm"
+                  title="Instagram"
+                >
+                  <Instagram className="h-5 w-5" />
+                </a>
+              )}
+              {businessData.whatsapp && (
+                <a
+                  href={`https://wa.me/${businessData.whatsapp}`}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="p-3 bg-emerald-100 dark:bg-emerald-900/30 text-emerald-600 dark:text-emerald-400 rounded-xl hover:bg-emerald-600 hover:text-white transition-all transform hover:-translate-y-1 shadow-sm"
+                  title="WhatsApp"
+                >
+                  <MessageCircle className="h-5 w-5" />
+                </a>
+              )}
+            </div>
           </div>
 
-          <div className="flex flex-col space-y-3 text-sm">
-            {businessData.address && businessData.config?.mostrar_direccion && (
-              <div className="flex items-center">
-                <MapPin className="h-5 w-5 text-indigo-600 mr-2" />
-                <span className="">{businessData.address}</span>
+          <div className="w-full md:w-auto min-w-[280px]">
+            <div className="bg-slate-50 dark:bg-slate-800/50 rounded-2xl p-6 border border-slate-100 dark:border-slate-700/50">
+              <h3 className="text-sm font-bold text-slate-400 uppercase tracking-widest mb-4">Información de contacto</h3>
+              <div className="space-y-4">
+                {businessData.address && businessData.config?.mostrar_direccion && (
+                  <div className="flex items-start group">
+                    <div className="p-2 bg-white dark:bg-slate-800 rounded-lg shadow-sm border border-slate-100 dark:border-slate-700 mr-3 text-primary-600">
+                      <MapPin className="h-4 w-4" />
+                    </div>
+                    <span className="text-sm text-slate-600 dark:text-slate-300 pt-1 leading-snug">{businessData.address}</span>
+                  </div>
+                )}
+                {businessData.phone && businessData.config?.mostrar_telefono && (
+                  <div className="flex items-center group">
+                    <div className="p-2 bg-white dark:bg-slate-800 rounded-lg shadow-sm border border-slate-100 dark:border-slate-700 mr-3 text-primary-600">
+                      <Phone className="h-4 w-4" />
+                    </div>
+                    <a href={`tel:${businessData.phone}`} className="text-sm font-bold text-slate-700 dark:text-slate-200 hover:text-primary-600 transition-colors">
+                      {businessData.phone}
+                    </a>
+                  </div>
+                )}
+                {businessData.email && businessData.config?.mostrar_email && (
+                  <div className="flex items-center group">
+                    <div className="p-2 bg-white dark:bg-slate-800 rounded-lg shadow-sm border border-slate-100 dark:border-slate-700 mr-3 text-primary-600">
+                      <Mail className="h-4 w-4" />
+                    </div>
+                    <a href={`mailto:${businessData.email}`} className="text-sm font-bold text-slate-700 dark:text-slate-200 hover:text-primary-600 transition-colors truncate max-w-[200px]">
+                      {businessData.email}
+                    </a>
+                  </div>
+                )}
+                {businessData.website && (
+                  <div className="flex items-center group">
+                    <div className="p-2 bg-white dark:bg-slate-800 rounded-lg shadow-sm border border-slate-100 dark:border-slate-700 mr-3 text-primary-600">
+                      <Globe className="h-4 w-4" />
+                    </div>
+                    <a href={businessData.website} target="_blank" rel="noopener noreferrer" className="text-sm font-bold text-slate-700 dark:text-slate-200 hover:text-primary-600 transition-colors truncate max-w-[200px]">
+                      Sitio Web
+                    </a>
+                  </div>
+                )}
               </div>
-            )}
-            {businessData.phone && businessData.config?.mostrar_telefono && (
-              <div className="flex items-center">
-                <Phone className="h-5 w-5 text-indigo-600 mr-2" />
-                <a href={`tel:${businessData.phone}`} className="hover:text-indigo-600 ">
-                  {businessData.phone}
-                </a>
-              </div>
-            )}
-            {businessData.email && businessData.config?.mostrar_email && (
-              <div className="flex items-center">
-                <Mail className="h-5 w-5 text-indigo-600 mr-2" />
-                <a href={`mailto:${businessData.email}`} className="hover:text-indigo-600 ">
-                  {businessData.email}
-                </a>
-              </div>
-            )}
-            {businessData.website && (
-              <div className="flex items-center">
-                <Globe className="h-5 w-5 text-indigo-600 mr-2" />
-                <a href={businessData.website} target="_blank" rel="noopener noreferrer" className="hover:text-indigo-600  truncate">
-                  {businessData.website.replace(/https?:\/\/(www\.)?/, '')}
-                </a>
-              </div>
-            )}
-            {businessData.whatsapp && (
-              <div className="flex items-center">
-                <MessageCircle className="h-5 w-5 text-indigo-600 mr-2" />
-                <a href={`https://wa.me/${businessData.whatsapp}`} target="_blank" rel="noopener noreferrer" className="hover:text-indigo-600 ">
-                  WhatsApp
-                </a>
+            </div>
+
+            {currentUser && currentUser.id === businessData.owner_id && (
+              <div className="mt-4 grid grid-cols-2 gap-2">
+                <Link
+                  to="/business/dashboard?tab=profile"
+                  className="flex items-center justify-center py-2 px-3 bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300 text-xs font-bold rounded-lg hover:bg-slate-200 dark:hover:bg-slate-700 transition-colors"
+                >
+                  Editar Perfil
+                </Link>
+                <Link
+                  to="/business/dashboard?tab=services"
+                  className="flex items-center justify-center py-2 px-3 bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300 text-xs font-bold rounded-lg hover:bg-slate-200 dark:hover:bg-slate-700 transition-colors"
+                >
+                  Servicios
+                </Link>
               </div>
             )}
           </div>
         </div>
-
-        <div className="flex space-x-2 mt-6">
-          {businessData.facebook && businessData.config?.mostrar_redes_sociales && (
-            <a
-              href={`https://facebook.com/${businessData.facebook}`}
-              target="_blank"
-              rel="noopener noreferrer"
-              className="bg-gray-500 p-2 rounded-full hover:bg-indigo-100 transition-colors"
-            >
-              <Facebook className="h-5 w-5 text-indigo-600" />
-            </a>
-          )}
-          {businessData.instagram && businessData.config?.mostrar_redes_sociales && (
-            <a
-              href={`https://instagram.com/${businessData.instagram}`}
-              target="_blank"
-              rel="noopener noreferrer"
-              className="bg-gray-500 p-2 rounded-full hover:bg-indigo-100 transition-colors"
-            >
-              <Instagram className="h-5 w-5 text-indigo-600" />
-            </a>
-          )}
-        </div>
-        {currentUser && currentUser.id === businessData.owner_id && (
-          <div className="mt-4 flex flex-wrap gap-2">
-            <Link
-              to="/business/dashboard?tab=profile"
-              className="px-3 py-1 bg-green-600 text-white rounded hover:bg-green-700"
-            >
-              Datos
-            </Link>
-            <Link
-              to="/business/dashboard?tab=services"
-              className="px-3 py-1 bg-green-600 text-white rounded hover:bg-green-700"
-            >
-              Servicios
-            </Link>
-            <Link
-              to="/business/dashboard?tab=availability"
-              className="px-3 py-1 bg-green-600 text-white rounded hover:bg-green-700"
-            >
-              Horarios
-            </Link>
-            <Link
-              to="/business/dashboard?tab=settings"
-              className="px-3 py-1 bg-green-600 text-white rounded hover:bg-green-700"
-            >
-              Configuración
-            </Link>
-          </div>
-        )}
       </div>
     </div>
   );

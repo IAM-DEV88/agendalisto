@@ -1,5 +1,7 @@
 import React from 'react';
+import { Clock, Save, Loader2, CalendarX } from 'lucide-react';
 import { BusinessHours } from '../../lib/api';
+import SectionHeader from '../ui/SectionHeader';
 
 interface BusinessHoursSectionProps {
   businessHours: BusinessHours[];
@@ -20,69 +22,84 @@ const BusinessHoursSection: React.FC<BusinessHoursSectionProps> = ({
   days
 }) => {
   return (
-    <div>
+    <div className="space-y-6">
+      <SectionHeader 
+        title="Horario de Atención" 
+        description="Define los días y horas en los que tu negocio está disponible para recibir citas"
+      />
+
       {loading && businessHours.length === 0 ? (
-        <div className="flex items-center justify-center min-h-[400px]">
-          <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-indigo-500"></div>
+        <div className="flex flex-col items-center justify-center min-h-[400px] gap-4">
+          <Loader2 className="w-10 h-10 text-primary-500 animate-spin" />
+          <p className="text-slate-500 font-medium">Cargando horario...</p>
         </div>
       ) : (
-        <form onSubmit={onSave}>
-          <div className="bg-gray-50 dark:bg-opacity-10 shadow-md p-4 rounded-md">
-            <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
-              {/* Horario Regular */}
-              <div>
-                <div className="space-y-4">
-                  {businessHours.map((hour, idx) => (
-                    <div key={hour.day_of_week} className="border-b py-2">
-                      <div className="flex items-center justify-between">
-                        <span className="text-gray-700 dark:text-gray-300">{days[hour.day_of_week]}</span>
-                        <label className="inline-flex items-center">
-                          <input
-                            type="checkbox"
-                            checked={hour.is_closed}
-                            onChange={e => onHoursChange(idx, 'is_closed', e.target.checked)}
-                            className="h-4 w-4 mr-2 text-indigo-600 focus:ring-indigo-500 dark:bg-gray-900"
-                          />
-                          <span className="text-gray-500 ">Cerrado</span>
-                        </label>
+        <form onSubmit={onSave} className="space-y-6">
+          <div className="card overflow-hidden">
+            <div className="p-6 grid grid-cols-1 md:grid-cols-2 gap-x-12 gap-y-2">
+              {businessHours.map((hour, idx) => (
+                <div key={hour.day_of_week} className="group py-4 border-b border-slate-100 dark:border-slate-800 last:border-0 md:[&:nth-last-child(2)]:border-0">
+                  <div className="flex items-center justify-between mb-3">
+                    <span className="text-base font-bold text-slate-900 dark:text-white capitalize">
+                      {days[hour.day_of_week]}
+                    </span>
+                    <label className="relative inline-flex items-center cursor-pointer">
+                      <input
+                        type="checkbox"
+                        checked={!hour.is_closed}
+                        onChange={e => onHoursChange(idx, 'is_closed', !e.target.checked)}
+                        className="sr-only peer"
+                      />
+                      <div className="w-11 h-6 bg-slate-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-primary-300 dark:peer-focus:ring-primary-800 rounded-full peer dark:bg-slate-700 peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all dark:border-gray-600 peer-checked:bg-primary-600"></div>
+                      <span className="ml-3 text-sm font-bold text-slate-500 dark:text-slate-400 min-w-[60px]">
+                        {hour.is_closed ? 'Cerrado' : 'Abierto'}
+                      </span>
+                    </label>
+                  </div>
+                  
+                  {!hour.is_closed ? (
+                    <div className="flex items-center gap-3 animate-in slide-in-from-top-1 duration-200">
+                      <div className="relative flex-1">
+                        <Clock className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
+                        <input
+                          type="time"
+                          value={hour.start_time}
+                          onChange={e => onHoursChange(idx, 'start_time', e.target.value)}
+                          className="w-full pl-10 pr-4 py-2 rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 focus:ring-2 focus:ring-primary-500/20 focus:border-primary-500 outline-none transition-all text-sm font-bold text-slate-900 dark:text-white"
+                        />
                       </div>
-                      {!hour.is_closed && (
-                        <div className="mt-2 flex items-center space-x-2 flex-wrap">
-                          <input
-                            type="time"
-                            value={hour.start_time}
-                            onChange={e => onHoursChange(idx, 'start_time', e.target.value)}
-                            className="border rounded-md p-2 text-sm dark:bg-gray-900 "
-                          />
-                          <span className="text-gray-700 ">-</span>
-                          <input
-                            type="time"
-                            value={hour.end_time}
-                            onChange={e => onHoursChange(idx, 'end_time', e.target.value)}
-                            className="border rounded-md p-2 text-sm dark:bg-gray-900 "
-                          />
-                        </div>
-                      )}
+                      <span className="text-slate-400 font-bold">a</span>
+                      <div className="relative flex-1">
+                        <Clock className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
+                        <input
+                          type="time"
+                          value={hour.end_time}
+                          onChange={e => onHoursChange(idx, 'end_time', e.target.value)}
+                          className="w-full pl-10 pr-4 py-2 rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 focus:ring-2 focus:ring-primary-500/20 focus:border-primary-500 outline-none transition-all text-sm font-bold text-slate-900 dark:text-white"
+                        />
+                      </div>
                     </div>
-                  ))}
+                  ) : (
+                    <div className="flex items-center gap-2 text-slate-400 py-2 italic text-sm">
+                      <CalendarX className="w-4 h-4" />
+                      <span>No se aceptan citas este día</span>
+                    </div>
+                  )}
                 </div>
-              </div>
+              ))}
             </div>
-
           </div>
-            <div className="mt-2 flex justify-end">
-              <button 
-                type="submit" 
-                disabled={saving} 
-                className={`inline-flex rounded-md items-center px-4 py-2 border border-transparent text-sm font-medium -md shadow-sm text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 ${saving ? 'opacity-70 cursor-not-allowed' : ''
-                }`}
-              >
-                <svg className="h-5 w-5 mr-2" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor">
-                  <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
-            </svg>
-                {saving ? 'Guardando...' : 'Guardar cambios'}
-              </button>
-            </div>
+
+          <div className="flex justify-end">
+            <button 
+              type="submit" 
+              disabled={saving} 
+              className="inline-flex items-center px-8 py-3 bg-primary-600 hover:bg-primary-700 text-white font-bold rounded-xl transition-all shadow-lg shadow-primary-500/25 gap-2 disabled:opacity-50"
+            >
+              {saving ? <Loader2 className="w-5 h-5 animate-spin" /> : <Save className="w-5 h-5" />}
+              {saving ? 'Guardando...' : 'Guardar Horario'}
+            </button>
+          </div>
         </form>
       )}
     </div>

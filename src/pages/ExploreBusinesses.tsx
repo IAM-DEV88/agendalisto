@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react';
 import { Link, useSearchParams } from 'react-router-dom';
+import { Search, Filter, MapPin, ArrowRight } from 'lucide-react';
 import { getBusinesses, getBusinessCategories, BusinessCategory } from '../lib/api';
 import type { Business } from '../lib/api';
 
@@ -30,7 +31,6 @@ const ExploreBusinesses = () => {
       setLoading(true);
       setError(null);
       try {
-        // Real implementation using Supabase
         const data = await getBusinesses(searchTerm, category !== 'all' ? category : undefined);
         setBusinesses(data);
       } catch (err) {
@@ -40,7 +40,6 @@ const ExploreBusinesses = () => {
       }
     };
 
-    // Set a small debounce for the search term
     const timer = setTimeout(() => {
       fetchBusinesses();
     }, 300);
@@ -48,102 +47,137 @@ const ExploreBusinesses = () => {
     return () => clearTimeout(timer);
   }, [searchTerm, category]);
 
-  // No need for filteredBusinesses as filtering is now done at the database level
-  // through the API call with search parameters
-
   return (
-    <div className="min-h-screen">
-      <div className="max-w-7xl mx-auto py-12 px-4 sm:px-6 lg:px-8">
-        <div className="text-center">
-          <h1 className="text-3xl  font-extrabold text-gray-900 dark:text-white sm:text-4xl">
+    <div className="min-h-screen bg-slate-50 dark:bg-slate-900 transition-colors duration-200">
+      <div className="max-w-7xl mx-auto py-16 px-4 sm:px-6 lg:px-8">
+        <div className="text-center mb-12">
+          <h1 className="text-4xl font-black text-slate-900 dark:text-white sm:text-5xl tracking-tight mb-4">
             Explora Negocios
           </h1>
-          <p className="mt-3 max-w-2xl mx-auto text-xl text-gray-500 dark:text-gray-200 sm:mt-4">
+          <p className="max-w-2xl mx-auto text-xl text-slate-600 dark:text-slate-400 font-medium">
             Encuentra servicios y reserva citas en los mejores negocios locales
           </p>
         </div>
 
         {/* Search and Filter Section */}
-        <div className="mt-10 flex flex-col md:flex-row gap-4">
-          <div className="w-full md:w-2/3">
-            <div className="relative">
+        <div className="card p-6 mb-12 shadow-xl shadow-slate-200/50 dark:shadow-none">
+          <div className="flex flex-col md:flex-row gap-6">
+            <div className="flex-1 relative group">
+              <div className="absolute inset-y-0 left-4 flex items-center pointer-events-none">
+                <Search className="h-5 w-5 text-slate-400 group-focus-within:text-primary-500 transition-colors" />
+              </div>
               <input
                 type="text"
                 value={searchTerm}
                 onChange={(e) => setSearchTerm(e.target.value)}
-                placeholder="Buscar negocios..."
-                className="w-full px-4 py-2 border border-gray-300 rounded-md focus:ring-indigo-500 focus:border-indigo-500"
+                placeholder="Buscar por nombre o descripción..."
+                className="w-full pl-12 pr-4 py-4 bg-slate-50 dark:bg-slate-800/50 border-2 border-slate-100 dark:border-slate-700 rounded-2xl focus:border-primary-500 focus:ring-0 transition-all font-medium text-slate-700 dark:text-white"
               />
-              <div className="absolute inset-y-0 right-0 flex items-center pr-3 pointer-events-none">
-                <svg className="h-5 w-5 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+            </div>
+            <div className="md:w-1/3 relative group">
+              <div className="absolute inset-y-0 left-4 flex items-center pointer-events-none">
+                <Filter className="h-5 w-5 text-slate-400 group-focus-within:text-primary-500 transition-colors" />
+              </div>
+              <select
+                value={category}
+                onChange={(e) => setCategory(e.target.value)}
+                className="w-full pl-12 pr-4 py-4 bg-slate-50 dark:bg-slate-800/50 border-2 border-slate-100 dark:border-slate-700 rounded-2xl focus:border-primary-500 focus:ring-0 transition-all font-bold text-slate-700 dark:text-white appearance-none"
+              >
+                <option value="all">Todas las categorías</option>
+                {categories.map((cat) => (
+                  <option key={cat.id} value={cat.id}>
+                    {cat.name}
+                  </option>
+                ))}
+              </select>
+              <div className="absolute inset-y-0 right-4 flex items-center pointer-events-none">
+                <svg className="h-5 w-5 text-slate-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
                 </svg>
               </div>
             </div>
-          </div>
-          <div className="w-full md:w-1/3">
-            <select
-              value={category}
-              onChange={(e) => setCategory(e.target.value)}
-              className="w-full px-4 py-2 border border-gray-300 rounded-md focus:ring-indigo-500 focus:border-indigo-500"
-            >
-              <option value="all">Todos</option>
-              {categories.map((cat) => (
-                <option key={cat.id} value={cat.id}>
-                  {cat.name}
-                </option>
-              ))}
-            </select>
           </div>
         </div>
 
         {/* Error message */}
         {error && (
-          <div className="mt-6 bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded relative" role="alert">
-            <span className="block sm:inline">{error}</span>
+          <div className="alert alert-error mb-8 flex items-center gap-3">
+            <svg className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+            </svg>
+            <span className="font-bold">{error}</span>
           </div>
         )}
 
         {/* Businesses Grid */}
         {loading ? (
-          <div className="flex justify-center items-center py-20">
-            <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-indigo-500"></div>
+          <div className="flex flex-col justify-center items-center py-32">
+            <div className="animate-spin rounded-full h-16 w-16 border-t-4 border-b-4 border-primary-600 mb-4"></div>
+            <p className="text-slate-500 font-bold animate-pulse">Buscando los mejores negocios...</p>
           </div>
         ) : businesses.length === 0 ? (
-          <div className="text-center py-20">
-            <p className="text-gray-500 text-lg">No se encontraron negocios que coincidan con tu búsqueda.</p>
+          <div className="text-center py-32 card bg-slate-50/50 dark:bg-slate-800/20 border-dashed border-2">
+            <div className="bg-slate-100 dark:bg-slate-800 w-20 h-20 rounded-full flex items-center justify-center mx-auto mb-6">
+              <Search className="h-10 w-10 text-slate-400" />
+            </div>
+            <h3 className="text-2xl font-black text-slate-900 dark:text-white mb-2">No encontramos resultados</h3>
+            <p className="text-slate-500 dark:text-slate-400 max-w-md mx-auto">
+              Intenta ajustar tus filtros o buscar con otros términos.
+            </p>
+            <button 
+              onClick={() => { setSearchTerm(''); setCategory('all'); }}
+              className="mt-8 text-primary-600 dark:text-primary-400 font-black hover:underline"
+            >
+              Limpiar todos los filtros
+            </button>
           </div>
         ) : (
-          <div className="mt-10 grid gap-6 grid-cols-1 sm:grid-cols-2 lg:grid-cols-3">
+          <div className="grid gap-8 grid-cols-1 sm:grid-cols-2 lg:grid-cols-3">
             {businesses.map((business) => (
               <Link
                 key={business.slug}
                 to={`/${business.slug}`}
-                className="bg-gray-50 dark:bg-gray-50 dark:bg-opacity-10 overflow-hidden shadow hover:shadow-lg transition-shadow duration-300 rounded-md"
+                className="group card overflow-hidden hover:border-primary-400 dark:hover:border-primary-500 hover:shadow-2xl transition-all duration-300 transform hover:-translate-y-1"
               >
-                <div className="h-48 bg-gray-200 relative">
+                <div className="h-56 bg-slate-100 dark:bg-slate-800 relative overflow-hidden">
                   <img
                     src={business.logo_url || FALLBACK_LOGO}
                     alt={business.name}
-                    className="w-full h-full object-contain"
+                    className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500"
                     onError={(e) => { e.currentTarget.src = FALLBACK_LOGO }}
                   />
+                  <div className="absolute inset-0 bg-gradient-to-t from-black/40 to-transparent opacity-0 group-hover:opacity-100 transition-opacity"></div>
                 </div>
-                <div className="p-6">
-                  <h3 className="text-lg font-medium text-gray-900 dark:text-white">{business.name}</h3>
-                  <p className="mt-1 text-sm text-gray-500 dark:text-gray-200">{business.address}</p>
-                  <p className="mt-2 text-sm text-gray-600 dark:text-gray-300 line-clamp-2">{business.description}</p>
-                  {(() => {
-                    const cat = categories.find(c => c.id === business.category_id);
-                    return cat ? (
-                      <span className="inline-block mt-2 px-2 py-0.5 text-xs font-medium bg-indigo-100 text-indigo-800 rounded">
-                        {cat.name}
-                      </span>
-                    ) : null;
-                  })()}
-                  <div className="mt-4">
-                    <span className="inline-flex items-center px-3 py-0.5 text-sm font-medium bg-indigo-100 text-indigo-800 dark:bg-gray-50 dark:bg-opacity-10 rounded-md dark:text-white">
+                <div className="p-8">
+                  <div className="flex justify-between items-start mb-4">
+                    <h3 className="text-2xl font-black text-slate-900 dark:text-white leading-tight group-hover:text-primary-600 dark:group-hover:text-primary-400 transition-colors">
+                      {business.name}
+                    </h3>
+                  </div>
+                  
+                  {business.address && (
+                    <div className="flex items-start text-slate-500 dark:text-slate-400 mb-4">
+                      <MapPin className="h-4 w-4 mr-2 mt-1 flex-shrink-0 text-primary-500" />
+                      <p className="text-sm font-medium line-clamp-1">{business.address}</p>
+                    </div>
+                  )}
+                  
+                  <p className="text-slate-600 dark:text-slate-400 text-sm line-clamp-2 mb-6 leading-relaxed">
+                    {business.description}
+                  </p>
+                  
+                  <div className="flex items-center justify-between mt-auto pt-6 border-t border-slate-100 dark:border-slate-800">
+                    {(() => {
+                      const cat = categories.find(c => c.id === business.category_id);
+                      return cat ? (
+                        <span className="px-3 py-1 bg-primary-50 dark:bg-primary-900/30 text-primary-700 dark:text-primary-300 rounded-full text-xs font-black uppercase tracking-wider">
+                          {cat.name}
+                        </span>
+                      ) : <span></span>;
+                    })()}
+                    <span className="flex items-center text-primary-600 dark:text-primary-400 font-black text-sm group-hover:translate-x-1 transition-transform">
                       Ver servicios
+                      <ArrowRight className="ml-2 h-4 w-4" />
                     </span>
                   </div>
                 </div>

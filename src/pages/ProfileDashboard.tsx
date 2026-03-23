@@ -67,30 +67,16 @@ const ProfileDashboard = ({ user }: ProfileDashboardProps) => {
     history: { page: 1, perPage: itemsPerPage }
   });
 
-  // Estado para las secciones colapsables
-  const [collapsedSections, setCollapsedSections] = useState({
-    upcoming: false,
-    pending: false,
-    history: false
-  });
-
   // Estado para el tab activo
   const [activeTab, setActiveTab] = useState<'appointments' | 'settings'>('appointments');
 
-  // Estado para secciones colapsables de configuración
-  const [collapsedConfigSections, setCollapsedConfigSections] = useState({
-    profile: true,
-    general: true
-  });
+  // Sub-tabs for Appointments
+  const [activeAppointmentTab, setActiveAppointmentTab] = useState('upcoming');
+  
+  // Sub-tabs for Settings
+  const [activeSettingsTab, setActiveSettingsTab] = useState('profile');
 
   const [selectedAppointmentForReview, setSelectedAppointmentForReview] = useState<Appointment | null>(null);
-
-  const toggleSection = (section: 'upcoming' | 'pending' | 'history') => {
-    setCollapsedSections(prev => ({
-      ...prev,
-      [section]: !prev[section]
-    }));
-  };
 
   const handlePageChange = (section: keyof typeof pagination, newPage: number) => {
     setPagination(prev => ({
@@ -142,12 +128,16 @@ const ProfileDashboard = ({ user }: ProfileDashboardProps) => {
     setActiveTab(tab as 'appointments' | 'settings');
   };
 
-  const toggleConfigSection = (section: keyof typeof collapsedConfigSections) => {
-    setCollapsedConfigSections(prev => ({
-      ...prev,
-      [section]: !prev[section]
-    }));
-  };
+  const appointmentTabs: Tab[] = [
+    { id: 'upcoming', label: 'Próximas', count: upcomingCount },
+    { id: 'pending', label: 'Pendientes', count: pendingCount },
+    { id: 'history', label: 'Historial', count: pastCount }
+  ];
+
+  const settingsTabs: Tab[] = [
+    { id: 'profile', label: 'Perfil' },
+    { id: 'general', label: 'Ajustes' }
+  ];
 
   // Verificar si el usuario tiene un negocio
   useEffect(() => {
@@ -310,271 +300,215 @@ const ProfileDashboard = ({ user }: ProfileDashboardProps) => {
   };
 
   return (
-    <div className="max-w-7xl mx-auto mt-6 sm:px-6 lg:px-8">
-      <div className="px-4 py-2 sm:px-0">
-        <div className="flex items-center justify-between mb-4 sm:flex sm:items-baseline">
-          <div className="flex items-center space-x-4">
-            <img
-              src={avatarUrl}
-              alt={`${user?.full_name || 'Usuario'} avatar`}
-              className="h-12 w-12 rounded-full object-cover"
-            />
-            <h3 className="text-lg leading-6 font-medium text-gray-900 dark:text-white grow">
-              {user?.full_name || 'Usuario'}
-            </h3>
+    <div className="min-h-screen bg-slate-50 dark:bg-slate-950 transition-colors duration-200">
+      <div className="max-w-7xl mx-auto pt-6 pb-20 sm:px-6 lg:px-8">
+        <div className="px-4 py-2 sm:px-0">
+          <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-8">
+            <div className="flex items-center gap-4 group">
+              <div className="relative">
+                <img
+                  src={avatarUrl}
+                  alt={`${user?.full_name || 'Usuario'} avatar`}
+                  className="h-16 w-16 rounded-2xl object-cover shadow-lg border-2 border-white dark:border-slate-800 transition-transform group-hover:scale-105"
+                />
+                <div className="absolute -bottom-1 -right-1 w-4 h-4 bg-emerald-500 border-2 border-white dark:border-slate-800 rounded-full shadow-sm"></div>
+              </div>
+              <div>
+                <h1 className="text-2xl font-black text-slate-900 dark:text-white tracking-tight">
+                  Hola, {user?.full_name?.split(' ')[0] || 'Usuario'}
+                </h1>
+                <p className="text-sm font-medium text-slate-500 dark:text-slate-400">Bienvenido a tu panel de control</p>
+              </div>
+            </div>
+            
+            <div className="flex items-center gap-3">
+              {hasBusiness ? (
+                <Link 
+                  to="/business/dashboard" 
+                  className="inline-flex items-center justify-center px-6 py-2.5 bg-primary-600 hover:bg-primary-700 text-white text-sm font-bold rounded-xl transition-all shadow-lg shadow-primary-500/25"
+                >
+                  Mi Negocio
+                </Link>
+              ) : (
+                <Link 
+                  to="/business/register" 
+                  className="inline-flex items-center justify-center px-6 py-2.5 bg-white dark:bg-slate-900 text-primary-600 dark:text-primary-400 text-sm font-bold rounded-xl border border-primary-100 dark:border-primary-900/30 hover:bg-primary-50 dark:hover:bg-primary-900/20 transition-all shadow-sm"
+                >
+                  Registrar mi negocio
+                </Link>
+              )}
+            </div>
           </div>
-          <div className="flex flex-col gap-4 self-center">
-            {hasBusiness ? (
-              <Link to="/business/dashboard" className="dark:hover:text-black inline-flex px-4 py-2 border border-transparent text-sm font-medium rounded-md text-indigo-600 border-indigo-600 hover:bg-indigo-50">
-                Mi Negocio
-              </Link>
-            ) : (
-              <Link to="/business/register" className="dark:hover:text-black inline-flex px-4 py-2 border border-transparent text-sm font-medium rounded-md text-indigo-600 border-indigo-600 hover:bg-indigo-50">
-                Registrar negocio
-              </Link>
+
+          <TabNav
+            tabs={tabs}
+            activeTabId={activeTab}
+            onTabChange={handleTabChange}
+          />
+
+          <div className="mt-8 animate-in fade-in slide-in-from-bottom-4 duration-500">
+            {/* Tab de Citas */}
+            {activeTab === 'appointments' && (
+              <div className="space-y-8">
+                <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+                  <SectionHeader 
+                    title="Mis Reservas" 
+                    description="Gestiona tus citas próximas y revisa tu historial"
+                  />
+                  <div className="bg-white dark:bg-slate-900 p-1 rounded-2xl border border-slate-200 dark:border-slate-800 shadow-sm self-start">
+                    <TabNav 
+                      tabs={appointmentTabs} 
+                      activeTabId={activeAppointmentTab} 
+                      onTabChange={setActiveAppointmentTab} 
+                    />
+                  </div>
+                </div>
+
+                <div className="animate-in fade-in zoom-in-95 duration-300">
+                  {activeAppointmentTab === 'upcoming' && (
+                    <div className="space-y-6">
+                      <UserAppointmentList
+                        appointments={pagedUpcoming}
+                        onReschedule={handleReschedule}
+                        onCancel={handleCancel}
+                      />
+                      {confirmedAppointments.length > pagination.upcoming.perPage && (
+                        <Pagination
+                          currentPage={pagination.upcoming.page}
+                          totalPages={Math.ceil(confirmedAppointments.length / pagination.upcoming.perPage)}
+                          onPageChange={(page) => handlePageChange('upcoming', page)}
+                        />
+                      )}
+                    </div>
+                  )}
+
+                  {activeAppointmentTab === 'pending' && (
+                    <div className="space-y-6">
+                      <UserAppointmentList
+                        appointments={pagedPending}
+                        onReschedule={handleReschedule}
+                        onCancel={handleCancel}
+                      />
+                      {pendingAppointments.length > pagination.pending.perPage && (
+                        <Pagination
+                          currentPage={pagination.pending.page}
+                          totalPages={Math.ceil(pendingAppointments.length / pagination.pending.perPage)}
+                          onPageChange={(page) => handlePageChange('pending', page)}
+                        />
+                      )}
+                    </div>
+                  )}
+
+                  {activeAppointmentTab === 'history' && (
+                    <div className="space-y-6">
+                      <UserAppointmentList
+                        appointments={paginatedPastAppointments}
+                        onReschedule={handleReschedule}
+                        onReview={handleReview}
+                      />
+                      {pastAppointments.length > pagination.history.perPage && (
+                        <Pagination
+                          currentPage={pagination.history.page}
+                          totalPages={Math.ceil(pastAppointments.length / pagination.history.perPage)}
+                          onPageChange={(page) => handlePageChange('history', page)}
+                        />
+                      )}
+                    </div>
+                  )}
+                </div>
+              </div>
             )}
-          </div>
-        </div>
 
-        {/* Use TabNav component */}
-        <TabNav
-          tabs={tabs}
-          activeTabId={activeTab}
-          onTabChange={handleTabChange}
-        />
-
-        <div className="mt-6">
-          {/* Tab de Citas */}
-          {activeTab === 'appointments' && (
-            <>
-              {/* Próximas Citas */}
-              <div className="mb-8 border-b border-gray-200 dark:border-gray-700 pb-8">
-                <div
-                  className="flex items-center justify-between cursor-pointer"
-                  onClick={() => toggleSection('upcoming')}
-                >
-                  <SectionHeader
-                    title={`Próximas Citas (${upcomingCount})`}
-                    description="Citas confirmadas y programadas."
+            {/* Tab de Configuración */}
+            {activeTab === 'settings' && (
+              <div className="space-y-8">
+                <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+                  <SectionHeader 
+                    title="Configuración" 
+                    description="Actualiza tu perfil y preferencias de la cuenta"
                   />
-                  <button className="p-2">
-                    <svg
-                      className={`w-6 h-6 transform transition-transform ${collapsedSections.upcoming ? '-rotate-90' : 'rotate-0'}`}
-                      fill="none"
-                      stroke="currentColor"
-                      viewBox="0 0 24 24"
-                    >
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
-                    </svg>
-                  </button>
-                </div>
-                {!collapsedSections.upcoming && (
-                  <div className="space-y-4">
-                    <UserAppointmentList
-                      appointments={pagedUpcoming}
-                      onReschedule={handleReschedule}
-                      onCancel={handleCancel}
+                  <div className="bg-white dark:bg-slate-900 p-1 rounded-2xl border border-slate-200 dark:border-slate-800 shadow-sm self-start">
+                    <TabNav 
+                      tabs={settingsTabs} 
+                      activeTabId={activeSettingsTab} 
+                      onTabChange={setActiveSettingsTab} 
                     />
-                    {confirmedAppointments.length > pagination.upcoming.perPage && (
-                      <Pagination
-                        currentPage={pagination.upcoming.page}
-                        totalPages={Math.ceil(confirmedAppointments.length / pagination.upcoming.perPage)}
-                        onPageChange={(page) => handlePageChange('upcoming', page)}
-                      />
-                    )}
                   </div>
-                )}
-              </div>
-
-              {/* Citas Pendientes */}
-              <div className="mb-8 border-b border-gray-200 dark:border-gray-700 pb-8">
-                <div
-                  className="flex items-center justify-between cursor-pointer"
-                  onClick={() => toggleSection('pending')}
-                >
-                  <SectionHeader
-                    title={`Citas Pendientes (${pendingCount})`}
-                    description="Solicitudes de citas que requieren confirmación."
-                  />
-                  <button className="p-2">
-                    <svg
-                      className={`w-6 h-6 transform transition-transform ${collapsedSections.pending ? '-rotate-90' : 'rotate-0'}`}
-                      fill="none"
-                      stroke="currentColor"
-                      viewBox="0 0 24 24"
-                    >
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
-                    </svg>
-                  </button>
                 </div>
-                {!collapsedSections.pending && (
-                  <div className="space-y-4">
-                    <UserAppointmentList
-                      appointments={pagedPending}
-                      onReschedule={handleReschedule}
-                      onCancel={handleCancel}
+
+                <div className="animate-in fade-in zoom-in-95 duration-300">
+                  {activeSettingsTab === 'profile' && (
+                    <UserProfileSection
+                      profileData={profileData}
+                      onChange={handleProfileChange}
+                      onSave={handleProfileSubmit}
+                      saving={saving}
+                      message={profileMessage}
                     />
-                    {pendingAppointments.length > pagination.pending.perPage && (
-                      <Pagination
-                        currentPage={pagination.pending.page}
-                        totalPages={Math.ceil(pendingAppointments.length / pagination.pending.perPage)}
-                        onPageChange={(page) => handlePageChange('pending', page)}
-                      />
-                    )}
-                  </div>
-                )}
-              </div>
+                  )}
 
-              {/* Historial de Citas */}
-              <div className="border-b border-gray-200 dark:border-gray-700 pb-8">
-                <div
-                  className="flex items-center justify-between cursor-pointer"
-                  onClick={() => toggleSection('history')}
-                >
-                  <SectionHeader
-                    title={`Historial de Citas (${pastCount})`}
-                    description="Citas completadas y pasadas."
-                  />
-                  <button className="p-2">
-                    <svg
-                      className={`w-6 h-6 transform transition-transform ${collapsedSections.history ? '-rotate-90' : 'rotate-0'}`}
-                      fill="none"
-                      stroke="currentColor"
-                      viewBox="0 0 24 24"
-                    >
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
-                    </svg>
-                  </button>
-                </div>
-                {!collapsedSections.history && (
-                  <div className="space-y-4">
-                    <UserAppointmentList
-                      appointments={paginatedPastAppointments}
-                      onReschedule={handleReschedule}
-                      onReview={handleReview}
-                    />
-                    {pastAppointments.length > pagination.history.perPage && (
-                      <Pagination
-                        currentPage={pagination.history.page}
-                        totalPages={Math.ceil(pastAppointments.length / pagination.history.perPage)}
-                        onPageChange={(page) => handlePageChange('history', page)}
-                      />
-                    )}
-                  </div>
-                )}
-              </div>
-            </>
-          )}
-
-          {/* Tab de Configuración */}
-          {activeTab === 'settings' && (
-            <>
-              {/* Sección de Datos Personales */}
-              <div className="mb-8 border-b border-gray-200 dark:border-gray-700 pb-8">
-                <div
-                  className="flex items-center justify-between cursor-pointer"
-                  onClick={() => toggleConfigSection('profile')}
-                >
-                  <SectionHeader
-                    title="Datos personales"
-                    description="Actualiza tu información personal."
-                  />
-                  <button className="p-2">
-                    <svg
-                      className={`w-6 h-6 transform transition-transform ${collapsedConfigSections.profile ? '-rotate-90' : 'rotate-0'}`}
-                      fill="none"
-                      stroke="currentColor"
-                      viewBox="0 0 24 24"
-                    >
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
-                    </svg>
-                  </button>
-                </div>
-                {!collapsedConfigSections.profile && (
-                  <UserProfileSection
-                    profileData={profileData}
-                    onChange={handleProfileChange}
-                    onSave={handleProfileSubmit}
-                    saving={saving}
-                    message={profileMessage}
-                  />
-                )}
-              </div>
-
-              {/* Sección de Configuración General */}
-              <div className="border-b border-gray-200 dark:border-gray-700 pb-8">
-                <div
-                  className="flex items-center justify-between cursor-pointer"
-                  onClick={() => toggleConfigSection('general')}
-                >
-                  <SectionHeader
-                    title="Configuración general"
-                    description="Personaliza las opciones de tu cuenta."
-                  />
-                  <button className="p-2">
-                    <svg
-                      className={`w-6 h-6 transform transition-transform ${collapsedConfigSections.general ? '-rotate-90' : 'rotate-0'}`}
-                      fill="none"
-                      stroke="currentColor"
-                      viewBox="0 0 24 24"
-                    >
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
-                    </svg>
-                  </button>
-                </div>
-                {!collapsedConfigSections.general && (
-                  <>
-                    <div className='dark:bg-opacity-10 bg-gray-50 shadow overflow-hidden rounded-md'>
-                      <div className="px-4 py-5 sm:p-6">
-                        <div className="flex items-center space-x-4">
-                          <label htmlFor="itemsPerPage" className="text-sm font-medium text-gray-700 dark:text-gray-300">
-                            Elementos por página:
-                          </label>
-                          <input
-                            type="number"
-                            id="itemsPerPage"
-                            min="1"
-                            max="50"
-                            value={itemsPerPage}
-                            onChange={(e) => handleItemsPerPageChange(parseInt(e.target.value))}
-                            className="shadow-sm focus:ring-indigo-500 focus:border-indigo-500 block w-20 sm:text-sm border-gray-300 rounded-md"
-                          />
+                  {activeSettingsTab === 'general' && (
+                    <div className="card p-6 space-y-6">
+                      <div className="flex items-center gap-3 pb-4 border-b border-slate-100 dark:border-slate-800">
+                        <div className="p-2 bg-amber-50 text-amber-600 dark:bg-amber-500/10 dark:text-amber-400 rounded-lg">
+                          <Settings className="w-5 h-5" />
                         </div>
-                        {itemsPerPageMessage && (
-                          <p className={`mt-2 text-sm ${itemsPerPageMessage.type === 'success' ? 'text-green-600' : 'text-red-600'}`}>
-                            {itemsPerPageMessage.text}
+                        <h3 className="text-lg font-black text-slate-900 dark:text-white tracking-tight">Preferencias de la Interfaz</h3>
+                      </div>
+
+                      <div className="space-y-4">
+                        <div className="space-y-2">
+                          <label htmlFor="items_per_page" className="block text-sm font-bold text-slate-700 dark:text-slate-300">
+                            Registros por página
+                          </label>
+                          <div className="flex items-center gap-4">
+                            <input
+                              type="number"
+                              id="items_per_page"
+                              min="1"
+                              max="50"
+                              value={itemsPerPage}
+                              onChange={(e) => handleItemsPerPageChange(parseInt(e.target.value) || 1)}
+                              className="w-24 px-4 py-2.5 rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 focus:ring-2 focus:ring-primary-500/20 focus:border-primary-500 outline-none transition-all font-bold"
+                            />
+                            <button
+                              onClick={handleSaveItemsPerPage}
+                              className="inline-flex items-center px-6 py-2.5 bg-primary-600 hover:bg-primary-700 text-white text-sm font-bold rounded-xl transition-all shadow-lg shadow-primary-500/25 gap-2"
+                            >
+                              Guardar
+                            </button>
+                          </div>
+                          <p className="text-xs text-slate-500 dark:text-slate-400 italic">
+                            Ajusta cuántos elementos quieres ver por página en tus listados.
                           </p>
+                        </div>
+
+                        {itemsPerPageMessage && (
+                          <div className={`alert ${itemsPerPageMessage.type === 'success' ? 'alert-success' : 'alert-error'} flex items-center gap-2`}>
+                            <p className="text-sm font-bold">{itemsPerPageMessage.text}</p>
+                          </div>
                         )}
                       </div>
                     </div>
-                    <div className="flex justify-end mt-2">
-                      <button
-                        type="submit"
-                        onClick={handleSaveItemsPerPage}
-                        className={`inline-flex rounded-md items-center px-4 py-2 border border-transparent text-sm font-medium shadow-sm text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 ${saving ? 'opacity-70 cursor-not-allowed' : ''}`}
-                      >
-                        <svg className="h-5 w-5 mr-2" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor">
-                          <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
-                        </svg>
-                        {saving ? 'Guardando...' : 'Guardar cambios'}
-                      </button>
-                    </div>
-                  </>
-                )}
+                  )}
+                </div>
               </div>
-            </>
-          )}
+            )}
+          </div>
         </div>
       </div>
 
-      <ReviewModal
-        isOpen={!!selectedAppointmentForReview}
-        onClose={() => setSelectedAppointmentForReview(null)}
-        appointment={selectedAppointmentForReview}
-        onSubmit={handleReviewSubmit}
-      />
+      {/* Modal de Reseña */}
+      {selectedAppointmentForReview && (
+        <ReviewModal
+          isOpen={!!selectedAppointmentForReview}
+          onClose={() => setSelectedAppointmentForReview(null)}
+          onSubmit={handleReviewSubmit}
+          appointment={selectedAppointmentForReview}
+        />
+      )}
     </div>
   );
 };
 
-export default ProfileDashboard; 
+export default ProfileDashboard;

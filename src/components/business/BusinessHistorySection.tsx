@@ -1,7 +1,8 @@
 import React, { useState, useEffect } from 'react';
-import { Star } from 'lucide-react';
-import Pagination from '../ui/Pagination';
+import { Star, Calendar, User, Clock, Loader2, History } from 'lucide-react';
+import { Pagination } from '../ui/Pagination';
 import { getBusinessReviews, Review } from '../../lib/api';
+import SectionHeader from '../ui/SectionHeader';
 
 interface BusinessHistorySectionProps {
   businessId: string;
@@ -52,63 +53,100 @@ const BusinessHistorySection: React.FC<BusinessHistorySectionProps> = ({
     });
   };
 
-  if (loading) {
-    return (
-      <div className="flex justify-center py-8">
-        <div className="animate-spin rounded-full h-10 w-10 border-t-2 border-b-2 border-indigo-500"></div>
-      </div>
-    );
-  }
-
-  if (appointments.length === 0) {
-    return (
-      <div className="dark:bg-opacity-10 bg-gray-50 shadow overflow-hidden sm:rounded-md p-6 text-center">
-        <p className="text-gray-500 ">No hay citas pasadas.</p>
-      </div>
-    );
-  }
-
   return (
-    <div className="dark:bg-opacity-10 bg-gray-50 shadow overflow-hidden sm:rounded-md">
-      <ul className="divide-y divide-gray-200">
-        {appointments.map((appt: any) => {
-          const review = reviewsMap[appt.id];
-          return (
-            <li key={appt.id} className="px-4 py-4 sm:px-6">
-              <div className="flex flex-col justify-between space-y-2">
-                <div>
-                  <p className="text-sm font-medium text-indigo-600 dark:text-indigo-200">{appt.services?.name}</p>
-                  <p className="text-sm text-gray-500 ">Cliente: {appt.profiles?.full_name || appt.user_id}</p>
-                  <p className="text-sm text-gray-500 ">Fecha: {formatDate(appt.start_time)}</p>
-                </div>
-                {appt.status === 'cancelled' ? (
-                  <p className="self-start px-2 py-1 text-sm font-medium rounded-md inline-flex items-center justify-center bg-red-800 text-red-100">
-                    Cancelada
-                  </p>
-                ) : review ? (
-                  <div className="flex items-center space-x-1">
-                    {Array.from({ length: review.rating }).map((_, i) => (
-                      <Star key={`star-filled-${i}`} className="h-5 w-5 text-yellow-400" />
-                    ))}
-                    {Array.from({ length: 5 - review.rating }).map((_, i) => (
-                      <Star key={`star-empty-${i}`} className="h-5 w-5 text-gray-300" />
-                    ))}
-                  </div>
-                ) : (
-                  <p className="self-start px-2 py-1 text-sm font-medium rounded-md inline-flex items-center justify-center bg-yellow-100 text-yellow-800 dark:bg-yellow-800 dark:text-yellow-100">
-                    Sin reseña todavía
-                  </p>
-                )}
-              </div>
-            </li>
-          );
-        })}
-      </ul>
-      <Pagination
-        currentPage={currentPage}
-        totalPages={Math.ceil(appointments.length / itemsPerPage)}
-        onPageChange={onPageChange}
+    <div className="space-y-6">
+      <SectionHeader 
+        title="Historial de Citas" 
+        description="Registro de todas las citas pasadas, canceladas y finalizadas"
       />
+
+      {loading ? (
+        <div className="flex flex-col items-center justify-center py-12 gap-4">
+          <Loader2 className="w-10 h-10 text-primary-500 animate-spin" />
+          <p className="text-slate-500 font-medium">Cargando historial...</p>
+        </div>
+      ) : appointments.length === 0 ? (
+        <div className="card p-12 flex flex-col items-center text-center max-w-lg mx-auto">
+          <div className="w-16 h-16 rounded-2xl bg-slate-50 dark:bg-slate-800 flex items-center justify-center mb-6 text-slate-400">
+            <History className="w-8 h-8" />
+          </div>
+          <h3 className="text-xl font-black text-slate-900 dark:text-white mb-2">No hay historial aún</h3>
+          <p className="text-slate-500 dark:text-slate-400">Aquí aparecerán las citas que hayan sido completadas o canceladas.</p>
+        </div>
+      ) : (
+        <div className="card overflow-hidden">
+          <ul className="divide-y divide-slate-100 dark:divide-slate-800">
+            {appointments.map((appt: any) => {
+              const review = reviewsMap[appt.id];
+              return (
+                <li key={appt.id} className="p-4 sm:p-6 hover:bg-slate-50/50 dark:hover:bg-slate-800/50 transition-colors">
+                  <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
+                    <div className="flex items-start gap-4">
+                      <div className={`w-12 h-12 rounded-xl flex items-center justify-center shrink-0 ${
+                        appt.status === 'cancelled' 
+                          ? 'bg-red-50 text-red-600 dark:bg-red-500/10 dark:text-red-400' 
+                          : 'bg-primary-50 text-primary-600 dark:bg-primary-500/10 dark:text-primary-400'
+                      }`}>
+                        <Calendar className="w-6 h-6" />
+                      </div>
+                      <div className="min-w-0">
+                        <h4 className="text-lg font-black text-slate-900 dark:text-white truncate tracking-tight">
+                          {appt.services?.name}
+                        </h4>
+                        <div className="flex flex-wrap gap-x-6 gap-y-1 mt-1">
+                          <div className="flex items-center gap-1.5 text-sm text-slate-500 dark:text-slate-400">
+                            <User className="w-4 h-4" />
+                            <span>{appt.profiles?.full_name || 'Usuario desconocido'}</span>
+                          </div>
+                          <div className="flex items-center gap-1.5 text-sm text-slate-500 dark:text-slate-400">
+                            <Clock className="w-4 h-4" />
+                            <span className="capitalize">{formatDate(appt.start_time)}</span>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+
+                    <div className="flex items-center gap-3">
+                      {appt.status === 'cancelled' ? (
+                        <span className="px-3 py-1 text-xs font-black uppercase tracking-wider rounded-lg bg-red-100 text-red-700 dark:bg-red-900/30 dark:text-red-400">
+                          Cancelada
+                        </span>
+                      ) : review ? (
+                        <div className="flex flex-col items-end gap-1">
+                          <div className="flex items-center gap-0.5">
+                            {[...Array(5)].map((_, i) => (
+                              <Star 
+                                key={i} 
+                                className={`w-4 h-4 ${i < review.rating ? 'fill-amber-400 text-amber-400' : 'text-slate-200 dark:text-slate-700'}`} 
+                              />
+                            ))}
+                          </div>
+                          {review.comment && (
+                            <p className="text-xs text-slate-500 dark:text-slate-400 italic max-w-[200px] truncate">
+                              "{review.comment}"
+                            </p>
+                          )}
+                        </div>
+                      ) : (
+                        <span className="px-3 py-1 text-xs font-black uppercase tracking-wider rounded-lg bg-slate-100 text-slate-500 dark:bg-slate-800 dark:text-slate-400">
+                          Sin reseña
+                        </span>
+                      )}
+                    </div>
+                  </div>
+                </li>
+              );
+            })}
+          </ul>
+          <div className="p-4 border-t border-slate-100 dark:border-slate-800">
+            <Pagination
+              currentPage={currentPage}
+              totalPages={Math.ceil(appointments.length / itemsPerPage)}
+              onPageChange={onPageChange}
+            />
+          </div>
+        </div>
+      )}
     </div>
   );
 };

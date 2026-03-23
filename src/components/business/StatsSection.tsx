@@ -1,5 +1,6 @@
 import React from 'react';
-import { Calendar, Clock, CheckSquare, Users, Box, DollarSign, Percent, TrendingUp } from 'lucide-react';
+import { Calendar, Clock, CheckSquare, Users, Box, DollarSign, Percent, TrendingUp, Star, Award, TrendingDown } from 'lucide-react';
+import SectionHeader from '../ui/SectionHeader';
 
 interface StatsSectionProps {
   totalAppointments: number;
@@ -8,7 +9,7 @@ interface StatsSectionProps {
   totalClients: number;
   totalServices: number;
   totalRevenue?: number;
-  confirmationRate?: number;    // porcentaje 0-100
+  confirmationRate?: number;
   cancellationRate?: number;
   avgDuration?: number;
   avgPrice?: number;
@@ -46,132 +47,127 @@ const StatsSection: React.FC<StatsSectionProps> = ({
   lifetimeValueAvg = 0,
   avgRating = 0
 }) => {
+  const stats = [
+    {
+      label: 'Ingresos Totales',
+      value: `$${totalRevenue.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`,
+      icon: DollarSign,
+      color: 'text-emerald-600 dark:text-emerald-400',
+      bgColor: 'bg-emerald-50 dark:bg-emerald-500/10',
+    },
+    {
+      label: 'Citas Totales',
+      value: totalAppointments.toString(),
+      icon: Calendar,
+      color: 'text-indigo-600 dark:text-indigo-400',
+      bgColor: 'bg-indigo-50 dark:bg-indigo-500/10',
+    },
+    {
+      label: 'Próximas Citas',
+      value: upcomingAppointments.toString(),
+      icon: Clock,
+      color: 'text-blue-600 dark:text-blue-400',
+      bgColor: 'bg-blue-50 dark:bg-blue-500/10',
+    },
+    {
+      label: 'Citas Pasadas',
+      value: pastAppointments.toString(),
+      icon: CheckSquare,
+      color: 'text-slate-600 dark:text-slate-400',
+      bgColor: 'bg-slate-50 dark:bg-slate-500/10',
+    },
+    {
+      label: 'Clientes Totales',
+      value: totalClients.toString(),
+      icon: Users,
+      color: 'text-amber-600 dark:text-amber-400',
+      bgColor: 'bg-amber-50 dark:bg-amber-500/10',
+    },
+    {
+      label: 'Servicios Totales',
+      value: totalServices.toString(),
+      icon: Box,
+      color: 'text-violet-600 dark:text-violet-400',
+      bgColor: 'bg-violet-50 dark:bg-violet-500/10',
+    },
+    {
+      label: 'Tasa de Confirmación',
+      value: `${confirmationRate.toFixed(1)}%`,
+      icon: TrendingUp,
+      color: 'text-green-600 dark:text-green-400',
+      bgColor: 'bg-green-50 dark:bg-green-500/10',
+    },
+    {
+      label: 'Tasa de Cancelación',
+      value: `${cancellationRate.toFixed(1)}%`,
+      icon: TrendingDown,
+      color: 'text-red-600 dark:text-red-400',
+      bgColor: 'bg-red-50 dark:bg-red-500/10',
+    },
+    {
+      label: 'Duración Promedio',
+      value: `${avgDuration.toFixed(0)} min`,
+      icon: Clock,
+      color: 'text-sky-600 dark:text-sky-400',
+      bgColor: 'bg-sky-50 dark:bg-sky-500/10',
+    },
+    {
+      label: 'Precio Promedio',
+      value: `$${avgPrice.toFixed(2)}`,
+      icon: DollarSign,
+      color: 'text-teal-600 dark:text-teal-400',
+      bgColor: 'bg-teal-50 dark:bg-teal-500/10',
+    },
+    {
+      label: 'Servicio Top',
+      value: topServiceName,
+      subValue: `${topServiceCount} citas`,
+      icon: Award,
+      color: 'text-rose-600 dark:text-rose-400',
+      bgColor: 'bg-rose-50 dark:bg-rose-500/10',
+    },
+    {
+      label: 'Valoración Media',
+      value: avgRating.toFixed(1),
+      icon: Star,
+      color: 'text-orange-500 dark:text-orange-400',
+      bgColor: 'bg-orange-50 dark:bg-orange-500/10',
+    },
+  ];
+
   return (
-    <div>
-      <h2 className="text-lg font-medium text-gray-900  mb-4 dark:text-gray-300">Estadísticas del negocio</h2>
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
-        <div className="bg-gray-50 dark:bg-gray-800 shadow rounded-md p-6 flex items-center">
-          <DollarSign className="h-6 w-6 text-green-600" />
-          <div className="ml-4">
-            <p className="text-sm text-gray-500 dark:text-gray-400">Ingresos Totales</p>
-            <p className="text-xl font-semibold text-gray-900 dark:text-gray-300">${totalRevenue.toFixed(2)}</p>
+    <div className="space-y-6">
+      <SectionHeader 
+        title="Estadísticas del negocio" 
+        description="Resumen detallado del rendimiento y métricas clave de tu actividad"
+      />
+      
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
+        {stats.map((stat, index) => (
+          <div key={index} className="card p-5 flex items-start gap-4 hover:shadow-md transition-shadow">
+            <div className={`p-3 rounded-xl ${stat.bgColor} ${stat.color} flex-shrink-0`}>
+              <stat.icon className="w-6 h-6" />
+            </div>
+            <div className="min-w-0">
+              <p className="text-sm font-medium text-slate-500 dark:text-slate-400 truncate">
+                {stat.label}
+              </p>
+              <div className="flex items-baseline gap-2 mt-1">
+                <p className="text-xl font-black text-slate-900 dark:text-white tracking-tight">
+                  {stat.value}
+                </p>
+                {stat.subValue && (
+                  <span className="text-xs font-bold text-slate-400 truncate">
+                    {stat.subValue}
+                  </span>
+                )}
+              </div>
+            </div>
           </div>
-        </div>
-        <div className="bg-gray-50 dark:bg-gray-800 shadow rounded-md p-6 flex items-center">
-          <Calendar className="h-6 w-6 text-indigo-600" />
-          <div className="ml-4">
-            <p className="text-sm text-gray-500 dark:text-gray-400">Citas Totales</p>
-            <p className="text-xl font-semibold text-gray-900 dark:text-gray-300">{totalAppointments}</p>
-          </div>
-        </div>
-        <div className="bg-gray-50 dark:bg-gray-800 shadow rounded-md p-6 flex items-center">
-          <Clock className="h-6 w-6 text-green-600" />
-          <div className="ml-4">
-            <p className="text-sm text-gray-500 dark:text-gray-400">Próximas Citas</p>
-            <p className="text-xl font-semibold text-gray-900 dark:text-gray-300">{upcomingAppointments}</p>
-          </div>
-        </div>
-        <div className="bg-gray-50 dark:bg-gray-800 shadow rounded-md p-6 flex items-center">
-          <CheckSquare className="h-6 w-6 text-blue-600" />
-          <div className="ml-4">
-            <p className="text-sm text-gray-500 dark:text-gray-400">Citas Pasadas</p>
-            <p className="text-xl font-semibold text-gray-900 ">{pastAppointments}</p>
-          </div>
-        </div>
-        <div className="bg-gray-50 dark:bg-gray-800 shadow rounded-md p-6 flex items-center">
-          <Users className="h-6 w-6 text-yellow-600" />
-          <div className="ml-4">
-            <p className="text-sm text-gray-500 dark:text-gray-400">Clientes Totales</p>
-            <p className="text-xl font-semibold text-gray-900 dark:text-gray-300">{totalClients}</p>
-          </div>
-        </div>
-        <div className="bg-gray-50 dark:bg-gray-800 shadow rounded-md p-6 flex items-center">
-          <Box className="h-6 w-6 text-pink-600" />
-          <div className="ml-4">
-            <p className="text-sm text-gray-500 dark:text-gray-400">Servicios Totales</p>
-            <p className="text-xl font-semibold text-gray-900 dark:text-gray-300">{totalServices}</p>
-          </div>
-        </div>
-        <div className="bg-gray-50 dark:bg-gray-800 shadow rounded-md p-6 flex items-center">
-          <TrendingUp className="h-6 w-6 text-indigo-500" />
-          <div className="ml-4">
-            <p className="text-sm text-gray-500 dark:text-gray-400">Tasa de Confirmación</p>
-            <p className="text-xl font-semibold text-gray-900 dark:text-gray-300">{confirmationRate.toFixed(2)}%</p>
-          </div>
-        </div>
-        <div className="bg-gray-50 dark:bg-gray-800 shadow rounded-md p-6 flex items-center">
-          <Percent className="h-6 w-6 text-red-500" />
-          <div className="ml-4">
-            <p className="text-sm text-gray-500 dark:text-gray-400">Tasa de Cancelación</p>
-            <p className="text-xl font-semibold text-gray-900 dark:text-gray-300">{cancellationRate.toFixed(2)}%</p>
-          </div>
-        </div>
-        <div className="bg-gray-50 dark:bg-gray-800 shadow rounded-md p-6 flex items-center">
-          <Clock className="h-6 w-6 text-gray-600" />
-          <div className="ml-4">
-            <p className="text-sm text-gray-500 dark:text-gray-400">Duración Promedio</p>
-            <p className="text-xl font-semibold text-gray-900 dark:text-gray-300">{avgDuration.toFixed(1)} min</p>
-          </div>
-        </div>
-        <div className="bg-gray-50 dark:bg-gray-800 shadow rounded-md p-6 flex items-center">
-          <DollarSign className="h-6 w-6 text-green-700" />
-          <div className="ml-4">
-            <p className="text-sm text-gray-500 dark:text-gray-400">Precio Promedio</p>
-            <p className="text-xl font-semibold text-gray-900 dark:text-gray-300">${avgPrice.toFixed(2)}</p>
-          </div>
-        </div>
-        <div className="bg-gray-50 dark:bg-gray-800 shadow rounded-md p-6 flex items-center">
-          <Box className="h-6 w-6 text-blue-400" />
-          <div className="ml-4">
-            <p className="text-sm text-gray-500 dark:text-gray-400">Servicio Más Solicitado</p>
-            <p className="text-xl font-semibold text-gray-900 dark:text-gray-300">{topServiceName} ({topServiceCount})</p>
-          </div>
-        </div>
-        <div className="bg-gray-50 dark:bg-gray-800 shadow rounded-md p-6 flex items-center">
-          <Users className="h-6 w-6 text-yellow-700" />
-          <div className="ml-4">
-            <p className="text-sm text-gray-500 dark:text-gray-400">Cliente Top</p>
-            <p className="text-xl font-semibold text-gray-900 dark:text-gray-300">{topClientName} ({topClientCount})</p>
-          </div>
-        </div>
-        <div className="bg-gray-50 dark:bg-gray-800 shadow rounded-md p-6 flex items-center">
-          <Calendar className="h-6 w-6 text-purple-600" />
-          <div className="ml-4">
-            <p className="text-sm text-gray-500 dark:text-gray-400">Pico</p>
-            <p className="text-xl font-semibold text-gray-900 dark:text-gray-300">{peakDay}, {peakHour}:00</p>
-          </div>
-        </div>
-        <div className="bg-gray-50 dark:bg-gray-800 shadow rounded-md p-6 flex items-center">
-          <Users className="h-6 w-6 text-pink-500" />
-          <div className="ml-4">
-            <p className="text-sm text-gray-500 dark:text-gray-400">Clientes Nuevos</p>
-            <p className="text-xl font-semibold text-gray-900 dark:text-gray-300">{newClients}</p>
-          </div>
-        </div>
-        <div className="bg-gray-50 dark:bg-gray-800 shadow rounded-md p-6 flex items-center">
-          <Users className="h-6 w-6 text-blue-500" />
-          <div className="ml-4">
-            <p className="text-sm text-gray-500 dark:text-gray-400">Clientes Recurrentes</p>
-            <p className="text-xl font-semibold text-gray-900 dark:text-gray-300">{returningClients}</p>
-          </div>
-        </div>
-        <div className="bg-gray-50 dark:bg-gray-800 shadow rounded-md p-6 flex items-center">
-          <DollarSign className="h-6 w-6 text-teal-600" />
-          <div className="ml-4">
-            <p className="text-sm text-gray-500 dark:text-gray-400">CLV Promedio</p>
-            <p className="text-xl font-semibold text-gray-900 dark:text-gray-300">${lifetimeValueAvg.toFixed(2)}</p>
-          </div>
-        </div>
-        <div className="bg-gray-50 dark:bg-gray-800 shadow rounded-md p-6 flex items-center">
-          <Percent className="h-6 w-6 text-indigo-400" />
-          <div className="ml-4">
-            <p className="text-sm text-gray-500 dark:text-gray-400">Valoración Media</p>
-            <p className="text-xl font-semibold text-gray-900 dark:text-gray-300">{avgRating.toFixed(1)}</p>
-          </div>
-        </div>
+        ))}
       </div>
     </div>
   );
 };
 
-export default StatsSection; 
+export default StatsSection;

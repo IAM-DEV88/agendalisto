@@ -36,33 +36,40 @@ const ReviewModal: React.FC<ReviewModalProps> = ({
     <div className="modal-overlay" onClick={onClose}>
       <div className="modal-container" onClick={e => e.stopPropagation()}>
         <div className="modal-header">
-          <h3 className="modal-title">Dejar Reseña</h3>
-          <button className="modal-close" onClick={onClose}>×</button>
+          <h3 className="modal-title">Tu Experiencia</h3>
+          <button 
+            className="p-2 hover:bg-slate-100 dark:hover:bg-slate-700 text-slate-400 hover:text-slate-600 rounded-full transition-colors" 
+            onClick={onClose}
+          >
+            <svg className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+            </svg>
+          </button>
         </div>
 
-        <form onSubmit={handleSubmit} className="modal-content">
-          <div className="space-y-6">
-            <div>
-              <label className="block text-sm font-medium text-gray-700 dark:text-gray-300dark:text-gray-300 mb-2">
-                Servicio
+        <form onSubmit={handleSubmit} className="modal-content p-8">
+          <div className="space-y-8">
+            <div className="bg-slate-50 dark:bg-slate-900/50 p-4 rounded-2xl border border-slate-100 dark:border-slate-800">
+              <label className="block text-[10px] font-black uppercase tracking-widest text-slate-400 mb-1">
+                Servicio realizado
               </label>
-              <p className="text-gray-900 dark:text-white">{appointment.services?.name}</p>
+              <p className="text-lg font-black text-primary-600 dark:text-primary-400">{appointment.services?.name}</p>
             </div>
 
             <div>
-              <label className="block text-sm font-medium text-gray-700 dark:text-gray-300dark:text-gray-300 mb-2">
-                Calificación
+              <label className="block text-sm font-bold text-slate-700 dark:text-slate-300 uppercase tracking-wider mb-4">
+                ¿Qué puntuación le darías?
               </label>
-              <div className="flex space-x-2">
+              <div className="flex gap-3 justify-center py-4 bg-slate-50 dark:bg-slate-900/50 rounded-3xl border border-slate-100 dark:border-slate-800">
                 {[1, 2, 3, 4, 5].map((value) => (
                   <button
                     key={value}
                     type="button"
                     onClick={() => setRating(value)}
-                    className="focus:outline-none"
+                    className="focus:outline-none transition-transform hover:scale-110 active:scale-95"
                   >
                     <Star 
-                      className={`h-8 w-8 ${value <= rating ? 'text-yellow-400 fill-current' : 'text-gray-300'}`}
+                      className={`h-10 w-10 ${value <= rating ? 'text-amber-400 fill-current' : 'text-slate-200 dark:text-slate-700'}`}
                     />
                   </button>
                 ))}
@@ -70,33 +77,33 @@ const ReviewModal: React.FC<ReviewModalProps> = ({
             </div>
 
             <div>
-              <label htmlFor="comment" className="block text-sm font-medium text-gray-700 dark:text-gray-300dark:text-gray-300 mb-2">
-                Comentario
+              <label htmlFor="comment" className="block text-sm font-bold text-slate-700 dark:text-slate-300 uppercase tracking-wider mb-2">
+                Tu comentario (opcional)
               </label>
               <textarea
                 id="comment"
                 rows={4}
                 value={comment}
                 onChange={(e) => setComment(e.target.value)}
-                className="shadow-sm focus:ring-indigo-500 focus:border-indigo-500 block w-full sm:text-sm border-gray-300 rounded-md dark:bg-gray-700 dark:border-gray-600"
-                placeholder="Cuéntanos tu experiencia..."
+                className="w-full"
+                placeholder="Cuéntanos qué te pareció el servicio..."
               />
             </div>
 
-            <div className="flex justify-end space-x-3">
+            <div className="flex flex-col sm:flex-row gap-3 pt-4">
               <button
                 type="button"
                 onClick={onClose}
-                className="px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-md hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 dark:bg-gray-800 dark:text-gray-300 dark:border-gray-600 dark:hover:bg-gray-700"
+                className="flex-1 px-6 py-3 bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300 font-bold rounded-2xl hover:bg-slate-200 dark:hover:bg-slate-700 transition-all"
               >
                 Cancelar
               </button>
               <button
                 type="submit"
                 disabled={loading}
-                className="px-4 py-2 text-sm font-medium text-white bg-indigo-600 border border-transparent rounded-md hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 disabled:opacity-50"
+                className="flex-[2] px-6 py-3 bg-primary-600 text-white font-black rounded-2xl shadow-xl shadow-primary-500/20 hover:bg-primary-500 transition-all disabled:opacity-50"
               >
-                {loading ? 'Enviando...' : 'Enviar Reseña'}
+                {loading ? 'Enviando...' : 'Publicar Reseña'}
               </button>
             </div>
           </div>

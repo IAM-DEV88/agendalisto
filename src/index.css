@@ -9,12 +9,12 @@
 /* ========================================================================== */
 @layer base {
   :root {
-    /* Light theme colors */
+    /* Light theme colors - Indigo base */
     --color-background: #ffffff;
     --color-surface: #f8fafc;
-    --color-primary: #0ea5e9;
-    --color-primary-light: #38bdf8;
-    --color-primary-dark: #0284c7;
+    --color-primary: #4f46e5; /* indigo-600 */
+    --color-primary-light: #6366f1; /* indigo-500 */
+    --color-primary-dark: #4338ca; /* indigo-700 */
     --color-text: #1e293b;
     --color-text-muted: #64748b;
     --color-border: #e2e8f0;
@@ -27,12 +27,12 @@
   }
 
   .dark {
-    /* Dark theme colors */
+    /* Dark theme colors - Indigo base */
     --color-background: #0f172a;
     --color-surface: #1e293b;
-    --color-primary: #38bdf8;
-    --color-primary-light: #7dd3fc;
-    --color-primary-dark: #0ea5e9;
+    --color-primary: #6366f1; /* indigo-500 */
+    --color-primary-light: #818cf8; /* indigo-400 */
+    --color-primary-dark: #4f46e5; /* indigo-600 */
     --color-text: #f8fafc;
     --color-text-muted: #94a3b8;
     --color-border: #334155;
@@ -122,15 +122,15 @@
 
   /* Primary Buttons */
   .btn-primary {
-    @apply w-full px-8 py-3 text-white bg-indigo-900 hover:bg-indigo-500 md:py-4 md:text-lg md:px-10 rounded-md;
+    @apply w-full px-8 py-3 text-white bg-primary-600 hover:bg-primary-500 md:py-4 md:text-lg md:px-10 rounded-md transition-colors duration-200;
   }
   
   .btn-secondary {
-    @apply w-full px-8 py-3 font-medium text-indigo-700 bg-indigo-100 hover:bg-indigo-500 md:py-4 md:text-lg md:px-10 hover:text-indigo-100 rounded-md;
+    @apply w-full px-8 py-3 font-medium text-primary-700 bg-primary-50 hover:bg-primary-100 md:py-4 md:text-lg md:px-10 rounded-md transition-colors duration-200 dark:bg-slate-800 dark:text-primary-400 dark:hover:bg-slate-700;
   }
   
   .btn-tertiary {
-    @apply w-full px-8 py-3 font-medium text-white bg-indigo-800 hover:bg-indigo-700 md:py-4 md:text-lg md:px-10 rounded-md;
+    @apply w-full px-8 py-3 font-medium text-white bg-primary-700 hover:bg-primary-800 md:py-4 md:text-lg md:px-10 rounded-md transition-colors duration-200;
   }
 
   /* Action Buttons */

@@ -1,6 +1,9 @@
 import React, { useState, useEffect } from 'react';
+import { Plus, Edit2, Trash2, Clock, DollarSign, User, Info, CheckCircle, XCircle, Loader2 } from 'lucide-react';
 import type { Service } from '../../lib/api';
 import { notifySuccess, notifyError } from '../../lib/toast';
+import SectionHeader from '../ui/SectionHeader';
+import { Pagination } from '../ui/Pagination';
 
 interface ServicesSectionProps {
   businessId: string;
@@ -25,6 +28,7 @@ const ServicesSection: React.FC<ServicesSectionProps> = ({
   const [modalOpen, setModalOpen] = useState(false);
   const [editingService, setEditingService] = useState<Service | null>(null);
   const [error, setError] = useState<string | null>(null);
+  const [isSubmitting, setIsSubmitting] = useState(false);
   const [formData, setFormData] = useState({
     name: '',
     description: '',
@@ -49,7 +53,6 @@ const ServicesSection: React.FC<ServicesSectionProps> = ({
       
       if (response.success && response.data) {
         setServices(response.data);
-        setCurrentPage(1);
       } else {
         setError(response.error || 'Error al cargar los servicios');
       }
@@ -76,6 +79,7 @@ const ServicesSection: React.FC<ServicesSectionProps> = ({
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setError(null);
+    setIsSubmitting(true);
 
     const serviceData = {
       business_id: businessId,
@@ -97,15 +101,15 @@ const ServicesSection: React.FC<ServicesSectionProps> = ({
         await createService(serviceData);
         notifySuccess('Servicio creado correctamente');
       }
+      setModalOpen(false);
+      resetForm();
+      await loadServices();
     } catch (err: any) {
       const errMsg = err.message || 'Error al guardar el servicio';
       setError(errMsg);
       notifyError(errMsg);
     } finally {
-      setModalOpen(false);
-      resetForm();
-      await loadServices();
-      setError(null);
+      setIsSubmitting(false);
     }
   };
 
@@ -146,282 +150,271 @@ const ServicesSection: React.FC<ServicesSectionProps> = ({
     setModalOpen(true);
   };
 
+  const totalPages = Math.ceil(services.length / itemsPerPage);
+  const pagedServices = services.slice((currentPage - 1) * itemsPerPage, currentPage * itemsPerPage);
+
   return (
-    <div>
-      <div className="sm:flex sm:items-center sm:justify-between">
-        <div className="mt-2 sm:mt-0 sm:ml-4">
+    <div className="space-y-6">
+      <SectionHeader 
+        title="Servicios" 
+        description="Gestiona el catálogo de servicios que ofreces a tus clientes"
+        actionButton={
           <button
             type="button"
             onClick={() => {
               resetForm();
               setModalOpen(true);
             }}
-            className="inline-flex items-center px-4 py-2 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
+            className="inline-flex items-center px-4 py-2.5 bg-primary-600 hover:bg-primary-700 text-white text-sm font-bold rounded-xl transition-all shadow-lg shadow-primary-500/25 gap-2"
           >
-            <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 mr-2" viewBox="0 0 20 20" fill="currentColor">
-              <path fillRule="evenodd" d="M10 3a1 1 0 011 1v5h5a1 1 0 110 2h-5v5a1 1 0 11-2 0v-5H4a1 1 0 110-2h5V4a1 1 0 011-1z" clipRule="evenodd" />
-            </svg>
+            <Plus className="w-5 h-5" />
             Nuevo Servicio
           </button>
-        </div>
-      </div>
+        }
+      />
 
       {error && (
-        <div className="mt-4 bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded">
-          {error}
+        <div className="alert alert-error flex items-center gap-3">
+          <Info className="w-5 h-5 flex-shrink-0" />
+          <p>{error}</p>
         </div>
       )}
 
       {loading ? (
-        <div className="flex justify-center items-center h-64">
-          <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-indigo-500"></div>
+        <div className="flex flex-col items-center justify-center h-64 gap-4">
+          <Loader2 className="w-10 h-10 text-primary-500 animate-spin" />
+          <p className="text-slate-500 font-medium">Cargando servicios...</p>
         </div>
       ) : services.length === 0 ? (
-        <div className="text-center py-12">
-          <div className="flex justify-center">
-            <svg xmlns="http://www.w3.org/2000/svg" className="h-12 w-12 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
-            </svg>
+        <div className="card p-12 flex flex-col items-center text-center max-w-lg mx-auto">
+          <div className="w-16 h-16 rounded-2xl bg-slate-50 dark:bg-slate-800 flex items-center justify-center mb-6 text-slate-400">
+            <Plus className="w-8 h-8" />
           </div>
-          <h3 className="mt-2 text-sm font-medium text-gray-900">No hay servicios</h3>
-          <p className="mt-1 text-sm text-gray-500">Comienza agregando tu primer servicio.</p>
-          <div className="mt-6">
-            <button
-              type="button"
-              onClick={() => {
-                resetForm();
-                setModalOpen(true);
-              }}
-              className="inline-flex items-center px-4 py-2 border border-transparent shadow-sm text-sm font-medium rounded-md text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
-            >
-              <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 mr-2" viewBox="0 0 20 20" fill="currentColor">
-                <path fillRule="evenodd" d="M10 3a1 1 0 011 1v5h5a1 1 0 110 2h-5v5a1 1 0 11-2 0v-5H4a1 1 0 110-2h5V4a1 1 0 011-1z" clipRule="evenodd" />
-              </svg>
-              Nuevo Servicio
-            </button>
-          </div>
+          <h3 className="text-xl font-black text-slate-900 dark:text-white mb-2">No hay servicios</h3>
+          <p className="text-slate-500 dark:text-slate-400 mb-8">Comienza agregando tu primer servicio para que tus clientes puedan reservar.</p>
+          <button
+            type="button"
+            onClick={() => {
+              resetForm();
+              setModalOpen(true);
+            }}
+            className="inline-flex items-center px-6 py-3 bg-primary-600 hover:bg-primary-700 text-white font-bold rounded-xl transition-all shadow-lg shadow-primary-500/25 gap-2"
+          >
+            <Plus className="w-5 h-5" />
+            Nuevo Servicio
+          </button>
         </div>
       ) : (
         <>
-        <div className="mt-2 grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3">
-          {(() => {
-            const pagedServices = services.slice((currentPage - 1) * itemsPerPage, currentPage * itemsPerPage);
-            return pagedServices.map((service) => (
+          <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6">
+            {pagedServices.map((service) => (
               <div
                 key={service.id}
-                className={`dark:bg-opacity-10 bg-gray-50 overflow-hidden flex flex-col shadow rounded-md ${
-                  !service.is_active ? 'opacity-75' : ''
+                className={`card group flex flex-col h-full transition-all hover:border-primary-500/30 ${
+                  !service.is_active ? 'opacity-70 grayscale-[0.3]' : ''
                 }`}
               >
-                <div className="p-6 grow">
-                  <div className="flex items-start justify-between">
-                    <div>
-                      <h3 className=" text-lg font-medium text-gray-900 dark:text-gray-300">{service.name}</h3>
-                      <p className=" mt-1 text-sm text-gray-500 dark:text-gray-400">{service.description}</p>
+                <div className="p-6 flex-grow">
+                  <div className="flex items-start justify-between gap-4 mb-4">
+                    <div className="min-w-0">
+                      <h3 className="text-lg font-black text-slate-900 dark:text-white truncate tracking-tight">
+                        {service.name}
+                      </h3>
+                      <p className="text-sm font-medium text-slate-500 dark:text-slate-400 mt-1 line-clamp-2">
+                        {service.description}
+                      </p>
                     </div>
-                    {!service.is_active && (
-                      <span className=" inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-gray-500 text-gray-800">
-                        Inactivo
-                      </span>
-                    )}
+                    <div className={`flex-shrink-0 w-10 h-10 rounded-xl flex items-center justify-center ${
+                      service.is_active 
+                        ? 'bg-emerald-50 text-emerald-600 dark:bg-emerald-500/10 dark:text-emerald-400' 
+                        : 'bg-slate-100 text-slate-400 dark:bg-slate-800 dark:text-slate-600'
+                    }`}>
+                      {service.is_active ? <CheckCircle className="w-6 h-6" /> : <XCircle className="w-6 h-6" />}
+                    </div>
                   </div>
-                  <div className="mt-4">
-                    <div className="flex justify-between text-sm">
-                      <span className=" text-gray-500 dark:text-gray-400">Duración</span>
-                      <span className=" font-medium">{service.duration} min</span>
+
+                  <div className="space-y-3 pt-4 border-t border-slate-100 dark:border-slate-800">
+                    <div className="flex items-center justify-between text-sm">
+                      <div className="flex items-center gap-2 text-slate-500 dark:text-slate-400">
+                        <Clock className="w-4 h-4" />
+                        <span>Duración</span>
+                      </div>
+                      <span className="font-bold text-slate-900 dark:text-white">{service.duration} min</span>
                     </div>
-                    <div className="mt-1 flex justify-between text-sm">
-                      <span className=" text-gray-500 dark:text-gray-400">Precio</span>
-                      <span className=" font-medium">${service.price.toFixed(2)}</span>
+                    <div className="flex items-center justify-between text-sm">
+                      <div className="flex items-center gap-2 text-slate-500 dark:text-slate-400">
+                        <DollarSign className="w-4 h-4" />
+                        <span>Precio</span>
+                      </div>
+                      <span className="font-black text-lg text-primary-600 dark:text-primary-400">${service.price.toFixed(2)}</span>
                     </div>
                     {service.provider && (
-                      <div className="mt-1 flex justify-between text-sm">
-                        <span className=" text-gray-500 dark:text-gray-400">Proveedor</span>
-                        <span className=" font-medium">{service.provider}</span>
+                      <div className="flex items-center justify-between text-sm">
+                        <div className="flex items-center gap-2 text-slate-500 dark:text-slate-400">
+                          <User className="w-4 h-4" />
+                          <span>Proveedor</span>
+                        </div>
+                        <span className="font-bold text-slate-900 dark:text-white truncate max-w-[120px]">{service.provider}</span>
                       </div>
                     )}
                   </div>
                 </div>
-                <div className="dark:bg-opacity-10 bg-gray-50 px-6 py-3 flex justify-end space-x-3">
+
+                <div className="px-6 py-4 bg-slate-50/50 dark:bg-slate-800/50 border-t border-slate-100 dark:border-slate-800 flex justify-end gap-3">
                   <button
                     onClick={() => handleEdit(service)}
-                    className="inline-flex items-center px-3 py-1.5 border border-gray-300 shadow-sm text-sm font-medium rounded-md text-gray-700 bdarg-white hover:bg-gray-600 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 dark:bg-gray-500"
+                    className="p-2 text-slate-400 hover:text-primary-600 dark:hover:text-primary-400 transition-colors"
+                    title="Editar"
                   >
-                    <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4 mr-1.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 0L11.828 15H9v-2.828l8.586-8.586z" />
-                    </svg>
-                    Editar
+                    <Edit2 className="w-5 h-5" />
                   </button>
                   <button
                     onClick={() => handleDelete(service.id)}
-                    className="inline-flex items-center px-3 py-1.5 border border-red-300 shadow-sm text-sm font-medium rounded-md text-red-700 bg-gray-50 hover:bg-red-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500"
+                    className="p-2 text-slate-400 hover:text-red-500 transition-colors"
+                    title="Eliminar"
                   >
-                    <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4 mr-1.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
-                    </svg>
-                    Eliminar
+                    <Trash2 className="w-5 h-5" />
                   </button>
                 </div>
               </div>
-            ));
-          })()}
-        </div>
-        {/* Controles de paginación */}
-        {Math.ceil(services.length / itemsPerPage) > 1 && (
-          <div className="flex justify-center mt-4">
-            <nav className="flex items-center space-x-2">
-              <button
-                onClick={() => setCurrentPage(prev => prev - 1)}
-                disabled={currentPage === 1}
-                aria-label="Anterior"
-                className="px-3 py-1 rounded-md bg-gray-50 border border-gray-300 text-gray-700 hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed"
-              >◀</button>
-              {Array.from({ length: Math.ceil(services.length / itemsPerPage) }, (_, i) => i + 1).map(page => (
-                <button
-                  key={page}
-                  onClick={() => setCurrentPage(page)}
-                  className={`px-3 py-1 rounded-md ${currentPage === page ? 'bg-indigo-600 text-white' : 'bg-gray-50 border border-gray-300 text-gray-700 hover:bg-gray-50'}`}
-                >{page}</button>
-              ))}
-              <button
-                onClick={() => setCurrentPage(prev => prev + 1)}
-                disabled={currentPage === Math.ceil(services.length / itemsPerPage)}
-                aria-label="Siguiente"
-                className="px-3 py-1 rounded-md bg-gray-50 border border-gray-300 text-gray-700 hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed"
-              >▶</button>
-            </nav>
+            ))}
           </div>
-        )}
+          
+          <Pagination 
+            currentPage={currentPage} 
+            totalPages={totalPages} 
+            onPageChange={setCurrentPage} 
+          />
         </>
       )}
 
       {/* Modal Form */}
       {modalOpen && (
-        <div className="fixed z-10 inset-0 overflow-y-auto">
-          <div className="flex items-end justify-center min-h-screen pt-4 px-4 pb-20 text-center sm:block sm:p-0">
-            <div className="fixed inset-0 bg-gray-900 bg-opacity-75 transition-opacity"></div>
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-sm">
+          <div className="bg-white dark:bg-slate-900 rounded-2xl shadow-2xl w-full max-w-lg overflow-hidden animate-in fade-in zoom-in duration-200">
+            <form onSubmit={handleSubmit}>
+              <div className="p-6 border-b border-slate-100 dark:border-slate-800">
+                <h3 className="text-xl font-black text-slate-900 dark:text-white tracking-tight">
+                  {editingService ? 'Editar Servicio' : 'Nuevo Servicio'}
+                </h3>
+                <p className="text-sm text-slate-500 dark:text-slate-400 mt-1">
+                  Completa los datos del servicio para actualizar tu catálogo
+                </p>
+              </div>
 
-            <span className="hidden sm:inline-block sm:align-middle sm:h-screen">&#8203;</span>
+              <div className="p-6 space-y-4 max-h-[60vh] overflow-y-auto">
+                <div className="space-y-1">
+                  <label htmlFor="name" className="text-sm font-bold text-slate-700 dark:text-slate-300">
+                    Nombre del servicio
+                  </label>
+                  <input
+                    type="text"
+                    id="name"
+                    value={formData.name}
+                    onChange={(e) => setFormData({ ...formData, name: e.target.value })}
+                    className="w-full px-4 py-2.5 rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 focus:ring-2 focus:ring-primary-500/20 focus:border-primary-500 outline-none transition-all"
+                    placeholder="Ej: Corte de Cabello"
+                    required
+                  />
+                </div>
 
-            <div className="inline-block align-bottom dark:bg-opacity-10 rounded-md text-left overflow-hidden shadow-xl transform transition-all sm:my-8 sm:align-middle sm:max-w-lg sm:w-full">
-              <form onSubmit={handleSubmit}>
-                <div className="bg-gray-50 dark:bg-gray-900 px-4 pt-20 pb-4 sm:p-6 sm:pb-4">
-                  <div className="mb-4">
-                    <h3 className="text-lg font-medium text-gray-900">
-                      {editingService ? 'Editar Servicio' : 'Nuevo Servicio'}
-                    </h3>
+                <div className="space-y-1">
+                  <label htmlFor="description" className="text-sm font-bold text-slate-700 dark:text-slate-300">
+                    Descripción
+                  </label>
+                  <textarea
+                    id="description"
+                    value={formData.description}
+                    onChange={(e) => setFormData({ ...formData, description: e.target.value })}
+                    rows={3}
+                    className="w-full px-4 py-2.5 rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 focus:ring-2 focus:ring-primary-500/20 focus:border-primary-500 outline-none transition-all resize-none"
+                    placeholder="Describe brevemente el servicio..."
+                    required
+                  ></textarea>
+                </div>
+
+                <div className="grid grid-cols-2 gap-4">
+                  <div className="space-y-1">
+                    <label htmlFor="duration" className="text-sm font-bold text-slate-700 dark:text-slate-300">
+                      Duración (min)
+                    </label>
+                    <input
+                      type="number"
+                      id="duration"
+                      value={formData.duration}
+                      onChange={(e) => setFormData({ ...formData, duration: e.target.value })}
+                      min="5"
+                      className="w-full px-4 py-2.5 rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 focus:ring-2 focus:ring-primary-500/20 focus:border-primary-500 outline-none transition-all"
+                      required
+                    />
                   </div>
 
-                  <div className="space-y-4">
-                    <div>
-                      <label htmlFor="name" className="block text-sm font-medium text-gray-700">
-                        Nombre del servicio
-                      </label>
-                      <input
-                        type="text"
-                        id="name"
-                        value={formData.name}
-                        onChange={(e) => setFormData({ ...formData, name: e.target.value })}
-                        className="mt-1 block w-full border border-gray-300 rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm"
-                        required
-                      />
-                    </div>
-
-                    <div>
-                      <label htmlFor="description" className="block text-sm font-medium text-gray-700">
-                        Descripción
-                      </label>
-                      <textarea
-                        id="description"
-                        value={formData.description}
-                        onChange={(e) => setFormData({ ...formData, description: e.target.value })}
-                        rows={3}
-                        className="mt-1 block w-full border border-gray-300 rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm"
-                        required
-                      ></textarea>
-                    </div>
-
-                    <div className="grid grid-cols-2 gap-4">
-                      <div>
-                        <label htmlFor="duration" className="block text-sm font-medium text-gray-700">
-                          Duración (minutos)
-                        </label>
-                        <input
-                          type="number"
-                          id="duration"
-                          value={formData.duration}
-                          onChange={(e) => setFormData({ ...formData, duration: e.target.value })}
-                          min="5"
-                          className="mt-1 block w-full border border-gray-300 rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm"
-                          required
-                        />
-                      </div>
-
-                      <div>
-                        <label htmlFor="price" className="block text-sm font-medium text-gray-700">
-                          Precio
-                        </label>
-                        <input
-                          type="number"
-                          id="price"
-                          value={formData.price}
-                          onChange={(e) => setFormData({ ...formData, price: e.target.value })}
-                          min="0"
-                          step="0.01"
-                          className="mt-1 block w-full border border-gray-300 rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm"
-                          required
-                        />
-                      </div>
-                    </div>
-
-                    <div>
-                      <label htmlFor="provider" className="block text-sm font-medium text-gray-700">
-                        Proveedor (opcional)
-                      </label>
-                      <input
-                        type="text"
-                        id="provider"
-                        value={formData.provider}
-                        onChange={(e) => setFormData({ ...formData, provider: e.target.value })}
-                        className="mt-1 block w-full border border-gray-300 rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm"
-                      />
-                    </div>
-
-                    <div className="flex items-center">
-                      <input
-                        type="checkbox"
-                        id="is_active"
-                        checked={formData.is_active}
-                        onChange={(e) => setFormData({ ...formData, is_active: e.target.checked })}
-                        className="h-4 w-4 text-indigo-600 focus:ring-indigo-500 border-gray-300 rounded"
-                      />
-                      <label htmlFor="is_active" className="ml-2 block text-sm text-gray-900 dark:text-gray-300">
-                        Servicio activo
-                      </label>
-                    </div>
+                  <div className="space-y-1">
+                    <label htmlFor="price" className="text-sm font-bold text-slate-700 dark:text-slate-300">
+                      Precio ($)
+                    </label>
+                    <input
+                      type="number"
+                      id="price"
+                      value={formData.price}
+                      onChange={(e) => setFormData({ ...formData, price: e.target.value })}
+                      min="0"
+                      step="0.01"
+                      className="w-full px-4 py-2.5 rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 focus:ring-2 focus:ring-primary-500/20 focus:border-primary-500 outline-none transition-all"
+                      required
+                    />
                   </div>
                 </div>
 
-                <div className="bg-gray-50 dark:bg-gray-900 px-4 py-3 sm:px-6 sm:flex sm:flex-row-reverse">
-                  <button
-                    type="submit"
-                    className="w-full inline-flex justify-center rounded-md border border-transparent shadow-sm px-4 py-2 bg-indigo-600 text-base font-medium text-white hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 sm:ml-3 sm:w-auto sm:text-sm"
-                  >
-                    {editingService ? 'Guardar cambios' : 'Crear servicio'}
-                  </button>
-                  <button
-                    type="button"
-                    onClick={() => {
-                      setModalOpen(false);
-                      resetForm();
-                    }}
-                    className="mt-3 w-full inline-flex justify-center rounded-md border border-gray-300 shadow-sm px-4 py-2 bg-gray-50 text-base font-medium text-gray-700 hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 sm:mt-0 sm:ml-3 sm:w-auto sm:text-sm"
-                  >
-                    Cancelar
-                  </button>
+                <div className="space-y-1">
+                  <label htmlFor="provider" className="text-sm font-bold text-slate-700 dark:text-slate-300">
+                    Proveedor (opcional)
+                  </label>
+                  <input
+                    type="text"
+                    id="provider"
+                    value={formData.provider}
+                    onChange={(e) => setFormData({ ...formData, provider: e.target.value })}
+                    className="w-full px-4 py-2.5 rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 focus:ring-2 focus:ring-primary-500/20 focus:border-primary-500 outline-none transition-all"
+                    placeholder="Nombre del profesional"
+                  />
                 </div>
-              </form>
-            </div>
+
+                <div className="flex items-center gap-3 p-4 bg-slate-50 dark:bg-slate-800/50 rounded-xl">
+                  <input
+                    type="checkbox"
+                    id="is_active"
+                    checked={formData.is_active}
+                    onChange={(e) => setFormData({ ...formData, is_active: e.target.checked })}
+                    className="w-5 h-5 rounded-md border-slate-300 text-primary-600 focus:ring-primary-500"
+                  />
+                  <label htmlFor="is_active" className="text-sm font-bold text-slate-700 dark:text-slate-300 cursor-pointer select-none">
+                    Servicio activo y visible para reservas
+                  </label>
+                </div>
+              </div>
+
+              <div className="p-6 bg-slate-50 dark:bg-slate-800/50 flex flex-col sm:flex-row-reverse gap-3">
+                <button
+                  type="submit"
+                  disabled={isSubmitting}
+                  className="w-full sm:w-auto px-8 py-3 bg-primary-600 hover:bg-primary-700 text-white font-bold rounded-xl transition-all shadow-lg shadow-primary-500/25 flex items-center justify-center gap-2 disabled:opacity-50"
+                >
+                  {isSubmitting && <Loader2 className="w-4 h-4 animate-spin" />}
+                  {editingService ? 'Guardar Cambios' : 'Crear Servicio'}
+                </button>
+                <button
+                  type="button"
+                  onClick={() => {
+                    setModalOpen(false);
+                    resetForm();
+                  }}
+                  className="w-full sm:w-auto px-8 py-3 bg-white dark:bg-slate-700 text-slate-700 dark:text-slate-200 font-bold rounded-xl border border-slate-200 dark:border-slate-600 hover:bg-slate-50 dark:hover:bg-slate-600 transition-all"
+                >
+                  Cancelar
+                </button>
+              </div>
+            </form>
           </div>
         </div>
       )}

@@ -24,31 +24,35 @@ export const TabNav: React.FC<TabNavProps> = ({
   }, [activeTabId]);
 
   return (
-    <div className="border-b border-gray-200">
-      <nav className="-mb-px flex flex-wrap md:space-x-2 overflow-visible whitespace-nowrap whitespace-normal">
+    <div className="border-b border-slate-200 dark:border-slate-800 transition-colors duration-200">
+      <nav className="-mb-px flex flex-wrap md:space-x-4 overflow-x-auto no-scrollbar">
         {tabs.map((tab) => (
           <button
             key={tab.id}
             id={`tab-${tab.id}`}
             onClick={() => onTabChange(tab.id)}
-            className={`${
+            className={`group relative whitespace-nowrap py-4 px-2 font-black text-sm transition-all ${
               activeTabId === tab.id
-                ? 'border-indigo-600 text-indigo-800 dark:text-indigo-200 font-bold border-b-2'
-                : 'border-transparent text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-300 border-b-2'
-            } whitespace-nowrap py-4 px-1 font-medium text-sm`}
+                ? 'text-primary-600 dark:text-primary-400'
+                : 'text-slate-500 hover:text-slate-700 dark:text-slate-400 dark:hover:text-slate-300'
+            }`}
           >
-            <div className="flex items-center">
-              <span className={`${activeTabId === tab.id ? 'text-indigo-600 dark:text-indigo-300' : 'text-gray-500 dark:text-gray-400'}`}>{tab.label}</span>
+            <div className="flex items-center gap-2">
+              <span>{tab.label}</span>
               {tab.count !== undefined && (
-                <span className={`ml-1 inline-flex items-center px-2 py-0.5 rounded-full text-xs ${
+                <span className={`inline-flex items-center px-2 py-0.5 rounded-lg text-[10px] font-black uppercase tracking-tighter transition-colors ${
                   activeTabId === tab.id
-                    ? 'bg-indigo-600 text-white'
-                    : 'bg-gray-200 text-gray-700 dark:bg-gray-700 dark:text-gray-300'
+                    ? 'bg-primary-600 text-white shadow-lg shadow-primary-500/30'
+                    : 'bg-slate-100 text-slate-600 dark:bg-slate-800 dark:text-slate-400 group-hover:bg-slate-200 dark:group-hover:bg-slate-700'
                 }`}>
                   {tab.count}
                 </span>
               )}
             </div>
+            {/* Active indicator bar */}
+            {activeTabId === tab.id && (
+              <div className="absolute bottom-0 left-0 right-0 h-1 bg-primary-600 dark:bg-primary-400 rounded-t-full animate-in fade-in slide-in-from-bottom-1 duration-300"></div>
+            )}
           </button>
         ))}
       </nav>

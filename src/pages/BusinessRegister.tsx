@@ -78,209 +78,214 @@ const BusinessRegister = ({ user }: BusinessRegisterProps) => {
   };
 
   return (
-    <div>
-      <div className="max-w-7xl mx-auto py-6 sm:px-6 lg:px-8">
-        <div className="px-4 py-6 sm:px-0">
-          <div className="mb-10">
-            <h1 className="text-3xl  font-extrabold text-gray-900">Registrar mi negocio</h1>
-            <p className="mt-2  text-sm text-gray-600">
-              Completa la información para registrar tu negocio y comenzar a recibir reservas.
-            </p>
-          </div>
+    <div className="min-h-screen bg-slate-50 dark:bg-slate-900 py-12 px-4 sm:px-6 lg:px-8 transition-colors duration-200">
+      <div className="max-w-4xl mx-auto">
+        <div className="text-center mb-12">
+          <h1 className="text-4xl font-black text-slate-900 dark:text-white tracking-tight mb-4">Registrar mi negocio</h1>
+          <p className="max-w-2xl mx-auto text-lg text-slate-600 dark:text-slate-400 font-medium">
+            Completa la información para registrar tu negocio y comenzar a recibir reservas profesionales.
+          </p>
+        </div>
 
-          {error && (
-            <div className="mb-4 bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded relative" role="alert">
-              <span className="block sm:inline">{error}</span>
+        {error && (
+          <div className="alert alert-error mb-8 flex items-start gap-3 animate-in fade-in duration-300">
+            <svg className="h-6 w-6 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+            </svg>
+            <span className="font-bold">{error}</span>
+          </div>
+        )}
+
+        <div className="card p-8 sm:p-12 shadow-2xl shadow-slate-200/50 dark:shadow-none">
+          <form onSubmit={handleSubmit} className="space-y-10">
+            <section className="space-y-8">
+              <div className="border-b border-slate-100 dark:border-slate-800 pb-4">
+                <h3 className="text-xl font-black text-slate-900 dark:text-white uppercase tracking-wider">
+                  Información general
+                </h3>
+              </div>
+
+              <div className="grid grid-cols-1 gap-8 sm:grid-cols-2">
+                <div className="sm:col-span-2">
+                  <label htmlFor="businessName" className="block text-sm font-bold text-slate-700 dark:text-slate-300 uppercase tracking-widest mb-2">
+                    Nombre del negocio
+                  </label>
+                  <input
+                    type="text"
+                    id="businessName"
+                    value={businessName}
+                    onChange={(e) => setBusinessName(e.target.value)}
+                    required
+                    placeholder="Ej: Barbería El Corte Ideal"
+                    className="w-full"
+                  />
+                </div>
+
+                <div className="sm:col-span-2">
+                  <label htmlFor="description" className="block text-sm font-bold text-slate-700 dark:text-slate-300 uppercase tracking-widest mb-2">
+                    Descripción
+                  </label>
+                  <textarea
+                    id="description"
+                    rows={4}
+                    value={description}
+                    onChange={(e) => setDescription(e.target.value)}
+                    required
+                    placeholder="Cuéntanos qué haces y por qué eres el mejor..."
+                    className="w-full"
+                  />
+                  <p className="mt-3 text-xs text-slate-500 font-medium italic">
+                    Breve descripción de tu negocio y los servicios que ofreces.
+                  </p>
+                </div>
+
+                <div className="sm:col-span-2">
+                  <label htmlFor="address" className="block text-sm font-bold text-slate-700 dark:text-slate-300 uppercase tracking-widest mb-2">
+                    Dirección física
+                  </label>
+                  <input
+                    type="text"
+                    id="address"
+                    value={address}
+                    onChange={(e) => setAddress(e.target.value)}
+                    required
+                    placeholder="Calle, Número, Ciudad, CP"
+                    className="w-full"
+                  />
+                </div>
+
+                <div className="sm:col-span-2">
+                  <label htmlFor="category" className="block text-sm font-bold text-slate-700 dark:text-slate-300 uppercase tracking-widest mb-2">
+                    Categoría del negocio
+                  </label>
+                  <select
+                    id="category"
+                    value={categoryId}
+                    onChange={(e) => setCategoryId(e.target.value)}
+                    required
+                    className="w-full appearance-none"
+                  >
+                    <option value="" disabled>Selecciona una categoría</option>
+                    {categories.map(cat => (
+                      <option key={cat.id} value={cat.id}>{cat.name}</option>
+                    ))}
+                  </select>
+                </div>
+              </div>
+            </section>
+
+            <section className="space-y-8">
+              <div className="border-b border-slate-100 dark:border-slate-800 pb-4">
+                <h3 className="text-xl font-black text-slate-900 dark:text-white uppercase tracking-wider">
+                  Información de contacto
+                </h3>
+              </div>
+
+              <div className="grid grid-cols-1 gap-8 sm:grid-cols-2">
+                <div>
+                  <label htmlFor="phone" className="block text-sm font-bold text-slate-700 dark:text-slate-300 uppercase tracking-widest mb-2">
+                    Teléfono comercial
+                  </label>
+                  <input
+                    type="tel"
+                    id="phone"
+                    value={phone}
+                    onChange={(e) => setPhone(e.target.value)}
+                    required
+                    placeholder="+34 000 000 000"
+                    className="w-full"
+                  />
+                </div>
+
+                <div>
+                  <label htmlFor="email" className="block text-sm font-bold text-slate-700 dark:text-slate-300 uppercase tracking-widest mb-2">
+                    Email de contacto
+                  </label>
+                  <input
+                    type="email"
+                    id="email"
+                    value={email}
+                    onChange={(e) => setEmail(e.target.value)}
+                    required
+                    placeholder="contacto@negocio.com"
+                    className="w-full"
+                  />
+                </div>
+
+                <div>
+                  <label htmlFor="whatsapp" className="block text-sm font-bold text-slate-700 dark:text-slate-300 uppercase tracking-widest mb-2">
+                    WhatsApp (opcional)
+                  </label>
+                  <input
+                    type="tel"
+                    id="whatsapp"
+                    value={whatsapp}
+                    onChange={(e) => setWhatsapp(e.target.value)}
+                    placeholder="+34 000 000 000"
+                    className="w-full"
+                  />
+                </div>
+                
+                <div>
+                  <label htmlFor="instagram" className="block text-sm font-bold text-slate-700 dark:text-slate-300 uppercase tracking-widest mb-2">
+                    Instagram (opcional)
+                  </label>
+                  <div className="flex shadow-sm">
+                    <span className="inline-flex items-center px-4 rounded-l-xl border-2 border-r-0 border-slate-100 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 text-slate-400 font-bold sm:text-sm transition-colors">
+                      @
+                    </span>
+                    <input
+                      type="text"
+                      id="instagram"
+                      value={instagram}
+                      onChange={(e) => setInstagram(e.target.value)}
+                      placeholder="usuario"
+                      className="flex-1 min-w-0 block w-full px-4 py-2 rounded-none rounded-r-xl focus:border-primary-500 focus:ring-0 sm:text-sm border-2 border-slate-100 dark:border-slate-700 bg-slate-50 dark:bg-slate-900 transition-colors"
+                    />
+                  </div>
+                </div>
+
+                <div className="sm:col-span-2">
+                  <label htmlFor="facebook" className="block text-sm font-bold text-slate-700 dark:text-slate-300 uppercase tracking-widest mb-2">
+                    Facebook (opcional)
+                  </label>
+                  <input
+                    type="text"
+                    id="facebook"
+                    value={facebook}
+                    onChange={(e) => setFacebook(e.target.value)}
+                    placeholder="facebook.com/tunegocio"
+                    className="w-full"
+                  />
+                </div>
+              </div>
+            </section>
+
+            <div className="pt-10 flex flex-col sm:flex-row justify-end gap-4">
+              <button
+                type="button"
+                onClick={() => navigate('/dashboard')}
+                className="btn-secondary px-8 py-4 order-2 sm:order-1"
+              >
+                Cancelar
+              </button>
+              <button
+                type="submit"
+                disabled={loading}
+                className="btn-primary px-12 py-4 shadow-xl shadow-primary-500/20 order-1 sm:order-2"
+              >
+                {loading ? (
+                  <span className="flex items-center">
+                    <svg className="animate-spin -ml-1 mr-3 h-5 w-5 text-white" fill="none" viewBox="0 0 24 24">
+                      <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+                      <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                    </svg>
+                    Registrando...
+                  </span>
+                ) : 'Crear mi negocio ahora'}
+              </button>
             </div>
-          )}
-
-          <div className="bg-gray-50 dark:bg-opacity-10 shadow p-4">
-            <form onSubmit={handleSubmit} className="space-y-8">
-              <div className="space-y-6">
-                <h3 className="text-lg  font-medium leading-6 text-gray-900">Información general</h3>
-
-                <div className="grid grid-cols-1 gap-y-6 gap-x-4 sm:grid-cols-6">
-                  <div className="sm:col-span-4">
-                    <label htmlFor="businessName" className="block text-sm font-medium text-gray-700 dark:text-gray-300">
-                      Nombre del negocio
-                    </label>
-                    <div className="mt-1">
-                      <input
-                        type="text"
-                        id="businessName"
-                        value={businessName}
-                        onChange={(e) => setBusinessName(e.target.value)}
-                        required
-                        className="shadow-sm p-2 focus:ring-indigo-500 focus:border-indigo-500 block w-full sm:text-sm border-gray-300"
-                      />
-                    </div>
-                  </div>
-
-                  <div className="sm:col-span-6">
-                    <label htmlFor="description" className="block text-sm font-medium text-gray-700 dark:text-gray-300">
-                      Descripción
-                    </label>
-                    <div className="mt-1">
-                      <textarea
-                        id="description"
-                        rows={3}
-                        value={description}
-                        onChange={(e) => setDescription(e.target.value)}
-                        required
-                        className="shadow-sm p-2 focus:ring-indigo-500 focus:border-indigo-500 block w-full sm:text-sm border-gray-300"
-                      />
-                    </div>
-                    <p className="mt-2  text-sm text-gray-500">
-                      Breve descripción de tu negocio y los servicios que ofreces.
-                    </p>
-                  </div>
-
-                  <div className="sm:col-span-6">
-                    <label htmlFor="address" className="block text-sm font-medium text-gray-700 dark:text-gray-300">
-                      Dirección
-                    </label>
-                    <div className="mt-1">
-                      <input
-                        type="text"
-                        id="address"
-                        value={address}
-                        onChange={(e) => setAddress(e.target.value)}
-                        required
-                        className="shadow-sm focus:ring-indigo-500 focus:border-indigo-500 block w-full sm:text-sm border-gray-300"
-                      />
-                    </div>
-                  </div>
-
-                  <div className="sm:col-span-6">
-                    <label htmlFor="category" className="block text-sm font-medium text-gray-700 dark:text-gray-300">
-                      Categoría
-                    </label>
-                    <div className="mt-1">
-                      <select
-                        id="category"
-                        value={categoryId}
-                        onChange={(e) => setCategoryId(e.target.value)}
-                        required
-                        className="shadow-sm p-2 focus:ring-indigo-500 focus:border-indigo-500 block w-full sm:text-sm border-gray-300"
-                      >
-                        <option value="" disabled>Selecciona una categoría</option>
-                        {categories.map(cat => (
-                          <option key={cat.id} value={cat.id}>{cat.name}</option>
-                        ))}
-                      </select>
-                    </div>
-                  </div>
-                </div>
-              </div>
-
-              <div className="space-y-6 pt-6 border-t border-gray-200">
-                <h3 className="text-lg  font-medium leading-6 text-gray-900">Información de contacto</h3>
-
-                <div className="grid grid-cols-1 gap-y-6 gap-x-4 sm:grid-cols-6">
-                  <div className="sm:col-span-3">
-                    <label htmlFor="phone" className="block text-sm font-medium text-gray-700 dark:text-gray-300">
-                      Teléfono
-                    </label>
-                    <div className="mt-1">
-                      <input
-                        type="tel"
-                        id="phone"
-                        value={phone}
-                        onChange={(e) => setPhone(e.target.value)}
-                        required
-                        className="shadow-sm p-2 focus:ring-indigo-500 focus:border-indigo-500 block w-full sm:text-sm border-gray-300"
-                      />
-                    </div>
-                  </div>
-
-                  <div className="sm:col-span-3">
-                    <label htmlFor="email" className="block text-sm font-medium text-gray-700 dark:text-gray-300">
-                      Correo electrónico
-                    </label>
-                    <div className="mt-1">
-                      <input
-                        type="email"
-                        id="email"
-                        value={email}
-                        onChange={(e) => setEmail(e.target.value)}
-                        required
-                        className="shadow-sm p-2 focus:ring-indigo-500 focus:border-indigo-500 block w-full sm:text-sm border-gray-300"
-                      />
-                    </div>
-                  </div>
-
-                  <div className="sm:col-span-3">
-                    <label htmlFor="whatsapp" className="block text-sm font-medium text-gray-700 dark:text-gray-300">
-                      WhatsApp (opcional)
-                    </label>
-                    <div className="mt-1">
-                      <input
-                        type="tel"
-                        id="whatsapp"
-                        value={whatsapp}
-                        onChange={(e) => setWhatsapp(e.target.value)}
-                        className="shadow-sm p-2 focus:ring-indigo-500 focus:border-indigo-500 block w-full sm:text-sm border-gray-300"
-                      />
-                    </div>
-                  </div>
-                  
-                  <div className="sm:col-span-3">
-                    <label htmlFor="instagram" className="block text-sm font-medium text-gray-700 dark:text-gray-300">
-                      Instagram (opcional)
-                    </label>
-                    <div className="mt-1">
-                      <div className="flex shadow-sm">
-                        <span className="inline-flex items-center px-3 rounded-l-md border border-r-0 border-gray-300 bg-gray-50 dark:bg-opacity-10 text-gray-500 sm:text-sm">
-                          @
-                        </span>
-                        <input
-                          type="text"
-                          id="instagram"
-                          value={instagram}
-                          onChange={(e) => setInstagram(e.target.value)}
-                          className="flex-1 min-w-0 block w-full px-3 py-2 rounded-none rounded-r-md focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm border-gray-300"
-                        />
-                      </div>
-                    </div>
-                  </div>
-
-                  <div className="sm:col-span-3">
-                    <label htmlFor="facebook" className="block text-sm font-medium text-gray-700 dark:text-gray-300">
-                      Facebook (opcional)
-                    </label>
-                    <div className="mt-1">
-                      <input
-                        type="text"
-                        id="facebook"
-                        value={facebook}
-                        onChange={(e) => setFacebook(e.target.value)}
-                        className="shadow-sm p-2 focus:ring-indigo-500 focus:border-indigo-500 block w-full sm:text-sm border-gray-300"
-                      />
-                    </div>
-                  </div>
-                </div>
-              </div>
-
-              <div className="pt-5">
-                <div className="flex justify-end">
-                  <button
-                    type="button"
-                    onClick={() => navigate('/dashboard')}
-                    className="bg-gray-50  dark:bg-opacity-10 py-2 px-4 border border-gray-300 shadow-sm text-sm font-medium text-gray-700 hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
-                  >
-                    Cancelar
-                  </button>
-                  <button
-                    type="submit"
-                    disabled={loading}
-                    className="ml-3 inline-flex justify-center py-2 px-4 border border-transparent shadow-sm text-sm font-medium text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
-                  >
-                    {loading ? 'Registrando...' : 'Registrar negocio'}
-                  </button>
-                </div>
-              </div>
-            </form>
-          </div>
+          </form>
         </div>
       </div>
     </div>

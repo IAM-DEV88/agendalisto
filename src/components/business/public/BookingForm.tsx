@@ -227,126 +227,132 @@ const BookingForm: React.FC<BookingFormProps> = ({
   }
 
   return (
-    <div>
-      <div className="flex justify-between items-center mb-4">
-        <h2 className="text-xl font-semibold">Solicitar Reserva</h2>
+    <div className="animate-in slide-in-from-bottom-4 duration-500">
+      <div className="flex justify-between items-center mb-8 pb-4 border-b border-primary-200 dark:border-primary-800">
+        <h3 className="text-2xl font-black text-primary-900 dark:text-white tracking-tight">Reservar Cita</h3>
         <button
           onClick={onClose}
-          className="text-gray-400 hover:text-gray-500"
+          className="p-2 hover:bg-primary-100 dark:hover:bg-primary-900/50 text-primary-600 rounded-full transition-colors"
         >
-          <X className="h-5 w-5" />
+          <X className="h-6 w-6" />
         </button>
       </div>
 
-      {service && (
-        <div className="mb-4 p-4 bg-opacity-10 bg-gray-50 rounded-md">
-          <h3 className="font-medium text-gray-900 dark:text-white">{service.name}</h3>
-          <div className="flex justify-between items-center mt-2">
-            <div className="flex items-center text-sm text-gray-500 dark:text-gray-200">
-              <Clock className="h-4 w-4 mr-1 " />
-              <span className="">{service.duration} min</span>
+      <div className="mb-8 p-5 bg-white dark:bg-slate-800 rounded-2xl border border-primary-100 dark:border-primary-800 shadow-sm">
+        <h4 className="text-sm font-bold text-slate-400 uppercase tracking-widest mb-3">Servicio Seleccionado</h4>
+        <div className="flex justify-between items-center">
+          <span className="text-xl font-bold text-slate-900 dark:text-white">{service.name}</span>
+          {showPrices && (
+            <span className="text-2xl font-black text-primary-600 dark:text-primary-400">
+              ${service.price.toFixed(2)}
+            </span>
+          )}
+        </div>
+        <div className="flex items-center mt-2 text-slate-500 font-medium">
+          <Clock className="h-4 w-4 mr-2 text-primary-500" />
+          {service.duration} minutos
+        </div>
+      </div>
+
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+        <div className="space-y-6">
+          <div>
+            <label className="block text-sm font-bold text-slate-700 dark:text-slate-300 uppercase tracking-wider mb-3">
+              1. Selecciona el día
+            </label>
+            <div className="p-4 bg-white dark:bg-slate-800 rounded-2xl border border-slate-200 dark:border-slate-700 shadow-inner">
+              <input
+                type="date"
+                id="date"
+                min={today}
+                value={formData.date}
+                onChange={(e) => setFormData({ ...formData, date: e.target.value })}
+                className="w-full px-4 py-3 bg-transparent border-2 border-slate-100 dark:border-slate-700 rounded-xl focus:border-primary-500 focus:ring-0 transition-all font-bold text-slate-700 dark:text-white"
+                required
+              />
             </div>
-            {showPrices && (
-              <span className="text-lg font-semibold text-gray-900 ">
-                ${service.price.toFixed(2)}
-              </span>
+          </div>
+        </div>
+
+        <div className="space-y-6">
+          <div>
+            <label className="block text-sm font-bold text-slate-700 dark:text-slate-300 uppercase tracking-wider mb-3">
+              2. Horario disponible
+            </label>
+            {!formData.date ? (
+              <div className="p-8 text-center bg-slate-100 dark:bg-slate-800/50 rounded-2xl border border-dashed border-slate-300 dark:border-slate-700 text-slate-400 font-medium italic">
+                Selecciona una fecha primero
+              </div>
+            ) : loadingSlots ? (
+              <div className="grid grid-cols-3 gap-3">
+                {[...Array(6)].map((_, i) => (
+                  <div key={i} className="h-10 bg-slate-100 dark:bg-slate-800 rounded-lg animate-pulse"></div>
+                ))}
+              </div>
+            ) : availableTimeSlots.length === 0 ? (
+              <div className="p-8 text-center bg-red-50 dark:bg-red-900/10 rounded-2xl border border-dashed border-red-200 dark:border-red-900/30 text-red-600 dark:text-red-400 font-bold">
+                No hay turnos disponibles para este día
+              </div>
+            ) : (
+              <div className="grid grid-cols-3 gap-3 max-h-64 overflow-y-auto pr-2 custom-scrollbar">
+                {availableTimeSlots.map((slot) => (
+                  <button
+                    key={slot}
+                    type="button"
+                    onClick={() => setFormData({ ...formData, time: slot })}
+                    className={`py-3 px-2 text-sm font-black rounded-xl border-2 transition-all ${
+                      formData.time === slot
+                        ? 'bg-primary-600 border-primary-600 text-white shadow-lg shadow-primary-500/30 scale-105 z-10'
+                        : 'bg-white dark:bg-slate-800 border-slate-100 dark:border-slate-700 text-slate-700 dark:text-slate-300 hover:border-primary-400 dark:hover:border-primary-600'
+                    }`}
+                  >
+                    {slot}
+                  </button>
+                ))}
+              </div>
             )}
           </div>
         </div>
-      )}
+      </div>
 
-      {error && (
-        <div className="mb-4 p-3 bg-red-50 text-red-700 rounded-md border border-red-200">
-          {error}
-        </div>
-      )}
+      <div className="mt-8">
+        <label htmlFor="notes" className="block text-sm font-bold text-slate-700 dark:text-slate-300 uppercase tracking-wider mb-3">
+          Notas adicionales
+        </label>
+        <textarea
+          id="notes"
+          value={formData.notes}
+          onChange={(e) => setFormData({ ...formData, notes: e.target.value })}
+          className="w-full px-4 py-3 bg-white dark:bg-slate-800 border-2 border-slate-100 dark:border-slate-700 rounded-2xl focus:border-primary-500 focus:ring-0 transition-all font-medium text-slate-700 dark:text-white"
+          rows={3}
+          placeholder="Algún detalle que debamos saber..."
+        ></textarea>
+      </div>
 
-      <form onSubmit={handleSubmit}>
-        {requireConfirmation && (
-          <div className="flex items-center mb-4">
-            <input
-              type="checkbox"
-              id="confirmCancellation"
-              checked={confirmationChecked}
-              onChange={e => setConfirmationChecked(e.target.checked)}
-              className="h-4 w-4 text-indigo-600 border-gray-300 rounded"
-            />
-            <label htmlFor="confirmCancellation" className="ml-2 text-sm text-gray-700 ">
-              Confirmo que entiendo las condiciones de cancelación (mínimo {minCancellationHours}h de antelación)
-            </label>
-          </div>
-        )}
-        <div className="space-y-4">
-          <div>
-            <label htmlFor="date" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
-              <Calendar className="h-4 w-4 inline mr-1 " />
-              Fecha
-            </label>
-            <input
-              type="date"
-              id="date"
-              min={today}
-              value={formData.date}
-              onChange={(e) => setFormData({ ...formData, date: e.target.value })}
-              className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500"
-              required
-            />
-          </div>
+      <div className="mt-12 flex flex-col sm:flex-row gap-4">
+        <button
+          onClick={onClose}
+          type="button"
+          className="flex-1 px-8 py-4 bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300 font-bold rounded-2xl hover:bg-slate-200 dark:hover:bg-slate-700 transition-all"
+        >
+          Cancelar
+        </button>
+        <button
+          onClick={handleSubmit}
+          disabled={!formData.date || !formData.time || submitting}
+          className={`flex-[2] px-8 py-4 bg-primary-600 text-white font-black rounded-2xl shadow-xl shadow-primary-500/20 transition-all transform hover:-translate-y-1 disabled:opacity-50 disabled:cursor-not-allowed disabled:transform-none ${
+            submitting ? 'animate-pulse' : ''
+          }`}
+        >
+          {submitting ? 'Procesando...' : requireConfirmation ? 'Solicitar Cita' : 'Confirmar Reserva'}
+        </button>
+      </div>
 
-          <div>
-            <label htmlFor="time" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
-              <Clock className="h-4 w-4 inline mr-1 " />
-              Hora
-            </label>
-            <select
-              id="time"
-              value={formData.time}
-              onChange={(e) => setFormData({ ...formData, time: e.target.value })}
-              className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500"
-              required
-              disabled={loadingSlots || !formData.date || availableTimeSlots.length === 0}
-            >
-              <option value="">
-                {loadingSlots
-                  ? 'Cargando...'
-                  : !formData.date
-                  ? 'Selecciona fecha primero'
-                  : availableTimeSlots.length > 0
-                  ? 'Seleccionar hora'
-                  : 'No hay horas disponibles'}
-              </option>
-              {!loadingSlots && availableTimeSlots.map((slot) => (
-                <option key={slot} value={slot}>
-                  {slot}
-                </option>
-              ))}
-            </select>
-          </div>
-
-          <div>
-            <label htmlFor="notes" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
-              Notas adicionales (opcional)
-            </label>
-            <textarea
-              id="notes"
-              value={formData.notes}
-              onChange={(e) => setFormData({ ...formData, notes: e.target.value })}
-              className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500"
-              rows={3}
-            ></textarea>
-          </div>
-        </div>
-
-        <div className="mt-6">
-          <button
-            type="submit"
-            disabled={submitting}
-            className="w-full bg-indigo-600 text-white py-2 px-4 rounded-md font-medium hover:bg-indigo-700 transition-colors disabled:opacity-50"
-          >
-            {submitting ? 'Procesando...' : 'Enviar Solicitud'}
-          </button>
-        </div>
-      </form>
+      <p className="mt-6 text-center text-xs text-slate-400 font-medium">
+        {requireConfirmation 
+          ? '* El negocio deberá confirmar tu solicitud para validar la cita.' 
+          : '* Tu cita será agendada y confirmada instantáneamente.'}
+      </p>
     </div>
   );
 };
