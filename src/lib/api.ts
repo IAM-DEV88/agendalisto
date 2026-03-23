@@ -40,6 +40,7 @@ export interface Service {
   updated_at: string;
   is_active: boolean;
   provider?: string;
+  image_urls?: string[]; // Array of image URLs for the service gallery
 }
 
 export type BusinessHours = {
@@ -288,39 +289,6 @@ export const updateBusiness = async (id: string, updates: Partial<Business>) => 
   return updatedWithSlug;
 };
 
-export const createService = async (service: Omit<Service, 'id' | 'created_at' | 'updated_at'>) => {
-  const { data, error } = await supabase
-    .from('services')
-    .insert(service)
-    .select()
-    .single();
-  
-  if (error) throw error;
-  return data;
-};
-
-export const updateService = async (id: string, updates: Partial<Service>) => {
-  const { data, error } = await supabase
-    .from('services')
-    .update({ ...updates, updated_at: new Date().toISOString() })
-    .eq('id', id)
-    .select()
-    .single();
-  
-  if (error) throw error;
-  return data;
-};
-
-export const deleteService = async (id: string) => {
-  const { error } = await supabase
-    .from('services')
-    .delete()
-    .eq('id', id);
-  
-  if (error) throw error;
-  return true;
-};
-
 // API functions for business hours
 export const setBusinessHours = async (hours: Omit<BusinessHours, 'id'>[]) => {
   // First remove any existing hours for this business
@@ -513,15 +481,17 @@ export const createBusinessService = async (service: Omit<Service, 'id' | 'creat
       .from('services')
       .insert({
         ...service, 
+        image_urls: service.image_urls || [],
         created_at: new Date().toISOString(),
         updated_at: new Date().toISOString()
       })
+      .select()
       .single();
 
     if (error) throw error;
-    return data;
+    return { success: true, service: data as Service };
   } catch (err: any) {
-    throw err;
+    return { success: false, error: err.message || 'Error al crear el servicio' };
   }
 };
 
@@ -538,9 +508,9 @@ export const updateBusinessService = async (id: string, updates: Partial<Service
       .single();
 
     if (error) throw error;
-    return data;
+    return { success: true, service: data as Service };
   } catch (err: any) {
-    throw err;
+    return { success: false, error: err.message || 'Error al actualizar el servicio' };
   }
 };
 

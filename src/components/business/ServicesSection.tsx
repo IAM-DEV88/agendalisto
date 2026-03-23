@@ -1,9 +1,10 @@
 import React, { useState, useEffect } from 'react';
-import { Plus, Edit2, Trash2, Clock, DollarSign, User, Info, CheckCircle, XCircle, Loader2 } from 'lucide-react';
+import { Plus, Edit2, Trash2, Clock, DollarSign, User, Info, CheckCircle, XCircle, Loader2, Image as ImageIcon, X } from 'lucide-react';
 import type { Service } from '../../lib/api';
 import { notifySuccess, notifyError } from '../../lib/toast';
 import SectionHeader from '../ui/SectionHeader';
 import { Pagination } from '../ui/Pagination';
+import { supabase } from '../../lib/supabase';
 
 interface ServicesSectionProps {
   businessId: string;
@@ -29,13 +30,15 @@ const ServicesSection: React.FC<ServicesSectionProps> = ({
   const [editingService, setEditingService] = useState<Service | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [isUploading, setIsUploading] = useState(false);
   const [formData, setFormData] = useState({
     name: '',
     description: '',
     duration: '',
     price: '',
     is_active: true,
-    provider: ''
+    provider: '',
+    image_urls: [] as string[]
   });
 
   useEffect(() => {
@@ -70,7 +73,8 @@ const ServicesSection: React.FC<ServicesSectionProps> = ({
       duration: '',
       price: '',
       is_active: true,
-      provider: ''
+      provider: '',
+      image_urls: []
     });
     setEditingService(null);
     setError(null);
@@ -89,17 +93,25 @@ const ServicesSection: React.FC<ServicesSectionProps> = ({
       price: parseFloat(formData.price),
       is_active: formData.is_active,
       provider: formData.provider || '',
-      category: '',
-      active: true
+      image_urls: formData.image_urls
     };
 
     try {
+      let response;
       if (editingService) {
-        await updateService(editingService.id, serviceData);
-        notifySuccess('Servicio actualizado correctamente');
+        response = await updateService(editingService.id, serviceData);
+        if (response.success) {
+          notifySuccess('Servicio actualizado correctamente');
+        } else {
+          throw new Error(response.error);
+        }
       } else {
-        await createService(serviceData);
-        notifySuccess('Servicio creado correctamente');
+        response = await createService(serviceData);
+        if (response.success) {
+          notifySuccess('Servicio creado correctamente');
+        } else {
+          throw new Error(response.error);
+        }
       }
       setModalOpen(false);
       resetForm();
@@ -139,15 +151,84 @@ const ServicesSection: React.FC<ServicesSectionProps> = ({
   const handleEdit = (service: Service) => {
     setError(null);
     setEditingService(service);
+    
+    // Asegurarse de que image_urls sea un array válido
+    let images: string[] = [];
+    if (Array.isArray(service.image_urls)) {
+      images = service.image_urls;
+    } else if (typeof service.image_urls === 'string') {
+      try {
+        images = JSON.parse(service.image_urls);
+      } catch (e) {
+        images = [];
+      }
+    }
+
     setFormData({
       name: service.name,
       description: service.description,
       duration: service.duration.toString(),
       price: service.price.toString(),
       is_active: service.is_active,
-      provider: service.provider || ''
+      provider: service.provider || '',
+      image_urls: images
     });
     setModalOpen(true);
+  };
+
+  const handleImageUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    if (!e.target.files || e.target.files.length === 0) return;
+    
+    const allowedTypes = ['image/jpeg', 'image/png', 'image/webp', 'image/gif'];
+    const maxFileSize = 5 * 1024 * 1024; // 5MB
+    
+    setIsUploading(true);
+    const files = Array.from(e.target.files);
+    const newUrls: string[] = [...formData.image_urls];
+
+    try {
+      for (const file of files) {
+        // Validación de tipo MIME
+        if (!allowedTypes.includes(file.type)) {
+          throw new Error(`El archivo ${file.name} no es una imagen válida (JPG, PNG, WEBP, GIF)`);
+        }
+        
+        // Validación de tamaño
+        if (file.size > maxFileSize) {
+          throw new Error(`El archivo ${file.name} supera el límite de 5MB`);
+        }
+
+        const fileExt = file.name.split('.').pop();
+        const fileName = `${businessId}/${Date.now()}-${Math.random().toString(36).substring(2)}.${fileExt}`;
+        const filePath = `service-galleries/${fileName}`;
+
+        const { error: uploadError } = await supabase.storage
+          .from('business-assets')
+          .upload(filePath, file);
+
+        if (uploadError) throw uploadError;
+
+        const { data: { publicUrl } } = supabase.storage
+          .from('business-assets')
+          .getPublicUrl(filePath);
+
+        newUrls.push(publicUrl);
+      }
+      
+      setFormData(prev => ({ ...prev, image_urls: newUrls }));
+      notifySuccess('Imágenes subidas correctamente');
+    } catch (err: any) {
+      notifyError(err.message);
+    } finally {
+      setIsUploading(false);
+    }
+  };
+
+  const removeImage = (index: number) => {
+    setFormData(prev => ({
+      ...prev,
+      image_urls: prev.image_urls.filter((_, i) => i !== index)
+    }));
   };
 
   const totalPages = Math.ceil(services.length / itemsPerPage);
@@ -378,6 +459,47 @@ const ServicesSection: React.FC<ServicesSectionProps> = ({
                     className="w-full px-4 py-2.5 rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 focus:ring-2 focus:ring-primary-500/20 focus:border-primary-500 outline-none transition-all"
                     placeholder="Nombre del profesional"
                   />
+                </div>
+
+                <div className="space-y-3">
+                  <label className="text-sm font-bold text-slate-700 dark:text-slate-300 flex items-center gap-2">
+                    <ImageIcon className="w-4 h-4" />
+                    Galería de Imágenes
+                  </label>
+                  
+                  <div className="grid grid-cols-3 gap-3">
+                    {formData.image_urls.map((url, index) => (
+                      <div key={index} className="relative aspect-square rounded-xl overflow-hidden border border-slate-200 dark:border-slate-700 group">
+                        <img src={url} alt={`Gallery ${index}`} className="w-full h-full object-cover" />
+                        <button
+                          type="button"
+                          onClick={() => removeImage(index)}
+                          className="absolute top-1 right-1 p-1 bg-red-500 text-white rounded-full opacity-0 group-hover:opacity-100 transition-opacity"
+                        >
+                          <X className="w-3 h-3" />
+                        </button>
+                      </div>
+                    ))}
+                    
+                    <label className={`relative aspect-square rounded-xl border-2 border-dashed border-slate-200 dark:border-slate-700 flex flex-col items-center justify-center cursor-pointer hover:bg-slate-50 dark:hover:bg-slate-800 transition-all ${isUploading ? 'opacity-50 pointer-events-none' : ''}`}>
+                      {isUploading ? (
+                        <Loader2 className="w-6 h-6 text-primary-500 animate-spin" />
+                      ) : (
+                        <>
+                          <Plus className="w-6 h-6 text-slate-400" />
+                          <span className="text-[10px] font-bold text-slate-400 uppercase mt-1">Subir</span>
+                        </>
+                      )}
+                      <input
+                        type="file"
+                        className="hidden"
+                        accept="image/*"
+                        multiple
+                        onChange={handleImageUpload}
+                      />
+                    </label>
+                  </div>
+                  <p className="text-xs text-slate-500 dark:text-slate-400">Puedes subir varias imágenes para mostrar tu trabajo.</p>
                 </div>
 
                 <div className="flex items-center gap-3 p-4 bg-slate-50 dark:bg-slate-800/50 rounded-xl">
