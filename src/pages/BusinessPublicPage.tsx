@@ -18,9 +18,8 @@ function BusinessPublicPage() {
   const [businessData, setBusinessData] = useState<any>(null);
   const [services, setServices] = useState<Service[]>([]);
   const [businessHours, setBusinessHours] = useState<BusinessHours[]>([]);
-  const [selectedService, setSelectedService] = useState<string | null>(null);
-  const [showBooking, setShowBooking] = useState(false);
   const [loading, setLoading] = useState(true);
+  const [selectedService, setSelectedService] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [activeTab, setActiveTab] = useState('services');
   const [user, setUser] = useState<any>(null);
@@ -96,21 +95,25 @@ function BusinessPublicPage() {
     fetchBusinessData();
   }, [slug, navigate]);
 
-  // Read reschedule param to show booking form
+  // Read reschedule param to show booking page
   useEffect(() => {
     const params = new URLSearchParams(location.search);
     if (params.get('reschedule') === 'true') {
       const svcId = params.get('serviceId');
-      if (svcId) setSelectedService(svcId);
-      setShowBooking(true);
+      if (svcId) {
+        navigate(`/${slug}/book/${svcId}`);
+      }
     }
-  }, [location.search]);
+  }, [location.search, navigate, slug]);
 
   const handleServiceSelection = (serviceId: string) => {
     setSelectedService(serviceId);
     if (businessData?.config?.permitir_reservas_online) {
-      setShowBooking(true);
-    } else {
+      if (!user) {
+        navigate(`/login?redirect=/${slug}/book/${serviceId}`);
+      } else {
+        navigate(`/${slug}/book/${serviceId}`);
+      }
     }
   };
 
@@ -196,31 +199,6 @@ function BusinessPublicPage() {
                   businessOwnerId={businessData?.owner_id}
                 />
 
-                {selectedService && businessData?.config?.permitir_reservas_online && user && user.id !== businessData?.owner_id && (
-                  <div className="mt-8">
-                    <button className="btn-primary">
-                      Reservar Ahora
-                    </button>
-                  </div>
-                )}
-
-                {showBooking && user && user.id !== businessData?.owner_id && (
-                  <div className="mt-8 card p-6 border-primary-200 dark:border-primary-900 bg-primary-50/30 dark:bg-primary-900/10">
-                    <BookingForm
-                      businessId={businessData.id}
-                      serviceId={selectedService || ''}
-                      userId={user.id}
-                      service={getServiceById(selectedService || '')}
-                      onClose={() => setShowBooking(false)}
-                      showPrices={businessData.config.mostrar_precios}
-                      requireConfirmation={businessData.config.requiere_confirmacion}
-                      notifyEmail={businessData.config.notificaciones_email}
-                      notifyWhatsapp={businessData.config.notificaciones_whatsapp}
-                      minCancellationHours={businessData.config.tiempo_minimo_cancelacion}
-                    />
-                  </div>
-                )}
-
                 {user && user.id === businessData?.owner_id && (
                   <div className="mt-8">
                     <Link to="/business/dashboard?tab=services" className="btn-secondary text-center">
@@ -293,24 +271,6 @@ function BusinessPublicPage() {
                 </div>
               )}
             </div>
-
-            {/* Booking Form */}
-            {showBooking && user && user.id !== businessData?.owner_id && (
-              <div className="card p-8 border-primary-200 dark:border-primary-900 bg-primary-50/30 dark:bg-primary-900/10 animate-in zoom-in duration-300">
-                <BookingForm
-                  businessId={businessData.id}
-                  serviceId={selectedService || ''}
-                  userId={user.id}
-                  service={getServiceById(selectedService || '')}
-                  onClose={() => setShowBooking(false)}
-                  showPrices={businessData.config.mostrar_precios}
-                  requireConfirmation={businessData.config.requiere_confirmacion}
-                  notifyEmail={businessData.config.notificaciones_email}
-                  notifyWhatsapp={businessData.config.notificaciones_whatsapp}
-                  minCancellationHours={businessData.config.tiempo_minimo_cancelacion}
-                />
-              </div>
-            )}
             
             {/* Reviews Section */}
             <div className="card p-8">

@@ -531,8 +531,6 @@ export const deleteBusinessService = async (id: string): Promise<{ success: bool
 
 export async function getBusinessBySlug(slug: string) {
   try {
-    // In a production environment, you would have a slug field in your table
-    // For this implementation, we'll convert business names to slugs for comparison
     const { data, error } = await supabase
       .from('businesses')
       .select('*');
@@ -543,25 +541,37 @@ export async function getBusinessBySlug(slug: string) {
       return { success: false, error: 'No businesses found' };
     }
     
-    // Find the business by comparing slugs
     const business = data.find((business: Business) => slugify(business.name) === slug);
     
     if (!business) {
       return { success: false, error: 'Business not found' };
     }
     
-    // Get business config
     const { success: configSuccess, config } = await getBusinessConfig(business.id);
     
     if (configSuccess && config) {
       business.config = config;
     }
     
-    // Attach slug property
     business.slug = slug;
     return { success: true, business };
   } catch (error: any) {
     return { success: false, error: error.message };
+  }
+}
+
+export async function getService(serviceId: string): Promise<{ success: boolean; data?: Service; error?: string }> {
+  try {
+    const { data, error } = await supabase
+      .from('services')
+      .select('*')
+      .eq('id', serviceId)
+      .single();
+
+    if (error) throw error;
+    return { success: true, data: data as Service };
+  } catch (err: any) {
+    return { success: false, error: err.message || 'Error al obtener el servicio' };
   }
 }
 

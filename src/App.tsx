@@ -12,6 +12,8 @@ import BusinessPublicPage from './pages/BusinessPublicPage';
 import ForgotPassword from './pages/ForgotPassword';
 import ExploreBusinesses from './pages/ExploreBusinesses';
 import Crowdfunding from './pages/Crowdfunding';
+import BookingPage from './pages/BookingPage';
+import ScrollToTop from './components/ScrollToTop';
 import Nav from './components/Nav';
 import Footer from './components/Footer';
 import ProtectedRoute from './components/ProtectedRoute';
@@ -210,6 +212,7 @@ function App() {
 
   return (
     <Router>
+      <ScrollToTop />
       <div className="min-h-screen flex flex-col bg-gray-50 dark:bg-gray-900 text-gray-900 dark:text-gray-100">
         <Nav user={userProfile} />
         <main className="flex-grow pt-14 bg-gray-50 dark:bg-gray-800 shadow-md">
@@ -236,6 +239,11 @@ function App() {
               </ProtectedRoute>
             } />
             <Route path="/:slug" element={<BusinessPublicPage />} />
+            <Route path="/:slug/book/:serviceId" element={
+              <ProtectedRoute user={user}>
+                <BookingPage />
+              </ProtectedRoute>
+            } />
           </Routes>
         </main>
         <Footer />
