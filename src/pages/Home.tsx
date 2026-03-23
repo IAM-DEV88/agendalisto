@@ -60,7 +60,7 @@ const Home = () => {
   }, []);
 
   return (
-    <div>
+    <div className="space-y-0">
       {/* Hero section */}
       <section className="relative bg-primary-600 dark:bg-primary-900 overflow-hidden py-16 sm:py-24 transition-colors duration-200">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
@@ -111,6 +111,44 @@ const Home = () => {
         {/* Background decorative elements */}
         <div className="absolute top-0 right-0 -mt-20 -mr-20 w-96 h-96 bg-primary-500 rounded-full blur-3xl opacity-20"></div>
         <div className="absolute bottom-0 left-0 -mb-20 -ml-20 w-96 h-96 bg-primary-700 rounded-full blur-3xl opacity-20"></div>
+      </section>
+
+      {/* Brand Image Section (AgendaYa Mascot) */}
+      <section className="py-12 bg-white dark:bg-slate-950 transition-colors duration-200 overflow-hidden">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="relative rounded-3xl overflow-hidden bg-slate-900 shadow-2xl group border border-slate-200 dark:border-slate-800">
+            <div className="absolute inset-0 bg-gradient-to-r from-slate-900 via-transparent to-transparent z-10 opacity-60"></div>
+            <img 
+              src="/src/assets/branding/agendaya.jpg" 
+              alt="AgendaYa Mascot" 
+              className="w-full h-auto object-cover min-h-[300px] md:min-h-[450px] scale-105 group-hover:scale-100 transition-transform duration-700"
+              onError={(e) => {
+                // Fallback style if image is missing
+                e.currentTarget.style.display = 'none';
+                e.currentTarget.parentElement!.classList.add('p-12', 'flex', 'items-center', 'justify-center', 'bg-primary-600');
+              }}
+            />
+            <div className="absolute inset-0 flex items-center z-20 p-8 md:p-16">
+              <div className="max-w-xl hidden md:block">
+                <h2 className="text-3xl md:text-5xl font-black text-white mb-4 tracking-tighter">
+                  Profesionalismo en <br/>cada agenda.
+                </h2>
+                <p className="text-white/80 text-lg mb-8 font-medium">
+                  Nuestra plataforma está diseñada para que tú y tus clientes disfruten de una experiencia rápida, segura y profesional.
+                </p>
+                <Link 
+                  to={registerLink} 
+                  className="inline-flex items-center px-6 py-3 bg-primary-500 hover:bg-primary-400 text-white font-black rounded-xl transition-all shadow-lg shadow-primary-500/25"
+                >
+                  Empieza ahora
+                  <svg className="ml-2 w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={3} d="M14 5l7 7-7 7" />
+                  </svg>
+                </Link>
+              </div>
+            </div>
+          </div>
+        </div>
       </section>
 
       {/* Categories section */}
