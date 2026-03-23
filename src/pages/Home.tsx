@@ -91,7 +91,7 @@ const Home = () => {
                   {secondText}
                 </Link>
                 <div className="md:hidden">
-                  <Link to={exploreLink} className="btn-secondary w-full border-white/30 text-white hover:bg-white/30 dark:bg-white/10 dark:text-white dark:hover:bg-white/20">
+                  <Link to={exploreLink} className="btn-secondary w-full border-white/30 text-primary-600 dark:text-primary-400 tracking-tighter hover:bg-white/30 dark:bg-white/10 dark:text-white dark:hover:bg-white/20">
                     {exploreText}
                   </Link>
                 </div>
@@ -114,34 +114,39 @@ const Home = () => {
       </section>
 
       {/* Brand Image Section (AgendaYa Mascot) */}
-      <section className="py-12 bg-white dark:bg-slate-950 transition-colors duration-200 overflow-hidden">
+      <section className="py-8 sm:py-16 bg-white dark:bg-slate-950 transition-colors duration-200">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="relative rounded-3xl overflow-hidden bg-slate-900 shadow-2xl group border border-slate-200 dark:border-slate-800">
-            <div className="absolute inset-0 bg-gradient-to-r from-slate-900 via-transparent to-transparent z-10 opacity-60"></div>
-            <img 
-              src="/src/assets/branding/agendaya.jpg" 
-              alt="AgendaYa Mascot" 
-              className="w-full h-auto object-cover min-h-[300px] md:min-h-[450px] scale-105 group-hover:scale-100 transition-transform duration-700"
-              onError={(e) => {
-                // Fallback style if image is missing
-                e.currentTarget.style.display = 'none';
-                e.currentTarget.parentElement!.classList.add('p-12', 'flex', 'items-center', 'justify-center', 'bg-primary-600');
-              }}
-            />
-            <div className="absolute inset-0 flex items-center z-20 p-8 md:p-16">
-              <div className="max-w-xl hidden md:block">
-                <h2 className="text-3xl md:text-5xl font-black text-white mb-4 tracking-tighter">
-                  Profesionalismo en <br/>cada agenda.
+          <div className="relative rounded-3xl overflow-hidden bg-slate-900 shadow-2xl border border-slate-200 dark:border-slate-800 min-h-[350px] sm:min-h-[450px] md:min-h-[500px] flex items-center">
+            {/* Image as background */}
+            <div className="absolute inset-0 z-0">
+              <img 
+                src="/src/assets/branding/agendaya.jpg" 
+                alt="AgendaYa Mascot" 
+                className="w-full h-full object-cover object-center md:object-right transition-transform duration-1000 group-hover:scale-105"
+                onError={(e) => {
+                  e.currentTarget.style.display = 'none';
+                  e.currentTarget.parentElement!.classList.add('bg-primary-600');
+                }}
+              />
+              {/* Dynamic Gradient Overlay */}
+              <div className="absolute inset-0 bg-gradient-to-t from-slate-900/90 via-slate-900/50 to-slate-900/20 md:bg-gradient-to-r md:from-slate-900/90 md:via-slate-900/40 md:to-transparent"></div>
+            </div>
+            
+            {/* Content - Responsive Padding and Sizing */}
+            <div className="relative z-10 p-8 sm:p-12 md:p-20 w-full">
+              <div className="max-w-xl">
+                <h2 className="text-3xl sm:text-4xl md:text-6xl font-black text-white mb-4 sm:mb-6 tracking-tighter leading-[1.1]">
+                  Profesionalismo en <br className="hidden sm:block"/>cada agenda.
                 </h2>
-                <p className="text-white/80 text-lg mb-8 font-medium">
+                <p className="text-white/90 sm:text-white/80 text-base sm:text-lg md:text-xl mb-8 sm:mb-10 font-medium max-w-md">
                   Nuestra plataforma está diseñada para que tú y tus clientes disfruten de una experiencia rápida, segura y profesional.
                 </p>
                 <Link 
                   to={registerLink} 
-                  className="inline-flex items-center px-6 py-3 bg-primary-500 hover:bg-primary-400 text-white font-black rounded-xl transition-all shadow-lg shadow-primary-500/25"
+                  className="inline-flex items-center px-8 py-4 bg-primary-500 hover:bg-primary-400 text-white font-black rounded-2xl transition-all shadow-xl shadow-primary-500/25 active:scale-95 group/btn"
                 >
                   Empieza ahora
-                  <svg className="ml-2 w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <svg className="ml-3 w-5 h-5 group-hover:translate-x-1 transition-transform" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={3} d="M14 5l7 7-7 7" />
                   </svg>
                 </Link>
