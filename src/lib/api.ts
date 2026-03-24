@@ -23,6 +23,7 @@ export type Business = {
   website: string | null;
   lat: number | null;
   lng: number | null;
+  likes_count: number;
   created_at: string;
   updated_at: string;
   /** Business configuration settings */
@@ -36,6 +37,7 @@ export interface Service {
   description: string;
   duration: number;
   price: number;
+  likes_count: number;
   created_at: string;
   updated_at: string;
   is_active: boolean;
@@ -288,6 +290,72 @@ export const updateBusiness = async (id: string, updates: Partial<Business>) => 
   const updatedWithSlug = { ...data, slug: slugify(data.name) } as Business;
   return updatedWithSlug;
 };
+
+// --- Likes Functions ---
+export const checkIfLiked = async (userId: string, targetId: string, type: 'business' | 'service') => {
+  try {
+    const query = supabase
+      .from('user_likes')
+      .select('id')
+      .eq('user_id', userId);
+    
+    if (type === 'business') {
+      query.eq('business_id', targetId);
+    } else {
+      query.eq('service_id', targetId);
+    }
+
+    const { data, error } = await query.maybeSingle();
+    if (error) throw error;
+    return !!data;
+  } catch (error) {
+    console.error('Error checking like status:', error);
+    return false;
+  }
+};
+
+export const toggleLike = async (userId: string, targetId: string, type: 'business' | 'service') => {
+  try {
+    const isLiked = await checkIfLiked(userId, targetId, type);
+    
+    if (isLiked) {
+      // Remove like
+      const query = supabase
+        .from('user_likes')
+        .delete()
+        .eq('user_id', userId);
+      
+      if (type === 'business') {
+        query.eq('business_id', targetId);
+      } else {
+        query.eq('service_id', targetId);
+      }
+      
+      const { error } = await query;
+      if (error) throw error;
+      return { success: true, action: 'removed' };
+    } else {
+      // Add like
+      const payload: any = { user_id: userId };
+      if (type === 'business') {
+        payload.business_id = targetId;
+      } else {
+        payload.service_id = targetId;
+      }
+      
+      const { error } = await supabase
+        .from('user_likes')
+        .insert([payload]);
+      
+      if (error) throw error;
+      return { success: true, action: 'added' };
+    }
+  } catch (error: any) {
+    console.error('Error toggling like:', error);
+    return { success: false, error: error.message };
+  }
+};
+// --- End Likes Functions ---
 
 // API functions for business hours
 export const setBusinessHours = async (hours: Omit<BusinessHours, 'id'>[]) => {

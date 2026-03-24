@@ -1,11 +1,143 @@
 import { useState, useEffect } from 'react';
 import { Link, useSearchParams } from 'react-router-dom';
-import { Search, Filter, MapPin, ArrowRight } from 'lucide-react';
-import { getBusinesses, getBusinessCategories, BusinessCategory } from '../lib/api';
+import { Search, Filter, MapPin, ArrowRight, Heart, Share2, Check } from 'lucide-react';
+import { getBusinesses, getBusinessCategories, BusinessCategory, toggleLike, checkIfLiked } from '../lib/api';
 import type { Business } from '../lib/api';
+import { supabase } from '../lib/supabase';
+import { toast } from 'react-hot-toast';
 
 // Fallback logo for businesses without an image
 const FALLBACK_LOGO = 'https://upload.wikimedia.org/wikipedia/commons/8/89/Portrait_Placeholder.png';
+
+const BusinessCard = ({ business, categories, currentUser }: { business: Business, categories: BusinessCategory[], currentUser: any }) => {
+  const [isLiked, setIsLiked] = useState(false);
+  const [likesCount, setLikesCount] = useState(business.likes_count || 0);
+  const [isLiking, setIsLiking] = useState(false);
+  const [isCopied, setIsCopied] = useState(false);
+
+  useEffect(() => {
+    const checkLike = async () => {
+      if (currentUser?.id && business.id) {
+        const liked = await checkIfLiked(currentUser.id, business.id, 'business');
+        setIsLiked(liked);
+      }
+    };
+    checkLike();
+  }, [currentUser, business.id]);
+
+  const handleToggleLike = async (e: React.MouseEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+    
+    if (!currentUser) {
+      toast.error('Debes iniciar sesión para dar me gusta');
+      return;
+    }
+
+    try {
+      setIsLiking(true);
+      const result = await toggleLike(currentUser.id, business.id, 'business');
+      if (result.success) {
+        setIsLiked(result.action === 'added');
+        setLikesCount(prev => result.action === 'added' ? prev + 1 : prev - 1);
+      }
+    } catch (error) {
+      toast.error('Error al procesar tu me gusta');
+    } finally {
+      setIsLiking(false);
+    }
+  };
+
+  const handleShare = (e: React.MouseEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+    
+    const baseUrl = window.location.origin;
+    const shareUrl = `${baseUrl}/${business.slug}`;
+    
+    navigator.clipboard.writeText(shareUrl);
+    setIsCopied(true);
+    toast.success('¡Enlace del negocio copiado!');
+    setTimeout(() => setIsCopied(false), 2000);
+  };
+
+  const cat = categories.find(c => c.id === business.category_id);
+
+  return (
+    <Link
+      to={`/${business.slug}`}
+      className="group card overflow-hidden hover:border-primary-400 dark:hover:border-primary-500 hover:shadow-2xl transition-all duration-300 transform hover:-translate-y-1"
+    >
+      <div className="h-56 bg-slate-100 dark:bg-slate-800 relative overflow-hidden">
+        <img
+          src={business.logo_url || FALLBACK_LOGO}
+          alt={business.name}
+          className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500"
+          onError={(e) => { e.currentTarget.src = FALLBACK_LOGO }}
+        />
+        <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity flex items-end p-6">
+          <div className="flex gap-2">
+            <button
+              onClick={handleToggleLike}
+              disabled={isLiking}
+              className={`p-2 rounded-xl backdrop-blur-md transition-all ${
+                isLiked 
+                  ? 'bg-rose-500 text-white' 
+                  : 'bg-white/20 hover:bg-white/40 text-white'
+              }`}
+            >
+              <Heart className={`h-5 w-5 ${isLiked ? 'fill-current' : ''}`} />
+            </button>
+            <button
+              onClick={handleShare}
+              className={`p-2 rounded-xl backdrop-blur-md transition-all ${
+                isCopied 
+                  ? 'bg-emerald-500 text-white' 
+                  : 'bg-white/20 hover:bg-white/40 text-white'
+              }`}
+            >
+              {isCopied ? <Check className="h-5 w-5" /> : <Share2 className="h-5 w-5" />}
+            </button>
+          </div>
+        </div>
+      </div>
+      <div className="p-8">
+        <div className="flex justify-between items-start mb-4">
+          <h3 className="text-2xl font-black text-slate-900 dark:text-white leading-tight group-hover:text-primary-600 dark:group-hover:text-primary-400 transition-colors">
+            {business.name}
+          </h3>
+          <div className="flex items-center gap-1.5 text-slate-400 dark:text-slate-500 font-bold text-xs">
+            <Heart className={`h-3.5 w-3.5 ${likesCount > 0 ? 'text-rose-500 fill-rose-500' : ''}`} />
+            <span>{likesCount}</span>
+          </div>
+        </div>
+        
+        {business.address && (
+          <div className="flex items-start text-slate-500 dark:text-slate-400 mb-4">
+            <MapPin className="h-4 w-4 mr-2 mt-1 flex-shrink-0 text-primary-500" />
+            <p className="text-sm font-medium line-clamp-1">{business.address}</p>
+          </div>
+        )}
+        
+        <p className="text-slate-600 dark:text-slate-400 text-sm line-clamp-2 mb-6 leading-relaxed">
+          {business.description}
+        </p>
+        
+        <div className="flex items-center justify-between mt-auto pt-6 border-t border-slate-100 dark:border-slate-800">
+          {cat ? (
+            <span className="px-3 py-1 bg-primary-50 dark:bg-primary-900/30 text-primary-700 dark:text-primary-300 rounded-full text-xs font-black uppercase tracking-wider">
+              {cat.name}
+            </span>
+          ) : <span></span>}
+          <span className="flex items-center text-primary-600 dark:text-primary-400 font-black text-sm group-hover:translate-x-1 transition-transform">
+            Ver servicios
+            <ArrowRight className="ml-2 h-4 w-4" />
+          </span>
+        </div>
+      </div>
+    </Link>
+  );
+};
 
 const ExploreBusinesses = () => {
   const [searchParams] = useSearchParams();
@@ -16,6 +148,16 @@ const ExploreBusinesses = () => {
   const [category, setCategory] = useState(initialCategory);
   const [error, setError] = useState<string | null>(null);
   const [categories, setCategories] = useState<BusinessCategory[]>([]);
+  const [user, setUser] = useState<any>(null);
+
+  // Fetch current user
+  useEffect(() => {
+    const fetchUser = async () => {
+      const { data: { user } } = await supabase.auth.getUser();
+      setUser(user);
+    };
+    fetchUser();
+  }, []);
 
   // Load real categories from Supabase
   useEffect(() => {
@@ -134,54 +276,12 @@ const ExploreBusinesses = () => {
         ) : (
           <div className="grid gap-8 grid-cols-1 sm:grid-cols-2 lg:grid-cols-3">
             {businesses.map((business) => (
-              <Link
-                key={business.slug}
-                to={`/${business.slug}`}
-                className="group card overflow-hidden hover:border-primary-400 dark:hover:border-primary-500 hover:shadow-2xl transition-all duration-300 transform hover:-translate-y-1"
-              >
-                <div className="h-56 bg-slate-100 dark:bg-slate-800 relative overflow-hidden">
-                  <img
-                    src={business.logo_url || FALLBACK_LOGO}
-                    alt={business.name}
-                    className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500"
-                    onError={(e) => { e.currentTarget.src = FALLBACK_LOGO }}
-                  />
-                  <div className="absolute inset-0 bg-gradient-to-t from-black/40 to-transparent opacity-0 group-hover:opacity-100 transition-opacity"></div>
-                </div>
-                <div className="p-8">
-                  <div className="flex justify-between items-start mb-4">
-                    <h3 className="text-2xl font-black text-slate-900 dark:text-white leading-tight group-hover:text-primary-600 dark:group-hover:text-primary-400 transition-colors">
-                      {business.name}
-                    </h3>
-                  </div>
-                  
-                  {business.address && (
-                    <div className="flex items-start text-slate-500 dark:text-slate-400 mb-4">
-                      <MapPin className="h-4 w-4 mr-2 mt-1 flex-shrink-0 text-primary-500" />
-                      <p className="text-sm font-medium line-clamp-1">{business.address}</p>
-                    </div>
-                  )}
-                  
-                  <p className="text-slate-600 dark:text-slate-400 text-sm line-clamp-2 mb-6 leading-relaxed">
-                    {business.description}
-                  </p>
-                  
-                  <div className="flex items-center justify-between mt-auto pt-6 border-t border-slate-100 dark:border-slate-800">
-                    {(() => {
-                      const cat = categories.find(c => c.id === business.category_id);
-                      return cat ? (
-                        <span className="px-3 py-1 bg-primary-50 dark:bg-primary-900/30 text-primary-700 dark:text-primary-300 rounded-full text-xs font-black uppercase tracking-wider">
-                          {cat.name}
-                        </span>
-                      ) : <span></span>;
-                    })()}
-                    <span className="flex items-center text-primary-600 dark:text-primary-400 font-black text-sm group-hover:translate-x-1 transition-transform">
-                      Ver servicios
-                      <ArrowRight className="ml-2 h-4 w-4" />
-                    </span>
-                  </div>
-                </div>
-              </Link>
+              <BusinessCard 
+                key={business.id} 
+                business={business} 
+                categories={categories} 
+                currentUser={user} 
+              />
             ))}
           </div>
         )}

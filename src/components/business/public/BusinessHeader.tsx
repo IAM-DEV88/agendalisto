@@ -1,8 +1,9 @@
 import React, { useState, useEffect } from 'react';
-import { MapPin, Phone, Globe, MessageCircle, Facebook, Instagram, Mail, Star } from 'lucide-react';
-import { Business, getBusinessCategories, BusinessCategory } from '../../../lib/api';
+import { MapPin, Phone, Globe, MessageCircle, Facebook, Instagram, Mail, Star, Heart, Share2, Check } from 'lucide-react';
+import { Business, getBusinessCategories, BusinessCategory, toggleLike, checkIfLiked } from '../../../lib/api';
 import { supabase } from '../../../lib/supabase';
 import { Link } from 'react-router-dom';
+import { toast } from 'react-hot-toast';
 
 interface BusinessHeaderProps {
   businessData: Business;
@@ -15,9 +16,53 @@ const BusinessHeader: React.FC<BusinessHeaderProps> = ({ businessData, averageRa
   const [logoUrl, setLogoUrl] = useState<string | null>(null);
   const [currentUser, setCurrentUser] = useState<any>(null);
   const [categories, setCategories] = useState<BusinessCategory[]>([]);
+  const [isLiked, setIsLiked] = useState(false);
+  const [likesCount, setLikesCount] = useState(businessData.likes_count || 0);
+  const [isLiking, setIsLiking] = useState(false);
+  const [isCopied, setIsCopied] = useState(false);
   
   // Memoria local para URL inválidas para evitar intentos repetidos
   const invalidUrlsRef = React.useRef<Set<string>>(new Set());
+
+  // Verificar si el usuario ya dio like
+  useEffect(() => {
+    const checkLike = async () => {
+      if (currentUser?.id && businessData.id) {
+        const liked = await checkIfLiked(currentUser.id, businessData.id, 'business');
+        setIsLiked(liked);
+      }
+    };
+    checkLike();
+  }, [currentUser, businessData.id]);
+
+  const handleToggleLike = async () => {
+    if (!currentUser) {
+      toast.error('Debes iniciar sesión para dar me gusta');
+      return;
+    }
+
+    try {
+      setIsLiking(true);
+      const result = await toggleLike(currentUser.id, businessData.id, 'business');
+      if (result.success) {
+        setIsLiked(result.action === 'added');
+        setLikesCount(prev => result.action === 'added' ? prev + 1 : prev - 1);
+        toast.success(result.action === 'added' ? '¡Te gusta este negocio!' : 'Ya no te gusta este negocio');
+      }
+    } catch (error) {
+      toast.error('Error al procesar tu me gusta');
+    } finally {
+      setIsLiking(false);
+    }
+  };
+
+  const handleShare = () => {
+    const url = window.location.href;
+    navigator.clipboard.writeText(url);
+    setIsCopied(true);
+    toast.success('¡Enlace del negocio copiado!');
+    setTimeout(() => setIsCopied(false), 2000);
+  };
   
   // Verificar si una URL realmente existe y es accesible
   const verifyImageUrl = async (url: string): Promise<boolean> => {
@@ -233,40 +278,75 @@ const BusinessHeader: React.FC<BusinessHeaderProps> = ({ businessData, averageRa
               {businessData.description}
             </p>
 
-            <div className="flex flex-wrap gap-3 mt-8">
-              {businessData.facebook && businessData.config?.mostrar_redes_sociales && (
-                <a
-                  href={`https://facebook.com/${businessData.facebook}`}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="p-3 bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-400 rounded-xl hover:bg-primary-600 hover:text-white transition-all transform hover:-translate-y-1 shadow-sm"
-                  title="Facebook"
+            <div className="flex flex-wrap items-center gap-4 mt-8">
+              {/* Botones de Acción: Like y Compartir */}
+              <div className="flex items-center gap-2 p-1.5 bg-slate-100 dark:bg-slate-800 rounded-2xl border border-slate-200 dark:border-slate-700 shadow-sm">
+                <button
+                  onClick={handleToggleLike}
+                  disabled={isLiking}
+                  className={`flex items-center gap-2 px-4 py-2 rounded-xl transition-all ${
+                    isLiked 
+                      ? 'bg-rose-500 text-white shadow-md shadow-rose-200 dark:shadow-rose-900/20' 
+                      : 'hover:bg-slate-200 dark:hover:bg-slate-700 text-slate-600 dark:text-slate-400'
+                  }`}
+                  title={isLiked ? 'Ya no me gusta' : 'Me gusta'}
                 >
-                  <Facebook className="h-5 w-5" />
-                </a>
-              )}
-              {businessData.instagram && businessData.config?.mostrar_redes_sociales && (
-                <a
-                  href={`https://instagram.com/${businessData.instagram}`}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="p-3 bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-400 rounded-xl hover:bg-primary-600 hover:text-white transition-all transform hover:-translate-y-1 shadow-sm"
-                  title="Instagram"
+                  <Heart className={`h-5 w-5 ${isLiked ? 'fill-current' : ''}`} />
+                  <span className="font-bold text-sm">{likesCount}</span>
+                </button>
+                
+                <div className="w-px h-6 bg-slate-200 dark:bg-slate-700 mx-1"></div>
+                
+                <button
+                  onClick={handleShare}
+                  className={`flex items-center gap-2 px-4 py-2 rounded-xl transition-all ${
+                    isCopied 
+                      ? 'bg-emerald-500 text-white shadow-md shadow-emerald-200 dark:shadow-emerald-900/20' 
+                      : 'hover:bg-slate-200 dark:hover:bg-slate-700 text-slate-600 dark:text-slate-400'
+                  }`}
+                  title="Compartir negocio"
                 >
-                  <Instagram className="h-5 w-5" />
-                </a>
-              )}
-              {businessData.whatsapp && (
-                <a
-                  href={`https://wa.me/${businessData.whatsapp}`}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="p-3 bg-emerald-100 dark:bg-emerald-900/30 text-emerald-600 dark:text-emerald-400 rounded-xl hover:bg-emerald-600 hover:text-white transition-all transform hover:-translate-y-1 shadow-sm"
-                  title="WhatsApp"
-                >
-                  <MessageCircle className="h-5 w-5" />
-                </a>
-              )}
+                  {isCopied ? <Check className="h-5 w-5" /> : <Share2 className="h-5 w-5" />}
+                  <span className="font-bold text-sm">{isCopied ? '¡Copiado!' : 'Compartir'}</span>
+                </button>
+              </div>
+
+              {/* Redes Sociales Existentes */}
+              <div className="flex items-center gap-3 ml-2">
+                {businessData.facebook && businessData.config?.mostrar_redes_sociales && (
+                  <a
+                    href={`https://facebook.com/${businessData.facebook}`}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="p-3 bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-400 rounded-xl hover:bg-primary-600 hover:text-white transition-all transform hover:-translate-y-1 shadow-sm border border-slate-200 dark:border-slate-700"
+                    title="Facebook"
+                  >
+                    <Facebook className="h-5 w-5" />
+                  </a>
+                )}
+                {businessData.instagram && businessData.config?.mostrar_redes_sociales && (
+                  <a
+                    href={`https://instagram.com/${businessData.instagram}`}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="p-3 bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-400 rounded-xl hover:bg-primary-600 hover:text-white transition-all transform hover:-translate-y-1 shadow-sm border border-slate-200 dark:border-slate-700"
+                    title="Instagram"
+                  >
+                    <Instagram className="h-5 w-5" />
+                  </a>
+                )}
+                {businessData.whatsapp && (
+                  <a
+                    href={`https://wa.me/${businessData.whatsapp}`}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="p-3 bg-emerald-100 dark:bg-emerald-900/30 text-emerald-600 dark:text-emerald-400 rounded-xl hover:bg-emerald-600 hover:text-white transition-all transform hover:-translate-y-1 shadow-sm border border-emerald-200 dark:border-emerald-800/50"
+                    title="WhatsApp"
+                  >
+                    <MessageCircle className="h-5 w-5" />
+                  </a>
+                )}
+              </div>
             </div>
           </div>
 
