@@ -12,10 +12,13 @@ import BusinessPublicPage from './pages/BusinessPublicPage';
 import ForgotPassword from './pages/ForgotPassword';
 import ExploreBusinesses from './pages/ExploreBusinesses';
 import Crowdfunding from './pages/Crowdfunding';
+import Blog from './pages/Blog';
+import BlogPostView from './pages/BlogPostView';
 import BookingPage from './pages/BookingPage';
 import ScrollToTop from './components/ScrollToTop';
 import Nav from './components/Nav';
 import Footer from './components/Footer';
+import ChatGuia from './components/ChatGuia';
 import ProtectedRoute from './components/ProtectedRoute';
 import { useSelector } from 'react-redux';
 import { useAppDispatch } from './hooks/useAppDispatch';
@@ -223,6 +226,8 @@ function App() {
             <Route path="/forgot-password" element={<ForgotPassword />} />
             <Route path="/explore" element={<ExploreBusinesses />} />
             <Route path="/crowdfunding" element={<Crowdfunding />} />
+            <Route path="/blog" element={<Blog />} />
+            <Route path="/blog/:id" element={<BlogPostView />} />
             <Route path="/dashboard" element={
               <ProtectedRoute user={user}>
                 <ProfileDashboard user={userProfile} />
@@ -247,8 +252,9 @@ function App() {
           </Routes>
         </main>
         <Footer />
+        <ChatGuia />
         {/* Toaster para mostrar notificaciones */}
-        <Toaster />
+        <Toaster position="top-right" />
       </div>
     </Router>
   );

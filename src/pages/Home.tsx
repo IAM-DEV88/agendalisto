@@ -6,6 +6,7 @@ import { Swiper, SwiperSlide } from 'swiper/react';
 import { Pagination, Autoplay } from 'swiper/modules';
 import 'swiper/css';
 import 'swiper/css/pagination';
+import BlogHomeSection from '../components/BlogHomeSection';
 import { supabase } from '../lib/supabase';
 import type { Milestone } from '../lib/api';
 
@@ -112,6 +113,9 @@ const Home = () => {
         <div className="absolute top-0 right-0 -mt-20 -mr-20 w-96 h-96 bg-primary-500 rounded-full blur-3xl opacity-20"></div>
         <div className="absolute bottom-0 left-0 -mb-20 -ml-20 w-96 h-96 bg-primary-700 rounded-full blur-3xl opacity-20"></div>
       </section>
+
+      {/* Blog Section before branding */}
+      <BlogHomeSection />
 
       {/* Brand Image Section (AgendaYa Mascot) */}
       <section className="py-8 sm:py-16 bg-white dark:bg-slate-950 transition-colors duration-200">

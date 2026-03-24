@@ -727,6 +727,228 @@ export const getMilestones = async (): Promise<{ success: boolean; data?: Milest
   }
 };
 
+// --- Blog & Chat Functions ---
+
+export type BlogPost = {
+  id: string;
+  title: string;
+  content: string;
+  excerpt: string | null;
+  author_name: string;
+  image_url: string | null;
+  likes_count: number;
+  created_at: string;
+  updated_at: string;
+  comment_count?: number;
+};
+
+export type BlogComment = {
+  id: string;
+  post_id: string;
+  user_id: string | null;
+  author_name: string;
+  content: string;
+  likes_count: number;
+  is_agent_reply: boolean;
+  created_at: string;
+};
+
+export const getLatestBlogPost = async (): Promise<{ success: boolean; data?: BlogPost; error?: string }> => {
+  try {
+    const { data, error } = await supabase
+      .from('blog_posts')
+      .select('*, blog_comments(count)')
+      .order('created_at', { ascending: false })
+      .limit(1)
+      .single();
+    
+    if (error) throw error;
+    
+    const post = {
+      ...data,
+      comment_count: data.blog_comments?.[0]?.count || 0
+    };
+    
+    return { success: true, data: post as BlogPost };
+  } catch (err: any) {
+    return { success: false, error: err.message };
+  }
+};
+
+export const getPopularPosts = async (limit = 4): Promise<{ success: boolean; data?: BlogPost[]; error?: string }> => {
+  try {
+    const { data, error } = await supabase
+      .from('blog_posts')
+      .select('*, blog_comments(count)')
+      .order('likes_count', { ascending: false })
+      .limit(limit);
+    
+    if (error) throw error;
+    
+    const posts = (data || []).map(p => ({
+      ...p,
+      comment_count: p.blog_comments?.[0]?.count || 0
+    }));
+    
+    return { success: true, data: posts as BlogPost[] };
+  } catch (err: any) {
+    return { success: false, error: err.message };
+  }
+};
+
+export const getBlogPosts = async (): Promise<{ success: boolean; data?: BlogPost[]; error?: string }> => {
+  try {
+    const { data, error } = await supabase
+      .from('blog_posts')
+      .select('*, blog_comments(count)')
+      .order('created_at', { ascending: false });
+    
+    if (error) throw error;
+    
+    const posts = (data || []).map(p => ({
+      ...p,
+      comment_count: p.blog_comments?.[0]?.count || 0
+    }));
+    
+    return { success: true, data: posts as BlogPost[] };
+  } catch (err: any) {
+    return { success: false, error: err.message };
+  }
+};
+
+export const getBlogPost = async (id: string): Promise<{ success: boolean; data?: BlogPost; error?: string }> => {
+  try {
+    const { data, error } = await supabase
+      .from('blog_posts')
+      .select('*, blog_comments(count)')
+      .eq('id', id)
+      .single();
+    
+    if (error) throw error;
+    
+    const post = {
+      ...data,
+      comment_count: data.blog_comments?.[0]?.count || 0
+    };
+    
+    return { success: true, data: post as BlogPost };
+  } catch (err: any) {
+    return { success: false, error: err.message };
+  }
+};
+
+export const getBlogComments = async (postId: string): Promise<{ success: boolean; data?: BlogComment[]; error?: string }> => {
+  try {
+    const { data, error } = await supabase
+      .from('blog_comments')
+      .select('*')
+      .eq('post_id', postId)
+      .order('created_at', { ascending: true });
+    
+    if (error) throw error;
+    return { success: true, data: data as BlogComment[] };
+  } catch (err: any) {
+    return { success: false, error: err.message };
+  }
+};
+
+export const createBlogComment = async (comment: Omit<BlogComment, 'id' | 'likes_count' | 'created_at'>): Promise<{ success: boolean; data?: BlogComment; error?: string }> => {
+  try {
+    const { data, error } = await supabase
+      .from('blog_comments')
+      .insert([comment])
+      .select()
+      .single();
+    
+    if (error) throw error;
+    return { success: true, data: data as BlogComment };
+  } catch (err: any) {
+    return { success: false, error: err.message };
+  }
+};
+
+export const toggleBlogLike = async (userId: string, targetId: string, type: 'post' | 'comment'): Promise<{ success: boolean; action?: 'added' | 'removed'; error?: string }> => {
+  try {
+    const query = supabase
+      .from('blog_likes')
+      .select('id')
+      .eq('user_id', userId);
+    
+    if (type === 'post') query.eq('post_id', targetId);
+    else query.eq('comment_id', targetId);
+
+    const { data: existingLike } = await query.maybeSingle();
+
+    if (existingLike) {
+      const { error } = await supabase
+        .from('blog_likes')
+        .delete()
+        .eq('id', existingLike.id);
+      
+      if (error) throw error;
+      return { success: true, action: 'removed' };
+    } else {
+      const payload: any = { user_id: userId };
+      if (type === 'post') payload.post_id = targetId;
+      else payload.comment_id = targetId;
+
+      const { error } = await supabase
+        .from('blog_likes')
+        .insert([payload]);
+      
+      if (error) throw error;
+      return { success: true, action: 'added' };
+    }
+  } catch (err: any) {
+    return { success: false, error: err.message };
+  }
+};
+
+// --- Chat History Functions ---
+
+export type ChatMessage = {
+  id: string;
+  user_id?: string;
+  session_id: string;
+  role: 'user' | 'assistant';
+  content: string;
+  created_at: string;
+};
+
+export const saveChatMessage = async (message: Omit<ChatMessage, 'id' | 'created_at'>): Promise<{ success: boolean; error?: string }> => {
+  try {
+    const { error } = await supabase
+      .from('chat_messages')
+      .insert([message]);
+    
+    if (error) throw error;
+    return { success: true };
+  } catch (err: any) {
+    return { success: false, error: err.message };
+  }
+};
+
+export const getChatHistory = async (sessionId: string, userId?: string): Promise<{ success: boolean; data?: ChatMessage[]; error?: string }> => {
+  try {
+    const query = supabase
+      .from('chat_messages')
+      .select('*')
+      .order('created_at', { ascending: true });
+    
+    if (userId) {
+      query.or(`user_id.eq.${userId},session_id.eq.${sessionId}`);
+    } else {
+      query.eq('session_id', sessionId);
+    }
+
+    const { data, error } = await query;
+    if (error) throw error;
+    return { success: true, data: data as ChatMessage[] };
+  } catch (err: any) {
+    return { success: false, error: err.message };
+  }
+};
+
 export const getTopMilestones = async (limit = 3): Promise<{ success: boolean; data?: Milestone[]; error?: string }> => {
   try {
     const { data, error } = await supabase.from('milestones').select('*').order('current_amount', { ascending: false }).limit(limit);
