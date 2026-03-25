@@ -186,7 +186,7 @@ RUTAS VÁLIDAS DEL AGENDAYA:
 - Iniciar Sesión: [/login](/login)
 - Registrarse: [/register](/register)
 - Olvidé mi contraseña: [/forgot-password](/forgot-password)
-- Crowdfunding: [/crowdfunding](/crowdfunding)
+- Crowdfunding de AgendaYA: [/crowdfunding](/crowdfunding)
 - Mi Perfil / Dashboard: [/dashboard](/dashboard)
 - Registrar mi Negocio: [/business/register](/business/register)
 - Panel de Control de Negocio: [/business/dashboard](/business/dashboard)
