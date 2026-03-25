@@ -76,10 +76,10 @@ const ChatGuia = () => {
 
   const fetchSiteContext = async () => {
     try {
-      const [latestRes, popularRes, businesses] = await Promise.all([
+      const [latestRes, popularRes, allBusinesses] = await Promise.all([
         getBlogPosts(),
         getPopularPosts(1),
-        supabase.from('businesses').select('name, slug, description').limit(5)
+        supabase.from('businesses').select('name, slug, description')
       ]);
 
       // Blog Context
@@ -95,11 +95,19 @@ const ChatGuia = () => {
       }
       setBlogContext(bContext);
 
-      // Business Context (MCP-like data injection)
-      let bizContext = 'NEGOCIOS DESTACADOS:\n';
-      if (businesses.data) {
-        businesses.data.forEach(biz => {
-          bizContext += `- [${biz.name}](/${biz.slug}): ${biz.description?.substring(0, 50)}...\n`;
+      // Business Context (Directory of all registered businesses)
+      let bizContext = 'DIRECTORIO COMPLETO DE NEGOCIOS REGISTRADOS (Usa estos enlaces exactos):\n';
+      if (allBusinesses.data) {
+        allBusinesses.data.forEach(biz => {
+          bizContext += `- [${biz.name}](/${biz.slug})\n`;
+        });
+        
+        // Add descriptions only for the first few to keep prompt size manageable
+        bizContext += '\nDETALLES DE ALGUNOS NEGOCIOS:\n';
+        allBusinesses.data.slice(0, 10).forEach(biz => {
+          if (biz.description) {
+            bizContext += `- ${biz.name}: ${biz.description.substring(0, 100)}...\n`;
+          }
         });
       }
       setBusinessContext(bizContext);
@@ -168,7 +176,18 @@ const ChatGuia = () => {
           messages: [
             {
               role: 'system',
-              content: `Eres el Guía de AgendaYa, un asistente cordial y profesional. Tu objetivo es ayudar a los usuarios a navegar el sitio. No menciones que eres una IA. NUNCA inventes slugs o rutas. Si quieres recomendar contenido específico, usa ÚNICAMENTE estos datos reales:\n${blogContext || 'No hay posts recientes.'}\n${businessesContext || 'No hay negocios destacados.'}\n4. Si no conoces el ID o slug exacto, redirige SIEMPRE a explorar o al blog de forma general.\n5. No uses enlaces externos a menos que sean redes sociales oficiales de AgendaYa.`
+              content: `Eres el Guía de AgendaYa, un asistente cordial y profesional. Tu objetivo es ayudar a los usuarios a navegar el sitio. No menciones que eres una IA. NUNCA inventes slugs o rutas.
+
+USAR ESTE DIRECTORIO DE NEGOCIOS Y POSTS PARA TUS RECOMENDACIONES:
+${blogContext || 'No hay posts recientes.'}
+
+${businessesContext || 'No hay negocios registrados actualmente.'}
+
+REGLAS CRÍTICAS:
+1. Al recomendar un negocio, usa SIEMPRE el formato [Nombre del Negocio](/slug) proporcionado en el directorio anterior.
+2. Si el usuario pregunta por un negocio que NO está en la lista anterior, indícale amablemente que no lo encuentras y sugiere que use la sección de explorar: [Explorar Negocios](/explore).
+3. No menciones el término "Contexto" o "Directorio", solo úsalo para dar respuestas precisas.
+4. Mantén tus respuestas concisas, amigables y enfocadas en agendar citas.`
             },
             ...messages.map(m => ({ role: m.role, content: m.content })),
             { role: 'user', content: userMessage }
