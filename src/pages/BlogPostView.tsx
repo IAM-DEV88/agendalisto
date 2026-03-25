@@ -4,6 +4,7 @@ import { MessageSquare, Heart, Clock, User, ArrowLeft, Send, Share2, Check, Bot 
 import { getBlogPost, getBlogComments, createBlogComment, toggleBlogLike, BlogPost, BlogComment, getBlogPosts } from '../lib/api';
 import { supabase } from '../lib/supabase';
 import { toast } from 'react-hot-toast';
+import SEO from '../components/SEO';
 
 // Función para parsear el contenido del mensaje (reutilizada del chat)
 const MessageContent = ({ content }: { content: string }) => {
@@ -224,8 +225,30 @@ const BlogPostView = () => {
     </div>
   );
 
+  // Schema.org for Article
+  const articleSchema = {
+    "@context": "https://schema.org",
+    "@type": "BlogPosting",
+    "headline": post.title,
+    "description": post.excerpt || post.content.substring(0, 160),
+    "image": post.image_url,
+    "author": {
+      "@type": "Person",
+      "name": post.author_name
+    },
+    "datePublished": post.created_at,
+    "dateModified": post.updated_at
+  };
+
   return (
     <div className="min-h-screen bg-slate-50 dark:bg-slate-900 transition-colors duration-200 py-12">
+      <SEO 
+        title={post.title}
+        description={post.excerpt || post.content.substring(0, 160)}
+        ogImage={post.image_url || undefined}
+        ogType="article"
+        schemaData={articleSchema}
+      />
       <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
         <Link to="/blog" className="inline-flex items-center gap-2 text-slate-500 hover:text-primary-600 font-bold mb-8 transition-colors group">
           <ArrowLeft className="w-4 h-4 group-hover:-translate-x-1 transition-transform" /> Volver al blog
@@ -248,9 +271,64 @@ const BlogPostView = () => {
           </h1>
 
           <div className="prose prose-lg dark:prose-invert max-w-none mb-12 text-slate-700 dark:text-slate-300 leading-relaxed font-medium">
-            {post.content.split('\n').map((para, i) => (
-              <p key={i} className="mb-6">{para}</p>
-            ))}
+            {(() => {
+              const paragraphs = post.content.split('\n').filter(p => p.trim() !== '');
+              
+              let leftColumn: string[] = [];
+              let rightColumn: string[] = [];
+
+              if (paragraphs.length > 1) {
+                const midpoint = Math.ceil(paragraphs.length / 2);
+                leftColumn = paragraphs.slice(0, midpoint);
+                rightColumn = paragraphs.slice(midpoint);
+              } else if (paragraphs.length === 1) {
+                // Si solo hay un párrafo, intentamos dividirlo por frases
+                const text = paragraphs[0];
+                const sentences = text.match(/[^.!?]+[.!?]|\s*[^.!?]+$/g) || [text];
+                
+                if (sentences.length > 1) {
+                  const midpoint = Math.ceil(sentences.length / 2);
+                  leftColumn = [sentences.slice(0, midpoint).join(' ')];
+                  rightColumn = [sentences.slice(midpoint).join(' ')];
+                } else {
+                  // Si solo hay una frase o el regex falló, dividimos por palabras
+                  const words = text.split(' ');
+                  const midpoint = Math.ceil(words.length / 2);
+                  leftColumn = [words.slice(0, midpoint).join(' ')];
+                  rightColumn = [words.slice(midpoint).join(' ')];
+                }
+              }
+
+              return (
+                <div className="lg:grid lg:grid-cols-2 lg:gap-16 relative">
+                  {/* Vertical Line */}
+                  <div className="hidden lg:block absolute left-1/2 top-4 bottom-4 w-[2px] bg-slate-200 dark:bg-slate-800 -translate-x-1/2"></div>
+                  
+                  <div className="space-y-6">
+                    {leftColumn.map((para, i) => (
+                      <p 
+                        key={`left-${i}`} 
+                        className={`text-justify ${
+                          i === 0 
+                            ? 'first-letter:text-7xl first-letter:font-black first-letter:text-primary-600 first-letter:mr-3 first-letter:float-left first-letter:leading-[0.8]' 
+                            : ''
+                        }`}
+                      >
+                        {para}
+                      </p>
+                    ))}
+                  </div>
+                  
+                  <div className="space-y-6 mt-6 lg:mt-0">
+                    {rightColumn.map((para, i) => (
+                      <p key={`right-${i}`} className="text-justify">
+                        {para}
+                      </p>
+                    ))}
+                  </div>
+                </div>
+              );
+            })()}
           </div>
 
           <div className="pt-8 border-t border-slate-100 dark:border-slate-800 flex items-center justify-between">

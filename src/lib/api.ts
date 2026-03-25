@@ -796,12 +796,16 @@ export const getPopularPosts = async (limit = 4): Promise<{ success: boolean; da
   }
 };
 
-export const getBlogPosts = async (): Promise<{ success: boolean; data?: BlogPost[]; error?: string }> => {
+export const getBlogPosts = async (page = 0, limit = 6): Promise<{ success: boolean; data?: BlogPost[]; error?: string; hasMore?: boolean }> => {
   try {
-    const { data, error } = await supabase
+    const from = page * limit;
+    const to = from + limit - 1;
+
+    const { data, error, count } = await supabase
       .from('blog_posts')
-      .select('*, blog_comments(count)')
-      .order('created_at', { ascending: false });
+      .select('*, blog_comments(count)', { count: 'exact' })
+      .order('created_at', { ascending: false })
+      .range(from, to);
     
     if (error) throw error;
     
@@ -810,7 +814,11 @@ export const getBlogPosts = async (): Promise<{ success: boolean; data?: BlogPos
       comment_count: p.blog_comments?.[0]?.count || 0
     }));
     
-    return { success: true, data: posts as BlogPost[] };
+    return { 
+      success: true, 
+      data: posts as BlogPost[],
+      hasMore: count ? (from + posts.length) < count : false
+    };
   } catch (err: any) {
     return { success: false, error: err.message };
   }

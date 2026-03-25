@@ -1,0 +1,7 @@
+User-agent: *
+Allow: /
+Allow: /explore
+Allow: /blog
+
+# Sitemap
+Sitemap: https://agendalisto.com/sitemap.xml

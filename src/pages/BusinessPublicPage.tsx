@@ -10,6 +10,7 @@ import {
   BookingForm,
   ReviewsSection
 } from '../components/business/public';
+import SEO from '../components/SEO';
 
 function BusinessPublicPage() {
   const { slug } = useParams();
@@ -148,8 +149,35 @@ function BusinessPublicPage() {
     );
   }
 
+  // Schema.org Structured Data
+  const businessSchema = {
+    "@context": "https://schema.org",
+    "@type": "LocalBusiness",
+    "name": businessData.name,
+    "description": businessData.description,
+    "image": businessData.logo_url,
+    "address": {
+      "@type": "PostalAddress",
+      "streetAddress": businessData.address
+    },
+    "telephone": businessData.phone,
+    "url": window.location.href,
+    "aggregateRating": averageRating > 0 ? {
+      "@type": "AggregateRating",
+      "ratingValue": averageRating.toFixed(1),
+      "reviewCount": reviews.length
+    } : undefined
+  };
+
   return (
     <div className="min-h-screen py-8 px-4 sm:px-6 lg:px-8 bg-slate-50 dark:bg-slate-900 transition-colors duration-200">
+      <SEO 
+        title={businessData.name}
+        description={businessData.description}
+        ogImage={businessData.logo_url}
+        ogType="business.business"
+        schemaData={businessSchema}
+      />
       <div className="max-w-7xl mx-auto">
         {/* Business Header */}
         <BusinessHeader businessData={businessData} averageRating={averageRating} reviewsCount={reviews.length} />

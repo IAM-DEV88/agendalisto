@@ -64,37 +64,48 @@ const ChatGuia = () => {
   const [input, setInput] = useState('');
   const [isLoading, setIsLoading] = useState(false);
   const [blogContext, setBlogContext] = useState<string>('');
+  const [businessesContext, setBusinessContext] = useState<string>('');
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const sessionId = useRef(localStorage.getItem('chat_session_id') || Math.random().toString(36).substring(7));
 
   useEffect(() => {
     localStorage.setItem('chat_session_id', sessionId.current);
     fetchHistory();
-    fetchBlogContext();
+    fetchSiteContext();
   }, []);
 
-  const fetchBlogContext = async () => {
+  const fetchSiteContext = async () => {
     try {
-      const [latestRes, popularRes] = await Promise.all([
+      const [latestRes, popularRes, businesses] = await Promise.all([
         getBlogPosts(),
-        getPopularPosts(1)
+        getPopularPosts(1),
+        supabase.from('businesses').select('name, slug, description').limit(5)
       ]);
 
-      let context = 'PUBLICACIONES RECIENTES EN EL BLOG:\n';
+      // Blog Context
+      let bContext = 'PUBLICACIONES RECIENTES EN EL BLOG:\n';
       if (latestRes.success && latestRes.data) {
         latestRes.data.slice(0, 5).forEach(post => {
-          context += `- [${post.title}](/blog/${post.id})\n`;
+          bContext += `- [${post.title}](/blog/${post.id})\n`;
         });
       }
-
       if (popularRes.success && popularRes.data && popularRes.data.length > 0) {
         const popular = popularRes.data[0];
-        context += `\nPUBLICACIÓN MÁS POPULAR (CON MÁS LIKES):\n- [${popular.title}](/blog/${popular.id})`;
+        bContext += `\nPUBLICACIÓN MÁS POPULAR:\n- [${popular.title}](/blog/${popular.id})`;
       }
+      setBlogContext(bContext);
 
-      setBlogContext(context);
+      // Business Context (MCP-like data injection)
+      let bizContext = 'NEGOCIOS DESTACADOS:\n';
+      if (businesses.data) {
+        businesses.data.forEach(biz => {
+          bizContext += `- [${biz.name}](/${biz.slug}): ${biz.description?.substring(0, 50)}...\n`;
+        });
+      }
+      setBusinessContext(bizContext);
+
     } catch (error) {
-      console.error('Error fetching blog context for AI:', error);
+      console.error('Error fetching site context for AI:', error);
     }
   };
 
@@ -157,7 +168,7 @@ const ChatGuia = () => {
           messages: [
             {
               role: 'system',
-              content: `Eres el Guía de AgendaYa, un asistente cordial y profesional. Tu objetivo es ayudar a los usuarios a navegar el sitio. No menciones que eres una IA. NUNCA inventes slugs o rutas. Si quieres recomendar un post específico, usa ÚNICAMENTE los de esta lista:\n${blogContext || 'No hay posts recientes disponibles actualmente.'}\n4. Si no conoces el ID de un post, redirige SIEMPRE al blog de forma general. No uses enlaces externos a menos que sean redes sociales oficiales de AgendaYa.`
+              content: `Eres el Guía de AgendaYa, un asistente cordial y profesional. Tu objetivo es ayudar a los usuarios a navegar el sitio. No menciones que eres una IA. \n\nREGLAS CRÍTICAS DE ENLACES:\n1. Solo usa enlaces Markdown [Texto](/ruta).\n2. RUTAS PERMITIDAS EXCLUSIVAMENTE:\n   - [/explore] para ver negocios.\n   - [/blog] para ver el blog.\n   - [/login] para iniciar sesión.\n   - [/register] para registrarse.\n3. NUNCA inventes slugs o rutas. Si quieres recomendar contenido específico, usa ÚNICAMENTE estos datos reales:\n${blogContext || 'No hay posts recientes.'}\n${businessesContext || 'No hay negocios destacados.'}\n4. Si no conoces el ID o slug exacto, redirige SIEMPRE a [/explore] o [/blog] de forma general.\n5. No uses enlaces externos a menos que sean redes sociales oficiales de AgendaYa.`
             },
             ...messages.map(m => ({ role: m.role, content: m.content })),
             { role: 'user', content: userMessage }
