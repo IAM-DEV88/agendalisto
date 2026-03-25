@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { MessageSquare, X, Send, User, Bot, Loader2 } from 'lucide-react';
 import { supabase } from '../lib/supabase';
-import { saveChatMessage, getChatHistory, ChatMessage, getBlogPosts, BlogPost, getPopularPosts } from '../lib/api';
+import { saveChatMessage, getChatHistory, ChatMessage, getBlogPosts, BlogPost, getPopularPosts, slugify } from '../lib/api';
 import { toast } from 'react-hot-toast';
 import { Link } from 'react-router-dom';
 
@@ -79,7 +79,7 @@ const ChatGuia = () => {
       const [latestRes, popularRes, allBusinesses] = await Promise.all([
         getBlogPosts(),
         getPopularPosts(1),
-        supabase.from('businesses').select('name, slug, description')
+        supabase.from('businesses').select('name, description')
       ]);
 
       // Blog Context
@@ -99,7 +99,8 @@ const ChatGuia = () => {
       let bizContext = 'DIRECTORIO COMPLETO DE NEGOCIOS REGISTRADOS (Usa estos enlaces exactos):\n';
       if (allBusinesses.data) {
         allBusinesses.data.forEach(biz => {
-          bizContext += `- [${biz.name}](/${biz.slug})\n`;
+          const slug = slugify(biz.name);
+          bizContext += `- [${biz.name}](/${slug})\n`;
         });
         
         // Add descriptions only for the first few to keep prompt size manageable
@@ -178,16 +179,16 @@ const ChatGuia = () => {
               role: 'system',
               content: `Eres el Guía de AgendaYa, un asistente cordial y profesional. Tu objetivo es ayudar a los usuarios a navegar el sitio. No menciones que eres una IA. NUNCA inventes slugs o rutas.
 
-USAR ESTE DIRECTORIO DE NEGOCIOS Y POSTS PARA TUS RECOMENDACIONES:
+DIRECTORIO DE REFERENCIA (Usa estos enlaces exactos):
 ${blogContext || 'No hay posts recientes.'}
 
 ${businessesContext || 'No hay negocios registrados actualmente.'}
 
-REGLAS CRÍTICAS:
-1. Al recomendar un negocio, usa SIEMPRE el formato [Nombre del Negocio](/slug) proporcionado en el directorio anterior.
-2. Si el usuario pregunta por un negocio que NO está en la lista anterior, indícale amablemente que no lo encuentras y sugiere que use la sección de explorar: [Explorar Negocios](/explore).
-3. No menciones el término "Contexto" o "Directorio", solo úsalo para dar respuestas precisas.
-4. Mantén tus respuestas concisas, amigables y enfocadas en agendar citas.`
+REGLAS CRÍTICAS PARA TUS RESPUESTAS:
+1. Al recomendar un negocio del directorio, usa EL FORMATO EXACTO: [Nombre](/slug) que aparece en la lista anterior. El slug es la parte después de la barra diagonal (/).
+2. Si un negocio se llama "Barbería Paco" y su entrada en el directorio es "- [Barbería Paco](/barberia-paco)", debes escribir exactamente [Barbería Paco](/barberia-paco).
+3. NUNCA inventes un slug. Si el negocio no está en la lista anterior, di que no lo encuentras y sugiere ir a [Explorar todos los negocios](/explore).
+4. Mantén tus respuestas breves, amigables y enfocadas en ayudar al usuario a agendar.`
             },
             ...messages.map(m => ({ role: m.role, content: m.content })),
             { role: 'user', content: userMessage }

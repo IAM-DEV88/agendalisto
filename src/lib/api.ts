@@ -69,7 +69,7 @@ export interface BusinessConfig {
 }
 
 // Helper to create URL-friendly slug from business name
-const slugify = (str: string) => str.toLowerCase().replace(/\s+/g, '-').replace(/[^\w\-]+/g, '');
+export const slugify = (str: string) => str.toLowerCase().replace(/\s+/g, '-').replace(/[^\w\-]+/g, '');
 
 // API functions for businesses
 export const getBusinesses = async (search?: string, _category?: string) => {
