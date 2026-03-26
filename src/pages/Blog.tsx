@@ -98,7 +98,7 @@ const Blog = () => {
               placeholder="Buscar publicaciones..." 
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
-              className="w-full pl-12 pr-4 py-4 bg-white dark:bg-slate-800 border-2 border-slate-100 dark:border-slate-700 rounded-2xl shadow-xl shadow-slate-200/50 dark:shadow-none focus:ring-2 focus:ring-primary-500 focus:border-transparent transition-all font-medium"
+              className="w-full pr-4 py-4 bg-white border-2 border-slate-100 dark:border-slate-700 rounded-2xl shadow-xl shadow-slate-200/50 dark:shadow-none focus:ring-2 focus:ring-primary-500 focus:border-transparent transition-all font-medium"
             />
           </div>
         </div>

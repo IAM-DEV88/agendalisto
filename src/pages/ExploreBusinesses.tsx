@@ -240,7 +240,7 @@ const ExploreBusinesses = () => {
                 value={searchTerm}
                 onChange={(e) => setSearchTerm(e.target.value)}
                 placeholder="¿Qué servicio buscas?"
-                className="w-full pl-12 pr-4 py-4 bg-slate-50 dark:bg-slate-800/50 border-2 border-slate-100 dark:border-slate-700 rounded-2xl focus:border-primary-500 focus:ring-0 transition-all font-medium text-slate-700 dark:text-white"
+                className="w-full pl-12 pr-4 py-4 border-2 border-slate-100 dark:border-slate-700 rounded-2xl focus:border-primary-500 focus:ring-0 transition-all font-medium text-slate-700 dark:text-white"
               />
             </div>
             <div className="flex-1 relative group">
@@ -252,7 +252,7 @@ const ExploreBusinesses = () => {
                 value={locationTerm}
                 onChange={(e) => setLocationTerm(e.target.value)}
                 placeholder="Ubicación (Ciudad, barrio...)"
-                className="w-full pl-12 pr-4 py-4 bg-slate-50 dark:bg-slate-800/50 border-2 border-slate-100 dark:border-slate-700 rounded-2xl focus:border-primary-500 focus:ring-0 transition-all font-medium text-slate-700 dark:text-white"
+                className="w-full pl-12 pr-4 py-4 border-2 border-slate-100 dark:border-slate-700 rounded-2xl focus:border-primary-500 focus:ring-0 transition-all font-medium text-slate-700 dark:text-white"
               />
             </div>
             <div className="lg:w-1/4 relative group">
@@ -262,7 +262,7 @@ const ExploreBusinesses = () => {
               <select
                 value={category}
                 onChange={(e) => setCategory(e.target.value)}
-                className="w-full pl-12 pr-4 py-4 bg-slate-50 dark:bg-slate-800/50 border-2 border-slate-100 dark:border-slate-700 rounded-2xl focus:border-primary-500 focus:ring-0 transition-all font-bold text-slate-700 dark:text-white appearance-none"
+                className="w-full pl-12 pr-4 py-4 text-slate-700 border-2 border-slate-100 dark:border-slate-700 rounded-2xl focus:border-primary-500 focus:ring-0 transition-all font-bold appearance-none"
               >
                 <option value="all">Todas las categorías</option>
                 {categories.map((cat) => (

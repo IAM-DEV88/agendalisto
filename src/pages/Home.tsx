@@ -146,7 +146,7 @@ const Home = () => {
             </div>
             
             <div className="col-span-1 bg-white/10 backdrop-blur-md p-8 rounded-2xl border border-white/20 shadow-2xl w-full">
-              <h2 className="text-2xl font-bold text-white mb-6 text-center">Reservar ahora</h2>
+              <h2 className="text-2xl font-bold text-white mb-6 text-center">Mi espacio</h2>
               
               {user ? (
                 <div className="flex flex-col gap-4">
@@ -193,17 +193,13 @@ const Home = () => {
         <div className="absolute bottom-0 left-0 -mb-20 -ml-20 w-96 h-96 bg-primary-700 rounded-full blur-3xl opacity-20"></div>
       </section>
 
-      {/* Blog Section before branding */}
-      <BlogHomeSection />
-
-
       {/* Categories section */}
       <section className="py-16 bg-slate-50 dark:bg-slate-900 transition-colors duration-200">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex justify-between items-end mb-10">
             <div>
-              <h2 className="text-3xl font-bold text-slate-900 dark:text-white">Explora por Categoría</h2>
-              <p className="text-slate-600 dark:text-slate-400 mt-2">Encuentra al profesional ideal para lo que necesites</p>
+              <h2 className="text-3xl font-bold text-slate-900 dark:text-white">Explora servicios cerca de ti</h2>
+              <p className="text-slate-600 dark:text-slate-400 mt-2">Encuentra servicios disponibles y reserva ahora</p>
             </div>
           </div>
           
@@ -257,6 +253,9 @@ const Home = () => {
           )}
         </div>
       </section>
+
+      {/* Blog Section before branding */}
+      <BlogHomeSection />
 
       {/* Brand Image Section (AgendaYa Mascot) */}
       <section className="py-8 sm:py-16 bg-white dark:bg-slate-950 transition-colors duration-200">

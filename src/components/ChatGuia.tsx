@@ -259,8 +259,8 @@ REGLAS CRÍTICAS PARA TUS RESPUESTAS:
                 <Bot className="w-6 h-6" />
               </div>
               <div>
-                <h3 className="font-bold">Guía de AgendaYa</h3>
-                <p className="text-xs text-primary-100">En línea ahora</p>
+                <div className="font-bold">Guía de AgendaYa</div>
+                <div className="text-xs text-primary-100">En línea ahora</div>
               </div>
             </div>
             <button onClick={() => setIsOpen(false)} className="hover:bg-white/10 p-1 rounded-full">
@@ -314,7 +314,7 @@ REGLAS CRÍTICAS PARA TUS RESPUESTAS:
               value={input}
               onChange={(e) => setInput(e.target.value)}
               placeholder="Escribe un mensaje..."
-              className="flex-1 bg-slate-100 dark:bg-slate-800 border-none rounded-xl px-4 py-2 text-sm focus:ring-2 focus:ring-primary-500 text-slate-900 dark:text-white"
+              className="flex-1 bg-slate-100 border-none rounded-xl px-4 py-2 text-sm focus:ring-2 focus:ring-primary-500 text-slate-900 dark:text-white"
             />
             <button
               type="submit"

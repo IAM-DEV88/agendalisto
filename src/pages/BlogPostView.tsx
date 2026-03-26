@@ -302,7 +302,7 @@ const BlogPostView = () => {
               return (
                 <div className="lg:grid lg:grid-cols-2 lg:gap-16 relative">
                   {/* Vertical Line */}
-                  <div className="hidden lg:block absolute left-1/2 top-4 bottom-4 w-[2px] bg-slate-200 dark:bg-slate-800 -translate-x-1/2"></div>
+                  <div className="hidden lg:block absolute left-1/2 top-4 bottom-4 w-[2px] bg-slate-200 dark:bg-gray-500 -translate-x-1/2"></div>
                   
                   <div className="space-y-6">
                     {leftColumn.map((para, i) => (
@@ -370,7 +370,7 @@ const BlogPostView = () => {
                   placeholder="Escribe tu opinión..." 
                   value={newComment}
                   onChange={(e) => setNewComment(e.target.value)}
-                  className="w-full bg-slate-50 dark:bg-slate-800 border-none rounded-2xl p-4 text-slate-900 dark:text-white focus:ring-2 focus:ring-primary-500 mb-4 h-32"
+                  className="w-full bg-slate-50 border-none rounded-2xl p-4 mb-4 h-32"
                 />
                 <div className="flex justify-end">
                   <button 

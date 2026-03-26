@@ -106,7 +106,7 @@
   input[type='tel'],
   textarea,
   select {
-    @apply appearance-none block w-full px-8 py-4 w-full bg-slate-50 rounded-xl text-slate-900 font-medium pr-0;
+    @apply appearance-none block w-full pl-10 py-4 w-full bg-slate-50 rounded-xl text-slate-900 font-medium pr-0 dark:bg-slate-100 dark:text-gray-900;
   }
 }
 
