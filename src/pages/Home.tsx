@@ -146,7 +146,9 @@ const Home = () => {
             </div>
             
             <div className="col-span-1 bg-white/10 backdrop-blur-md p-8 rounded-2xl border border-white/20 shadow-2xl w-full">
-              <h2 className="text-2xl font-bold text-white mb-6 text-center">Mi espacio</h2>
+              <h2 className="text-2xl font-bold text-white mb-6 text-center">
+                {user ? 'Mi espacio' : 'Reservar ahora'}
+              </h2>
               
               {user ? (
                 <div className="flex flex-col gap-4">
