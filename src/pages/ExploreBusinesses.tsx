@@ -140,15 +140,38 @@ const BusinessCard = ({ business, categories, currentUser }: { business: Busines
 };
 
 const ExploreBusinesses = () => {
-  const [searchParams] = useSearchParams();
+  const [searchParams, setSearchParams] = useSearchParams();
   const [businesses, setBusinesses] = useState<Business[]>([]);
   const [loading, setLoading] = useState(true);
-  const [searchTerm, setSearchTerm] = useState('');
+  
+  // Obtener valores iniciales de la URL
+  const initialSearch = searchParams.get('search') || '';
+  const initialLocation = searchParams.get('location') || '';
   const initialCategory = searchParams.get('category') || 'all';
+
+  const [searchTerm, setSearchTerm] = useState(initialSearch);
+  const [locationTerm, setLocationTerm] = useState(initialLocation);
   const [category, setCategory] = useState(initialCategory);
+  
   const [error, setError] = useState<string | null>(null);
   const [categories, setCategories] = useState<BusinessCategory[]>([]);
   const [user, setUser] = useState<any>(null);
+
+  // Actualizar estados locales si cambian los parámetros de la URL (por ejemplo, al volver a hacer clic en "Explorar")
+  useEffect(() => {
+    setSearchTerm(searchParams.get('search') || '');
+    setLocationTerm(searchParams.get('location') || '');
+    setCategory(searchParams.get('category') || 'all');
+  }, [searchParams]);
+
+  // Actualizar la URL cuando cambian los filtros locales
+  useEffect(() => {
+    const params = new URLSearchParams();
+    if (searchTerm) params.set('search', searchTerm);
+    if (locationTerm) params.set('location', locationTerm);
+    if (category !== 'all') params.set('category', category);
+    setSearchParams(params, { replace: true });
+  }, [searchTerm, locationTerm, category, setSearchParams]);
 
   // Fetch current user
   useEffect(() => {
@@ -173,7 +196,11 @@ const ExploreBusinesses = () => {
       setLoading(true);
       setError(null);
       try {
-        const data = await getBusinesses(searchTerm, category !== 'all' ? category : undefined);
+        const data = await getBusinesses(
+          searchTerm || undefined, 
+          category !== 'all' ? category : undefined,
+          locationTerm || undefined
+        );
         setBusinesses(data);
       } catch (err) {
         setError('Error al cargar los negocios. Por favor, inténtalo de nuevo más tarde.');
@@ -187,7 +214,7 @@ const ExploreBusinesses = () => {
     }, 300);
 
     return () => clearTimeout(timer);
-  }, [searchTerm, category]);
+  }, [searchTerm, locationTerm, category]);
 
   return (
     <div className="min-h-screen bg-slate-50 dark:bg-slate-900 transition-colors duration-200">
@@ -203,7 +230,7 @@ const ExploreBusinesses = () => {
 
         {/* Search and Filter Section */}
         <div className="card p-6 mb-12 shadow-xl shadow-slate-200/50 dark:shadow-none">
-          <div className="flex flex-col md:flex-row gap-6">
+          <div className="flex flex-col lg:flex-row gap-6">
             <div className="flex-1 relative group">
               <div className="absolute inset-y-0 left-4 flex items-center pointer-events-none">
                 <Search className="h-5 w-5 text-slate-400 group-focus-within:text-primary-500 transition-colors" />
@@ -212,11 +239,23 @@ const ExploreBusinesses = () => {
                 type="text"
                 value={searchTerm}
                 onChange={(e) => setSearchTerm(e.target.value)}
-                placeholder="Buscar por nombre o descripción..."
+                placeholder="¿Qué servicio buscas?"
                 className="w-full pl-12 pr-4 py-4 bg-slate-50 dark:bg-slate-800/50 border-2 border-slate-100 dark:border-slate-700 rounded-2xl focus:border-primary-500 focus:ring-0 transition-all font-medium text-slate-700 dark:text-white"
               />
             </div>
-            <div className="md:w-1/3 relative group">
+            <div className="flex-1 relative group">
+              <div className="absolute inset-y-0 left-4 flex items-center pointer-events-none">
+                <MapPin className="h-5 w-5 text-slate-400 group-focus-within:text-primary-500 transition-colors" />
+              </div>
+              <input
+                type="text"
+                value={locationTerm}
+                onChange={(e) => setLocationTerm(e.target.value)}
+                placeholder="Ubicación (Ciudad, barrio...)"
+                className="w-full pl-12 pr-4 py-4 bg-slate-50 dark:bg-slate-800/50 border-2 border-slate-100 dark:border-slate-700 rounded-2xl focus:border-primary-500 focus:ring-0 transition-all font-medium text-slate-700 dark:text-white"
+              />
+            </div>
+            <div className="lg:w-1/4 relative group">
               <div className="absolute inset-y-0 left-4 flex items-center pointer-events-none">
                 <Filter className="h-5 w-5 text-slate-400 group-focus-within:text-primary-500 transition-colors" />
               </div>
@@ -267,7 +306,7 @@ const ExploreBusinesses = () => {
               Intenta ajustar tus filtros o buscar con otros términos.
             </p>
             <button 
-              onClick={() => { setSearchTerm(''); setCategory('all'); }}
+              onClick={() => { setSearchTerm(''); setLocationTerm(''); setCategory('all'); }}
               className="mt-8 text-primary-600 dark:text-primary-400 font-black hover:underline"
             >
               Limpiar todos los filtros

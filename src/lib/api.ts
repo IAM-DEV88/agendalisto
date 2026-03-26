@@ -72,17 +72,20 @@ export interface BusinessConfig {
 export const slugify = (str: string) => str.toLowerCase().replace(/\s+/g, '-').replace(/[^\w\-]+/g, '');
 
 // API functions for businesses
-export const getBusinesses = async (search?: string, _category?: string) => {
+export const getBusinesses = async (search?: string, _category?: string, location?: string) => {
   let query = supabase.from('businesses').select('*');
   
   if (search) {
     query = query.or(`name.ilike.%${search}%,description.ilike.%${search}%`);
   }
+  
+  if (location) {
+    query = query.ilike('address', `%${location}%`);
+  }
+
   if (_category) {
     query = query.eq('category_id', _category);
   }
-  
-  // Note: Filter by category_id if provided
   
   const { data, error } = await query;
   

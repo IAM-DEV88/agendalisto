@@ -1,9 +1,10 @@
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import { useAuthSession } from '../hooks/useAuthSession';
 import { useState, useEffect } from 'react';
 import { getBusinessCategories, BusinessCategory, getTopMilestones } from '../lib/api';
 import { Swiper, SwiperSlide } from 'swiper/react';
 import { Pagination, Autoplay } from 'swiper/modules';
+import { Search, MapPin, CheckCircle2, ArrowRight } from 'lucide-react';
 import 'swiper/css';
 import 'swiper/css/pagination';
 import BlogHomeSection from '../components/BlogHomeSection';
@@ -12,12 +13,17 @@ import type { Milestone } from '../lib/api';
 
 const Home = () => {
   const { user, loading } = useAuthSession();
+  const navigate = useNavigate();
+  const [searchService, setSearchService] = useState('');
+  const [searchLocation, setSearchLocation] = useState('');
+
   let registerText = 'Registrarse GRATIS';
   let registerLink = '/register';
   let secondText = 'Iniciar Sesión';
   let secondLink = '/login';
-  const exploreText = 'Explorar';
+  const exploreText = 'Buscar ahora';
   const exploreLink = '/explore';
+
   if (!loading && user) {
     secondText = 'Mi Perfil';
     secondLink = '/dashboard';
@@ -29,6 +35,14 @@ const Home = () => {
       registerLink = '/business/register';
     }
   }
+
+  const handleSearch = (e: React.FormEvent) => {
+    e.preventDefault();
+    const params = new URLSearchParams();
+    if (searchService) params.append('search', searchService);
+    if (searchLocation) params.append('location', searchLocation);
+    navigate(`/explore?${params.toString()}`);
+  };
 
   const [categories, setCategories] = useState<BusinessCategory[]>([]);
   const [loadingCategories, setLoadingCategories] = useState(true);
@@ -65,46 +79,111 @@ const Home = () => {
       {/* Hero section */}
       <section className="relative bg-primary-600 dark:bg-primary-900 overflow-hidden py-16 sm:py-24 transition-colors duration-200">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
-          <div className="flex flex-col md:flex-row items-center justify-between gap-12">
-            <div className="flex-1 text-center md:text-left">
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-y-12 md:gap-12">
+            <div className="col-span-2 text-center md:text-left">
               <h1 className="text-4xl tracking-tight font-extrabold text-white sm:text-5xl md:text-6xl mb-6">
-                <span className="block">Haz lo que amas.</span>
-                <span className="block text-primary-200">Gana como mereces.</span>
+                <span>Reserva servicios cerca de ti </span>
+                <span className="text-primary-200">en segundos.</span>
               </h1>
               <p className="text-primary-100 text-lg sm:text-xl md:text-2xl max-w-2xl mx-auto md:mx-0 mb-8 leading-relaxed">
-                Publica tus servicios, recibe valoraciones y empieza a destacar.
-                Conecta con quienes buscan tu talento.
+                Encuentra barberías, belleza, salud y más en un solo lugar.
               </p>
-              <div className="hidden md:flex gap-4">
-                <Link to={exploreLink} className="px-8 py-3 bg-white text-primary-700 font-bold rounded-lg hover:bg-primary-50 transition-colors shadow-lg">
-                  {exploreText}
-                </Link>
-              </div>
+              
+              {/* Buscador Funcional */}
+              {/* Search Form - Desktop Grid Layout */}
+              <form onSubmit={handleSearch} className="max-w-3xl bg-white p-2 rounded-2xl shadow-2xl hidden md:grid md:grid-cols-6 md:gap-2">
+                <div className="col-span-3 relative">
+                  <Search className="absolute left-2 top-1/3 -translate-y-1/6 w-5 h-5 text-slate-400" />
+                  <input 
+                    type="text" 
+                    placeholder="Ej: Corte de cabello, uñas, masaje" 
+                    value={searchService}
+                    onChange={(e) => setSearchService(e.target.value)}
+                    className="w-full"
+                  />
+                </div>
+                <div className="relative col-span-1">
+                  <MapPin className="absolute left-2 top-1/3 -translate-y-1/6 w-5 h-5 text-slate-400" />
+                  <input 
+                    type="text" 
+                    placeholder="Ubicación" 
+                    value={searchLocation}
+                    onChange={(e) => setSearchLocation(e.target.value)}
+                    className="w-full"
+                  />
+                </div>
+                <button type="submit" className="col-span-2 bg-primary-600 hover:bg-primary-500 text-white px-8 py-4 rounded-xl font-black transition-all flex items-center justify-center gap-2 shadow-lg shadow-primary-500/30">
+                  <Search className="w-5 h-5" /> Buscar ahora
+                </button>
+              </form>
+
+              {/* Search Form - Mobile Row Layout */}
+              <form onSubmit={handleSearch} className="max-w-3xl bg-white p-2 rounded-2xl shadow-2xl md:hidden space-y-2">
+                <div className="relative">
+                  <Search className="absolute left-2 top-1/3 -translate-y-1/6 w-5 h-5 text-slate-400" />
+                  <input 
+                    type="text" 
+                    placeholder="Ej: Corte de cabello, uñas, masaje" 
+                    value={searchService}
+                    onChange={(e) => setSearchService(e.target.value)}
+                    className="w-full"
+                  />
+                </div>
+                <div className="relative">
+                  <MapPin className="absolute left-2 top-1/3 -translate-y-1/6 w-5 h-5 text-slate-400" />
+                  <input 
+                    type="text" 
+                    placeholder="Ubicación" 
+                    value={searchLocation}
+                    onChange={(e) => setSearchLocation(e.target.value)}
+                    className="w-full"
+                  />
+                </div>
+                <button type="submit" className="w-full bg-primary-600 hover:bg-primary-500 text-white px-8 py-4 rounded-xl font-black transition-all flex items-center justify-center gap-2 shadow-lg shadow-primary-500/30">
+                  <Search className="w-5 h-5" /> Buscar ahora
+                </button>
+              </form>
             </div>
             
-            <div className="w-full max-w-md bg-white/10 backdrop-blur-md p-8 rounded-2xl border border-white/20 shadow-2xl">
-              <h2 className="text-2xl font-bold text-white mb-6 text-center">Empieza hoy</h2>
-              <div className="flex flex-col gap-4">
-                <Link to={registerLink} className="btn-primary w-full">
-                  {registerText}
-                </Link>
-                <Link to={secondLink} className="btn-secondary w-full bg-white/20 border-white/30 text-white hover:bg-white/30 dark:bg-white/10 dark:text-white dark:hover:bg-white/20">
-                  {secondText}
-                </Link>
-                <div className="md:hidden">
-                  <Link to={exploreLink} className="btn-secondary w-full border-white/30 text-primary-600 dark:text-primary-400 tracking-tighter hover:bg-white/30 dark:bg-white/10 dark:text-white dark:hover:bg-white/20">
-                    {exploreText}
+            <div className="col-span-1 bg-white/10 backdrop-blur-md p-8 rounded-2xl border border-white/20 shadow-2xl w-full">
+              <h2 className="text-2xl font-bold text-white mb-6 text-center">Reservar ahora</h2>
+              
+              {user ? (
+                <div className="flex flex-col gap-4">
+                  <Link to={registerLink} className="btn-primary w-full text-center">
+                    {registerText}
                   </Link>
-                </div>
-                {user && (
+                  <Link to={secondLink} className="btn-secondary w-full bg-white/20 border-white/30 text-white hover:bg-white/30 dark:bg-white/10 dark:text-white dark:hover:bg-white/20 text-center">
+                    {secondText}
+                  </Link>
                   <button 
                     onClick={() => supabase.auth.signOut()} 
                     className="text-white/70 hover:text-white text-sm font-medium mt-2 transition-colors"
                   >
                     Cerrar sesión
                   </button>
-                )}
-              </div>
+                </div>
+              ) : (
+                <div className="space-y-6">
+                  <div className="space-y-3">
+                    <div className="flex items-center gap-3 text-white/90">
+                      <CheckCircle2 className="w-5 h-5 text-primary-300" />
+                      <span className="font-bold">Sin llamadas</span>
+                    </div>
+                    <div className="flex items-center gap-3 text-white/90">
+                      <CheckCircle2 className="w-5 h-5 text-primary-300" />
+                      <span className="font-bold">Sin filas</span>
+                    </div>
+                    <div className="flex items-center gap-3 text-white/90">
+                      <CheckCircle2 className="w-5 h-5 text-primary-300" />
+                      <span className="font-bold">En menos de 30 segundos</span>
+                    </div>
+                  </div>
+                  <Link to="/explore" className="btn-primary w-full bg-white text-primary-700 hover:bg-primary-50 flex items-center justify-center gap-2 text-lg">
+                    Explorar servicios <ArrowRight className="w-5 h-5" />
+                  </Link>
+                </div>
+              )}
             </div>
           </div>
         </div>
@@ -117,48 +196,6 @@ const Home = () => {
       {/* Blog Section before branding */}
       <BlogHomeSection />
 
-      {/* Brand Image Section (AgendaYa Mascot) */}
-      <section className="py-8 sm:py-16 bg-white dark:bg-slate-950 transition-colors duration-200">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="relative rounded-3xl overflow-hidden bg-slate-900 shadow-2xl border border-slate-200 dark:border-slate-800 min-h-[350px] sm:min-h-[450px] md:min-h-[500px] flex items-center">
-            {/* Image as background */}
-            <div className="absolute inset-0 z-0">
-              <img 
-                src="/src/assets/branding/agendaya.jpg" 
-                alt="AgendaYa Mascot" 
-                className="w-full h-full object-cover object-center md:object-right transition-transform duration-1000 group-hover:scale-105"
-                onError={(e) => {
-                  e.currentTarget.style.display = 'none';
-                  e.currentTarget.parentElement!.classList.add('bg-primary-600');
-                }}
-              />
-              {/* Dynamic Gradient Overlay */}
-              <div className="absolute inset-0 bg-gradient-to-t from-slate-900/90 via-slate-900/50 to-slate-900/20 md:bg-gradient-to-r md:from-slate-900/90 md:via-slate-900/40 md:to-transparent"></div>
-            </div>
-            
-            {/* Content - Responsive Padding and Sizing */}
-            <div className="relative z-10 p-8 sm:p-12 md:p-20 w-full">
-              <div className="max-w-xl">
-                <h2 className="text-3xl sm:text-4xl md:text-6xl font-black text-white mb-4 sm:mb-6 tracking-tighter leading-[1.1]">
-                  Profesionalismo en <br className="hidden sm:block"/>cada agenda.
-                </h2>
-                <p className="text-white/90 sm:text-white/80 text-base sm:text-lg md:text-xl mb-8 sm:mb-10 font-medium max-w-md">
-                  Nuestra plataforma está diseñada para que tú y tus clientes disfruten de una experiencia rápida, segura y profesional.
-                </p>
-                <Link 
-                  to={registerLink} 
-                  className="inline-flex items-center px-8 py-4 bg-primary-500 hover:bg-primary-400 text-white font-black rounded-2xl transition-all shadow-xl shadow-primary-500/25 active:scale-95 group/btn"
-                >
-                  Empieza ahora
-                  <svg className="ml-3 w-5 h-5 group-hover:translate-x-1 transition-transform" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={3} d="M14 5l7 7-7 7" />
-                  </svg>
-                </Link>
-              </div>
-            </div>
-          </div>
-        </div>
-      </section>
 
       {/* Categories section */}
       <section className="py-16 bg-slate-50 dark:bg-slate-900 transition-colors duration-200">
@@ -218,6 +255,49 @@ const Home = () => {
               ))}
             </div>
           )}
+        </div>
+      </section>
+
+      {/* Brand Image Section (AgendaYa Mascot) */}
+      <section className="py-8 sm:py-16 bg-white dark:bg-slate-950 transition-colors duration-200">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="relative rounded-3xl overflow-hidden bg-slate-900 shadow-2xl border border-slate-200 dark:border-slate-800 min-h-[350px] sm:min-h-[450px] md:min-h-[500px] flex items-center">
+            {/* Image as background */}
+            <div className="absolute inset-0 z-0">
+              <img 
+                src="/src/assets/branding/agendaya.jpg" 
+                alt="AgendaYa Mascot" 
+                className="w-full h-full object-cover object-center md:object-right transition-transform duration-1000 group-hover:scale-105"
+                onError={(e) => {
+                  e.currentTarget.style.display = 'none';
+                  e.currentTarget.parentElement!.classList.add('bg-primary-600');
+                }}
+              />
+              {/* Dynamic Gradient Overlay */}
+              <div className="absolute inset-0 bg-gradient-to-t from-slate-900/90 via-slate-900/50 to-slate-900/20 md:bg-gradient-to-r md:from-slate-900/90 md:via-slate-900/40 md:to-transparent"></div>
+            </div>
+            
+            {/* Content - Responsive Padding and Sizing */}
+            <div className="relative z-10 p-8 sm:p-12 md:p-20 w-full">
+              <div className="max-w-xl">
+                <h2 className="text-3xl sm:text-4xl md:text-6xl font-black text-white mb-4 sm:mb-6 tracking-tighter leading-[1.1]">
+                  Profesionalismo en <br className="hidden sm:block"/>cada agenda.
+                </h2>
+                <p className="text-white/90 sm:text-white/80 text-base sm:text-lg md:text-xl mb-8 sm:mb-10 font-medium max-w-md">
+                  Nuestra plataforma está diseñada para que tú y tus clientes disfruten de una experiencia rápida, segura y profesional.
+                </p>
+                <Link 
+                  to={registerLink} 
+                  className="inline-flex items-center px-8 py-4 bg-primary-500 hover:bg-primary-400 text-white font-black rounded-2xl transition-all shadow-xl shadow-primary-500/25 active:scale-95 group/btn"
+                >
+                  Empieza ahora
+                  <svg className="ml-3 w-5 h-5 group-hover:translate-x-1 transition-transform" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={3} d="M14 5l7 7-7 7" />
+                  </svg>
+                </Link>
+              </div>
+            </div>
+          </div>
         </div>
       </section>
 
