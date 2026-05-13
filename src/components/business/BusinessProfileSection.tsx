@@ -200,7 +200,7 @@ const BusinessProfileSection: React.FC<BusinessProfileSectionProps> = ({
                   id="name"
                   value={businessData.name}
                   onChange={onChange}
-                  className="w-full px-4 py-2.5 rounded-xl border border-slate-200 dark:text-black dark:border-slate-700 bg-white focus:ring-2 focus:ring-primary-500/20 focus:border-primary-500 outline-none transition-all font-medium text-slate-900 dark:text-white"
+                  className="w-full px-4 py-2.5 rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 focus:ring-2 focus:ring-primary-500/20 focus:border-primary-500 outline-none transition-all font-medium text-slate-900 dark:text-white"
                   placeholder="Ej: Barbería Estilo"
                   required
                 />
@@ -216,7 +216,7 @@ const BusinessProfileSection: React.FC<BusinessProfileSectionProps> = ({
                   id="category_id"
                   value={businessData.category_id || ''}
                   onChange={onChange}
-                  className="w-full px-4 py-2.5 rounded-xl border border-slate-200 dark:text-black dark:border-slate-700 bg-white focus:ring-2 focus:ring-primary-500/20 focus:border-primary-500 outline-none transition-all font-medium text-slate-900 dark:text-white"
+                  className="w-full px-4 py-2.5 rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 focus:ring-2 focus:ring-primary-500/20 focus:border-primary-500 outline-none transition-all font-medium text-slate-900 dark:text-white"
                   required
                 >
                   <option value="" disabled>Selecciona una categoría</option>
@@ -237,7 +237,7 @@ const BusinessProfileSection: React.FC<BusinessProfileSectionProps> = ({
                   value={businessData.description}
                   onChange={onChange}
                   rows={3}
-                  className="w-full px-4 py-2.5 rounded-xl border border-slate-200 dark:text-black dark:border-slate-700 bg-white focus:ring-2 focus:ring-primary-500/20 focus:border-primary-500 outline-none transition-all font-medium resize-none text-slate-900 dark:text-white"
+                  className="w-full px-4 py-2.5 rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 focus:ring-2 focus:ring-primary-500/20 focus:border-primary-500 outline-none transition-all font-medium resize-none text-slate-900 dark:text-white"
                   placeholder="Describe los servicios y valores de tu negocio..."
                 ></textarea>
               </div>
@@ -253,7 +253,7 @@ const BusinessProfileSection: React.FC<BusinessProfileSectionProps> = ({
                   id="phone"
                   value={businessData.phone}
                   onChange={onChange}
-                  className="w-full px-4 py-2.5 rounded-xl border border-slate-200 dark:text-black dark:border-slate-700 bg-white focus:ring-2 focus:ring-primary-500/20 focus:border-primary-500 outline-none transition-all font-medium text-slate-900 dark:text-white"
+                  className="w-full px-4 py-2.5 rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 focus:ring-2 focus:ring-primary-500/20 focus:border-primary-500 outline-none transition-all font-medium text-slate-900 dark:text-white"
                   placeholder="+56 9 1234 5678"
                   required
                 />
@@ -270,7 +270,7 @@ const BusinessProfileSection: React.FC<BusinessProfileSectionProps> = ({
                   id="email"
                   value={businessData.email}
                   onChange={onChange}
-                  className="w-full px-4 py-2.5 rounded-xl border border-slate-200 dark:text-black dark:border-slate-700 bg-white focus:ring-2 focus:ring-primary-500/20 focus:border-primary-500 outline-none transition-all font-medium text-slate-900 dark:text-white"
+                  className="w-full px-4 py-2.5 rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 focus:ring-2 focus:ring-primary-500/20 focus:border-primary-500 outline-none transition-all font-medium text-slate-900 dark:text-white"
                   placeholder="contacto@negocio.com"
                   required
                 />
@@ -287,7 +287,7 @@ const BusinessProfileSection: React.FC<BusinessProfileSectionProps> = ({
                   id="address"
                   value={businessData.address}
                   onChange={onChange}
-                  className="w-full px-4 py-2.5 rounded-xl border border-slate-200 dark:text-black dark:border-slate-700 bg-white focus:ring-2 focus:ring-primary-500/20 focus:border-primary-500 outline-none transition-all font-medium text-slate-900 dark:text-white"
+                  className="w-full px-4 py-2.5 rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 focus:ring-2 focus:ring-primary-500/20 focus:border-primary-500 outline-none transition-all font-medium text-slate-900 dark:text-white"
                   placeholder="Calle Ficticia 123, Ciudad"
                   required
                 />
@@ -304,7 +304,7 @@ const BusinessProfileSection: React.FC<BusinessProfileSectionProps> = ({
                   id="website"
                   value={businessData.website || ''}
                   onChange={onChange}
-                  className="w-full px-4 py-2.5 rounded-xl border border-slate-200 dark:text-black dark:border-slate-700 bg-white focus:ring-2 focus:ring-primary-500/20 focus:border-primary-500 outline-none transition-all font-medium text-slate-900 dark:text-white"
+                  className="w-full px-4 py-2.5 rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 focus:ring-2 focus:ring-primary-500/20 focus:border-primary-500 outline-none transition-all font-medium text-slate-900 dark:text-white"
                   placeholder="https://www.tu-web.com"
                 />
               </div>

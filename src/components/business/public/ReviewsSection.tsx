@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Star, User } from 'lucide-react';
+import { Star, User, MessageCircle } from 'lucide-react';
 import { Review, getBusinessReviews } from '../../../lib/api';
 
 interface ReviewsSectionProps {
