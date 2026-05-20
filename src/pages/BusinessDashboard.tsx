@@ -139,7 +139,7 @@ export const BusinessDashboard: React.FC = () => {
       .on('postgres_changes', { 
         event: 'INSERT', 
         schema: 'public', 
-        table: 'reviews', 
+        table: 'agendaya_reviews', 
         filter: `business_id=eq.${businessData.id}` 
       }, async () => {
         console.log('[BusinessDashboard] review insert event received');

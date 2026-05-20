@@ -76,7 +76,7 @@ export function useAppointments(userId: string | undefined) {
         {
           event: '*',
           schema: 'public',
-          table: 'appointments',
+          table: 'agendaya_appointments',
           filter: `user_id=eq.${userId}`
         },
         () => {

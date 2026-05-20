@@ -17,7 +17,7 @@ export const useItemsPerPage = (userId: string | undefined) => {
       
       try {
         const { data, error } = await supabase
-          .from('profiles')
+          .from('agendaya_profiles')
           .select('items_per_page')
           .eq('id', userId)
           .single();
@@ -41,7 +41,7 @@ export const useItemsPerPage = (userId: string | undefined) => {
 
     try {
       const { error } = await supabase
-        .from('profiles')
+        .from('agendaya_profiles')
         .update({ items_per_page: newValue })
         .eq('id', userId);
 

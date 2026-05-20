@@ -73,7 +73,7 @@ export const slugify = (str: string) => str.toLowerCase().replace(/\s+/g, '-').r
 
 // API functions for businesses
 export const getBusinesses = async (search?: string, _category?: string, location?: string) => {
-  let query = supabase.from('businesses').select('*');
+  let query = supabase.from('agendaya_businesses').select('*');
   
   if (search) {
     query = query.or(`name.ilike.%${search}%,description.ilike.%${search}%`);
@@ -97,7 +97,7 @@ export const getBusinesses = async (search?: string, _category?: string, locatio
 
 export const getBusiness = async (id: string) => {
   const { data, error } = await supabase
-    .from('businesses')
+    .from('agendaya_businesses')
     .select('*')
     .eq('id', id)
     .single();
@@ -111,7 +111,7 @@ export const getBusiness = async (id: string) => {
 export const getBusinessServices = async (businessId: string) => {
   try {
     const { data, error } = await supabase
-      .from('services')
+      .from('agendaya_services')
       .select('*')
       .eq('business_id', businessId)
       .order('name');
@@ -127,7 +127,7 @@ export const getBusinessServices = async (businessId: string) => {
 export const getBusinessHours = async (businessId: string) => {
   try {
     const { data, error } = await supabase
-      .from('business_hours')
+      .from('agendaya_business_hours')
       .select('*')
       .eq('business_id', businessId);
     if (error) throw error;
@@ -141,19 +141,19 @@ export const getBusinessHours = async (businessId: string) => {
 export async function getUserAppointments(userId: string) {
   try {
     const { data, error } = await supabase
-      .from('appointments')
+      .from('agendaya_appointments')
       .select(`
         *,
-        businesses (
+        businesses:agendaya_businesses (
           name,
           address
         ),
-        services (
+        services:agendaya_services (
           name,
           duration,
           price
         ),
-        review:reviews!appointment_id (
+        review:agendaya_reviews!appointment_id (
           id,
           rating,
           comment,
@@ -174,19 +174,19 @@ export async function getUserAppointments(userId: string) {
 export async function getBusinessAppointments(businessId: string) {
   try {
     const { data, error } = await supabase
-      .from('appointments')
+      .from('agendaya_appointments')
       .select(`
         *, 
-        profiles (
+        profiles:agendaya_profiles (
           full_name, 
           phone
         ), 
-        services (
+        services:agendaya_services (
           name, 
           duration, 
           price
         ),
-        review:reviews!appointment_id (
+        review:agendaya_reviews!appointment_id (
           id,
           rating,
           comment,
@@ -206,7 +206,7 @@ export async function getBusinessAppointments(businessId: string) {
 
 export const createAppointment = async (appointment: Omit<Appointment, 'id' | 'created_at' | 'updated_at'>) => {
   const { data, error } = await supabase
-    .from('appointments')
+    .from('agendaya_appointments')
     .insert(appointment)
     .select()
     .single();
@@ -218,7 +218,7 @@ export const createAppointment = async (appointment: Omit<Appointment, 'id' | 'c
 export const updateAppointmentStatus = async (id: string, status: AppointmentStatus) => {
   try {
     const { data, error } = await supabase
-      .from('appointments')
+      .from('agendaya_appointments')
       .update({ status })
       .eq('id', id)
       .select()
@@ -236,7 +236,7 @@ export async function getBusinessClients(businessId: string): Promise<{ success:
   try {
     // Fetch all appointments for the business to get user IDs
     const { data: appts, error: apptError } = await supabase
-      .from('appointments')
+      .from('agendaya_appointments')
       .select('user_id')
       .eq('business_id', businessId);
     if (apptError) throw apptError;
@@ -247,7 +247,7 @@ export async function getBusinessClients(businessId: string): Promise<{ success:
     }
     // Fetch profiles for these user IDs
     const { data: profiles, error: profilesError } = await supabase
-      .from('profiles')
+      .from('agendaya_profiles')
       .select('*')
       .in('id', userIds);
     if (profilesError) throw profilesError;
@@ -263,7 +263,7 @@ export const createBusiness = async (business: Omit<Business, 'id' | 'created_at
     // Exclude slug field from insert payload; it doesn't exist in the DB
     const { slug, ...payload } = business;
     const { data, error } = await supabase
-      .from('businesses')
+      .from('agendaya_businesses')
       .insert([{
         ...payload,
         updated_at: new Date().toISOString()
@@ -282,7 +282,7 @@ export const createBusiness = async (business: Omit<Business, 'id' | 'created_at
 
 export const updateBusiness = async (id: string, updates: Partial<Business>) => {
   const { data, error } = await supabase
-    .from('businesses')
+    .from('agendaya_businesses')
     .update({ ...updates, updated_at: new Date().toISOString() })
     .eq('id', id)
     .select()
@@ -298,7 +298,7 @@ export const updateBusiness = async (id: string, updates: Partial<Business>) => 
 export const checkIfLiked = async (userId: string, targetId: string, type: 'business' | 'service') => {
   try {
     const query = supabase
-      .from('user_likes')
+      .from('agendaya_user_likes')
       .select('id')
       .eq('user_id', userId);
     
@@ -324,7 +324,7 @@ export const toggleLike = async (userId: string, targetId: string, type: 'busine
     if (isLiked) {
       // Remove like
       const query = supabase
-        .from('user_likes')
+        .from('agendaya_user_likes')
         .delete()
         .eq('user_id', userId);
       
@@ -347,7 +347,7 @@ export const toggleLike = async (userId: string, targetId: string, type: 'busine
       }
       
       const { error } = await supabase
-        .from('user_likes')
+        .from('agendaya_user_likes')
         .insert([payload]);
       
       if (error) throw error;
@@ -367,13 +367,13 @@ export const setBusinessHours = async (hours: Omit<BusinessHours, 'id'>[]) => {
   if (!businessId) throw new Error('Business ID is required');
   
   await supabase
-    .from('business_hours')
+    .from('agendaya_business_hours')
     .delete()
     .eq('business_id', businessId);
   
   // Then insert the new hours
   const { data, error } = await supabase
-    .from('business_hours')
+    .from('agendaya_business_hours')
     .insert(hours)
     .select();
   
@@ -410,7 +410,7 @@ export const obtenerPerfilUsuario = async (userId: string): Promise<{ success: b
       try {
         // Ejecutar la consulta dentro del try/catch de la Promise
         const response = await supabase
-          .from('profiles')
+          .from('agendaya_profiles')
           .select('*')
           .eq('id', userId)
           .single();
@@ -458,7 +458,7 @@ export const obtenerPerfilUsuario = async (userId: string): Promise<{ success: b
 
 export const updateUserProfile = async (userId: string, updates: Partial<UserProfile>) => {
   const { data, error } = await supabase
-    .from('profiles')
+    .from('agendaya_profiles')
     .update({ ...updates, updated_at: new Date().toISOString() })
     .eq('id', userId)
     .select()
@@ -471,7 +471,7 @@ export const updateUserProfile = async (userId: string, updates: Partial<UserPro
 export async function getUserBusiness(userId: string) {
   try {
     const { data, error } = await supabase
-      .from('businesses')
+      .from('agendaya_businesses')
       .select('*')
       .eq('owner_id', userId)
       .maybeSingle();
@@ -505,7 +505,7 @@ export async function getBusinessConfig(businessId: string): Promise<{ success: 
   };
   try {
     const { data, error } = await supabase
-      .from('business_config')
+      .from('agendaya_business_config')
       .select('*')
       .eq('business_id', businessId)
       .single();
@@ -528,7 +528,7 @@ export async function getBusinessConfig(businessId: string): Promise<{ success: 
 export async function updateBusinessConfig(businessId: string, config: BusinessConfig): Promise<{ success: boolean, error?: string }> {
   try {
     const { error } = await supabase
-      .from('business_config')
+      .from('agendaya_business_config')
       .upsert({
         business_id: businessId,
         ...config,
@@ -549,7 +549,7 @@ export async function updateBusinessConfig(businessId: string, config: BusinessC
 export const createBusinessService = async (service: Omit<Service, 'id' | 'created_at' | 'updated_at'>) => {
   try {
     const { data, error } = await supabase
-      .from('services')
+      .from('agendaya_services')
       .insert({
         ...service, 
         image_urls: service.image_urls || [],
@@ -569,7 +569,7 @@ export const createBusinessService = async (service: Omit<Service, 'id' | 'creat
 export const updateBusinessService = async (id: string, updates: Partial<Service>) => {
   try {
     const { data, error } = await supabase
-      .from('services')
+      .from('agendaya_services')
       .update({ 
         ...updates, 
         updated_at: new Date().toISOString() 
@@ -588,7 +588,7 @@ export const updateBusinessService = async (id: string, updates: Partial<Service
 export const deleteBusinessService = async (id: string): Promise<{ success: boolean; error?: string }> => {
   try {
     const { error } = await supabase
-      .from('services')
+      .from('agendaya_services')
       .delete()
       .eq('id', id);
 
@@ -603,7 +603,7 @@ export const deleteBusinessService = async (id: string): Promise<{ success: bool
 export async function getBusinessBySlug(slug: string) {
   try {
     const { data, error } = await supabase
-      .from('businesses')
+      .from('agendaya_businesses')
       .select('*');
     
     if (error) throw error;
@@ -634,7 +634,7 @@ export async function getBusinessBySlug(slug: string) {
 export async function getService(serviceId: string): Promise<{ success: boolean; data?: Service; error?: string }> {
   try {
     const { data, error } = await supabase
-      .from('services')
+      .from('agendaya_services')
       .select('*')
       .eq('id', serviceId)
       .single();
@@ -650,7 +650,7 @@ export async function getService(serviceId: string): Promise<{ success: boolean;
 export async function getBusinessReviews(businessId: string): Promise<{ success: boolean; data: Review[]; error?: string }> {
   try {
     const { data, error } = await supabase
-      .from('reviews')
+      .from('agendaya_reviews')
       .select('*')
       .eq('business_id', businessId)
       .order('created_at', { ascending: false });
@@ -670,7 +670,7 @@ export async function createBusinessReview(
 ): Promise<{ success: boolean; data?: Review; error?: string }> {
   try {
     const { data, error } = await supabase
-      .from('reviews')
+      .from('agendaya_reviews')
       .insert([{ 
         appointment_id: appointmentId,
         business_id: businessId,
@@ -699,7 +699,7 @@ export type BusinessCategory = {
 export async function getBusinessCategories(): Promise<{ success: boolean; data: BusinessCategory[] | null; error: string | null }> {
   try {
     const { data, error } = await supabase
-      .from('business_categories')
+      .from('agendaya_business_categories')
       .select('*');
     if (error) throw error;
     return { success: true, data: data as BusinessCategory[], error: null };
@@ -722,7 +722,7 @@ export type Milestone = {
 
 export const getMilestones = async (): Promise<{ success: boolean; data?: Milestone[]; error?: string }> => {
   try {
-    const { data, error } = await supabase.from('milestones').select('*');
+    const { data, error } = await supabase.from('agendaya_milestones').select('*');
     if (error) throw error;
     return { success: true, data: (data as Milestone[]) || [] };
   } catch (err: any) {
@@ -759,8 +759,8 @@ export type BlogComment = {
 export const getLatestBlogPost = async (): Promise<{ success: boolean; data?: BlogPost; error?: string }> => {
   try {
     const { data, error } = await supabase
-      .from('blog_posts')
-      .select('*, blog_comments(count)')
+      .from('agendaya_blog_posts')
+      .select('*, blog_comments:agendaya_blog_comments(count)')
       .order('created_at', { ascending: false })
       .limit(1)
       .single();
@@ -781,8 +781,8 @@ export const getLatestBlogPost = async (): Promise<{ success: boolean; data?: Bl
 export const getPopularPosts = async (limit = 4): Promise<{ success: boolean; data?: BlogPost[]; error?: string }> => {
   try {
     const { data, error } = await supabase
-      .from('blog_posts')
-      .select('*, blog_comments(count)')
+      .from('agendaya_blog_posts')
+      .select('*, blog_comments:agendaya_blog_comments(count)')
       .order('likes_count', { ascending: false })
       .limit(limit);
     
@@ -805,8 +805,8 @@ export const getBlogPosts = async (page = 0, limit = 6): Promise<{ success: bool
     const to = from + limit - 1;
 
     const { data, error, count } = await supabase
-      .from('blog_posts')
-      .select('*, blog_comments(count)', { count: 'exact' })
+      .from('agendaya_blog_posts')
+      .select('*, blog_comments:agendaya_blog_comments(count)', { count: 'exact' })
       .order('created_at', { ascending: false })
       .range(from, to);
     
@@ -830,8 +830,8 @@ export const getBlogPosts = async (page = 0, limit = 6): Promise<{ success: bool
 export const getBlogPost = async (id: string): Promise<{ success: boolean; data?: BlogPost; error?: string }> => {
   try {
     const { data, error } = await supabase
-      .from('blog_posts')
-      .select('*, blog_comments(count)')
+      .from('agendaya_blog_posts')
+      .select('*, blog_comments:agendaya_blog_comments(count)')
       .eq('id', id)
       .single();
     
@@ -851,7 +851,7 @@ export const getBlogPost = async (id: string): Promise<{ success: boolean; data?
 export const getBlogComments = async (postId: string): Promise<{ success: boolean; data?: BlogComment[]; error?: string }> => {
   try {
     const { data, error } = await supabase
-      .from('blog_comments')
+      .from('agendaya_blog_comments')
       .select('*')
       .eq('post_id', postId)
       .order('created_at', { ascending: true });
@@ -866,7 +866,7 @@ export const getBlogComments = async (postId: string): Promise<{ success: boolea
 export const createBlogComment = async (comment: Omit<BlogComment, 'id' | 'likes_count' | 'created_at'>): Promise<{ success: boolean; data?: BlogComment; error?: string }> => {
   try {
     const { data, error } = await supabase
-      .from('blog_comments')
+      .from('agendaya_blog_comments')
       .insert([comment])
       .select()
       .single();
@@ -881,7 +881,7 @@ export const createBlogComment = async (comment: Omit<BlogComment, 'id' | 'likes
 export const toggleBlogLike = async (userId: string, targetId: string, type: 'post' | 'comment'): Promise<{ success: boolean; action?: 'added' | 'removed'; error?: string }> => {
   try {
     const query = supabase
-      .from('blog_likes')
+      .from('agendaya_blog_likes')
       .select('id')
       .eq('user_id', userId);
     
@@ -892,7 +892,7 @@ export const toggleBlogLike = async (userId: string, targetId: string, type: 'po
 
     if (existingLike) {
       const { error } = await supabase
-        .from('blog_likes')
+        .from('agendaya_blog_likes')
         .delete()
         .eq('id', existingLike.id);
       
@@ -904,7 +904,7 @@ export const toggleBlogLike = async (userId: string, targetId: string, type: 'po
       else payload.comment_id = targetId;
 
       const { error } = await supabase
-        .from('blog_likes')
+        .from('agendaya_blog_likes')
         .insert([payload]);
       
       if (error) throw error;
@@ -929,7 +929,7 @@ export type ChatMessage = {
 export const saveChatMessage = async (message: Omit<ChatMessage, 'id' | 'created_at'>): Promise<{ success: boolean; error?: string }> => {
   try {
     const { error } = await supabase
-      .from('chat_messages')
+      .from('agendaya_chat_messages')
       .insert([message]);
     
     if (error) throw error;
@@ -942,7 +942,7 @@ export const saveChatMessage = async (message: Omit<ChatMessage, 'id' | 'created
 export const getChatHistory = async (sessionId: string, userId?: string): Promise<{ success: boolean; data?: ChatMessage[]; error?: string }> => {
   try {
     const query = supabase
-      .from('chat_messages')
+      .from('agendaya_chat_messages')
       .select('*')
       .order('created_at', { ascending: true });
     
@@ -962,7 +962,7 @@ export const getChatHistory = async (sessionId: string, userId?: string): Promis
 
 export const getTopMilestones = async (limit = 3): Promise<{ success: boolean; data?: Milestone[]; error?: string }> => {
   try {
-    const { data, error } = await supabase.from('milestones').select('*').order('current_amount', { ascending: false }).limit(limit);
+    const { data, error } = await supabase.from('agendaya_milestones').select('*').order('current_amount', { ascending: false }).limit(limit);
     if (error) throw error;
     return { success: true, data: (data as Milestone[]) || [] };
   } catch (err: any) {
@@ -973,10 +973,10 @@ export const getTopMilestones = async (limit = 3): Promise<{ success: boolean; d
 export const contributeToMilestone = async (id: string, amount: number): Promise<{ success: boolean; data?: Milestone; error?: string }> => {
   try {
     // Get existing current_amount
-    const { data: existing, error: fetchError } = await supabase.from('milestones').select('current_amount').eq('id', id).single();
+    const { data: existing, error: fetchError } = await supabase.from('agendaya_milestones').select('current_amount').eq('id', id).single();
     if (fetchError || !existing) throw fetchError || new Error('Milestone not found');
     const newAmount = Number((existing as any).current_amount) + amount;
-    const { data, error } = await supabase.from('milestones').update({ current_amount: newAmount }).eq('id', id).single();
+    const { data, error } = await supabase.from('agendaya_milestones').update({ current_amount: newAmount }).eq('id', id).single();
     if (error) throw error;
     return { success: true, data: data as Milestone };
   } catch (err: any) {

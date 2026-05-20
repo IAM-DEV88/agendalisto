@@ -178,8 +178,8 @@ function App() {
   useEffect(() => {
     if (!authInitialized || !user || !userProfile) return;
     const channel = supabase
-      .channel('public:appointments')
-      .on('postgres_changes', { event: 'INSERT', schema: 'public', table: 'appointments' }, ({ new: appt }: any) => {
+      .channel('public:agendaya_appointments')
+      .on('postgres_changes', { event: 'INSERT', schema: 'public', table: 'agendaya_appointments' }, ({ new: appt }: any) => {
         // Notificar al negocio de una nueva reserva
         if (userProfile.business_id === appt.business_id) {
           notifySuccess('Nueva reserva recibida');
@@ -188,7 +188,7 @@ function App() {
           notifySuccess('Tu reserva ha sido solicitada');
         }
       })
-      .on('postgres_changes', { event: 'UPDATE', schema: 'public', table: 'appointments' }, ({ new: appt }: any) => {
+      .on('postgres_changes', { event: 'UPDATE', schema: 'public', table: 'agendaya_appointments' }, ({ new: appt }: any) => {
         // Estatus de cita modificado
         if (user.id === appt.user_id) {
           let msg = '';

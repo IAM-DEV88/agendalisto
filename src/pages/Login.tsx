@@ -42,11 +42,24 @@ const Login = () => {
         let nombreUsuario = data.user.user_metadata?.full_name || data.user.email;
         try {
           const { success, perfil } = await obtenerPerfilUsuario(data.user.id);
-          if (success && perfil) {
-            dispatch(setUserProfile(perfil));
-            nombreUsuario = perfil.full_name || nombreUsuario;
+          if (!success || !perfil) {
+            await supabase.auth.signOut();
+            dispatch(setUser(null));
+            const errorMsg = 'Credenciales incorrectas. Por favor verifica tu correo y contraseña.';
+            setError(errorMsg);
+            notifyError(errorMsg);
+            return;
           }
-        } catch {}
+          dispatch(setUserProfile(perfil));
+          nombreUsuario = perfil.full_name || nombreUsuario;
+        } catch {
+          await supabase.auth.signOut();
+          dispatch(setUser(null));
+          const errorMsg = 'Credenciales incorrectas. Por favor verifica tu correo y contraseña.';
+          setError(errorMsg);
+          notifyError(errorMsg);
+          return;
+        }
         notifySuccess(`Bienvenido de nuevo ${nombreUsuario}`);
         navigate('/dashboard');
       } else {

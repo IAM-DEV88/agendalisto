@@ -129,7 +129,7 @@ Deno.serve(async (req) => {
     console.log("Insertando post:", cleanPostData.title);
 
     const { data, error } = await supabase
-      .from('blog_posts')
+      .from('agendaya_blog_posts')
       .insert([cleanPostData])
       .select();
 

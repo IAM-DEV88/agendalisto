@@ -35,7 +35,7 @@ export const handler = async (event) => {
   if (status === 'Completed' && milestoneId) {
     // Fetch existing current_amount
     const { data, error } = await supabase
-      .from('milestones')
+      .from('agendaya_milestones')
       .select('current_amount')
       .eq('id', milestoneId)
       .single();
@@ -45,7 +45,7 @@ export const handler = async (event) => {
     } else {
       const newAmount = data.current_amount + amount;
       const { error: updateError } = await supabase
-        .from('milestones')
+        .from('agendaya_milestones')
         .update({ current_amount: newAmount })
         .eq('id', milestoneId);
       if (updateError) console.error('Error updating milestone:', updateError);

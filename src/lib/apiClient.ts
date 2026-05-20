@@ -22,7 +22,7 @@ export class ApiClient {
   static async getBusinessById(id: string): Promise<ApiResponse<Business>> {
     try {
       const { data, error } = await supabase
-        .from('businesses')
+        .from('agendaya_businesses')
         .select('*')
         .eq('id', id)
         .single();
@@ -37,7 +37,7 @@ export class ApiClient {
   static async getUserBusiness(userId: string): Promise<ApiResponse<Business | null>> {
     try {
       const { data, error } = await supabase
-        .from('businesses')
+        .from('agendaya_businesses')
         .select('*')
         .eq('owner_id', userId)
         .maybeSingle();
@@ -52,7 +52,7 @@ export class ApiClient {
   static async updateBusiness(id: string, updates: Partial<Business>): Promise<ApiResponse<Business>> {
     try {
       const { data, error } = await supabase
-        .from('businesses')
+        .from('agendaya_businesses')
         .update({ ...updates, updated_at: new Date().toISOString() })
         .eq('id', id)
         .select()
@@ -82,7 +82,7 @@ export class ApiClient {
     
     try {
       const { data, error } = await supabase
-        .from('business_config')
+        .from('agendaya_business_config')
         .select('*')
         .eq('business_id', businessId)
         .single();
@@ -104,7 +104,7 @@ export class ApiClient {
   static async updateBusinessConfig(businessId: string, config: BusinessConfig): Promise<ApiResponse<null>> {
     try {
       const { error } = await supabase
-        .from('business_config')
+        .from('agendaya_business_config')
         .upsert({
           business_id: businessId,
           ...config,
@@ -122,7 +122,7 @@ export class ApiClient {
   static async getBusinessHours(businessId: string): Promise<ApiResponse<BusinessHours[]>> {
     try {
       const { data, error } = await supabase
-        .from('business_hours')
+        .from('agendaya_business_hours')
         .select('*')
         .eq('business_id', businessId);
         
@@ -140,13 +140,13 @@ export class ApiClient {
       
       // Delete existing hours
       await supabase
-        .from('business_hours')
+        .from('agendaya_business_hours')
         .delete()
         .eq('business_id', businessId);
       
       // Insert new hours
       const { data, error } = await supabase
-        .from('business_hours')
+        .from('agendaya_business_hours')
         .insert(hours)
         .select();
         
@@ -161,7 +161,7 @@ export class ApiClient {
   static async getBusinessServices(businessId: string): Promise<ApiResponse<Service[]>> {
     try {
       const { data, error } = await supabase
-        .from('services')
+        .from('agendaya_services')
         .select('*')
         .eq('business_id', businessId)
         .order('name');
@@ -176,7 +176,7 @@ export class ApiClient {
   static async createBusinessService(service: Omit<Service, 'id' | 'created_at' | 'updated_at'>): Promise<ApiResponse<Service>> {
     try {
       const { data, error } = await supabase
-        .from('services')
+        .from('agendaya_services')
         .insert({
           ...service, 
           created_at: new Date().toISOString(),
@@ -195,7 +195,7 @@ export class ApiClient {
   static async updateBusinessService(id: string, updates: Partial<Service>): Promise<ApiResponse<Service>> {
     try {
       const { data, error } = await supabase
-        .from('services')
+        .from('agendaya_services')
         .update({ 
           ...updates, 
           updated_at: new Date().toISOString() 
@@ -214,7 +214,7 @@ export class ApiClient {
   static async deleteBusinessService(id: string): Promise<ApiResponse<null>> {
     try {
       const { error } = await supabase
-        .from('services')
+        .from('agendaya_services')
         .delete()
         .eq('id', id);
         
@@ -230,7 +230,7 @@ export class ApiClient {
     try {
       // Get unique user IDs from appointments
       const { data: appointments, error: apptError } = await supabase
-        .from('appointments')
+        .from('agendaya_appointments')
         .select('user_id')
         .eq('business_id', businessId);
         
@@ -241,7 +241,7 @@ export class ApiClient {
       
       // Get profiles for these users
       const { data: profiles, error: profilesError } = await supabase
-        .from('profiles')
+        .from('agendaya_profiles')
         .select('*')
         .in('id', userIds);
         
@@ -256,8 +256,8 @@ export class ApiClient {
   static async getBusinessAppointments(businessId: string): Promise<ApiResponse<Appointment[]>> {
     try {
       const { data, error } = await supabase
-        .from('appointments')
-        .select(`*, profiles (full_name, phone), services (name, duration, price)`) 
+        .from('agendaya_appointments')
+        .select(`*, profiles:agendaya_profiles (full_name, phone), services:agendaya_services (name, duration, price)`) 
         .eq('business_id', businessId)
         .order('start_time', { ascending: true });
         
@@ -271,7 +271,7 @@ export class ApiClient {
   static async updateAppointmentStatus(id: string, status: Appointment['status']): Promise<ApiResponse<Appointment>> {
     try {
       const { data, error } = await supabase
-        .from('appointments')
+        .from('agendaya_appointments')
         .update({ 
           status, 
           updated_at: new Date().toISOString() 
@@ -291,7 +291,7 @@ export class ApiClient {
   static async getUserProfile(userId: string): Promise<ApiResponse<UserProfile>> {
     try {
       const { data, error } = await supabase
-        .from('profiles')
+        .from('agendaya_profiles')
         .select('*')
         .eq('id', userId)
         .single();
@@ -306,7 +306,7 @@ export class ApiClient {
   static async updateUserProfile(userId: string, updates: Partial<UserProfile>): Promise<ApiResponse<UserProfile>> {
     try {
       const { data, error } = await supabase
-        .from('profiles')
+        .from('agendaya_profiles')
         .update({ 
           ...updates, 
           updated_at: new Date().toISOString() 
@@ -326,7 +326,7 @@ export class ApiClient {
   static async saveItemsPerPage(userId: string, itemsPerPage: number): Promise<ApiResponse<null>> {
     try {
       const { error } = await supabase
-        .from('profiles')
+        .from('agendaya_profiles')
         .update({ items_per_page: itemsPerPage })
         .eq('id', userId);
         
@@ -341,7 +341,7 @@ export class ApiClient {
   static async getBusinessReviews(businessId: string): Promise<ApiResponse<Review[]>> {
     try {
       const { data, error } = await supabase
-        .from('reviews')
+        .from('agendaya_reviews')
         .select('*')
         .eq('business_id', businessId);
         
@@ -356,7 +356,7 @@ export class ApiClient {
     try {
       // Verificar si ya existe una reseña para esta cita
       const { data: existingReview, error: checkError } = await supabase
-        .from('reviews')
+        .from('agendaya_reviews')
         .select('id')
         .eq('appointment_id', appointmentId)
         .single();
@@ -374,7 +374,7 @@ export class ApiClient {
 
       // Si no existe una reseña, crear una nueva
       const { data, error } = await supabase
-        .from('reviews')
+        .from('agendaya_reviews')
         .insert({
           appointment_id: appointmentId,
           business_id: businessId,

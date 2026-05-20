@@ -8,6 +8,6 @@ DROP CONSTRAINT IF EXISTS appointments_user_id_fkey;
 -- Add the foreign key constraint
 ALTER TABLE public.appointments
 ADD CONSTRAINT appointments_user_id_fkey
-FOREIGN KEY (user_id) REFERENCES public.profiles(id)
+FOREIGN KEY (user_id) REFERENCES public.agendaya_profiles(id)
 ON DELETE CASCADE
 ON UPDATE CASCADE; 

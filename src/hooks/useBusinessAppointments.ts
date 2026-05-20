@@ -37,14 +37,14 @@ export function useBusinessAppointments(businessId: string | null) {
     if (businessId) {
       const appointmentChannel = supabase
         .channel(`business-appointments-${businessId}`)
-        .on('postgres_changes', { event: '*', schema: 'public', table: 'appointments', filter: `business_id=eq.${businessId}` }, async () => {
+        .on('postgres_changes', { event: '*', schema: 'public', table: 'agendaya_appointments', filter: `business_id=eq.${businessId}` }, async () => {
           console.log('[useBusinessAppointments] appointment change');
           await load();
         })
         .subscribe();
       const reviewChannel = supabase
         .channel(`business-reviews-${businessId}`)
-        .on('postgres_changes', { event: 'INSERT', schema: 'public', table: 'reviews', filter: `business_id=eq.${businessId}` }, async () => {
+        .on('postgres_changes', { event: 'INSERT', schema: 'public', table: 'agendaya_reviews', filter: `business_id=eq.${businessId}` }, async () => {
           console.log('[useBusinessAppointments] review change');
           await load();
         })

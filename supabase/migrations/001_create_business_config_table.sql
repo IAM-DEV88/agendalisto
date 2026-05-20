@@ -1,8 +1,8 @@
--- 001_create_business_config_table.sql
+-- 001_create_agendaya_business_config_table.sql
 -- Migration: Create table for storing business configuration flags
 
-CREATE TABLE IF NOT EXISTS business_config (
-  business_id uuid PRIMARY KEY REFERENCES businesses(id) ON DELETE CASCADE,
+CREATE TABLE IF NOT EXISTS agendaya_business_config (
+  business_id uuid PRIMARY KEY REFERENCES agendaya_businesses(id) ON DELETE CASCADE,
   permitir_reservas_online boolean NOT NULL DEFAULT true,
   mostrar_precios boolean NOT NULL DEFAULT true,
   mostrar_telefono boolean NOT NULL DEFAULT true,

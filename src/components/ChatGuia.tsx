@@ -79,7 +79,7 @@ const ChatGuia = () => {
       const [latestRes, popularRes, allBusinesses] = await Promise.all([
         getBlogPosts(),
         getPopularPosts(1),
-        supabase.from('businesses').select('name, description')
+        supabase.from('agendaya_businesses').select('name, description')
       ]);
 
       // Blog Context

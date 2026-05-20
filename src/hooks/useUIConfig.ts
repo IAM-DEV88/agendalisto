@@ -60,7 +60,7 @@ export const useUIConfig = (): UseUIConfigResult => {
     
     try {
       const { error } = await supabase
-        .from('profiles')
+        .from('agendaya_profiles')
         .update({ items_per_page: itemsPerPage })
         .eq('id', userId);
         

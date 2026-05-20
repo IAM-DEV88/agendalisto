@@ -5,16 +5,16 @@
 
 -- 1. Permitir que cualquier persona (autenticada o no) vea los perfiles
 -- Esto es necesario para ver datos públicos de negocios, clientes, etc.
-DROP POLICY IF EXISTS "Profiles are viewable by everyone" ON public.profiles;
-CREATE POLICY "Profiles are viewable by everyone" 
-  ON public.profiles 
+DROP POLICY IF EXISTS "Agendaya_profiles are viewable by everyone" ON public.agendaya_profiles;
+CREATE POLICY "Agendaya_profiles are viewable by everyone" 
+  ON public.agendaya_profiles 
   FOR SELECT 
   USING (true);
 
 -- 2. Permitir que cada usuario actualice UNICAMENTE su propio perfil
-DROP POLICY IF EXISTS "Users can update their own profile" ON public.profiles;
+DROP POLICY IF EXISTS "Users can update their own profile" ON public.agendaya_profiles;
 CREATE POLICY "Users can update their own profile" 
-  ON public.profiles 
+  ON public.agendaya_profiles 
   FOR UPDATE 
   USING (auth.uid() = id);
 
@@ -25,9 +25,9 @@ CREATE POLICY "Users can update their own profile"
 -- ======== MILESTONES ========
 
 -- 1. Permitir que todo el mundo vea los hitos del Crowdfunding en la App
-DROP POLICY IF EXISTS "Milestones are viewable by everyone" ON public.milestones;
-CREATE POLICY "Milestones are viewable by everyone" 
-  ON public.milestones 
+DROP POLICY IF EXISTS "Agendaya_milestones are viewable by everyone" ON public.agendaya_milestones;
+CREATE POLICY "Agendaya_milestones are viewable by everyone" 
+  ON public.agendaya_milestones 
   FOR SELECT 
   USING (true);
 
