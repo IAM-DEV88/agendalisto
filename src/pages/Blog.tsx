@@ -4,6 +4,7 @@ import { MessageSquare, Heart, Clock, User, ArrowRight, Search, ChevronRight, Lo
 import { getBlogPosts, BlogPost, toggleBlogLike } from '../lib/api';
 import { supabase } from '../lib/supabase';
 import { toast } from 'react-hot-toast';
+import SEO from '../components/SEO';
 
 const Blog = () => {
   const [posts, setPosts] = useState<BlogPost[]>([]);
@@ -80,6 +81,10 @@ const Blog = () => {
 
   return (
     <div className="min-h-screen bg-slate-50 dark:bg-slate-900 transition-colors duration-200 py-12">
+      <SEO
+        title="Blog de Comunidad"
+        description="Historias, consejos y novedades de nuestro Guía y los mejores negocios de AgendaYa."
+      />
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         {/* Header */}
         <div className="text-center mb-16">

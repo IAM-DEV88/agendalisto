@@ -1,10 +1,11 @@
 import { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
-import { signIn } from '../lib/supabase';
+import { supabase, signIn } from '../lib/supabase';
 import { useAppDispatch } from '../hooks/useAppDispatch';
 import { setUser, setUserProfile } from '../store/userSlice';
 import { obtenerPerfilUsuario } from '../lib/api';
 import { notifySuccess, notifyError } from '../lib/toast';
+import SEO from '../components/SEO';
 
 const Login = () => {
   const navigate = useNavigate();
@@ -75,6 +76,10 @@ const Login = () => {
 
   return (
     <div className="min-h-screen flex flex-col justify-center py-12 sm:px-6 lg:px-8 bg-slate-50 dark:bg-slate-900 transition-colors duration-200">
+      <SEO
+        title="Iniciar sesión"
+        description="Accede a tu cuenta de AgendaYa para gestionar tus reservas, perfil y negocios."
+      />
       <div className="sm:mx-auto sm:w-full sm:max-w-md">
         <h2 className="text-center text-4xl font-black text-slate-900 dark:text-white tracking-tight mb-2">
           ¡Hola de nuevo!

@@ -10,6 +10,7 @@ import 'swiper/css/pagination';
 import BlogHomeSection from '../components/BlogHomeSection';
 import { supabase } from '../lib/supabase';
 import type { Milestone } from '../lib/api';
+import SEO from '../components/SEO';
 
 const Home = () => {
   const { user, loading } = useAuthSession();
@@ -76,6 +77,10 @@ const Home = () => {
 
   return (
     <div className="space-y-0">
+      <SEO
+        title="Reserva servicios cerca de ti"
+        description="Encuentra barberías, belleza, salud y más en un solo lugar. Agenda citas online sin llamadas ni filas en segundos."
+      />
       {/* Hero section */}
       <section className="relative bg-primary-600 dark:bg-primary-900 overflow-hidden py-16 sm:py-24 transition-colors duration-200">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">

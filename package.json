@@ -8,7 +8,9 @@
     "type-check": "tsc --noEmit",
     "build": "vite build",
     "preview": "vite preview",
-    "netlify-build": "npm install --legacy-peer-deps && npm run build"
+    "sitemap": "node scripts/generate-sitemap.mjs",
+    "prerender": "node scripts/prerender.mjs",
+    "netlify-build": "npm install --legacy-peer-deps && npm run build && npm run sitemap && npm run prerender"
   },
   "engines": {
     "node": ">=18.0.0",
@@ -46,11 +48,13 @@
     "@typescript-eslint/parser": "^8.53.0",
     "@vitejs/plugin-react": "^5.1.2",
     "autoprefixer": "^10.4.23",
+    "dotenv": "^17.4.2",
     "eslint": "^9.39.2",
     "eslint-plugin-react": "^7.37.5",
     "eslint-plugin-react-hooks": "^7.0.1",
     "eslint-plugin-react-refresh": "^0.4.26",
     "postcss": "^8.5.6",
+    "puppeteer-core": "^25.0.4",
     "tailwindcss": "^3.4.1",
     "typescript": "^5.9.3",
     "vite": "^7.3.1"

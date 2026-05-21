@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { Link } from 'react-router-dom';
 import { resetPassword } from '../lib/supabase';
+import SEO from '../components/SEO';
 
 const ForgotPassword = () => {
   const [email, setEmail] = useState('');
@@ -29,6 +30,10 @@ const ForgotPassword = () => {
 
   return (
     <div className="min-h-screen bg-slate-50 dark:bg-slate-900 flex flex-col justify-center py-12 sm:px-6 lg:px-8 transition-colors duration-200">
+      <SEO
+        title="Recuperar contraseña"
+        description="Recibe un enlace de recuperación para restablecer tu contraseña de AgendaYa."
+      />
       <div className="sm:mx-auto sm:w-full sm:max-w-md">
         <h2 className="text-center text-4xl font-black text-slate-900 dark:text-white tracking-tight mb-2">
           Recuperar acceso

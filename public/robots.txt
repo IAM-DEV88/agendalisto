@@ -1,7 +1,8 @@
 User-agent: *
 Allow: /
-Allow: /explore
-Allow: /blog
+Disallow: /dashboard
+Disallow: /business/dashboard
+Disallow: /business/register
 
 # Sitemap
 Sitemap: https://agendalisto.com/sitemap.xml

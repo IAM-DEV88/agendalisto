@@ -5,6 +5,7 @@ import { getBusinesses, getBusinessCategories, BusinessCategory, toggleLike, che
 import type { Business } from '../lib/api';
 import { supabase } from '../lib/supabase';
 import { toast } from 'react-hot-toast';
+import SEO from '../components/SEO';
 
 // Fallback logo for businesses without an image
 const FALLBACK_LOGO = 'https://upload.wikimedia.org/wikipedia/commons/8/89/Portrait_Placeholder.png';
@@ -218,6 +219,10 @@ const ExploreBusinesses = () => {
 
   return (
     <div className="min-h-screen bg-slate-50 dark:bg-slate-900 transition-colors duration-200">
+      <SEO
+        title="Explora Negocios y Servicios"
+        description="Encuentra los mejores negocios locales de barbería, belleza, salud y más. Filtra por categoría, ubicación y reserva online."
+      />
       <div className="max-w-7xl mx-auto py-16 px-4 sm:px-6 lg:px-8">
         <div className="text-center mb-12">
           <h1 className="text-4xl font-black text-slate-900 dark:text-white sm:text-5xl tracking-tight mb-4">

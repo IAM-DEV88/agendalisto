@@ -3,6 +3,7 @@ import { Link, useNavigate } from 'react-router-dom';
 import { signUp } from '../lib/supabase';
 import { supabase } from '../lib/supabase';
 import { notifySuccess, notifyError } from '../lib/toast';
+import SEO from '../components/SEO';
 
 const Register = () => {
   const navigate = useNavigate();
@@ -89,6 +90,10 @@ const Register = () => {
 
   return (
     <div className="min-h-screen flex flex-col justify-center py-12 sm:px-6 lg:px-8 bg-slate-50 dark:bg-slate-900 transition-colors duration-200">
+      <SEO
+        title="Crear cuenta gratis"
+        description="Regístrate en AgendaYa para descubrir negocios, reservar servicios y gestionar tus citas online."
+      />
       <div className="sm:mx-auto sm:w-full sm:max-w-md">
         <h2 className="text-center text-4xl font-black text-slate-900 dark:text-white tracking-tight mb-2">
           Únete a AgendaYa

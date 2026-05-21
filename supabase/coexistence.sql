@@ -1,11 +1,30 @@
 -- =====================================================
--- COEXISTENCE: Renombrar tablas de AgendaYa
+-- COEXISTENCE: Renombrar tablas por app
 -- =====================================================
+-- Compatible con: agendaya, guild-portal, encuentrosvip
 -- Ejecutar COMPLETO en SQL Editor.
--- Si ves algún error, dímelo exactamente.
 -- =====================================================
 
--- ========== PASO 1: Renombrar 14 tablas ==========
+-- ========== GUILD-PORTAL: Renombrar 15 tablas ==========
+ALTER TABLE IF EXISTS public.config               RENAME TO guild_portal_config;
+ALTER TABLE IF EXISTS public.game_rewards_log      RENAME TO guild_portal_game_rewards_log;
+ALTER TABLE IF EXISTS public.game_sessions         RENAME TO guild_portal_game_sessions;
+ALTER TABLE IF EXISTS public.guide_comments        RENAME TO guild_portal_guide_comments;
+ALTER TABLE IF EXISTS public.guide_votes           RENAME TO guild_portal_guide_votes;
+ALTER TABLE IF EXISTS public.guides                RENAME TO guild_portal_guides;
+ALTER TABLE IF EXISTS public.raid_registrations    RENAME TO guild_portal_raid_registrations;
+ALTER TABLE IF EXISTS public.roster_players        RENAME TO guild_portal_roster_players;
+ALTER TABLE IF EXISTS public.schedule_votes        RENAME TO guild_portal_schedule_votes;
+ALTER TABLE IF EXISTS public.section_comments      RENAME TO guild_portal_section_comments;
+ALTER TABLE IF EXISTS public.redemption_codes      RENAME TO guild_portal_redemption_codes;
+ALTER TABLE IF EXISTS public.rd_blog_comment_likes RENAME TO guild_portal_blog_comment_likes;
+ALTER TABLE IF EXISTS public.rd_blog_comments      RENAME TO guild_portal_blog_comments;
+ALTER TABLE IF EXISTS public.rd_blog_likes         RENAME TO guild_portal_blog_likes;
+ALTER TABLE IF EXISTS public.rd_blog_posts         RENAME TO guild_portal_blog_posts;
+
+-- Registrar app guild_portal
+INSERT INTO public.apps (slug, name) VALUES ('guild_portal', 'Guild Portal')
+ON CONFLICT (slug) DO NOTHING;
 
 ALTER TABLE IF EXISTS public.business_categories RENAME TO agendaya_business_categories;
 ALTER TABLE IF EXISTS public.blog_posts         RENAME TO agendaya_blog_posts;
@@ -20,6 +39,18 @@ ALTER TABLE IF EXISTS public.business_config     RENAME TO agendaya_business_con
 ALTER TABLE IF EXISTS public.business_hours      RENAME TO agendaya_business_hours;
 
 ALTER TABLE IF EXISTS public.appointments        RENAME TO agendaya_appointments;
+
+-- Recrear FK que se perdió al dropear profiles con CASCADE
+DO $$ BEGIN
+  IF NOT EXISTS (
+    SELECT 1 FROM pg_constraint WHERE conname = 'fk_agendaya_appointments_user_id'
+  ) THEN
+    ALTER TABLE public.agendaya_appointments
+    ADD CONSTRAINT fk_agendaya_appointments_user_id
+    FOREIGN KEY (user_id) REFERENCES public.agendaya_profiles(id)
+    ON DELETE CASCADE ON UPDATE CASCADE;
+  END IF;
+END $$;
 ALTER TABLE IF EXISTS public.reviews             RENAME TO agendaya_reviews;
 ALTER TABLE IF EXISTS public.blog_comments       RENAME TO agendaya_blog_comments;
 
@@ -115,6 +146,10 @@ DROP POLICY IF EXISTS "agendaya_appointments negocio ve citas" ON public.agenday
 CREATE POLICY "agendaya_appointments negocio ve citas" ON public.agendaya_appointments FOR SELECT USING (auth.uid() IN (SELECT owner_id FROM agendaya_businesses WHERE id = business_id));
 DROP POLICY IF EXISTS "agendaya_appointments usuario crea" ON public.agendaya_appointments;
 CREATE POLICY "agendaya_appointments usuario crea" ON public.agendaya_appointments FOR INSERT WITH CHECK (auth.uid() = user_id);
+DROP POLICY IF EXISTS "agendaya_appointments usuario actualiza" ON public.agendaya_appointments;
+CREATE POLICY "agendaya_appointments usuario actualiza" ON public.agendaya_appointments FOR UPDATE USING (auth.uid() = user_id OR auth.uid() IN (SELECT owner_id FROM agendaya_businesses WHERE id = business_id));
+DROP POLICY IF EXISTS "agendaya_appointments usuario elimina" ON public.agendaya_appointments;
+CREATE POLICY "agendaya_appointments usuario elimina" ON public.agendaya_appointments FOR DELETE USING (auth.uid() = user_id OR auth.uid() IN (SELECT owner_id FROM agendaya_businesses WHERE id = business_id));
 
 ALTER TABLE public.agendaya_reviews ENABLE ROW LEVEL SECURITY;
 DROP POLICY IF EXISTS "agendaya_reviews público" ON public.agendaya_reviews;

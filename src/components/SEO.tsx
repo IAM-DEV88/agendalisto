@@ -23,7 +23,7 @@ const SEO: React.FC<SEOProps> = ({
   const defaultDescription = 'La plataforma líder para gestionar citas y reservas de forma profesional y cordial.';
   const siteUrl = window.location.origin;
   const currentUrl = canonical || window.location.href;
-  const image = ogImage || `${siteUrl}/og-default.png`; // Asegúrate de tener una imagen por defecto
+  const image = ogImage || `${siteUrl}/og-default.svg`;
 
   return (
     <Helmet>
