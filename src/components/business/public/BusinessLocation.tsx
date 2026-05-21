@@ -1,33 +1,40 @@
 import React from 'react';
-import { MapPin } from 'lucide-react';
+import { MapPin, ExternalLink } from 'lucide-react';
 
 interface BusinessLocationProps {
   address: string;
 }
 
 const BusinessLocation: React.FC<BusinessLocationProps> = ({ address }) => {
-  if (!address) {
-    return (
-      <div className="text-center py-2">
-        <p className="text-gray-500 italic">Dirección no disponible</p>
-      </div>
-    );
-  }
+  if (!address) return (
+    <p className="text-sm text-slate-400 italic text-center py-4">Dirección no disponible</p>
+  );
+
+  const mapsUrl = `https://maps.google.com/maps?q=${encodeURIComponent(address)}&t=&z=15&ie=UTF8&iwloc=&output=embed`;
 
   return (
-    <div>
-      <iframe
-        title="Ubicación del negocio"
-        className="w-full h-48 rounded-md border-0 mb-3"
-        src={`https://maps.google.com/maps?q=${encodeURIComponent(address)}&t=&z=15&ie=UTF8&iwloc=&output=embed`}
-        allowFullScreen
-      ></iframe>
-      <div className="flex items-center text-gray-600 text-sm">
-        <MapPin className="h-4 w-4 mr-2 text-indigo-500" />
-        <span>{address}</span>
+    <div className="space-y-3">
+      <div className="rounded-xl overflow-hidden border border-slate-200 dark:border-slate-700 shadow-sm">
+        <iframe
+          title="Ubicación del negocio"
+          className="w-full h-44"
+          src={mapsUrl}
+          allowFullScreen
+          loading="lazy"
+        />
       </div>
+      <a
+        href={`https://www.google.com/maps/search/${encodeURIComponent(address)}`}
+        target="_blank"
+        rel="noopener noreferrer"
+        className="flex items-center gap-2 text-sm font-bold text-primary-600 dark:text-primary-400 hover:text-primary-500 transition-colors"
+      >
+        <MapPin className="w-4 h-4" />
+        <span className="truncate">{address}</span>
+        <ExternalLink className="w-3 h-3 flex-shrink-0" />
+      </a>
     </div>
   );
 };
 
-export default BusinessLocation; 
+export default BusinessLocation;

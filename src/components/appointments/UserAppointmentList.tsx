@@ -4,7 +4,15 @@ import { es } from 'date-fns/locale';
 import { Link } from 'react-router-dom';
 import { Appointment } from '../../types/appointment';
 import { getStatusText } from '../../utils/appointmentUtils';
-import { Star } from 'lucide-react';
+import {
+  Star,
+  Clock,
+  Calendar,
+  MapPin,
+  XCircle,
+  RefreshCw,
+  ChevronRight,
+} from 'lucide-react';
 
 interface UserAppointmentListProps {
   appointments: Appointment[];
@@ -14,6 +22,37 @@ interface UserAppointmentListProps {
   showActions?: boolean;
 }
 
+const statusStyles: Record<string, { dot: string; bg: string; text: string; border: string; icon: React.ReactNode }> = {
+  confirmed: {
+    dot: 'bg-emerald-500',
+    bg: 'bg-emerald-50 dark:bg-emerald-500/10',
+    text: 'text-emerald-700 dark:text-emerald-400',
+    border: 'border-emerald-200 dark:border-emerald-800',
+    icon: null,
+  },
+  pending: {
+    dot: 'bg-amber-500',
+    bg: 'bg-amber-50 dark:bg-amber-500/10',
+    text: 'text-amber-700 dark:text-amber-400',
+    border: 'border-amber-200 dark:border-amber-800',
+    icon: null,
+  },
+  cancelled: {
+    dot: 'bg-red-500',
+    bg: 'bg-red-50 dark:bg-red-500/10',
+    text: 'text-red-700 dark:text-red-400',
+    border: 'border-red-200 dark:border-red-800',
+    icon: null,
+  },
+  completed: {
+    dot: 'bg-slate-400',
+    bg: 'bg-slate-50 dark:bg-slate-800',
+    text: 'text-slate-600 dark:text-slate-400',
+    border: 'border-slate-200 dark:border-slate-700',
+    icon: null,
+  },
+};
+
 const UserAppointmentList: React.FC<UserAppointmentListProps> = ({
   appointments,
   onReschedule,
@@ -21,91 +60,135 @@ const UserAppointmentList: React.FC<UserAppointmentListProps> = ({
   onReview,
   showActions = true,
 }) => {
-  // Utility to generate URL slug from business name
-  const slugify = (str: string) => str.toLowerCase().replace(/\s+/g, '-').replace(/[^\w\-]+/g, '');
-
   return (
-    <div className="grid gap-4">
-      {appointments.map((appointment) => (
-        <div key={appointment.id} className="card p-5 hover:border-primary-200 dark:hover:border-primary-800 hover:shadow-xl transition-all group">
-          <div className="flex flex-col sm:flex-row justify-between items-start gap-4">
-            <div className="flex-1 min-w-0">
-              <div className="flex items-center gap-2 mb-1">
-                <h4 className="text-lg font-black text-slate-900 dark:text-white truncate">
-                  <Link
-                    to={`/${appointment.businesses?.slug || ''}`}
-                    className="hover:text-primary-600 dark:hover:text-primary-400 transition-colors"
-                  >
-                    {appointment.businesses?.name}
-                  </Link>
-                </h4>
-                <span className={`px-2 py-0.5 text-[10px] font-black rounded-lg uppercase tracking-tighter shadow-sm border ${
-                  appointment.status === 'confirmed' 
-                    ? 'bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400 border-green-200 dark:border-green-800'
-                    : appointment.status === 'pending'
-                    ? 'bg-amber-100 text-amber-700 dark:bg-amber-900/30 dark:text-amber-400 border-amber-200 dark:border-amber-800'
-                    : appointment.status === 'cancelled'
-                    ? 'bg-red-100 text-red-700 dark:bg-red-900/30 dark:text-red-400 border-red-200 dark:border-red-800'
-                    : 'bg-primary-100 text-primary-700 dark:bg-primary-900/30 dark:text-primary-400 border-primary-200 dark:border-primary-800'
-                }`}>
-                  {getStatusText(appointment.status)}
-                </span>
-              </div>
-              <p className="text-sm font-bold text-primary-600 dark:text-primary-400 mb-2">
-                {appointment.services?.name}
-              </p>
-              <p className="text-xs font-medium text-slate-500 dark:text-slate-400 flex items-center">
-                <svg className="w-3.5 h-3.5 mr-1.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
-                </svg>
-                {format(new Date(appointment.start_time), "PPP p", { locale: es })}
-              </p>
-            </div>
+    <div className="space-y-4">
+      {appointments.map((appointment, index) => {
+        const styles = statusStyles[appointment.status] || statusStyles.pending;
+        const date = new Date(appointment.start_time);
+        return (
+          <div
+            key={appointment.id}
+            className="group relative bg-white dark:bg-slate-900 rounded-2xl border border-slate-200 dark:border-slate-800 hover:border-primary-200 dark:hover:border-primary-800 hover:shadow-xl hover:shadow-slate-200/50 dark:hover:shadow-none transition-all duration-300 animate-in fade-in slide-in-from-bottom-2"
+            style={{ animationDelay: `${index * 60}ms` }}
+          >
+            {/* Status top accent bar */}
+            <div className={`h-1.5 rounded-t-2xl ${styles.dot.replace('bg-', 'bg-')} opacity-60`} />
 
-            <div className="flex flex-col sm:items-end gap-3 w-full sm:w-auto">
-              {showActions && (
-                <div className="flex flex-wrap gap-2">
-                  {['pending', 'confirmed'].includes(appointment.status) && onCancel && (
-                    <button
-                      onClick={() => onCancel(appointment)}
-                      className="px-4 py-1.5 bg-red-50 text-red-600 dark:bg-red-900/20 dark:text-red-400 text-xs font-black rounded-xl hover:bg-red-100 dark:hover:bg-red-900/30 transition-all uppercase tracking-wider"
-                    >
-                      Cancelar
-                    </button>
-                  )}
-                  {['pending', 'confirmed', 'cancelled'].includes(appointment.status) && onReschedule && (
-                    <button
-                      onClick={() => onReschedule(appointment)}
-                      className="px-4 py-1.5 bg-slate-100 text-slate-600 dark:bg-slate-800 dark:text-slate-300 text-xs font-black rounded-xl hover:bg-slate-200 dark:hover:bg-slate-700 transition-all uppercase tracking-wider"
-                    >
-                      Reagendar
-                    </button>
-                  )}
-                  {onReview && appointment.status === 'completed' && (
-                    <div className="flex flex-col gap-2">
-                      {appointment.review ? (
-                        <div className="flex bg-amber-50 dark:bg-amber-900/20 px-3 py-1.5 rounded-xl border border-amber-100 dark:border-amber-900/30 items-center gap-1">
-                          <Star className="h-3.5 w-3.5 text-amber-500 fill-current" />
-                          <span className="text-xs font-black text-amber-700 dark:text-amber-400">{appointment.review.rating}.0</span>
-                        </div>
-                      ) : (
-                        <button
-                          onClick={() => onReview(appointment)}
-                          className="px-4 py-1.5 bg-amber-500 text-white text-xs font-black rounded-xl shadow-lg shadow-amber-500/20 hover:bg-amber-600 transition-all uppercase tracking-wider"
+            <div className="p-5 sm:p-6">
+              <div className="flex flex-col sm:flex-row sm:items-start gap-4">
+                {/* Info section */}
+                <div className="flex-1 min-w-0 space-y-3">
+                  {/* Business name + status */}
+                  <div className="flex items-start justify-between gap-3">
+                    <div className="min-w-0">
+                      <h4 className="text-lg font-black text-slate-900 dark:text-white truncate">
+                        <Link
+                          to={`/${appointment.businesses?.slug || ''}`}
+                          className="hover:text-primary-600 dark:hover:text-primary-400 transition-colors"
                         >
-                          Dejar Reseña
-                        </button>
+                          {appointment.businesses?.name}
+                        </Link>
+                      </h4>
+                      {appointment.businesses?.address && (
+                        <p className="text-xs font-medium text-slate-400 dark:text-slate-500 flex items-center mt-0.5">
+                          <MapPin className="w-3 h-3 mr-1 flex-shrink-0" />
+                          <span className="truncate">{appointment.businesses.address}</span>
+                        </p>
                       )}
                     </div>
+                    <span className={`inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-[11px] font-black uppercase tracking-wider border shadow-sm flex-shrink-0 ${styles.bg} ${styles.text} ${styles.border}`}>
+                      <span className={`w-1.5 h-1.5 rounded-full ${styles.dot}`} />
+                      {getStatusText(appointment.status)}
+                    </span>
+                  </div>
+
+                  {/* Service name */}
+                  <div className="flex items-center gap-2">
+                    <div className="w-8 h-8 rounded-lg bg-primary-50 dark:bg-primary-500/10 flex items-center justify-center flex-shrink-0">
+                      <ChevronRight className="w-4 h-4 text-primary-500 dark:text-primary-400" />
+                    </div>
+                    <div>
+                      <p className="text-sm font-bold text-primary-600 dark:text-primary-400">
+                        {appointment.services?.name}
+                      </p>
+                      <div className="flex items-center gap-3 text-xs font-medium text-slate-400 dark:text-slate-500">
+                        {appointment.services?.duration && (
+                          <span className="flex items-center gap-1">
+                            <Clock className="w-3 h-3" />
+                            {appointment.services.duration} min
+                          </span>
+                        )}
+                        {appointment.services?.price !== undefined && appointment.services.price > 0 && (
+                          <span className="font-black text-slate-700 dark:text-slate-300">
+                            ${appointment.services.price.toLocaleString()}
+                          </span>
+                        )}
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* Date */}
+                  <div className="flex items-center gap-1.5 text-xs font-bold text-slate-500 dark:text-slate-400">
+                    <Calendar className="w-3.5 h-3.5" />
+                    <span className="uppercase tracking-wider">
+                      {format(date, "EEEE d 'de' MMMM, yyyy", { locale: es })}
+                    </span>
+                    <span className="mx-1.5 text-slate-300 dark:text-slate-600">·</span>
+                    <Clock className="w-3.5 h-3.5" />
+                    <span>{format(date, 'HH:mm', { locale: es })}</span>
+                  </div>
+                </div>
+
+                {/* Actions */}
+                <div className="flex sm:flex-col items-center sm:items-stretch gap-2 sm:min-w-[140px]">
+                  {showActions && (
+                    <>
+                      {(appointment.status === 'pending' || appointment.status === 'confirmed') && onCancel && (
+                        <button
+                          onClick={() => onCancel(appointment)}
+                          className="inline-flex items-center justify-center gap-1.5 px-4 py-2 bg-red-50 hover:bg-red-100 dark:bg-red-500/10 dark:hover:bg-red-500/20 text-red-600 dark:text-red-400 text-xs font-black rounded-xl transition-all active:scale-95 uppercase tracking-wider"
+                        >
+                          <XCircle className="w-3.5 h-3.5" />
+                          Cancelar
+                        </button>
+                      )}
+                      {(appointment.status === 'pending' || appointment.status === 'confirmed' || appointment.status === 'cancelled') && onReschedule && (
+                        <button
+                          onClick={() => onReschedule(appointment)}
+                          className="inline-flex items-center justify-center gap-1.5 px-4 py-2 bg-slate-100 hover:bg-slate-200 dark:bg-slate-800 dark:hover:bg-slate-700 text-slate-600 dark:text-slate-300 text-xs font-black rounded-xl transition-all active:scale-95 uppercase tracking-wider"
+                        >
+                          <RefreshCw className="w-3.5 h-3.5" />
+                          Reagendar
+                        </button>
+                      )}
+                      {appointment.status === 'completed' && onReview && (
+                        appointment.review ? (
+                          <div className="inline-flex items-center justify-center gap-1.5 px-4 py-2 bg-amber-50 dark:bg-amber-500/10 rounded-xl border border-amber-200 dark:border-amber-800">
+                            <Star className="w-3.5 h-3.5 text-amber-500 fill-current" />
+                            <span className="text-xs font-black text-amber-700 dark:text-amber-400">
+                              {appointment.review.rating}.0
+                            </span>
+                          </div>
+                        ) : (
+                          <button
+                            onClick={() => onReview(appointment)}
+                            className="inline-flex items-center justify-center gap-1.5 px-4 py-2 bg-amber-500 hover:bg-amber-600 text-white text-xs font-black rounded-xl transition-all shadow-lg shadow-amber-500/25 active:scale-95 uppercase tracking-wider"
+                          >
+                            <Star className="w-3.5 h-3.5" />
+                            Reseña
+                          </button>
+                        )
+                      )}
+                    </>
                   )}
                 </div>
-              )}
+              </div>
             </div>
           </div>
-        </div>
-      ))}
+        );
+      })}
     </div>
   );
 };
 
-export default UserAppointmentList; 
+export default UserAppointmentList;

@@ -1,9 +1,21 @@
-import { useState } from 'react';
+import { useState, useMemo } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { signUp } from '../lib/supabase';
 import { supabase } from '../lib/supabase';
 import { notifySuccess, notifyError } from '../lib/toast';
 import SEO from '../components/SEO';
+import {
+  User,
+  Mail,
+  Phone,
+  Lock,
+  Eye,
+  EyeOff,
+  UserPlus,
+  Check,
+  X,
+  AlertCircle,
+} from 'lucide-react';
 
 const Register = () => {
   const navigate = useNavigate();
@@ -15,12 +27,21 @@ const Register = () => {
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
   const [registered, setRegistered] = useState(false);
+  const [showPassword, setShowPassword] = useState(false);
+  const [showConfirm, setShowConfirm] = useState(false);
+
+  const passwordsMatch = useMemo(
+    () => confirmPassword.length === 0 || password === confirmPassword,
+    [password, confirmPassword]
+  );
+  const passwordLengthOk = useMemo(() => password.length >= 6, [password]);
+
+  const clearError = () => setError('');
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setError('');
 
-    // Validaciones básicas
     if (password !== confirmPassword) {
       setError('Las contraseñas no coinciden');
       return;
@@ -34,52 +55,34 @@ const Register = () => {
     setLoading(true);
 
     try {
-      
-      // Paso 1: Registrar usuario con email y contraseña únicamente
       const { data, error: signUpError } = await signUp(email, password);
-      
+
       if (signUpError) {
         throw signUpError;
       }
-      
+
       if (data.user) {
-        
         try {
-          // Paso 2: Actualizar metadatos del usuario (por separado para reducir errores)
-          const { error: updateError } = await supabase.auth.updateUser({
-            data: {
-              full_name: fullName,
-              phone: phone
-            }
+          await supabase.auth.updateUser({
+            data: { full_name: fullName, phone },
           });
-          
-          if (updateError) {
-            // No bloqueamos el flujo por esto, solo advertimos
-          } else {
-          }
-        } catch (metadataError) {
-          // No bloqueamos el flujo por un error en metadatos
+        } catch {
+          // Non-blocking
         }
 
-        // Marcar como registrado incluso si falla la actualización de metadatos
         setRegistered(true);
         setError('');
         notifySuccess('Registro exitoso');
-        // Mostrar mensaje de éxito antes de redireccionar
-        setTimeout(() => {
-          navigate('/login');
-        }, 2000);
+        setTimeout(() => navigate('/login'), 2000);
       }
     } catch (err: any) {
-      
-      // Manejar mensajes de error comunes
       let errorMsg: string;
       if (err.message.includes('Email already registered')) {
-        errorMsg = 'Este correo electrónico ya está registrado. Intenta iniciar sesión.';
+        errorMsg = 'Este correo ya está registrado. Intenta iniciar sesión.';
       } else if (err.message.includes('Database error')) {
-        errorMsg = 'Hubo un problema con el servidor. Por favor, intenta de nuevo más tarde.';
+        errorMsg = 'Hubo un problema con el servidor. Intenta de nuevo más tarde.';
       } else {
-        errorMsg = err.message || 'Error al registrar usuario. Intenta nuevamente.';
+        errorMsg = err.message || 'Error al registrar usuario.';
       }
       setError(errorMsg);
       notifyError(errorMsg);
@@ -88,51 +91,70 @@ const Register = () => {
     }
   };
 
+  if (registered) {
+    return (
+      <div className="min-h-screen bg-gradient-to-b from-slate-50 to-white dark:from-slate-950 dark:to-slate-900 flex items-center justify-center px-4 transition-colors duration-200">
+        <div className="text-center animate-in fade-in zoom-in-95 duration-500">
+          <div className="w-20 h-20 rounded-2xl bg-emerald-50 dark:bg-emerald-500/10 flex items-center justify-center mx-auto mb-6 ring-1 ring-emerald-200 dark:ring-emerald-800">
+            <Check className="w-10 h-10 text-emerald-500" />
+          </div>
+          <h1 className="text-3xl font-black text-slate-900 dark:text-white mb-3">
+            ¡Registro exitoso!
+          </h1>
+          <p className="text-slate-500 dark:text-slate-400 font-medium max-w-sm mx-auto leading-relaxed">
+            Te hemos enviado un enlace de confirmación a <strong className="text-slate-700 dark:text-slate-300">{email}</strong>. Revisa tu bandeja de entrada.
+          </p>
+          <div className="mt-8 flex flex-col items-center gap-3">
+            <div className="animate-spin rounded-full h-5 w-5 border-2 border-primary-600 border-t-transparent" />
+            <p className="text-xs font-medium text-slate-400">Redirigiendo al inicio de sesión...</p>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
   return (
-    <div className="min-h-screen flex flex-col justify-center py-12 sm:px-6 lg:px-8 bg-slate-50 dark:bg-slate-900 transition-colors duration-200">
+    <div className="min-h-screen bg-gradient-to-b from-slate-50 to-white dark:from-slate-950 dark:to-slate-900 flex flex-col justify-center py-12 sm:px-6 lg:px-8 transition-colors duration-200">
       <SEO
         title="Crear cuenta gratis"
         description="Regístrate en AgendaYa para descubrir negocios, reservar servicios y gestionar tus citas online."
       />
-      <div className="sm:mx-auto sm:w-full sm:max-w-md">
-        <h2 className="text-center text-4xl font-black text-slate-900 dark:text-white tracking-tight mb-2">
-          Únete a AgendaYa
-        </h2>
-        <p className="text-center text-slate-600 dark:text-slate-400 font-medium">
-          ¿Ya tienes una cuenta?{' '}
-          <Link to="/login" className="font-bold text-primary-600 dark:text-primary-400 hover:text-primary-500 transition-colors">
-            Inicia sesión
-          </Link>
-        </p>
-      </div>
 
-      <div className="mt-10 sm:mx-auto sm:w-full sm:max-w-md px-4">
-        <div className="card p-8 sm:p-10">
+      <div className="sm:mx-auto sm:w-full sm:max-w-md px-4">
+        {/* Brand */}
+        <div className="text-center mb-8 animate-in fade-in slide-in-from-top-4 duration-500">
+          <div className="w-14 h-14 rounded-2xl bg-primary-50 dark:bg-primary-500/10 flex items-center justify-center mx-auto mb-4 ring-1 ring-primary-200 dark:ring-primary-800">
+            <UserPlus className="w-7 h-7 text-primary-600 dark:text-primary-400" />
+          </div>
+          <h1 className="text-3xl sm:text-4xl font-black text-slate-900 dark:text-white tracking-tight mb-2">
+            Únete a AgendaYa
+          </h1>
+          <p className="text-slate-500 dark:text-slate-400 font-medium">
+            ¿Ya tienes una cuenta?{' '}
+            <Link to="/login" className="font-bold text-primary-600 dark:text-primary-400 hover:text-primary-500 transition-colors">
+              Inicia sesión
+            </Link>
+          </p>
+        </div>
+
+        {/* Card */}
+        <div className="bg-white dark:bg-slate-900 rounded-3xl border border-slate-200 dark:border-slate-800 shadow-xl shadow-slate-200/50 dark:shadow-none p-6 sm:p-8 animate-in fade-in slide-in-from-bottom-4 duration-500 delay-100">
+          {/* Error */}
           {error && (
-            <div className="alert alert-error mb-6 flex items-start gap-3">
-              <svg className="h-5 w-5 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
-              </svg>
-              <span className="text-sm font-bold">{error}</span>
+            <div className="flex items-start gap-3 px-4 py-3 mb-6 bg-red-50 dark:bg-red-500/10 border border-red-200 dark:border-red-800 rounded-2xl animate-in fade-in slide-in-from-top-2 duration-300">
+              <AlertCircle className="w-5 h-5 text-red-500 flex-shrink-0 mt-0.5" />
+              <p className="text-sm font-bold text-red-700 dark:text-red-400">{error}</p>
             </div>
           )}
-          
-          {registered ? (
-            <div className="alert alert-success py-8 text-center animate-in zoom-in duration-300">
-              <div className="bg-white dark:bg-slate-800 rounded-full p-3 w-16 h-16 flex items-center justify-center mx-auto mb-4 shadow-sm">
-                <svg className="h-10 w-10 text-green-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={3} d="M5 13l4 4L19 7" />
-                </svg>
-              </div>
-              <h3 className="text-xl font-black mb-2">¡Registro exitoso!</h3>
-              <p className="font-medium opacity-90">Redirigiendo al inicio de sesión...</p>
-            </div>
-          ) : (
-            <form className="space-y-5" onSubmit={handleSubmit}>
-              <div>
-                <label htmlFor="fullName" className="block text-sm font-bold text-slate-700 dark:text-slate-300 uppercase tracking-wider mb-2">
-                  Nombre completo
-                </label>
+
+          <form className="space-y-4" onSubmit={handleSubmit}>
+            {/* Full Name */}
+            <div>
+              <label htmlFor="fullName" className="block text-sm font-bold text-slate-700 dark:text-slate-300 mb-1.5">
+                Nombre completo
+              </label>
+              <div className="relative">
+                <User className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
                 <input
                   id="fullName"
                   name="fullName"
@@ -140,16 +162,20 @@ const Register = () => {
                   autoComplete="name"
                   required
                   value={fullName}
-                  onChange={(e) => setFullName(e.target.value)}
+                  onChange={(e) => { setFullName(e.target.value); clearError(); }}
                   placeholder="Tu nombre real"
-                  className="w-full"
+                  className="w-full pl-10"
                 />
               </div>
+            </div>
 
-              <div>
-                <label htmlFor="email" className="block text-sm font-bold text-slate-700 dark:text-slate-300 uppercase tracking-wider mb-2">
-                  Correo electrónico
-                </label>
+            {/* Email */}
+            <div>
+              <label htmlFor="email" className="block text-sm font-bold text-slate-700 dark:text-slate-300 mb-1.5">
+                Correo electrónico
+              </label>
+              <div className="relative">
+                <Mail className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
                 <input
                   id="email"
                   name="email"
@@ -157,16 +183,20 @@ const Register = () => {
                   autoComplete="email"
                   required
                   value={email}
-                  onChange={(e) => setEmail(e.target.value)}
+                  onChange={(e) => { setEmail(e.target.value); clearError(); }}
                   placeholder="tu@email.com"
-                  className="w-full"
+                  className="w-full pl-10"
                 />
               </div>
+            </div>
 
-              <div>
-                <label htmlFor="phone" className="block text-sm font-bold text-slate-700 dark:text-slate-300 uppercase tracking-wider mb-2">
-                  Teléfono
-                </label>
+            {/* Phone */}
+            <div>
+              <label htmlFor="phone" className="block text-sm font-bold text-slate-700 dark:text-slate-300 mb-1.5">
+                Teléfono
+              </label>
+              <div className="relative">
+                <Phone className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
                 <input
                   id="phone"
                   name="phone"
@@ -174,71 +204,133 @@ const Register = () => {
                   autoComplete="tel"
                   required
                   value={phone}
-                  onChange={(e) => setPhone(e.target.value)}
+                  onChange={(e) => { setPhone(e.target.value); clearError(); }}
                   placeholder="+34 600 000 000"
-                  className="w-full"
+                  className="w-full pl-10"
                 />
               </div>
+            </div>
 
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                <div>
-                  <label htmlFor="password" className="block text-sm font-bold text-slate-700 dark:text-slate-300 uppercase tracking-wider mb-2">
-                    Contraseña
-                  </label>
+            {/* Password + Confirm side by side */}
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+              {/* Password */}
+              <div>
+                <label htmlFor="password" className="block text-sm font-bold text-slate-700 dark:text-slate-300 mb-1.5">
+                  Contraseña
+                </label>
+                <div className="relative">
+                  <Lock className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
                   <input
                     id="password"
                     name="password"
-                    type="password"
+                    type={showPassword ? 'text' : 'password'}
                     autoComplete="new-password"
                     required
                     value={password}
-                    onChange={(e) => setPassword(e.target.value)}
+                    onChange={(e) => { setPassword(e.target.value); clearError(); }}
                     placeholder="••••••••"
-                    className="w-full"
+                    className="w-full pl-10 pr-10"
                   />
+                  <button
+                    type="button"
+                    onClick={() => setShowPassword(!showPassword)}
+                    className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600 dark:hover:text-slate-300 transition-colors"
+                    tabIndex={-1}
+                  >
+                    {showPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
+                  </button>
                 </div>
+                {/* Validation indicator */}
+                {password.length > 0 && (
+                  <div className="flex items-center gap-1.5 mt-1.5">
+                    {passwordLengthOk ? (
+                      <Check className="w-3 h-3 text-emerald-500" />
+                    ) : (
+                      <X className="w-3 h-3 text-red-400" />
+                    )}
+                    <span className={`text-[11px] font-bold ${passwordLengthOk ? 'text-emerald-600 dark:text-emerald-400' : 'text-red-500 dark:text-red-400'}`}>
+                      Mínimo 6 caracteres
+                    </span>
+                  </div>
+                )}
+              </div>
 
-                <div>
-                  <label htmlFor="confirmPassword" className="block text-sm font-bold text-slate-700 dark:text-slate-300 uppercase tracking-wider mb-2">
-                    Confirmar
-                  </label>
+              {/* Confirm password */}
+              <div>
+                <label htmlFor="confirmPassword" className="block text-sm font-bold text-slate-700 dark:text-slate-300 mb-1.5">
+                  Confirmar
+                </label>
+                <div className="relative">
+                  <Lock className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
                   <input
                     id="confirmPassword"
                     name="confirmPassword"
-                    type="password"
+                    type={showConfirm ? 'text' : 'password'}
                     autoComplete="new-password"
                     required
                     value={confirmPassword}
-                    onChange={(e) => setConfirmPassword(e.target.value)}
+                    onChange={(e) => { setConfirmPassword(e.target.value); clearError(); }}
                     placeholder="••••••••"
-                    className="w-full"
+                    className="w-full pl-10 pr-10"
                   />
+                  <button
+                    type="button"
+                    onClick={() => setShowConfirm(!showConfirm)}
+                    className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600 dark:hover:text-slate-300 transition-colors"
+                    tabIndex={-1}
+                  >
+                    {showConfirm ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
+                  </button>
                 </div>
-              </div>
-
-              <div className="pt-4">
-                <button
-                  type="submit"
-                  disabled={loading}
-                  className="btn-primary shadow-xl shadow-primary-500/20 py-4"
-                >
-                  {loading ? (
-                    <span className="flex items-center">
-                      <svg className="animate-spin -ml-1 mr-3 h-5 w-5 text-white" fill="none" viewBox="0 0 24 24">
-                        <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
-                        <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
-                      </svg>
-                      Creando cuenta...
+                {/* Match indicator */}
+                {confirmPassword.length > 0 && (
+                  <div className="flex items-center gap-1.5 mt-1.5">
+                    {passwordsMatch ? (
+                      <Check className="w-3 h-3 text-emerald-500" />
+                    ) : (
+                      <X className="w-3 h-3 text-red-400" />
+                    )}
+                    <span className={`text-[11px] font-bold ${passwordsMatch ? 'text-emerald-600 dark:text-emerald-400' : 'text-red-500 dark:text-red-400'}`}>
+                      {passwordsMatch ? 'Coinciden' : 'No coinciden'}
                     </span>
-                  ) : 'Registrarme ahora'}
-                </button>
+                  </div>
+                )}
               </div>
-            </form>
-          )}
+            </div>
+
+            {/* Submit */}
+            <button
+              type="submit"
+              disabled={loading}
+              className="w-full inline-flex items-center justify-center gap-2 px-6 py-3.5 bg-primary-600 hover:bg-primary-700 text-white font-bold rounded-xl shadow-lg shadow-primary-500/25 transition-all hover:-translate-y-0.5 active:translate-y-0 disabled:opacity-60 disabled:cursor-not-allowed disabled:hover:-translate-y-0 mt-2"
+            >
+              {loading ? (
+                <>
+                  <div className="animate-spin rounded-full h-4 w-4 border-2 border-white border-t-transparent" />
+                  Creando cuenta...
+                </>
+              ) : (
+                <>
+                  <UserPlus className="w-4 h-4" />
+                  Registrarme ahora
+                </>
+              )}
+            </button>
+          </form>
+
+          {/* Footer */}
+          <div className="mt-8 pt-6 border-t border-slate-100 dark:border-slate-800">
+            <p className="text-center text-xs font-medium text-slate-500 dark:text-slate-400">
+              Al registrarte aceptas nuestros{' '}
+              <a href="#" className="font-bold text-primary-600 dark:text-primary-400 hover:text-primary-500 transition-colors">Términos</a>
+              {' '}y{' '}
+              <a href="#" className="font-bold text-primary-600 dark:text-primary-400 hover:text-primary-500 transition-colors">Privacidad</a>.
+            </p>
+          </div>
         </div>
       </div>
     </div>
   );
 };
 
-export default Register; 
+export default Register;

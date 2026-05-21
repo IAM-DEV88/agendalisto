@@ -1,33 +1,88 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useMemo, useCallback } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
-import { Settings } from 'lucide-react';
 import { supabase } from '../lib/supabase';
 import { dispatchUserProfileUpdated } from '../lib/events';
 import UserProfileSection from '../components/profile/UserProfileSection';
 import { useAppDispatch } from '../hooks/useAppDispatch';
 import { useAppointments } from '../hooks/useAppointments';
-import { UserProfile } from '../lib/supabase';
+import type { UserProfile } from '../lib/supabase';
 import { ApiClient } from '../lib/apiClient';
 import { useToast } from '../hooks/useToast';
 import { useUIConfig } from '../hooks/useUIConfig';
 import UserAppointmentList from '../components/appointments/UserAppointmentList';
-import { Appointment } from '../types/appointment';
+import type { Appointment } from '../types/appointment';
 import ReviewModal from '../components/appointments/ReviewModal';
-
-// UI Components
-import TabNav, { Tab } from '../components/ui/TabNav';
+import TabNav from '../components/ui/TabNav';
 import SectionHeader from '../components/ui/SectionHeader';
 import Pagination from '../components/ui/Pagination';
+import EmptyState from '../components/ui/EmptyState';
+import {
+  CalendarCheck,
+  CalendarClock,
+  Clock,
+  Store,
+  Star,
+  Settings,
+  Shield,
+  LogOut,
+  ChevronRight,
+  ListChecks,
+} from 'lucide-react';
 
-type ProfileDashboardProps = {
-  user: UserProfile | null;
-};
+const FALLBACK_AVATAR = 'https://upload.wikimedia.org/wikipedia/commons/8/89/Portrait_Placeholder.png';
 
 const slugify = (str: string): string =>
-  str
-    .toLowerCase()
-    .replace(/\s+/g, '-')
-    .replace(/[^\w\-]+/g, '');
+  str.toLowerCase().replace(/\s+/g, '-').replace(/[^\w\-]+/g, '');
+
+function getGreeting(): string {
+  const hour = new Date().getHours();
+  if (hour < 12) return 'Buenos días';
+  if (hour < 18) return 'Buenas tardes';
+  return 'Buenas noches';
+}
+
+interface ProfileDashboardProps {
+  user: UserProfile | null;
+}
+
+function SkeletonCard() {
+  return (
+    <div className="bg-white dark:bg-slate-900 rounded-2xl border border-slate-200 dark:border-slate-800 p-5 sm:p-6 animate-pulse">
+      <div className="flex items-start gap-4">
+        <div className="flex-1 space-y-3">
+          <div className="h-5 bg-slate-200 dark:bg-slate-700 rounded-lg w-48" />
+          <div className="h-4 bg-slate-200 dark:bg-slate-700 rounded-lg w-32" />
+          <div className="h-3 bg-slate-200 dark:bg-slate-700 rounded-lg w-64" />
+        </div>
+        <div className="space-y-2">
+          <div className="h-8 bg-slate-200 dark:bg-slate-700 rounded-xl w-24" />
+          <div className="h-8 bg-slate-200 dark:bg-slate-700 rounded-xl w-24" />
+        </div>
+      </div>
+    </div>
+  );
+}
+
+function StatCard({ icon, label, value, color }: {
+  icon: React.ReactNode;
+  label: string;
+  value: number;
+  color: string;
+}) {
+  return (
+    <div className="relative bg-white dark:bg-slate-900 rounded-2xl border border-slate-200 dark:border-slate-800 p-5 transition-all hover:shadow-lg hover:border-slate-300 dark:hover:border-slate-700">
+      <div className="flex items-center gap-4">
+        <div className={`w-12 h-12 rounded-2xl flex items-center justify-center ${color}`}>
+          {icon}
+        </div>
+        <div>
+          <p className="text-2xl font-black text-slate-900 dark:text-white">{value}</p>
+          <p className="text-xs font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider">{label}</p>
+        </div>
+      </div>
+    </div>
+  );
+}
 
 const ProfileDashboard = ({ user }: ProfileDashboardProps) => {
   const dispatch = useAppDispatch();
@@ -35,22 +90,17 @@ const ProfileDashboard = ({ user }: ProfileDashboardProps) => {
   const toast = useToast();
   const navigate = useNavigate();
 
-  // Realtime appointments via custom hook
-  const { appointments, refreshAppointments } = useAppointments(user?.id);
+  const { appointments, refreshAppointments, loading: appointmentsLoading } = useAppointments(user?.id);
 
-  // Avatar for header
-  const FALLBACK_AVATAR = 'https://upload.wikimedia.org/wikipedia/commons/8/89/Portrait_Placeholder.png';
-  const avatarKey = user?.avatar_url;
-  const avatarUrl = avatarKey
-    ? (avatarKey.startsWith('http')
-      ? avatarKey
-      : supabase.storage.from('avatars').getPublicUrl(avatarKey).data.publicUrl)
-    : FALLBACK_AVATAR;
+  const avatarUrl = useMemo(() => {
+    if (!user?.avatar_url) return FALLBACK_AVATAR;
+    return user.avatar_url.startsWith('http')
+      ? user.avatar_url
+      : supabase.storage.from('avatars').getPublicUrl(user.avatar_url).data.publicUrl;
+  }, [user?.avatar_url]);
 
-  // Estado para indicar si el usuario tiene un negocio
   const [hasBusiness, setHasBusiness] = useState(false);
 
-  // Estado para el perfil de usuario
   const [profileData, setProfileData] = useState({
     full_name: user?.full_name || '',
     email: user?.email || '',
@@ -58,154 +108,107 @@ const ProfileDashboard = ({ user }: ProfileDashboardProps) => {
     avatar_url: user?.avatar_url || '',
   });
   const [saving, setSaving] = useState(false);
-  const [profileMessage, setProfileMessage] = useState<{ text: string, type: 'success' | 'error' } | null>(null);
+  const [profileMessage, setProfileMessage] = useState<{ text: string; type: 'success' | 'error' } | null>(null);
   const [itemsPerPageMessage, setItemsPerPageMessage] = useState<{ text: string; type: 'success' | 'error' } | null>(null);
 
-  // Estados para la paginación
   const [pagination, setPagination] = useState({
     upcoming: { page: 1, perPage: itemsPerPage },
     pending: { page: 1, perPage: itemsPerPage },
-    history: { page: 1, perPage: itemsPerPage }
+    history: { page: 1, perPage: itemsPerPage },
   });
 
-  // Estado para el tab activo
   const [activeTab, setActiveTab] = useState<'appointments' | 'settings'>('appointments');
-
-  // Sub-tabs for Appointments
   const [activeAppointmentTab, setActiveAppointmentTab] = useState('upcoming');
-  
-  // Sub-tabs for Settings
   const [activeSettingsTab, setActiveSettingsTab] = useState('profile');
-
   const [selectedAppointmentForReview, setSelectedAppointmentForReview] = useState<Appointment | null>(null);
 
-  const handlePageChange = (section: keyof typeof pagination, newPage: number) => {
-    setPagination(prev => ({
-      ...prev,
-      [section]: { ...prev[section], page: newPage }
-    }));
-  };
-
-  // Cálculo de conteos y filtros
-  const confirmedAppointments = appointments.filter(a => a.status === 'confirmed');
-  const pendingAppointments = appointments.filter(a => a.status === 'pending');
-  const pastAppointments = appointments.filter(
-    (appointment) =>
-      appointment.status === 'completed' ||
-      appointment.status === 'cancelled' ||
-      (new Date(appointment.start_time) < new Date() &&
-        !['pending', 'confirmed'].includes(appointment.status))
+  const confirmedAppointments = useMemo(
+    () => appointments.filter(a => a.status === 'confirmed'),
+    [appointments]
+  );
+  const pendingAppointments = useMemo(
+    () => appointments.filter(a => a.status === 'pending'),
+    [appointments]
+  );
+  const pastAppointments = useMemo(
+    () => appointments.filter(a =>
+      a.status === 'completed' ||
+      a.status === 'cancelled' ||
+      (new Date(a.start_time) < new Date() && !['pending', 'confirmed'].includes(a.status))
+    ),
+    [appointments]
   );
 
-  // Debugging para verificar el conteo
-  console.log('Total appointments:', appointments.length);
-  console.log('Past appointments:', pastAppointments.length);
-  console.log('Past appointments data:', pastAppointments);
-
-  // Conteos para las pestañas
   const upcomingCount = confirmedAppointments.length;
   const pendingCount = pendingAppointments.length;
   const pastCount = pastAppointments.length;
   const activeAppointmentsCount = upcomingCount + pendingCount;
 
-  // Calculate paginated appointments for each section
-  const getPaginatedItems = (items: any[], page: number, perPage: number) => {
-    const startIndex = (page - 1) * perPage;
-    const endIndex = startIndex + perPage;
-    return items.slice(startIndex, endIndex);
-  };
+  const handlePageChange = useCallback((section: keyof typeof pagination, newPage: number) => {
+    setPagination(prev => ({
+      ...prev,
+      [section]: { ...prev[section], page: newPage },
+    }));
+  }, []);
+
+  const getPaginatedItems = useCallback((items: Appointment[], page: number, perPage: number) => {
+    return items.slice((page - 1) * perPage, page * perPage);
+  }, []);
 
   const pagedUpcoming = getPaginatedItems(confirmedAppointments, pagination.upcoming.page, pagination.upcoming.perPage);
   const pagedPending = getPaginatedItems(pendingAppointments, pagination.pending.page, pagination.pending.perPage);
   const paginatedPastAppointments = getPaginatedItems(pastAppointments, pagination.history.page, pagination.history.perPage);
 
-  // Prepare tabs for TabNav component
-  const tabs: Tab[] = [
-    { id: 'appointments', label: 'Citas', count: activeAppointmentsCount },
-    { id: 'settings', label: 'Configuración' }
-  ];
-
-  const handleTabChange = (tab: string) => {
-    setActiveTab(tab as 'appointments' | 'settings');
-  };
-
-  const appointmentTabs: Tab[] = [
-    { id: 'upcoming', label: 'Próximas', count: upcomingCount },
-    { id: 'pending', label: 'Pendientes', count: pendingCount },
-    { id: 'history', label: 'Historial', count: pastCount }
-  ];
-
-  const settingsTabs: Tab[] = [
-    { id: 'profile', label: 'Perfil' },
-    { id: 'general', label: 'Ajustes' }
-  ];
-
-  // Verificar si el usuario tiene un negocio
   useEffect(() => {
     const checkBusiness = async () => {
       if (!user) return;
       try {
         const response = await ApiClient.getUserBusiness(user.id);
-        if (response.success && response.data) {
-          setHasBusiness(true);
-        } else {
-          setHasBusiness(false);
-        }
-      } catch (error) {
-        console.error('Error al verificar negocio:', error);
+        setHasBusiness(response.success && !!response.data);
+      } catch {
         setHasBusiness(false);
       }
     };
     checkBusiness();
   }, [user]);
 
-  const handleProfileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+  useEffect(() => {
+    setProfileData({
+      full_name: user?.full_name || '',
+      email: user?.email || '',
+      phone: user?.phone || '',
+      avatar_url: user?.avatar_url || '',
+    });
+  }, [user]);
+
+  const handleProfileChange = useCallback((e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;
-    setProfileData(prev => ({
-      ...prev,
-      [name]: value
-    }));
-  };
+    setProfileData(prev => ({ ...prev, [name]: value }));
+  }, []);
 
-  const handleProfileSubmit = async (e: React.FormEvent) => {
+  const handleProfileSubmit = useCallback(async (e: React.FormEvent) => {
     e.preventDefault();
-
-    if (!user) {
-      setProfileMessage({ text: 'No hay información de usuario disponible', type: 'error' });
-      return;
-    }
+    if (!user) return;
 
     setSaving(true);
     setProfileMessage(null);
 
     try {
-      // Obtener la sesión actual para tener el objeto User
       const { data: { session } } = await supabase.auth.getSession();
-      if (!session?.user) {
-        throw new Error('No se pudo obtener la sesión del usuario');
-      }
+      if (!session?.user) throw new Error('No se pudo obtener la sesión');
 
-      // Actualizar perfil del usuario
       const response = await ApiClient.updateUserProfile(user.id, {
         full_name: profileData.full_name,
         phone: profileData.phone,
         avatar_url: profileData.avatar_url || undefined,
-        updated_at: new Date().toISOString()
+        updated_at: new Date().toISOString(),
       });
 
       if (response.success && response.data) {
-        // Actualizar el estado local con los datos actualizados
-        setProfileData({
-          ...profileData,
-          ...response.data
-        });
-
-        // Disparar evento personalizado para actualizar el estado global
+        setProfileData(prev => ({ ...prev, ...response.data }));
         dispatchUserProfileUpdated(session.user, response.data);
-
-        const successMsg = 'Perfil actualizado correctamente';
-        setProfileMessage({ text: successMsg, type: 'success' });
-        toast.success(successMsg);
+        setProfileMessage({ text: 'Perfil actualizado correctamente', type: 'success' });
+        toast.success('Perfil actualizado correctamente');
       } else {
         throw new Error(response.error || 'Error al actualizar perfil');
       }
@@ -216,38 +219,34 @@ const ProfileDashboard = ({ user }: ProfileDashboardProps) => {
     } finally {
       setSaving(false);
     }
-  };
+  }, [user, profileData, toast]);
 
-  // Handlers for appointment actions
-  const handleReschedule = (appointment: Appointment) => {
-    // Navigate to public business page and open booking form for rescheduling
+  const handleReschedule = useCallback((appointment: Appointment) => {
     const businessName = appointment.businesses?.name;
     if (!businessName) return;
     const slug = slugify(businessName);
     navigate(`/${slug}?reschedule=true&serviceId=${appointment.service_id}&date=${encodeURIComponent(appointment.start_time)}`);
-  };
+  }, [navigate]);
 
-  const handleCancel = async (appointment: Appointment) => {
+  const handleCancel = useCallback(async (appointment: Appointment) => {
     if (!user) return;
     try {
       const response = await ApiClient.updateAppointmentStatus(appointment.id, 'cancelled');
       if (!response.success) {
-        console.error(response.error || 'Error al cancelar la cita');
-        toast.error('Error al cancelar la cita');
+        toast.error(response.error || 'Error al cancelar la cita');
       } else {
         toast.success('Cita cancelada correctamente');
       }
     } catch (err: any) {
-      console.error(err.message || 'Error al cancelar la cita');
-      toast.error('Error al cancelar la cita');
+      toast.error(err.message || 'Error al cancelar la cita');
     }
-  };
+  }, [user, toast]);
 
-  const handleReview = (appointment: Appointment) => {
+  const handleReview = useCallback((appointment: Appointment) => {
     setSelectedAppointmentForReview(appointment);
-  };
+  }, []);
 
-  const handleReviewSubmit = async (rating: number, comment: string) => {
+  const handleReviewSubmit = useCallback(async (rating: number, comment: string) => {
     if (!user || !selectedAppointmentForReview) return;
 
     try {
@@ -256,18 +255,14 @@ const ProfileDashboard = ({ user }: ProfileDashboardProps) => {
         selectedAppointmentForReview.business_id,
         user.id,
         rating,
-        comment
+        comment,
       );
-
       if (response.success) {
         toast.success('Reseña enviada correctamente');
         await refreshAppointments();
-
-        // Dispatch event to notify business
         window.dispatchEvent(new CustomEvent('businessReviewAdded', {
-          detail: { businessId: selectedAppointmentForReview.business_id }
+          detail: { businessId: selectedAppointmentForReview.business_id },
         }));
-
         setSelectedAppointmentForReview(null);
       } else {
         toast.error(response.error || 'Error al enviar la reseña');
@@ -275,164 +270,261 @@ const ProfileDashboard = ({ user }: ProfileDashboardProps) => {
     } catch (err: any) {
       toast.error(err.message || 'Error al enviar la reseña');
     }
-  };
+  }, [user, selectedAppointmentForReview, toast, refreshAppointments]);
 
-  const handleItemsPerPageChange = (value: number) => {
+  const handleItemsPerPageChange = useCallback((value: number) => {
     if (value >= 1 && value <= 50) {
       dispatch({ type: 'ui/setItemsPerPage', payload: value });
     }
-  };
+  }, [dispatch]);
 
-  const handleSaveItemsPerPage = async () => {
+  const handleSaveItemsPerPage = useCallback(async () => {
     if (!user) return;
+    setItemsPerPageMessage(null);
+    const success = await saveItemsPerPage(user.id);
+    setItemsPerPageMessage({
+      text: success ? 'Configuración guardada' : 'Error al guardar la configuración',
+      type: success ? 'success' : 'error',
+    });
+  }, [user, saveItemsPerPage]);
 
-    try {
-      setItemsPerPageMessage(null);
-      const success = await saveItemsPerPage(user.id);
+  const tabs = [
+    { id: 'appointments', label: 'Mis Citas', count: activeAppointmentsCount },
+    { id: 'settings', label: 'Configuración' },
+  ];
 
-      if (success) {
-        setItemsPerPageMessage({ text: 'Configuración guardada correctamente', type: 'success' });
-      } else {
-        setItemsPerPageMessage({ text: 'Error al guardar la configuración', type: 'error' });
-      }
-    } catch (error: any) {
-      setItemsPerPageMessage({ text: error.message || 'Error al guardar la configuración', type: 'error' });
-    }
-  };
+  const appointmentTabs = [
+    { id: 'upcoming', label: 'Próximas', count: upcomingCount },
+    { id: 'pending', label: 'Pendientes', count: pendingCount },
+    { id: 'history', label: 'Historial', count: pastCount },
+  ];
+
+  const settingsTabs = [
+    { id: 'profile', label: 'Perfil' },
+    { id: 'general', label: 'Ajustes' },
+  ];
+
+  const username = user?.full_name?.split(' ')[0] || 'Usuario';
+  const greeting = getGreeting();
 
   return (
-    <div className="min-h-screen bg-slate-50 dark:bg-slate-950 transition-colors duration-200">
+    <div className="min-h-screen bg-gradient-to-b from-slate-50 to-white dark:from-slate-950 dark:to-slate-900 transition-colors duration-200">
       <div className="max-w-7xl mx-auto pt-6 pb-20 sm:px-6 lg:px-8">
-        <div className="px-4 py-2 sm:px-0">
-          <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-8">
-            <div className="flex items-center gap-4 group">
-              <div className="relative">
-                <img
-                  src={avatarUrl}
-                  alt={`${user?.full_name || 'Usuario'} avatar`}
-                  className="h-16 w-16 rounded-2xl object-cover shadow-lg border-2 border-white dark:border-slate-800 transition-transform group-hover:scale-105"
-                />
-                <div className="absolute -bottom-1 -right-1 w-4 h-4 bg-emerald-500 border-2 border-white dark:border-slate-800 rounded-full shadow-sm"></div>
+        <div className="px-4 sm:px-0 space-y-8">
+
+          {/* ─── HEADER ─── */}
+          <div className="animate-in fade-in slide-in-from-top-4 duration-500">
+            <div className="flex flex-col md:flex-row md:items-center justify-between gap-6">
+              <div className="flex items-center gap-5 group">
+                <div className="relative">
+                  <div className="h-16 w-16 rounded-2xl overflow-hidden ring-2 ring-white dark:ring-slate-800 shadow-xl transition-transform duration-300 group-hover:scale-105">
+                    <img
+                      src={avatarUrl}
+                      alt={`${username} avatar`}
+                      className="h-full w-full object-cover"
+                    />
+                  </div>
+                  <div className="absolute -bottom-1 -right-1 w-5 h-5 bg-emerald-500 border-[3px] border-white dark:border-slate-900 rounded-full shadow-lg" />
+                </div>
+                <div>
+                  <div className="flex items-center gap-2">
+                    <h1 className="text-2xl font-black text-slate-900 dark:text-white tracking-tight">
+                      {greeting}, {username}
+                    </h1>
+                    <span className="text-2xl">{greeting.includes('noches') ? '🌙' : greeting.includes('tardes') ? '☀️' : '🌅'}</span>
+                  </div>
+                  <p className="text-sm font-medium text-slate-500 dark:text-slate-400 mt-0.5">
+                    {activeAppointmentsCount > 0
+                      ? `Tienes ${activeAppointmentsCount} ${activeAppointmentsCount === 1 ? 'cita activa' : 'citas activas'} hoy`
+                      : 'Gestiona tus citas y configura tu perfil'}
+                  </p>
+                </div>
               </div>
-              <div>
-                <h1 className="text-2xl font-black text-slate-900 dark:text-white tracking-tight">
-                  Hola, {user?.full_name?.split(' ')[0] || 'Usuario'}
-                </h1>
-                <p className="text-sm font-medium text-slate-500 dark:text-slate-400">Bienvenido a tu panel de control</p>
+
+              <div className="flex items-center gap-3">
+                {hasBusiness ? (
+                  <Link
+                    to="/business/dashboard"
+                    className="inline-flex items-center gap-2 px-5 py-2.5 bg-primary-600 hover:bg-primary-700 text-white text-sm font-bold rounded-xl transition-all shadow-lg shadow-primary-500/25 hover:-translate-y-0.5 active:translate-y-0"
+                  >
+                    <Store className="w-4 h-4" />
+                    Mi Negocio
+                    <ChevronRight className="w-4 h-4" />
+                  </Link>
+                ) : (
+                  <Link
+                    to="/business/register"
+                    className="inline-flex items-center gap-2 px-5 py-2.5 bg-white dark:bg-slate-900 text-primary-600 dark:text-primary-400 text-sm font-bold rounded-xl border border-primary-200 dark:border-primary-800 hover:bg-primary-50 dark:hover:bg-primary-900/20 hover:border-primary-300 dark:hover:border-primary-700 transition-all shadow-sm hover:-translate-y-0.5 active:translate-y-0"
+                  >
+                    <Store className="w-4 h-4" />
+                    Registrar mi negocio
+                  </Link>
+                )}
               </div>
-            </div>
-            
-            <div className="flex items-center gap-3">
-              {hasBusiness ? (
-                <Link 
-                  to="/business/dashboard" 
-                  className="inline-flex items-center justify-center px-6 py-2.5 bg-primary-600 hover:bg-primary-700 text-white text-sm font-bold rounded-xl transition-all shadow-lg shadow-primary-500/25"
-                >
-                  Mi Negocio
-                </Link>
-              ) : (
-                <Link 
-                  to="/business/register" 
-                  className="inline-flex items-center justify-center px-6 py-2.5 bg-white dark:bg-slate-900 text-primary-600 dark:text-primary-400 text-sm font-bold rounded-xl border border-primary-100 dark:border-primary-900/30 hover:bg-primary-50 dark:hover:bg-primary-900/20 transition-all shadow-sm"
-                >
-                  Registrar mi negocio
-                </Link>
-              )}
             </div>
           </div>
 
-          <TabNav
-            tabs={tabs}
-            activeTabId={activeTab}
-            onTabChange={handleTabChange}
-          />
+          {/* ─── STATS CARDS ─── */}
+          <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 sm:gap-4 animate-in fade-in slide-in-from-bottom-4 duration-500 delay-100">
+            <StatCard
+              icon={<CalendarCheck className="w-6 h-6 text-emerald-600 dark:text-emerald-400" />}
+              label="Confirmadas"
+              value={upcomingCount}
+              color="bg-emerald-50 dark:bg-emerald-500/10"
+            />
+            <StatCard
+              icon={<CalendarClock className="w-6 h-6 text-amber-600 dark:text-amber-400" />}
+              label="Pendientes"
+              value={pendingCount}
+              color="bg-amber-50 dark:bg-amber-500/10"
+            />
+            <StatCard
+              icon={<Star className="w-6 h-6 text-primary-600 dark:text-primary-400" />}
+              label="Completadas"
+              value={pastAppointments.filter(a => a.status === 'completed').length}
+              color="bg-primary-50 dark:bg-primary-500/10"
+            />
+            <StatCard
+              icon={<ListChecks className="w-6 h-6 text-slate-600 dark:text-slate-400" />}
+              label="Total"
+              value={appointments.length}
+              color="bg-slate-100 dark:bg-slate-800"
+            />
+          </div>
 
-          <div className="mt-8 animate-in fade-in slide-in-from-bottom-4 duration-500">
-            {/* Tab de Citas */}
+          {/* ─── MAIN TABS ─── */}
+          <div className="animate-in fade-in duration-500 delay-200">
+            <TabNav tabs={tabs} activeTabId={activeTab} onTabChange={(tab) => setActiveTab(tab as 'appointments' | 'settings')} />
+          </div>
+
+          <div className="animate-in fade-in slide-in-from-bottom-4 duration-500 delay-300">
+            {/* ═══ CITAS TAB ═══ */}
             {activeTab === 'appointments' && (
-              <div className="space-y-8">
+              <div className="space-y-6">
                 <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-                  <SectionHeader 
-                    title="Mis Reservas" 
-                    description="Gestiona tus citas próximas y revisa tu historial"
+                  <SectionHeader
+                    title="Mis Reservas"
+                    description="Gestiona tus citas y revisa tu historial"
                   />
                   <div className="bg-white dark:bg-slate-900 p-1 rounded-2xl border border-slate-200 dark:border-slate-800 shadow-sm self-start">
-                    <TabNav 
-                      tabs={appointmentTabs} 
-                      activeTabId={activeAppointmentTab} 
-                      onTabChange={setActiveAppointmentTab} 
+                    <TabNav
+                      tabs={appointmentTabs}
+                      activeTabId={activeAppointmentTab}
+                      onTabChange={setActiveAppointmentTab}
                     />
                   </div>
                 </div>
 
                 <div className="animate-in fade-in zoom-in-95 duration-300">
+                  {/* Próximas */}
                   {activeAppointmentTab === 'upcoming' && (
-                    <div className="space-y-6">
-                      <UserAppointmentList
-                        appointments={pagedUpcoming}
-                        onReschedule={handleReschedule}
-                        onCancel={handleCancel}
+                    appointmentsLoading ? (
+                      <div className="space-y-4">
+                        <SkeletonCard />
+                        <SkeletonCard />
+                      </div>
+                    ) : pagedUpcoming.length === 0 ? (
+                      <EmptyState
+                        icon={<CalendarCheck className="w-8 h-8" />}
+                        title="No tienes citas próximas"
+                        description="Aún no has agendado ninguna cita. Explora los negocios disponibles y reserva tu primera cita."
+                        action={{ label: 'Explorar negocios', to: '/explore' }}
                       />
-                      {confirmedAppointments.length > pagination.upcoming.perPage && (
-                        <Pagination
-                          currentPage={pagination.upcoming.page}
-                          totalPages={Math.ceil(confirmedAppointments.length / pagination.upcoming.perPage)}
-                          onPageChange={(page) => handlePageChange('upcoming', page)}
+                    ) : (
+                      <div className="space-y-4">
+                        <UserAppointmentList
+                          appointments={pagedUpcoming}
+                          onReschedule={handleReschedule}
+                          onCancel={handleCancel}
                         />
-                      )}
-                    </div>
+                        {confirmedAppointments.length > pagination.upcoming.perPage && (
+                          <Pagination
+                            currentPage={pagination.upcoming.page}
+                            totalPages={Math.ceil(confirmedAppointments.length / pagination.upcoming.perPage)}
+                            onPageChange={(page) => handlePageChange('upcoming', page)}
+                          />
+                        )}
+                      </div>
+                    )
                   )}
 
+                  {/* Pendientes */}
                   {activeAppointmentTab === 'pending' && (
-                    <div className="space-y-6">
-                      <UserAppointmentList
-                        appointments={pagedPending}
-                        onReschedule={handleReschedule}
-                        onCancel={handleCancel}
+                    appointmentsLoading ? (
+                      <div className="space-y-4">
+                        <SkeletonCard />
+                      </div>
+                    ) : pagedPending.length === 0 ? (
+                      <EmptyState
+                        icon={<CalendarClock className="w-8 h-8" />}
+                        title="Sin citas pendientes"
+                        description="No tienes solicitudes de cita pendientes. Cuando reserves un servicio, aparecerá aquí hasta que el negocio lo confirme."
                       />
-                      {pendingAppointments.length > pagination.pending.perPage && (
-                        <Pagination
-                          currentPage={pagination.pending.page}
-                          totalPages={Math.ceil(pendingAppointments.length / pagination.pending.perPage)}
-                          onPageChange={(page) => handlePageChange('pending', page)}
+                    ) : (
+                      <div className="space-y-4">
+                        <UserAppointmentList
+                          appointments={pagedPending}
+                          onReschedule={handleReschedule}
+                          onCancel={handleCancel}
                         />
-                      )}
-                    </div>
+                        {pendingAppointments.length > pagination.pending.perPage && (
+                          <Pagination
+                            currentPage={pagination.pending.page}
+                            totalPages={Math.ceil(pendingAppointments.length / pagination.pending.perPage)}
+                            onPageChange={(page) => handlePageChange('pending', page)}
+                          />
+                        )}
+                      </div>
+                    )
                   )}
 
+                  {/* Historial */}
                   {activeAppointmentTab === 'history' && (
-                    <div className="space-y-6">
-                      <UserAppointmentList
-                        appointments={paginatedPastAppointments}
-                        onReschedule={handleReschedule}
-                        onReview={handleReview}
+                    appointmentsLoading ? (
+                      <div className="space-y-4">
+                        <SkeletonCard />
+                        <SkeletonCard />
+                      </div>
+                    ) : paginatedPastAppointments.length === 0 ? (
+                      <EmptyState
+                        icon={<Clock className="w-8 h-8" />}
+                        title="Historial vacío"
+                        description="Aún no has completado ninguna cita. Una vez que tengas citas pasadas, aparecerán aquí."
                       />
-                      {pastAppointments.length > pagination.history.perPage && (
-                        <Pagination
-                          currentPage={pagination.history.page}
-                          totalPages={Math.ceil(pastAppointments.length / pagination.history.perPage)}
-                          onPageChange={(page) => handlePageChange('history', page)}
+                    ) : (
+                      <div className="space-y-4">
+                        <UserAppointmentList
+                          appointments={paginatedPastAppointments}
+                          onReschedule={handleReschedule}
+                          onReview={handleReview}
                         />
-                      )}
-                    </div>
+                        {pastAppointments.length > pagination.history.perPage && (
+                          <Pagination
+                            currentPage={pagination.history.page}
+                            totalPages={Math.ceil(pastAppointments.length / pagination.history.perPage)}
+                            onPageChange={(page) => handlePageChange('history', page)}
+                          />
+                        )}
+                      </div>
+                    )
                   )}
                 </div>
               </div>
             )}
 
-            {/* Tab de Configuración */}
+            {/* ═══ SETTINGS TAB ═══ */}
             {activeTab === 'settings' && (
-              <div className="space-y-8">
+              <div className="space-y-6">
                 <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-                  <SectionHeader 
-                    title="Configuración" 
-                    description="Actualiza tu perfil y preferencias de la cuenta"
+                  <SectionHeader
+                    title="Configuración"
+                    description="Actualiza tu perfil y preferencias"
                   />
                   <div className="bg-white dark:bg-slate-900 p-1 rounded-2xl border border-slate-200 dark:border-slate-800 shadow-sm self-start">
-                    <TabNav 
-                      tabs={settingsTabs} 
-                      activeTabId={activeSettingsTab} 
-                      onTabChange={setActiveSettingsTab} 
+                    <TabNav
+                      tabs={settingsTabs}
+                      activeTabId={activeSettingsTab}
+                      onTabChange={setActiveSettingsTab}
                     />
                   </div>
                 </div>
@@ -449,46 +541,77 @@ const ProfileDashboard = ({ user }: ProfileDashboardProps) => {
                   )}
 
                   {activeSettingsTab === 'general' && (
-                    <div className="card p-6 space-y-6">
-                      <div className="flex items-center gap-3 pb-4 border-b border-slate-100 dark:border-slate-800">
-                        <div className="p-2 bg-amber-50 text-amber-600 dark:bg-amber-500/10 dark:text-amber-400 rounded-lg">
-                          <Settings className="w-5 h-5" />
+                    <div className="space-y-4">
+                      {/* Preferencias */}
+                      <div className="bg-white dark:bg-slate-900 rounded-2xl border border-slate-200 dark:border-slate-800 p-6 space-y-6">
+                        <div className="flex items-center gap-3 pb-4 border-b border-slate-100 dark:border-slate-800">
+                          <div className="p-2.5 bg-amber-50 dark:bg-amber-500/10 rounded-xl">
+                            <Settings className="w-5 h-5 text-amber-600 dark:text-amber-400" />
+                          </div>
+                          <div>
+                            <h3 className="text-lg font-black text-slate-900 dark:text-white">Preferencias</h3>
+                            <p className="text-xs font-medium text-slate-500 dark:text-slate-400">Personaliza tu experiencia</p>
+                          </div>
                         </div>
-                        <h3 className="text-lg font-black text-slate-900 dark:text-white tracking-tight">Preferencias de la Interfaz</h3>
-                      </div>
 
-                      <div className="space-y-4">
-                        <div className="space-y-2">
-                          <label htmlFor="items_per_page" className="block text-sm font-bold text-slate-700 dark:text-slate-300">
+                        <div className="space-y-3">
+                          <label className="block text-sm font-bold text-slate-700 dark:text-slate-300">
                             Registros por página
                           </label>
-                          <div className="flex items-center gap-4">
+                          <div className="flex items-center gap-3">
                             <input
                               type="number"
-                              id="items_per_page"
                               min="1"
                               max="50"
                               value={itemsPerPage}
                               onChange={(e) => handleItemsPerPageChange(parseInt(e.target.value) || 1)}
-                              className="w-24 px-4 py-2.5 rounded-xl border border-slate-200 dark:border-slate-700 bg-white focus:ring-2 focus:ring-primary-500/20 focus:border-primary-500 outline-none transition-all font-bold"
+                              className="w-24 px-4 py-2.5 rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 focus:ring-2 focus:ring-primary-500/20 focus:border-primary-500 outline-none transition-all font-bold text-center"
                             />
                             <button
                               onClick={handleSaveItemsPerPage}
-                              className="inline-flex items-center px-6 py-2.5 bg-primary-600 hover:bg-primary-700 text-white text-sm font-bold rounded-xl transition-all shadow-lg shadow-primary-500/25 gap-2"
+                              className="px-6 py-2.5 bg-primary-600 hover:bg-primary-700 text-white text-sm font-bold rounded-xl transition-all shadow-lg shadow-primary-500/25 active:scale-95"
                             >
                               Guardar
                             </button>
                           </div>
-                          <p className="text-xs text-slate-500 dark:text-slate-400 italic">
-                            Ajusta cuántos elementos quieres ver por página en tus listados.
+                          <p className="text-xs text-slate-500 dark:text-slate-400">
+                            Ajusta cuántos elementos ver por página en tus listados.
                           </p>
                         </div>
 
                         {itemsPerPageMessage && (
-                          <div className={`alert ${itemsPerPageMessage.type === 'success' ? 'alert-success' : 'alert-error'} flex items-center gap-2`}>
-                            <p className="text-sm font-bold">{itemsPerPageMessage.text}</p>
+                          <div className={`flex items-center gap-2 px-4 py-3 rounded-xl text-sm font-bold ${
+                            itemsPerPageMessage.type === 'success'
+                              ? 'bg-emerald-50 dark:bg-emerald-500/10 text-emerald-700 dark:text-emerald-400'
+                              : 'bg-red-50 dark:bg-red-500/10 text-red-700 dark:text-red-400'
+                          }`}>
+                            {itemsPerPageMessage.text}
                           </div>
                         )}
+                      </div>
+
+                      {/* Cuenta */}
+                      <div className="bg-white dark:bg-slate-900 rounded-2xl border border-slate-200 dark:border-slate-800 p-6 space-y-4">
+                        <div className="flex items-center gap-3 pb-4 border-b border-slate-100 dark:border-slate-800">
+                          <div className="p-2.5 bg-slate-100 dark:bg-slate-800 rounded-xl">
+                            <Shield className="w-5 h-5 text-slate-600 dark:text-slate-400" />
+                          </div>
+                          <div>
+                            <h3 className="text-lg font-black text-slate-900 dark:text-white">Cuenta</h3>
+                            <p className="text-xs font-medium text-slate-500 dark:text-slate-400">Seguridad y sesión</p>
+                          </div>
+                        </div>
+
+                        <button
+                          onClick={async () => {
+                            const { error } = await supabase.auth.signOut();
+                            if (!error) navigate('/');
+                          }}
+                          className="inline-flex items-center gap-2 px-5 py-2.5 bg-red-50 hover:bg-red-100 dark:bg-red-500/10 dark:hover:bg-red-500/20 text-red-600 dark:text-red-400 text-sm font-bold rounded-xl transition-all active:scale-95"
+                        >
+                          <LogOut className="w-4 h-4" />
+                          Cerrar sesión
+                        </button>
                       </div>
                     </div>
                   )}
@@ -499,7 +622,6 @@ const ProfileDashboard = ({ user }: ProfileDashboardProps) => {
         </div>
       </div>
 
-      {/* Modal de Reseña */}
       {selectedAppointmentForReview && (
         <ReviewModal
           isOpen={!!selectedAppointmentForReview}

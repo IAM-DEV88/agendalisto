@@ -146,7 +146,9 @@ export async function getUserAppointments(userId: string) {
         *,
         businesses:agendaya_businesses (
           name,
-          address
+          address,
+          slug,
+          logo_url
         ),
         services:agendaya_services (
           name,

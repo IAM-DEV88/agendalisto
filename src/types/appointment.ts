@@ -47,6 +47,8 @@ export interface Appointment {
   businesses?: {
     name: string;
     address: string;
+    slug?: string;
+    logo_url?: string;
   };
 }
 
