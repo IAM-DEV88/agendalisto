@@ -10,12 +10,13 @@
     "preview": "vite preview",
     "sitemap": "node scripts/generate-sitemap.mjs",
     "prerender": "node scripts/prerender.mjs",
-    "netlify-build": "npm install --legacy-peer-deps && npm run build && npm run sitemap && npm run prerender"
+    "netlify-build": "pnpm install --frozen-lockfile && pnpm run build && pnpm run sitemap && pnpm run prerender"
   },
   "engines": {
     "node": ">=18.0.0",
-    "npm": ">=9.0.0"
+    "pnpm": ">=9.0.0"
   },
+  "packageManager": "pnpm@11.2.2",
   "dependencies": {
     "@hookform/resolvers": "^5.2.2",
     "@paypal/react-paypal-js": "^8.9.2",

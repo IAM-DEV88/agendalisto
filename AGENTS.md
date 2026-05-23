@@ -11,12 +11,20 @@
 - **Backend:** Supabase (JS client v2)
 - **Deploy:** Netlify (Node 20)
 
+## Supabase
+
+- Cliente en `src/lib/supabase.ts` con `VITE_SUPABASE_URL` y `VITE_SUPABASE_ANON_KEY`.
+- Queries tipadas con el JS client. Sin SQL raw.
+- ⚠️ **Multi-app coexistence**: AgendaYa comparte instancia Supabase. Ver sección CRITICAL abajo.
+- ⚠️ **`handle_new_user()` canónico** en `../supabase-shared/handle_new_user.sql`. NO redefinir aquí.
+- ⚠️ **Tablas con prefijo `agendaya_`** (ej: `agendaya_profiles`, `agendaya_businesses`). Nunca nombres genéricos.
+
 ## ⚠️ CRITICAL: Multi-app Supabase Coexistence
 
-Este proyecto comparte la instancia de Supabase con otras aplicaciones (`encuentrosvip`, `GUILD-PORTAL`).
+Este proyecto comparte la instancia de Supabase con otras aplicaciones (`lexigo`, `encuentrosvip`, `guild_portal`).
 Todas las apps usan el mismo `VITE_SUPABASE_URL` y la misma `VITE_SUPABASE_ANON_KEY`.
 
-### Arquitectura del sistema de registro/login
+### Arquitectura
 
 El ecosistema usa 4 piezas que trabajan juntas. Entender cada una es crítico para no romper nada.
 
@@ -30,110 +38,110 @@ El ecosistema usa 4 piezas que trabajan juntas. Entender cada una es crítico pa
 
 #### `apps` — El catálogo de aplicaciones
 
-- Tabla maestra que lista qué apps existen: `encuentrosvip`, `agendaya`, `guild_portal`.
+- Tabla maestra que lista qué apps existen.
 - Es **documental/organizacional** — ninguna FK apunta a ella. Si se borra, no rompe nada funcionalmente.
-- Sirve para saber qué apps están registradas y hacer reporting.
 
 #### `user_apps` — La matriz de membresía
 
 - Una fila por cada {usuario, app}. Cada app puede tener su propio rol para el mismo usuario.
+- `role` se sincroniza automáticamente desde `{app}_profiles.role` vía el trigger `sync_profile_role`.
 - `status = 'active'` permite desactivar a un usuario en una app sin afectar las demás.
-- Es la base para RLS policies sin recursión (consultas con `SECURITY DEFINER`).
 - **Ejemplo:** Un usuario admin en encuentrosvip puede ser visitor en agendaya.
 
 #### `{app}_profiles` — Los datos específicos de cada app
 
 - Cada app tiene su propia tabla con el esquema que necesita.
-- `encuentrosvip_profiles` usa `id` propio + `user_id` (permite múltiples perfiles por usuario si hiciera falta).
-- `agendaya_profiles` usa `id = auth.users.id` (relación 1:1, más simple).
+- **`agendaya_profiles` es la única fuente de verdad para el rol.** El frontend lee el rol exclusivamente de `agendaya_profiles`. Nunca consultar `user_apps` desde el frontend para detectar el rol actual.
 - **NUNCA** consultar, modificar o dropear la tabla `{app}_profiles` de otra app.
 
-#### El flujo completo de registro
+### `handle_new_user()` — El punto único de fallo
+
+- **Canónica en:** `../supabase-shared/handle_new_user.sql`
+- **NUNCA redefinir** en archivos SQL del proyecto.
+- La función inserta perfiles para TODAS las apps registradas. Cada app externa va envuelta en `BEGIN/EXCEPTION` para tolerancia a fallos.
+- **Caso real (lo que pasó):** EncuentrosVIP ejecutó `cleanup_profiles.sql` que reescribió `handle_new_user()` solo para su app. AgendaYa dejó de recibir perfiles de usuarios nuevos → login roto por semanas.
+
+**Regla:** Toda modificación a `handle_new_user()` o al trigger `on_auth_user_created` debe verificarse contra TODAS las apps registradas. No alcanza con no romper tu app — hay que asegurar que las otras sigan funcionando.
+
+### `sanitize_signup_role()` — Sanitización de roles
+
+- Definida en `../supabase-shared/sanitize_signup_role.sql`.
+- AgendaYa la extiende para permitir: `'visitor'`, `'business_owner'`. Cualquier otro rol enviado desde el cliente se degrada a `'visitor'`.
+- `admin` y `moderator` solo asignables vía DB/Supabase por un admin existente.
+
+### `ensureUserApp()` — Late registration (anti-huérfanos)
+
+- RPC definido en `../supabase-shared/ensure_user_app.sql`.
+- Cuando un usuario registrado en otra app (ej: EncuentrosVIP) entra a AgendaYa por primera vez, NO existe su `agendaya_profiles` ni `user_apps` para AgendaYa.
+- El frontend debe llamar a `ensureUserApp(userId, 'agendaya')` si no encuentra perfil.
+- **Actualmente AgendaYa NO tiene fallback inline en `obtenerPerfilUsuario()`** — agregarlo es prioritario para evitar usuarios huérfanos.
+
+### Flujo de registro para AgendaYa
 
 ```
-Usuario llena formulario → supabase.auth.signUp()
-  → Supabase crea fila en auth.users
-    → on_auth_user_created TRIGGER se dispara
-      → handle_new_user() se ejecuta:
-          1. INSERT INTO encuentrosvip_profiles (...)
-          2. INSERT INTO user_apps (..., app_slug='encuentrosvip')
-          3. INSERT INTO agendaya_profiles (...)
-          4. INSERT INTO user_apps (..., app_slug='agendaya')
-          5. INSERT INTO user_apps (..., app_slug='guild_portal')  -- si aplica
+Usuario se registra → supabase.auth.signUp()
+  → on_auth_user_created TRIGGER
+    → handle_new_user() (en supabase-shared/) ejecuta:
+      1. SANITIZA rol via sanitize_signup_role()
+      2. INSERT INTO lexigo_profiles / user_apps (lexigo)
+      3. INSERT INTO encuentrosvip_profiles / user_apps (encuentrosvip)  → BEGIN/EXCEPTION
+      4. INSERT INTO agendaya_profiles (id, role, full_name, email)     → BEGIN/EXCEPTION
+      5. INSERT INTO user_apps (..., app_slug='agendaya')               → BEGIN/EXCEPTION
+      6. INSERT INTO user_apps (..., app_slug='guild_portal')           → BEGIN/EXCEPTION
 ```
 
-#### ⚠️ ADVERTENCIA: handle_new_user() es el cuello de botella
+### ⚠️ Reglas ABSOLUTAS
 
-Todas las apps dependen de UNA SOLA función `handle_new_user()`. Si se reescribe sin incluir todas las apps:
+1. **TODA tabla nueva debe tener prefijo `agendaya_`.** Jamás crear tabla sin prefijo.
+2. **NUNCA modificar tablas, funciones, triggers o policies de otras apps.**
+3. **NUNCA reescribir `handle_new_user()`** — la canónica está en `../supabase-shared/handle_new_user.sql`. Cualquier cambio debe hacerse ahí y coordinarse con las otras 3 apps.
+4. **NUNCA hacer `DROP TABLE`** sin verificar que la tabla pertenece a AgendaYa.
+5. **Siempre usar `IF EXISTS` / `IF NOT EXISTS`** en migraciones.
+6. **NUNCA confiar en `raw_user_meta_data` sin sanitizar.** Siempre usar `sanitize_signup_role()`.
+7. **CADA app externa en `handle_new_user()`** debe ir envuelta en `BEGIN/EXCEPTION`. Una tabla faltante NO debe bloquear el registro global.
+8. **NUNCA hacer `DROP TRIGGER on_auth_user_created`** sin coordinación cross-app.
+9. **Mantener sincronizados `{app}_profiles.role` y `user_apps.role`.** El trigger `sync_profile_role` en EncuentrosVIP sincroniza automáticamente.
 
-**Caso real que pasó:** EncuentrosVIP ejecutó `cleanup_profiles.sql` que:
-1. Borró la tabla `public.profiles` (que AgendaYa usaba) con `DROP TABLE ... CASCADE`
-2. Reescribió `handle_new_user()` para que solo insertara en `encuentrosvip_profiles`
-3. AgendaYa dejó de recibir perfiles de usuarios nuevos → login roto por semanas
+### ⚠️ Reglas RLS (Row Level Security)
 
-**Lección:** Toda modificación a `handle_new_user()` o al trigger `on_auth_user_created` debe verificarse contra TODAS las apps registradas. No alcanza con no romper tu app — hay que asegurar que las otras sigan funcionando.
+1. **Solo `auth.uid() = user_id` en policies.** Nunca usar subconsultas a otras tablas.
+2. **`agendaya_profiles` es la única fuente de verdad para el rol.**
+3. **Toda migración RLS debe limpiar policies anteriores.** Usar `DO $$ ... DROP ALL`.
+4. **`user_apps` NO debe tener RLS.** Es compartida.
+5. **Nombres de policy con prefijo `agendaya_`.**
 
-### Principios de arquitectura
-
-1. **Cada app tiene su propio prefijo de tabla.** Ej: `app_perfiles`, `app_servicios`. Nunca nombres genéricos como `profiles`, `reviews`.
-
-2. **Nunca modificar objetos que no te pertenecen.** Si una tabla, función, trigger o policy no tiene tu prefijo, no tocarla.
-
-3. **Las tablas compartidas (bajo acuerdo) llevan nombres semánticos sin prefijo.** Actualmente: `apps`, `user_apps`, `auth.users`.
-
-4. **El trigger `on_auth_user_created` es compartido.** La función `handle_new_user()` debe insertar registros iniciales para TODAS las apps registradas. Nunca reescribirla sin mantener soporte para las demás.
-
-5. **Toda función/trigger compartida debe revisarse antes de modificarla.** Si afecta `auth.users` o usa `SECURITY DEFINER`, verificar que no rompe otras apps.
-
-6. **Los RPC (Remote Procedure Calls) deben ir con prefijo de app.** Ej: `encuentrosvip_update_role()`, `agendaya_do_thing()`.
-
-### Mapa actual de tablas por app
+### Mapa de tablas por app
 
 | App | Prefijo | Tablas |
 |---|---|---|
+| `lexigo` | `lexigo_` | `profiles`, `courses`, `lessons`, `exercises`, `enrollments`, `xp_transactions`, `achievements`, `streaks`, `reviews`, `tutoring_sessions`, `notifications`, `subscriptions` |
 | `encuentrosvip` | `encuentrosvip_` | `profiles`, `media`, `reviews`, `favorites`, `verifications` |
 | `agendaya` | `agendaya_` | `profiles`, `businesses`, `services`, `business_hours`, `business_config`, `appointments`, `reviews`, `user_likes`, `blog_posts`, `blog_comments`, `blog_likes`, `chat_messages`, `milestones`, `business_categories` |
 | `guild_portal` | `guild_portal_` | `config`, `game_rewards_log`, `game_sessions`, `guide_comments`, `guide_votes`, `guides`, `raid_registrations`, `roster_players`, `schedule_votes`, `section_comments`, `redemption_codes`, `blog_comment_likes`, `blog_comments`, `blog_likes`, `blog_posts` |
 | Compartidas | — | `apps`, `user_apps`, `auth.users` |
 
-### Reglas ABSOLUTAS
-
-1. **TODA tabla nueva debe tener prefijo de app.** Jamás crear `CREATE TABLE public.something` sin prefijo. Si ves una tabla sin prefijo en `public` que no sea `apps` o `user_apps`, reportarla.
-
-2. **NUNCA hacer `DROP TABLE`** en producción sin verificar la tabla de ownership. Si la tabla no tiene tu prefijo, NO TOCAR.
-
-3. **NUNCA reescribir `handle_new_user()`** sin mantener las inserciones para TODAS las apps. La función debe crear perfiles en cada `{app}_profiles` y registrar cada app en `user_apps`.
-
-4. **NUNCA modificar RLS policies** de tablas que no te pertenecen. Si la policy opera sobre `public.otra_app_*`, dejarla intacta.
-
-5. **NUNCA asumir que una tabla existe o no existe.** Siempre usar `IF EXISTS` / `IF NOT EXISTS` en migraciones.
-
 ### Checklist de seguridad para migraciones SQL
 
-Antes de ejecutar cualquier SQL en producción, verificar TODO esto:
-
 - [ ] La migración no contiene `DROP TABLE`, `DROP SCHEMA` ni `TRUNCATE` sobre tablas ajenas
-- [ ] `handle_new_user()` conserva soporte para todas las apps (buscar `{app}_profiles` y `user_apps` en el cuerpo)
+- [ ] `handle_new_user()` conserva soporte para todas las apps
 - [ ] Las nuevas policies RLS no afectan tablas de otras apps
-- [ ] Las nuevas funciones/triggers usan prefijo de app
+- [ ] Las nuevas funciones/triggers usan prefijo `agendaya_`
 - [ ] Los `REFERENCES` en FK apuntan a tablas con el prefijo correcto
-- [ ] Los trigger names incluyen prefijo de app para evitar colisiones
-- [ ] `raw_user_meta_data` sanitizado si se introduce un nuevo campo de registro
+- [ ] `raw_user_meta_data` sanitizado
 - [ ] Las funciones `SECURITY DEFINER` no exponen datos de otras apps
 
 ### Cómo agregar una nueva app al ecosistema
 
 1. Registrar en `public.apps`: `INSERT INTO apps (slug, name) VALUES ('miapp', 'Mi App')`
-2. Crear tablas con prefijo `miapp_`: `CREATE TABLE public.miapp_profiles (...)`
-3. Agregar inserción en `handle_new_user()`: insertar perfil en `miapp_profiles` + registro en `user_apps` con `app_slug = 'miapp'`
-4. Crear RLS policies para las tablas nuevas
-5. Migración de coexistencia: crear `supabase/coexistence.sql` que incluya los pasos 1-4
+2. Crear tablas con prefijo `miapp_`
+3. Agregar inserción en `handle_new_user()` (en `../supabase-shared/handle_new_user.sql`)
+4. Crear RLS policies
 
 ### Referencia
 
-- Migración de coexistencia: `supabase/coexistence.sql` (en proyecto encuentrosvip)
-- `handle_new_user()` actual definida en: `supabase/coexistence.sql`, `supabase-setup.sql`, `security_hardening.sql`
-- `user_apps.app_slug` valores activos: `'encuentrosvip'`, `'agendaya'`, `'guild_portal'`
+- `handle_new_user()` canónico: `../supabase-shared/handle_new_user.sql`
+- `sanitize_signup_role()` canónico: `../supabase-shared/sanitize_signup_role.sql`
+- `ensureUserApp()` RPC: `../supabase-shared/ensure_user_app.sql`
 
 ## Code Organization
 
@@ -164,11 +172,11 @@ src/
 ## Build & Deploy
 
 ```bash
-npm run dev           # Development server (port 3000)
-npm run type-check    # tsc --noEmit
-npm run build         # vite build
-npm run preview       # Preview production build
-npx vite build        # Force build
+pnpm dev              # Development server (port 3000)
+pnpm type-check       # tsc --noEmit
+pnpm build            # vite build
+pnpm preview          # Preview production build
+pnpm netlify-build    # Build para Netlify (instala + build + sitemap + prerender)
 ```
 
 - Netlify SPA redirect: `/*` → `/index.html` with `200`.
@@ -177,7 +185,10 @@ npx vite build        # Force build
 
 ## Developing with an Agent (opencode)
 
+- **Commits al finalizar la sesión:** Antes de cerrar la sesión de trabajo, hacer commit de todos los cambios funcionales completados. Usar `git add -A` y commits atómicos (un cambio lógico por commit). Mensajes descriptivos en español.
+- **Verificación pre-commit:** Ejecutar `pnpm type-check` luego `pnpm build` antes de cada commit para verificar que no hay errores. Si el build falla por errores preexistentes (no causados por tus cambios), documentarlo en el commit.
 - Read files before editing. Understand conventions before writing code.
 - Prefer editing existing files over creating new ones unless clearly warranted.
-- After edits, run `npx tsc --noEmit` then `npx vite build` to verify.
+- After edits, run `pnpm type-check` then `pnpm build` to verify.
 - **Remember: tables are `agendaya_profiles` NOT `profiles`.**
+- **SQL compartido:** Si modificas `handle_new_user()`, hacerlo en `../supabase-shared/handle_new_user.sql`. Nunca redefinirlo en archivos SQL del proyecto.
