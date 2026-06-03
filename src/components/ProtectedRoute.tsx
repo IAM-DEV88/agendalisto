@@ -1,18 +1,30 @@
 import { Navigate } from 'react-router-dom';
+import React from 'react';
+import { ROLES } from '../lib/roles';
+import type { Role } from '../lib/roles';
 
 type ProtectedRouteProps = {
-  user: any; // El usuario ya viene verificado desde App.tsx
-  children: JSX.Element;
+  user: any;
+  children: React.ReactNode;
+  requiredRole?: Role;
+  fallbackPath?: string;
 };
 
-const ProtectedRoute = ({ user, children }: ProtectedRouteProps) => {
-  // Si el usuario no existe (pasado desde App), redirigir
+const ProtectedRoute = ({ user, children, requiredRole, fallbackPath = '/' }: ProtectedRouteProps) => {
   if (!user) {
-    return <Navigate to="/login" replace />; // replace evita añadir al historial
+    return <Navigate to="/login" replace />;
   }
 
-  // Si el usuario existe, renderizar el componente hijo
-  return children;
+  if (requiredRole && user.role) {
+    const userIdx = ROLES.indexOf(user.role);
+    const reqIdx = ROLES.indexOf(requiredRole);
+
+    if (reqIdx !== -1 && userIdx !== -1 && userIdx < reqIdx) {
+      return <Navigate to={fallbackPath} replace />;
+    }
+  }
+
+  return <>{children}</>;
 };
 
-export default ProtectedRoute; 
+export default ProtectedRoute;

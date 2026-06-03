@@ -256,6 +256,16 @@ const BusinessHeader: React.FC<BusinessHeaderProps> = ({ businessData, averageRa
                   {categoryName}
                 </span>
               )}
+              {businessData.plan === 'premium' && (
+                <span className="px-3 py-1 bg-amber-100 dark:bg-amber-900/40 text-amber-700 dark:text-amber-300 rounded-full font-bold text-xs uppercase tracking-wider">
+                  Premium
+                </span>
+              )}
+              {businessData.plan === 'pro' && (
+                <span className="px-3 py-1 bg-blue-100 dark:bg-blue-900/40 text-blue-700 dark:text-blue-300 rounded-full font-bold text-xs uppercase tracking-wider">
+                  Pro
+                </span>
+              )}
             </div>
 
             {reviewsCount > 0 && (

@@ -84,6 +84,9 @@ const Nav = ({ user }: NavProps) => {
               Explorar
             </Link>
 
+            <Link to="/plans" className="px-3 py-2 text-sm font-semibold text-slate-700 dark:text-slate-300 hover:text-primary-600 dark:hover:text-primary-400 transition-colors">
+              Planes
+            </Link>
             <Link to="/blog" className="px-3 py-2 text-sm font-semibold text-slate-700 dark:text-slate-300 hover:text-primary-600 dark:hover:text-primary-400 transition-colors">
               Blog
             </Link>
@@ -197,6 +200,9 @@ const Nav = ({ user }: NavProps) => {
             </Link>
             <Link to="/explore" onClick={() => setIsMenuOpen(false)} className="block px-4 py-3 text-base font-bold text-slate-700 dark:text-slate-300 rounded-xl hover:bg-primary-50 dark:hover:bg-slate-800 hover:text-primary-600 transition-all">
               Explorar
+            </Link>
+            <Link to="/plans" onClick={() => setIsMenuOpen(false)} className="block px-4 py-3 text-base font-bold text-slate-700 dark:text-slate-300 rounded-xl hover:bg-primary-50 dark:hover:bg-slate-800 hover:text-primary-600 transition-all">
+              Planes
             </Link>
             <Link to="/blog" onClick={() => setIsMenuOpen(false)} className="block px-4 py-3 text-base font-bold text-slate-700 dark:text-slate-300 rounded-xl hover:bg-primary-50 dark:hover:bg-slate-800 hover:text-primary-600 transition-all">
               Blog

@@ -4,6 +4,7 @@ import { supabase } from '../lib/supabase';
 import { dispatchUserProfileUpdated } from '../lib/events';
 import UserProfileSection from '../components/profile/UserProfileSection';
 import { useAppDispatch } from '../hooks/useAppDispatch';
+import { setUserProfile } from '../store/userSlice';
 import { useAppointments } from '../hooks/useAppointments';
 import type { UserProfile } from '../lib/supabase';
 import { ApiClient } from '../lib/apiClient';
@@ -27,7 +28,10 @@ import {
   LogOut,
   ChevronRight,
   ListChecks,
+  UserPlus,
 } from 'lucide-react';
+import { ROLE_LABELS } from '../lib/roles';
+import { updateProfileRole } from '../lib/api';
 
 const FALLBACK_AVATAR = 'https://upload.wikimedia.org/wikipedia/commons/8/89/Portrait_Placeholder.png';
 
@@ -116,6 +120,20 @@ const ProfileDashboard = ({ user }: ProfileDashboardProps) => {
     pending: { page: 1, perPage: itemsPerPage },
     history: { page: 1, perPage: itemsPerPage },
   });
+
+  const isVisitor = user?.role === 'visitor';
+
+  const handleActivateClient = async () => {
+    if (!user?.id) return;
+    const result = await updateProfileRole(user.id, 'client');
+    if (result.success) {
+      const updated = { ...user, role: 'client' } as UserProfile;
+      dispatch(setUserProfile(updated));
+      toast.success('¡Cuenta de cliente activada! Ya puedes agendar citas.');
+    } else {
+      toast.error(result.error || 'Error al activar cuenta de cliente');
+    }
+  };
 
   const [activeTab, setActiveTab] = useState<'appointments' | 'settings'>('appointments');
   const [activeAppointmentTab, setActiveAppointmentTab] = useState('upcoming');
@@ -331,7 +349,12 @@ const ProfileDashboard = ({ user }: ProfileDashboardProps) => {
                     <h1 className="text-2xl font-black text-slate-900 dark:text-white tracking-tight">
                       {greeting}, {username}
                     </h1>
-                    <span className="text-2xl">{greeting.includes('noches') ? '🌙' : greeting.includes('tardes') ? '☀️' : '🌅'}</span>
+                    <span className="text-lg">{greeting.includes('noches') ? '🌙' : greeting.includes('tardes') ? '☀️' : '🌅'}</span>
+                    {user?.role && user.role !== 'visitor' && (
+                      <span className="ml-2 px-2.5 py-0.5 text-xs font-bold rounded-full bg-primary-100 text-primary-700 dark:bg-primary-900/30 dark:text-primary-400">
+                        {ROLE_LABELS[user.role as keyof typeof ROLE_LABELS] || user.role}
+                      </span>
+                    )}
                   </div>
                   <p className="text-sm font-medium text-slate-500 dark:text-slate-400 mt-0.5">
                     {activeAppointmentsCount > 0
@@ -342,6 +365,15 @@ const ProfileDashboard = ({ user }: ProfileDashboardProps) => {
               </div>
 
               <div className="flex items-center gap-3">
+                {isVisitor ? (
+                  <button
+                    onClick={handleActivateClient}
+                    className="inline-flex items-center gap-2 px-5 py-2.5 bg-emerald-600 hover:bg-emerald-700 text-white text-sm font-bold rounded-xl transition-all shadow-lg shadow-emerald-500/25 hover:-translate-y-0.5 active:translate-y-0"
+                  >
+                    <UserPlus className="w-4 h-4" />
+                    Activar cuenta de cliente
+                  </button>
+                ) : null}
                 {hasBusiness ? (
                   <Link
                     to="/business/dashboard"
@@ -363,6 +395,29 @@ const ProfileDashboard = ({ user }: ProfileDashboardProps) => {
               </div>
             </div>
           </div>
+
+          {/* ─── VISITOR UPGRADE BANNER ─── */}
+          {isVisitor && (
+            <div className="bg-gradient-to-r from-emerald-50 to-teal-50 dark:from-emerald-950/30 dark:to-teal-950/30 border border-emerald-200 dark:border-emerald-800 rounded-2xl p-5 animate-in fade-in slide-in-from-bottom-4 duration-500 delay-75">
+              <div className="flex flex-col sm:flex-row items-start sm:items-center gap-4">
+                <div className="flex-1">
+                  <h3 className="font-bold text-emerald-800 dark:text-emerald-300 text-base">
+                    Activa tu cuenta de cliente
+                  </h3>
+                  <p className="text-sm text-emerald-600 dark:text-emerald-400 mt-1">
+                    Agenda citas, escribe reseñas, guarda tus favoritos y mucho más. Es gratis.
+                  </p>
+                </div>
+                <button
+                  onClick={handleActivateClient}
+                  className="inline-flex items-center gap-2 px-5 py-2.5 bg-emerald-600 hover:bg-emerald-700 text-white text-sm font-bold rounded-xl transition-all shadow-lg shadow-emerald-500/25 hover:-translate-y-0.5 active:translate-y-0 flex-shrink-0"
+                >
+                  <UserPlus className="w-4 h-4" />
+                  Activar ahora
+                </button>
+              </div>
+            </div>
+          )}
 
           {/* ─── STATS CARDS ─── */}
           <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 sm:gap-4 animate-in fade-in slide-in-from-bottom-4 duration-500 delay-100">

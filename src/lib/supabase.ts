@@ -73,6 +73,8 @@ export interface UserProfile {
   full_name: string;
   phone: string;
   email: string;
+  role: string;
+  plan: string;
   is_business: boolean;
   created_at: string;
   updated_at: string;

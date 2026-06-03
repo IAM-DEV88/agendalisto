@@ -9,7 +9,7 @@ import { supabase } from '../../lib/supabase';
 interface ServicesSectionProps {
   businessId: string;
   getServices: (businessId: string) => Promise<{ success: boolean; data?: Service[]; error?: string }>;
-  createService: (service: Omit<Service, 'id' | 'created_at' | 'updated_at'>) => Promise<{ success: boolean; data?: Service; error?: string }>;
+  createService: (service: Omit<Service, 'id' | 'likes_count' | 'created_at' | 'updated_at'>) => Promise<{ success: boolean; data?: Service; error?: string }>;
   updateService: (id: string, service: Partial<Service>) => Promise<{ success: boolean; data?: Service; error?: string }>;
   deleteService: (id: string) => Promise<{ success: boolean; error?: string }>;
   itemsPerPage: number;

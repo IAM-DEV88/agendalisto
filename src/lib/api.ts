@@ -23,6 +23,8 @@ export type Business = {
   website: string | null;
   lat: number | null;
   lng: number | null;
+  plan: string;
+  plan_score: number;
   likes_count: number;
   created_at: string;
   updated_at: string;
@@ -86,6 +88,8 @@ export const getBusinesses = async (search?: string, _category?: string, locatio
   if (_category) {
     query = query.eq('category_id', _category);
   }
+
+  query = query.order('plan_score', { ascending: false }).order('created_at', { ascending: false });
   
   const { data, error } = await query;
   
@@ -260,7 +264,7 @@ export async function getBusinessClients(businessId: string): Promise<{ success:
 }
 
 // API functions for business management
-export const createBusiness = async (business: Omit<Business, 'id' | 'created_at' | 'updated_at'>) => {
+export const createBusiness = async (business: Omit<Business, 'id' | 'plan' | 'plan_score' | 'likes_count' | 'created_at' | 'updated_at'>) => {
   try {
     // Exclude slug field from insert payload; it doesn't exist in the DB
     const { slug, ...payload } = business;
@@ -445,9 +449,32 @@ export const obtenerPerfilUsuario = async (userId: string): Promise<{ success: b
 
     if (data) {
       return { success: true, perfil: data, error: null };
-    } else {
-      return { success: false, perfil: null, error: 'Respuesta inesperada del servidor' };
     }
+
+    // Fallback: intentar late-registration vía ensure_user_app
+    try {
+      const { error: rpcError } = await supabase.rpc('ensure_user_app', {
+        p_user_id: userId,
+        p_app_slug: 'agendaya',
+      });
+      if (rpcError) throw rpcError;
+
+      await new Promise(resolve => setTimeout(resolve, 500));
+
+      const retryResponse = await supabase
+        .from('agendaya_profiles')
+        .select('*')
+        .eq('id', userId)
+        .single();
+
+      if (retryResponse.data) {
+        return { success: true, perfil: retryResponse.data as UserProfile, error: null };
+      }
+    } catch {
+      // Fallback silencioso — si no se pudo recuperar, retornar error original
+    }
+
+    return { success: false, perfil: null, error: 'Perfil no encontrado' };
 
   } catch (err: any) {
     return {
@@ -548,7 +575,7 @@ export async function updateBusinessConfig(businessId: string, config: BusinessC
 }
 
 // Functions for managing business services
-export const createBusinessService = async (service: Omit<Service, 'id' | 'created_at' | 'updated_at'>) => {
+export const createBusinessService = async (service: Omit<Service, 'id' | 'likes_count' | 'created_at' | 'updated_at'>) => {
   try {
     const { data, error } = await supabase
       .from('agendaya_services')
@@ -967,6 +994,40 @@ export const getTopMilestones = async (limit = 3): Promise<{ success: boolean; d
     const { data, error } = await supabase.from('agendaya_milestones').select('*').order('current_amount', { ascending: false }).limit(limit);
     if (error) throw error;
     return { success: true, data: (data as Milestone[]) || [] };
+  } catch (err: any) {
+    return { success: false, error: err.message };
+  }
+};
+
+// ─── Roles & Plans API ───
+
+export const updateProfileRole = async (
+  userId: string,
+  newRole: string
+): Promise<{ success: boolean; error?: string }> => {
+  try {
+    const { error } = await supabase.rpc('update_agendaya_profile_role', {
+      p_user_id: userId,
+      p_new_role: newRole,
+    });
+    if (error) throw error;
+    return { success: true };
+  } catch (err: any) {
+    return { success: false, error: err.message };
+  }
+};
+
+export const updateBusinessPlan = async (
+  userId: string,
+  newPlan: string
+): Promise<{ success: boolean; error?: string }> => {
+  try {
+    const { error } = await supabase.rpc('update_agendaya_business_plan', {
+      p_user_id: userId,
+      p_new_plan: newPlan,
+    });
+    if (error) throw error;
+    return { success: true };
   } catch (err: any) {
     return { success: false, error: err.message };
   }

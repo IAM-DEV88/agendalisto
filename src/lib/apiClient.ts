@@ -173,7 +173,7 @@ export class ApiClient {
     }
   }
 
-  static async createBusinessService(service: Omit<Service, 'id' | 'created_at' | 'updated_at'>): Promise<ApiResponse<Service>> {
+  static async createBusinessService(service: Omit<Service, 'id' | 'likes_count' | 'created_at' | 'updated_at'>): Promise<ApiResponse<Service>> {
     try {
       const { data, error } = await supabase
         .from('agendaya_services')

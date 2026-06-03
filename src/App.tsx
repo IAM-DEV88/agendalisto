@@ -12,6 +12,7 @@ import BusinessPublicPage from './pages/BusinessPublicPage';
 import ForgotPassword from './pages/ForgotPassword';
 import ExploreBusinesses from './pages/ExploreBusinesses';
 import Crowdfunding from './pages/Crowdfunding';
+import Plans from './pages/Plans';
 import Blog from './pages/Blog';
 import BlogPostView from './pages/BlogPostView';
 import BookingPage from './pages/BookingPage';
@@ -33,7 +34,7 @@ function App() {
   const userProfile = useSelector((state: RootState) => state.user.userProfile);
   const authInitialized = useSelector((state: RootState) => state.user.authInitialized);
   const authInProgressRef = useRef(false);
-  const retryTimeoutRef = useRef<number>();
+  const retryTimeoutRef = useRef<number | undefined>(undefined);
   const profileLoadAttemptsRef = useRef(0);
   const MAX_PROFILE_LOAD_ATTEMPTS = 3;
 
@@ -226,6 +227,7 @@ function App() {
             <Route path="/forgot-password" element={<ForgotPassword />} />
             <Route path="/explore" element={<ExploreBusinesses />} />
             <Route path="/crowdfunding" element={<Crowdfunding />} />
+            <Route path="/plans" element={<Plans />} />
             <Route path="/blog" element={<Blog />} />
             <Route path="/blog/:id" element={<BlogPostView />} />
             <Route path="/dashboard" element={

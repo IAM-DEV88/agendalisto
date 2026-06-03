@@ -139,8 +139,9 @@ export const BusinessDashboard: React.FC = () => {
 
   useEffect(() => {
     if (!businessData?.id) return;
-    const reviewChannel = supabase
-      .channel(`business-reviews-${businessData.id}`)
+
+    const channel = supabase
+      .channel(`business-reviews-dashboard-${businessData.id}`)
       .on('postgres_changes', {
         event: 'INSERT',
         schema: 'public',
@@ -151,7 +152,10 @@ export const BusinessDashboard: React.FC = () => {
         await refreshAppointments();
       })
       .subscribe();
-    return () => { supabase.removeChannel(reviewChannel); };
+
+    return () => {
+      supabase.removeChannel(channel);
+    };
   }, [businessData?.id, refreshAppointments]);
 
   const handleUpdateAppointmentStatus = async (id: string, newStatus: AppointmentStatus) => {
