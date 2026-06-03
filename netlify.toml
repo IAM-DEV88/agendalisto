@@ -3,7 +3,7 @@
   publish = "dist"
 
 [build.environment]
-  NODE_VERSION = "20.10.0"
+  NODE_VERSION = "20.18.0"
   # pnpm no necesita --legacy-peer-deps
   CI = "false"
   SITE_URL = "https://agendalisto.com"
