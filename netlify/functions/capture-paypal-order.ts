@@ -41,6 +41,8 @@ export const handler = async (event: any) => {
     return { statusCode: 405, body: 'Method Not Allowed' };
   }
 
+  console.log('[capture-paypal-order] ENV:', Object.keys(process.env).filter(k => k.includes('PAYPAL') || k.includes('SUPABASE')));
+
   try {
     const { orderId, userId, plan } = JSON.parse(event.body || '{}');
 
