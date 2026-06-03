@@ -1,8 +1,10 @@
 import { Link } from 'react-router-dom';
 import { useSelector } from 'react-redux';
+import { PayPalScriptProvider } from '@paypal/react-paypal-js';
 import { PLANS, PLAN_LABELS, PLAN_DESCRIPTIONS, PLAN_PRICES, PLAN_FEATURES, PLAN_BADGE, Plan } from '../lib/roles';
 import type { RootState } from '../store';
 import SEO from '../components/SEO';
+import PayPalSubscribeButton from '../components/PayPalSubscribeButton';
 import { Check, X, Sparkles, Crown, Store } from 'lucide-react';
 
 const PLAN_ICONS: Record<Plan, React.ReactNode> = {
@@ -33,9 +35,13 @@ const PLAN_CARDS: Record<Plan, { border: string; bg: string; accent: string; but
   },
 };
 
-const Plans = () => {
+const PAYPAL_CLIENT_ID = import.meta.env.VITE_PAYPAL_CLIENT_ID;
+
+function PlansContent() {
   const userProfile = useSelector((state: RootState) => state.user.userProfile);
+  const user = useSelector((state: RootState) => state.user.user);
   const hasBusiness = !!userProfile?.business_id;
+  const currentPlan = userProfile?.plan;
 
   return (
     <div className="min-h-screen bg-gradient-to-b from-slate-50 to-white dark:from-slate-950 dark:to-slate-900">
@@ -133,13 +139,19 @@ const Plans = () => {
                       >
                         {hasBusiness ? <><Store className="w-4 h-4" /> Ir a mi negocio</> : 'Empezar gratis'}
                       </Link>
-                    ) : (
+                    ) : plan === currentPlan ? (
+                      <div className="w-full text-center py-3 font-bold rounded-xl bg-slate-100 dark:bg-slate-800 text-slate-400 cursor-not-allowed">
+                        Plan actual
+                      </div>
+                    ) : !user || !PAYPAL_CLIENT_ID ? (
                       <Link
-                        to={userProfile ? '/business/dashboard' : '/login'}
+                        to={user ? '/business/dashboard' : '/login'}
                         className={`block w-full text-center py-3 font-bold rounded-xl transition-all ${card.button}`}
                       >
-                        {`Mejora a ${PLAN_LABELS[plan]}`}
+                        {user ? `Mejora a ${PLAN_LABELS[plan]}` : 'Inicia sesión'}
                       </Link>
+                    ) : (
+                      <PayPalSubscribeButton plan={plan as 'pro' | 'premium'} userId={user.id} />
                     )}
                   </div>
               </div>
@@ -158,6 +170,17 @@ const Plans = () => {
       </div>
     </div>
   );
+}
+
+const Plans = () => {
+  if (PAYPAL_CLIENT_ID) {
+    return (
+      <PayPalScriptProvider options={{ clientId: PAYPAL_CLIENT_ID, vault: false, intent: 'capture' }}>
+        <PlansContent />
+      </PayPalScriptProvider>
+    );
+  }
+  return <PlansContent />;
 };
 
 export default Plans;

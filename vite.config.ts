@@ -10,7 +10,13 @@ export default defineConfig(({ mode }) => {
     plugins: [react()],
     server: {
       port: 3000,
-      open: true
+      open: true,
+      proxy: {
+        '/.netlify/functions': {
+          target: 'http://localhost:8888',
+          changeOrigin: true,
+        }
+      }
     },
     define: {
       'process.env': {

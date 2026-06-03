@@ -8,6 +8,11 @@
   CI = "false"
   SITE_URL = "https://agendalisto.com"
 
+[functions]
+  directory = "netlify/functions"
+  # Node.js 20 + esbuild bundler por defecto
+  node_bundler = "esbuild"
+
 # 404 personalizada
 [[redirects]]
   from = "/404"
