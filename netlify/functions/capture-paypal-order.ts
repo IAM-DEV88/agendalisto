@@ -11,11 +11,11 @@ const supabase = createClient(
 
 async function getAccessToken(): Promise<string> {
   const clientId = process.env.PAYPAL_CLIENT_ID!;
-  const clientSecret = process.env.PAYPAL_CLIENT_SECRET!;
+  const clientSecret = process.env.PAYPAL_SECRET!;
 
   if (!clientId || !clientSecret) {
     const similares = Object.keys(process.env).filter(k => /paypal/i.test(k));
-    throw new Error(`Faltan PAYPAL_CLIENT_ID o PAYPAL_CLIENT_SECRET. Similares encontradas: ${similares.length ? similares.join(', ') : 'ninguna'}`);
+    throw new Error(`Faltan PAYPAL_CLIENT_ID o PAYPAL_SECRET. Similares encontradas: ${similares.length ? similares.join(', ') : 'ninguna'}`);
   }
 
   const res = await fetch(`${PAYPAL_API}/v1/oauth2/token`, {
