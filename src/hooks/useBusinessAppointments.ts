@@ -9,7 +9,6 @@ export function useBusinessAppointments(businessId: string | null) {
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
-    console.log('[useBusinessAppointments] mount, businessId=', businessId);
     let isMounted = true;
 
     async function load() {
@@ -19,7 +18,6 @@ export function useBusinessAppointments(businessId: string | null) {
         const { success, data, error: apiError } = await getBusinessAppointments(businessId);
         if (!isMounted) return;
         if (success && data) {
-          console.log('[useBusinessAppointments] loaded', data.length, 'appointments');
           setAppointments(data);
           setError(null);
         } else {
@@ -38,21 +36,18 @@ export function useBusinessAppointments(businessId: string | null) {
       const appointmentChannel = supabase
         .channel(`business-appointments-${businessId}`)
         .on('postgres_changes', { event: '*', schema: 'public', table: 'agendaya_appointments', filter: `business_id=eq.${businessId}` }, async () => {
-          console.log('[useBusinessAppointments] appointment change');
           await load();
         })
         .subscribe();
       const reviewChannel = supabase
         .channel(`business-reviews-${businessId}`)
         .on('postgres_changes', { event: 'INSERT', schema: 'public', table: 'agendaya_reviews', filter: `business_id=eq.${businessId}` }, async () => {
-          console.log('[useBusinessAppointments] review change');
           await load();
         })
         .subscribe();
 
       return () => {
         isMounted = false;
-        console.log('[useBusinessAppointments] cleanup channels');
         supabase.removeChannel(appointmentChannel);
         supabase.removeChannel(reviewChannel);
       };

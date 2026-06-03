@@ -1,7 +1,10 @@
 import { useState, useEffect, useMemo } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { createBusiness, updateUserProfile, getBusinessCategories, BusinessCategory } from '../lib/api';
+import { useSelector } from 'react-redux';
+import { createBusiness, updateUserProfile, updateProfileRole, getBusinessCategories, BusinessCategory } from '../lib/api';
 import type { UserProfile } from '../lib/supabase';
+import type { RootState } from '../store';
+import { getMaxBusinesses } from '../lib/roles';
 import SEO from '../components/SEO';
 import {
   Store,
@@ -40,12 +43,21 @@ const initialForm = {
 
 const BusinessRegister = ({ user }: BusinessRegisterProps) => {
   const navigate = useNavigate();
+  const userProfile = useSelector((state: RootState) => state.user.userProfile);
+  const plan = (userProfile?.plan as 'starter' | 'pro' | 'premium') || 'starter';
   const [form, setForm] = useState({ ...initialForm, email: user?.email || '' });
   const [categories, setCategories] = useState<BusinessCategory[]>([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [slugPreview, setSlugPreview] = useState('');
   const [submitted, setSubmitted] = useState(false);
+
+  // Redirect if user already has a business
+  useEffect(() => {
+    if (user?.business_id && getMaxBusinesses(plan) <= 1) {
+      navigate('/business/dashboard', { replace: true });
+    }
+  }, [user, plan, navigate]);
 
   useEffect(() => {
     getBusinessCategories().then(({ success, data }) => {
@@ -81,6 +93,13 @@ const BusinessRegister = ({ user }: BusinessRegisterProps) => {
     setLoading(true);
     setError(null);
 
+    // Solo se permite un negocio por cuenta
+    if (user?.business_id) {
+      setError('Ya tienes un negocio registrado.');
+      setLoading(false);
+      return;
+    }
+
     try {
       const businessData = {
         owner_id: user.id,
@@ -104,6 +123,10 @@ const BusinessRegister = ({ user }: BusinessRegisterProps) => {
 
       if (success && business) {
         await updateUserProfile(user.id, { is_business: true, business_id: business.id });
+        await updateProfileRole(user.id, 'business_owner');
+        window.dispatchEvent(new CustomEvent('userProfileUpdated', {
+          detail: { profile: { ...user, role: 'business_owner' } }
+        }));
         setSubmitted(true);
         setTimeout(() => navigate('/business/dashboard'), 1500);
       } else {

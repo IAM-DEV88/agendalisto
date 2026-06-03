@@ -81,6 +81,15 @@ CREATE TRIGGER on_like_change
   FOR EACH ROW
   EXECUTE FUNCTION public.update_likes_count();
 
+-- Actualizar sanitize_signup_role para AgendaYa
+-- (la versión en coexistence.sql no incluye business_owner)
+CREATE OR REPLACE FUNCTION public.sanitize_signup_role(raw_role text)
+RETURNS text LANGUAGE plpgsql IMMUTABLE AS $$
+BEGIN
+  IF raw_role IN ('advertiser', 'business_owner') THEN RETURN raw_role; END IF;
+  RETURN 'visitor';
+END $$;
+
 -- Forzar recarga del schema cache de PostgREST
 NOTIFY pgrst, 'reload schema';
 

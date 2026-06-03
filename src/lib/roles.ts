@@ -113,3 +113,38 @@ export function canBook(role: string): boolean {
   const bookable: readonly string[] = ['client', 'business_owner', 'moderator', 'admin'];
   return (bookable as readonly string[]).includes(role);
 }
+
+// ─── Plan-based helpers ───
+
+export function getMaxBusinesses(plan: Plan): number {
+  if (plan === 'premium') return 3;
+  return 1;
+}
+
+export function getMaxServices(plan: Plan): number {
+  if (plan === 'starter') return 5;
+  return Infinity;
+}
+
+export function hasFeature(plan: Plan | string, featureLabel: string): boolean {
+  const features = PLAN_FEATURES[plan as Plan];
+  if (!features) return false;
+  return features.some(f => f.label === featureLabel && f.included);
+}
+
+export function canAccessAnalytics(plan: Plan | string): boolean {
+  const p = plan as Plan;
+  return p === 'pro' || p === 'premium';
+}
+
+export function canAccessAdvancedAnalytics(plan: Plan | string): boolean {
+  return (plan as Plan) === 'premium';
+}
+
+export function canUseWhatsApp(plan: Plan | string): boolean {
+  return (plan as Plan) !== 'starter';
+}
+
+export function canCustomBranding(plan: Plan | string): boolean {
+  return (plan as Plan) === 'premium';
+}

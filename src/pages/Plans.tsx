@@ -1,7 +1,9 @@
 import { Link } from 'react-router-dom';
+import { useSelector } from 'react-redux';
 import { PLANS, PLAN_LABELS, PLAN_DESCRIPTIONS, PLAN_PRICES, PLAN_FEATURES, PLAN_BADGE, Plan } from '../lib/roles';
+import type { RootState } from '../store';
 import SEO from '../components/SEO';
-import { Check, X, Sparkles, Crown } from 'lucide-react';
+import { Check, X, Sparkles, Crown, Store } from 'lucide-react';
 
 const PLAN_ICONS: Record<Plan, React.ReactNode> = {
   starter: <div className="w-10 h-10 rounded-xl bg-slate-100 dark:bg-slate-800 flex items-center justify-center text-slate-500" />,
@@ -32,6 +34,9 @@ const PLAN_CARDS: Record<Plan, { border: string; bg: string; accent: string; but
 };
 
 const Plans = () => {
+  const userProfile = useSelector((state: RootState) => state.user.userProfile);
+  const hasBusiness = !!userProfile?.business_id;
+
   return (
     <div className="min-h-screen bg-gradient-to-b from-slate-50 to-white dark:from-slate-950 dark:to-slate-900">
       <SEO
@@ -119,24 +124,24 @@ const Plans = () => {
                   ))}
                 </div>
 
-                {/* CTA */}
-                <div className="p-6 sm:p-8 pt-0">
-                  {price.amount === 0 ? (
-                    <Link
-                      to="/business/register"
-                      className={`block w-full text-center py-3 font-bold rounded-xl transition-all ${card.button}`}
-                    >
-                      Empezar gratis
-                    </Link>
-                  ) : (
-                    <Link
-                      to="/business/dashboard"
-                      className={`block w-full text-center py-3 font-bold rounded-xl transition-all ${card.button}`}
-                    >
-                      {`Mejora a ${PLAN_LABELS[plan]}`}
-                    </Link>
-                  )}
-                </div>
+                  {/* CTA */}
+                  <div className="p-6 sm:p-8 pt-0">
+                    {price.amount === 0 ? (
+                      <Link
+                        to={hasBusiness ? '/business/dashboard' : '/business/register'}
+                        className={`inline-flex items-center justify-center gap-2 w-full py-3 font-bold rounded-xl transition-all ${card.button}`}
+                      >
+                        {hasBusiness ? <><Store className="w-4 h-4" /> Ir a mi negocio</> : 'Empezar gratis'}
+                      </Link>
+                    ) : (
+                      <Link
+                        to={userProfile ? '/business/dashboard' : '/login'}
+                        className={`block w-full text-center py-3 font-bold rounded-xl transition-all ${card.button}`}
+                      >
+                        {`Mejora a ${PLAN_LABELS[plan]}`}
+                      </Link>
+                    )}
+                  </div>
               </div>
             );
           })}

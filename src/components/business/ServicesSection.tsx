@@ -5,6 +5,7 @@ import { notifySuccess, notifyError } from '../../lib/toast';
 import SectionHeader from '../ui/SectionHeader';
 import { Pagination } from '../ui/Pagination';
 import { supabase } from '../../lib/supabase';
+import { getMaxServices } from '../../lib/roles';
 
 interface ServicesSectionProps {
   businessId: string;
@@ -13,6 +14,7 @@ interface ServicesSectionProps {
   updateService: (id: string, service: Partial<Service>) => Promise<{ success: boolean; data?: Service; error?: string }>;
   deleteService: (id: string) => Promise<{ success: boolean; error?: string }>;
   itemsPerPage: number;
+  plan: 'starter' | 'pro' | 'premium';
 }
 
 const ServicesSection: React.FC<ServicesSectionProps> = ({
@@ -22,7 +24,9 @@ const ServicesSection: React.FC<ServicesSectionProps> = ({
   updateService,
   deleteService,
   itemsPerPage,
+  plan,
 }) => {
+  const maxServices = getMaxServices(plan);
   const [services, setServices] = useState<Service[]>([]);
   const [currentPage, setCurrentPage] = useState(1);
   const [loading, setLoading] = useState(true);
@@ -106,6 +110,9 @@ const ServicesSection: React.FC<ServicesSectionProps> = ({
           throw new Error(response.error);
         }
       } else {
+        if (maxServices !== Infinity && services.length >= maxServices) {
+          throw new Error(`Has alcanzado el límite de ${maxServices} servicios en tu plan ${plan}. Actualiza a un plan superior para agregar más servicios.`);
+        }
         response = await createService(serviceData);
         if (response.success) {
           notifySuccess('Servicio creado correctamente');
@@ -238,11 +245,15 @@ const ServicesSection: React.FC<ServicesSectionProps> = ({
     <div className="space-y-6">
       <SectionHeader 
         title="Servicios" 
-        description="Gestiona el catálogo de servicios que ofreces a tus clientes"
+        description={`${maxServices === Infinity ? 'Servicios ilimitados' : `Hasta ${maxServices} servicios — Plan ${plan}`} (${services.length} actuales)`}
         actionButton={
           <button
             type="button"
             onClick={() => {
+              if (maxServices !== Infinity && services.length >= maxServices) {
+                notifyError(`Has alcanzado el límite de ${maxServices} servicios. Actualiza tu plan para agregar más.`);
+                return;
+              }
               resetForm();
               setModalOpen(true);
             }}

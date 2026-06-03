@@ -3,6 +3,7 @@ import { useState, useEffect, useRef } from 'react';
 import { signOut, supabase } from '../lib/supabase';
 import { UserProfile } from '../lib/supabase';
 import { useTheme } from '../contexts/ThemeContext';
+import { canManageBusiness } from '../lib/roles';
 import { Sun, Moon } from 'lucide-react';
 
 type NavProps = {
@@ -15,7 +16,8 @@ const Nav = ({ user }: NavProps) => {
   const location = useLocation();
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [isUserDropdownOpen, setIsUserDropdownOpen] = useState(false);
-  const hasBusiness = !!user?.business_id;
+  const canManage = canManageBusiness(user?.role || '');
+  const hasBusiness = canManage && !!user?.business_id;
   const dropdownRef = useRef<HTMLDivElement>(null);
   const buttonRef = useRef<HTMLButtonElement>(null);
   const mobileMenuRef = useRef<HTMLDivElement>(null);

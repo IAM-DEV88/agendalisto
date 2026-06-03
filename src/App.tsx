@@ -231,26 +231,26 @@ function App() {
             <Route path="/blog" element={<Blog />} />
             <Route path="/blog/:id" element={<BlogPostView />} />
             <Route path="/dashboard" element={
-              <ProtectedRoute user={user}>
+              <ProtectedRoute user={user} userProfile={userProfile} requiredRole="client">
                 <ProfileDashboard user={userProfile} />
               </ProtectedRoute>
             } />
             <Route path="/business/register" element={
-              <ProtectedRoute user={user}>
+              <ProtectedRoute user={user} userProfile={userProfile} requiredRole="client">
                 <BusinessRegister user={userProfile} />
               </ProtectedRoute>
             } />
             <Route path="/business/dashboard" element={
-              <ProtectedRoute user={user}>
+              <ProtectedRoute user={user} userProfile={userProfile} requiredRole="business_owner">
                 <BusinessDashboard />
               </ProtectedRoute>
             } />
-            <Route path="/:slug" element={<BusinessPublicPage />} />
             <Route path="/:slug/book/:serviceId" element={
-              <ProtectedRoute user={user}>
+              <ProtectedRoute user={user} userProfile={userProfile} requiredRole="client">
                 <BookingPage />
               </ProtectedRoute>
             } />
+            <Route path="/:slug" element={<BusinessPublicPage />} />
           </Routes>
         </main>
         <Footer />

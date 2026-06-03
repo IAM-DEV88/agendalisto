@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
+import { useSelector } from 'react-redux';
 import { Business } from '../lib/api';
 import { ApiClient } from '../lib/apiClient';
 import { supabase } from '../lib/supabase';
@@ -11,6 +12,8 @@ import { useAuth } from '../hooks/useAuth';
 import { useBusinessConfig } from '../hooks/useBusinessConfig';
 import { useBusinessHours } from '../hooks/useBusinessHours';
 import { useBusinessClients } from '../hooks/useBusinessClients';
+import { canAccessAdvancedAnalytics } from '../lib/roles';
+import type { RootState } from '../store';
 
 import TabNav, { Tab } from '../components/ui/TabNav';
 import SectionHeader from '../components/ui/SectionHeader';
@@ -61,6 +64,8 @@ const slugify = (str: string): string =>
 
 export const BusinessDashboard: React.FC = () => {
   const { user } = useAuth();
+  const userProfile = useSelector((state: RootState) => state.user.userProfile);
+  const plan = (userProfile?.plan as 'starter' | 'pro' | 'premium') || 'starter';
   const { itemsPerPage } = useUIConfig();
   const toast = useToast();
   const [businessData, setBusinessData] = useState<Business | null>(null);
@@ -100,6 +105,12 @@ export const BusinessDashboard: React.FC = () => {
   const [activeTab, setActiveTab] = useState('appointments');
   const [activeAppointmentTab, setActiveAppointmentTab] = useState('pending');
   const [activeSettingsTab, setActiveSettingsTab] = useState('profile');
+
+  useEffect(() => {
+    if (activeSettingsTab === 'stats' && !canAccessAdvancedAnalytics(plan)) {
+      setActiveSettingsTab('profile');
+    }
+  }, [plan, activeSettingsTab]);
 
   useEffect(() => {
     const loadBusinessData = async () => {
@@ -282,7 +293,7 @@ export const BusinessDashboard: React.FC = () => {
     { id: 'profile', label: 'Perfil' },
     { id: 'hours', label: 'Horarios' },
     { id: 'config', label: 'Ajustes' },
-    { id: 'stats', label: 'Estadísticas' },
+    ...(canAccessAdvancedAnalytics(plan) ? [{ id: 'stats' as const, label: 'Estadísticas' }] : []),
   ];
 
   return (
@@ -473,6 +484,7 @@ export const BusinessDashboard: React.FC = () => {
                   updateService={ApiClient.updateBusinessService}
                   deleteService={ApiClient.deleteBusinessService}
                   itemsPerPage={itemsPerPage}
+                  plan={plan}
                 />
               </div>
             )}

@@ -448,6 +448,19 @@ export const obtenerPerfilUsuario = async (userId: string): Promise<{ success: b
     }
 
     if (data) {
+      // Backfill business_id from agendaya_businesses if profile has it null
+      if (!data.business_id) {
+        const { data: biz } = await supabase
+          .from('agendaya_businesses')
+          .select('id')
+          .eq('owner_id', userId)
+          .maybeSingle();
+        if (biz?.id) {
+          data.business_id = biz.id;
+          // Update profile so next queries don't need the extra lookup
+          await supabase.from('agendaya_profiles').update({ business_id: biz.id }).eq('id', userId);
+        }
+      }
       return { success: true, perfil: data, error: null };
     }
 
