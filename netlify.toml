@@ -6,6 +6,7 @@
   NODE_VERSION = "20.18.0"
   # pnpm no necesita --legacy-peer-deps
   CI = "false"
+  COREPACK_INTEGRITY_KEYS = "0"
   SITE_URL = "https://agendalisto.com"
 
 [functions]
