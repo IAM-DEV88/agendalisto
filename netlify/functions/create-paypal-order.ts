@@ -7,7 +7,8 @@ async function getAccessToken(): Promise<string> {
   const clientSecret = process.env.PAYPAL_CLIENT_SECRET!;
 
   if (!clientId || !clientSecret) {
-    throw new Error('Faltan PAYPAL_CLIENT_ID o PAYPAL_CLIENT_SECRET en las variables de entorno');
+    const similares = Object.keys(process.env).filter(k => /paypal/i.test(k));
+    throw new Error(`Faltan PAYPAL_CLIENT_ID o PAYPAL_CLIENT_SECRET. Similares encontradas: ${similares.length ? similares.join(', ') : 'ninguna'}`);
   }
 
   const res = await fetch(`${PAYPAL_API}/v1/oauth2/token`, {
