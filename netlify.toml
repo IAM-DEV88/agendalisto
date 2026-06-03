@@ -3,15 +3,14 @@
   publish = "dist"
 
 [build.environment]
-  NODE_VERSION = "20.18.0"
-  # pnpm no necesita --legacy-peer-deps
+  NODE_VERSION = "22.14.0"
   CI = "false"
   COREPACK_INTEGRITY_KEYS = "0"
   SITE_URL = "https://agendalisto.com"
 
 [functions]
   directory = "netlify/functions"
-  # Node.js 20 + esbuild bundler por defecto
+  # esbuild bundler por defecto
   node_bundler = "esbuild"
 
 # 404 personalizada
