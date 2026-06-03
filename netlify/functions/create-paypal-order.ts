@@ -6,6 +6,10 @@ async function getAccessToken(): Promise<string> {
   const clientId = process.env.PAYPAL_CLIENT_ID!;
   const clientSecret = process.env.PAYPAL_CLIENT_SECRET!;
 
+  if (!clientId || !clientSecret) {
+    throw new Error('Faltan PAYPAL_CLIENT_ID o PAYPAL_CLIENT_SECRET en las variables de entorno');
+  }
+
   const res = await fetch(`${PAYPAL_API}/v1/oauth2/token`, {
     method: 'POST',
     headers: {
@@ -17,6 +21,11 @@ async function getAccessToken(): Promise<string> {
   });
 
   const data = await res.json();
+
+  if (!res.ok || !data.access_token) {
+    throw new Error(`PayPal auth error: ${data.error_description || data.error || res.statusText}`);
+  }
+
   return data.access_token;
 }
 
@@ -70,6 +79,7 @@ export const handler = async (event: any) => {
       body: JSON.stringify({ id: order.id }),
     };
   } catch (err: any) {
+    console.error('[create-paypal-order]', err);
     return { statusCode: 500, body: JSON.stringify({ error: err.message || 'Internal error' }) };
   }
 };

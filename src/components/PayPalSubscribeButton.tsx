@@ -45,8 +45,10 @@ export default function PayPalSubscribeButton({ plan, userId, disabled }: PayPal
               headers: { 'Content-Type': 'application/json' },
               body: JSON.stringify({ plan }),
             });
-            const data = await res.json();
-            if (!res.ok) throw new Error(data.error || 'Error al crear orden');
+            const text = await res.text();
+            let data;
+            try { data = JSON.parse(text); } catch { data = null; }
+            if (!res.ok) throw new Error(data?.error || `Error del servidor (${res.status}): ${text || 'sin respuesta'}`);
             return data.id;
           } catch (err: any) {
             notifyError(err.message);
