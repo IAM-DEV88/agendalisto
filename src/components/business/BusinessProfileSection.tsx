@@ -216,7 +216,7 @@ const BusinessProfileSection: React.FC<BusinessProfileSectionProps> = ({
                   id="category_id"
                   value={businessData.category_id || ''}
                   onChange={onChange}
-                  className="w-full px-4 py-2.5 rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 focus:ring-2 focus:ring-primary-500/20 focus:border-primary-500 outline-none transition-all font-medium text-slate-900 dark:text-white"
+                  className="w-full rounded-xl border border-slate-200 dark:border-slate-700 focus:ring-2 focus:ring-primary-500/20 focus:border-primary-500 outline-none transition-all"
                   required
                 >
                   <option value="" disabled>Selecciona una categoría</option>
@@ -237,7 +237,7 @@ const BusinessProfileSection: React.FC<BusinessProfileSectionProps> = ({
                   value={businessData.description}
                   onChange={onChange}
                   rows={3}
-                  className="w-full px-4 py-2.5 rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 focus:ring-2 focus:ring-primary-500/20 focus:border-primary-500 outline-none transition-all font-medium resize-none text-slate-900 dark:text-white"
+                  className="w-full rounded-xl border border-slate-200 dark:border-slate-700 focus:ring-2 focus:ring-primary-500/20 focus:border-primary-500 outline-none transition-all resize-none"
                   placeholder="Describe los servicios y valores de tu negocio..."
                 ></textarea>
               </div>
