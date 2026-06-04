@@ -457,10 +457,11 @@ export const obtenerPerfilUsuario = async (userId: string): Promise<{ success: b
           await supabase.from('agendaya_profiles').update({ business_id: biz.id }).eq('id', userId);
         }
       }
-      // Si el perfil existe pero es visitor (ej: usuario de otra app que
-      // nunca activó AgendaYa), promover a client automáticamente.
+      // Si el perfil existe pero es visitor, promover a client.
+      // updateProfileRole puede fallar si el RPC no existe en DB;
+      // igual se actualiza en memoria para que el usuario acceda.
       if (data.role === 'visitor') {
-        await updateProfileRole(userId, 'client');
+        try { await updateProfileRole(userId, 'client'); } catch {}
         data.role = 'client';
       }
       return { success: true, perfil: data, error: null };

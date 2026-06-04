@@ -73,7 +73,12 @@ const Register = () => {
         setRegistered(true);
         setError('');
         notifySuccess('Registro exitoso');
-        setTimeout(() => navigate('/login'), 2000);
+        // Redirigir a dashboard si hay sesión activa, si no a login
+        setTimeout(async () => {
+          const { data: { session: currentSession } } = await supabase.auth.getSession();
+          console.log('[Register] currentSession on redirect:', !!currentSession);
+          navigate(currentSession ? '/dashboard' : '/login');
+        }, 2000);
       }
     } catch (err: any) {
       let errorMsg: string;
