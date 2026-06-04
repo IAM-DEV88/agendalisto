@@ -434,20 +434,17 @@ export const obtenerPerfilUsuario = async (userId: string): Promise<{ success: b
     const { data, error } = await withTimeout(supabaseQueryPromise, 1000, 'Timeout al obtener perfil de usuario');
 
 
-    if (error) {
+    const perfilNoEncontrado = error && error.code === 'PGRST116';
+
+    if (error && !perfilNoEncontrado) {
       const errorMessage = error.message || 'Error desconocido';
       if (errorMessage === 'Timeout al obtener perfil de usuario') {
       } else {
       }
-
-      if (error.code === 'PGRST116') {
-        return { success: false, perfil: null, error: 'Perfil no encontrado' };
-      }
-      
       return { success: false, perfil: null, error: errorMessage };
     }
 
-    if (data) {
+    if (data && !perfilNoEncontrado) {
       // Backfill business_id from agendaya_businesses if profile has it null
       if (!data.business_id) {
         const { data: biz } = await supabase
@@ -457,14 +454,19 @@ export const obtenerPerfilUsuario = async (userId: string): Promise<{ success: b
           .maybeSingle();
         if (biz?.id) {
           data.business_id = biz.id;
-          // Update profile so next queries don't need the extra lookup
           await supabase.from('agendaya_profiles').update({ business_id: biz.id }).eq('id', userId);
         }
+      }
+      // Si el perfil existe pero es visitor (ej: usuario de otra app que
+      // nunca activó AgendaYa), promover a client automáticamente.
+      if (data.role === 'visitor') {
+        await updateProfileRole(userId, 'client');
+        data.role = 'client';
       }
       return { success: true, perfil: data, error: null };
     }
 
-    // Fallback: intentar late-registration vía ensure_user_app
+    // PGRST116 o data null → Fallback: late-registration vía ensure_user_app
     try {
       const { error: rpcError } = await supabase.rpc('ensure_user_app', {
         p_user_id: userId,
@@ -481,6 +483,12 @@ export const obtenerPerfilUsuario = async (userId: string): Promise<{ success: b
         .single();
 
       if (retryResponse.data) {
+        // Usuario proveniente de otra app → ensure_user_app crea role='visitor'.
+        // Auto-promover a client para que pueda acceder a /dashboard y /business/register.
+        if (retryResponse.data.role === 'visitor') {
+          await updateProfileRole(userId, 'client');
+          retryResponse.data.role = 'client';
+        }
         return { success: true, perfil: retryResponse.data as UserProfile, error: null };
       }
     } catch {

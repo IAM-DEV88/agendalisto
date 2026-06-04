@@ -11,6 +11,9 @@ export default defineConfig(({ mode }) => {
     server: {
       port: 3000,
       open: true,
+      watch: {
+        usePolling: true,
+      },
       proxy: {
         '/.netlify/functions': {
           target: 'http://localhost:8888',

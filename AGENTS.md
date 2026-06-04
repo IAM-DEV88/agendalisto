@@ -74,7 +74,7 @@ El ecosistema usa 4 piezas que trabajan juntas. Entender cada una es crítico pa
 - RPC definido en `../supabase-shared/ensure_user_app.sql`.
 - Cuando un usuario registrado en otra app (ej: EncuentrosVIP) entra a AgendaYa por primera vez, NO existe su `agendaya_profiles` ni `user_apps` para AgendaYa.
 - El frontend debe llamar a `ensureUserApp(userId, 'agendaya')` si no encuentra perfil.
-- **Actualmente AgendaYa NO tiene fallback inline en `obtenerPerfilUsuario()`** — agregarlo es prioritario para evitar usuarios huérfanos.
+- **`obtenerPerfilUsuario()` en `src/lib/api.ts:467` ya implementa fallback inline** vía `ensure_user_app`. Si no encuentra perfil, llama al RPC, espera 500ms y reintenta.
 
 ### Flujo de registro para AgendaYa
 
@@ -143,6 +143,86 @@ Usuario se registra → supabase.auth.signUp()
 - `sanitize_signup_role()` canónico: `../supabase-shared/sanitize_signup_role.sql`
 - `ensureUserApp()` RPC: `../supabase-shared/ensure_user_app.sql`
 
+## Roles, Planes y Flujo de Usuario
+
+### Roles (5 niveles)
+
+Definidos en `src/lib/roles.ts:3`. El frontend compara por índice (`ROLES.indexOf`) para permisos.
+
+| Role | Índice | Auto-asignable | Acceso principal |
+|---|---|---|---|
+| `visitor` | 0 | ✅ | Solo páginas públicas (Home, Explorar, Blog, perfil público de negocio) |
+| `client` | 1 | ✅ | `/dashboard` (perfil, historial), reservar servicios en `/:slug/book/:serviceId`, escribir reseñas |
+| `business_owner` | 2 | ✅ | `/business/dashboard` (CRUD servicios, horarios, citas, clientes, config), gestionar negocio |
+| `moderator` | 3 | ❌ (solo admin) | Dashboard sin gestionar negocios |
+| `admin` | 4 | ❌ (solo admin) | Acceso total |
+
+**Helper functions** en `src/lib/roles.ts:104-115`:
+- `canAccessDashboard()` → `business_owner`, `admin`, `moderator`
+- `canManageBusiness()` → `business_owner`, `admin`
+- `canBook()` → `client`, `business_owner`, `moderator`, `admin`
+
+**Protección DB:** Trigger `trg_protect_agendaya_profile` (mig `006_roles_plans.sql:53`) evita auto-asignación de `admin`/`moderator`. Sincronización a `user_apps` vía `trg_sync_agendaya_profile_role`.
+
+### Planes (3 niveles)
+
+Definidos en `src/lib/roles.ts:16-92`. Pricing en COP mensual.
+
+| Plan | Precio | Score búsq. | Negocios | Servicios | Features clave |
+|---|---|---|---|---|---|
+| `starter` | Gratis | 0 | 1 | 5 | Perfil público, gestión manual de citas, notificaciones email |
+| `pro` | $49.900 | 2 | 1 | ∞ | WhatsApp, analytics básicos, badge "Pro", posición prioritaria |
+| `premium` | $99.900 | 3 | 3 | ∞ | Todo Pro + analytics avanzados, branding personalizado, badge "Premium", posición destacada |
+
+**`plan_score`** se replica de `agendaya_profiles.plan` → `agendaya_businesses.plan_score` vía triggers (`trg_compute_agendaya_plan_score`, `trg_recompute_agendaya_business_plan_score`). Búsquedas ordenan por `plan_score DESC`.
+
+**Pago:** PayPal vía Netlify Functions (`create-paypal-order.ts`, `capture-paypal-order.ts`). Persiste en `agendaya_subscriptions` (mig `008_agendaya_subscriptions.sql`).
+
+### Flujo de usuario
+
+```
+Visitante anónimo → navega páginas públicas
+       │
+       ├─ Registro → auth.users → handle_new_user() → agendaya_profiles (role=visitor, plan=starter)
+       │
+       └─ Login → obtenerPerfilUsuario()
+                      ├─ Si existe perfil → backfill business_id si es null → Redux store
+                      └─ Si NO existe (PGRST116) → ensure_user_app RPC → espera 500ms → reintenta
+
+VISITOR
+  ├─ Botón "Activar cuenta de cliente" en /dashboard → updateProfileRole('client')
+  │
+  └─ Botón "Registrar mi negocio" → /business/register → createBusiness()
+       └─ updateProfileRole('business_owner') + is_business=true + business_id seteado
+
+CLIENT
+  ├─ /dashboard (perfil, historial de citas)
+  ├─ /business/register → se convierte en BUSINESS_OWNER
+  └─ /:slug/book/:serviceId (reservar cita)
+
+BUSINESS_OWNER
+  ├─ /business/dashboard (tabs: Citas, Servicios, Clientes, Configuración)
+  ├─ /plans → PayPalSubscribeButton para upgrade a Pro/Premium
+  └─ Plan define: max negocios, max servicios, analytics, badge, posición búsqueda
+```
+
+### Rutas protegidas
+
+Definidas en `src/App.tsx:217-263` con `ProtectedRoute` (compara índices de `ROLES`).
+
+| Ruta | Componente | `requiredRole` | Acceso |
+|---|---|---|---|
+| `/` | Home | — | Público |
+| `/login`, `/register`, `/forgot-password` | Login, Register, ForgotPassword | — | Público |
+| `/explore` | ExploreBusinesses | — | Público |
+| `/plans` | Plans | — | Público |
+| `/blog`, `/blog/:id` | Blog, BlogPostView | — | Público |
+| `/:slug` | BusinessPublicPage | — | Público |
+| `/:slug/book/:serviceId` | BookingPage | `client` | client+ |
+| `/dashboard` | ProfileDashboard | `client` | client+ |
+| `/business/register` | BusinessRegister | `client` | client+ |
+| `/business/dashboard` | BusinessDashboard | `business_owner` | business_owner+ |
+
 ## Code Organization
 
 ```
@@ -182,6 +262,7 @@ pnpm netlify-build    # Build para Netlify (instala + build + sitemap + prerende
 - Netlify SPA redirect: `/*` → `/index.html` with `200`.
 - Node version: 18+ (set in `netlify.toml`).
 - Environment variables: `VITE_SUPABASE_URL`, `VITE_SUPABASE_ANON_KEY`.
+- **`vite.config.ts` tiene `server.watch.usePolling: true`** — necesario porque el proyecto reside en `/mnt/d/` (DrvFs en WSL2). `inotify` no funciona confiablemente sobre el filesystem montado de Windows; con polling se asegura que HMR detecte cambios incluso cuando se edita desde un editor en Windows.
 
 ## Developing with an Agent (opencode)
 
