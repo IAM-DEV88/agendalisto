@@ -5,7 +5,7 @@ import { notifySuccess, notifyError } from '../../lib/toast';
 import SectionHeader from '../ui/SectionHeader';
 import { Pagination } from '../ui/Pagination';
 import { supabase } from '../../lib/supabase';
-import { getMaxServices } from '../../lib/roles';
+import { getMaxServices, getMaxImages } from '../../lib/roles';
 
 interface ServicesSectionProps {
   businessId: string;
@@ -27,6 +27,7 @@ const ServicesSection: React.FC<ServicesSectionProps> = ({
   plan,
 }) => {
   const maxServices = getMaxServices(plan);
+  const maxImages = getMaxImages(plan);
   const [services, setServices] = useState<Service[]>([]);
   const [currentPage, setCurrentPage] = useState(1);
   const [loading, setLoading] = useState(true);
@@ -188,6 +189,13 @@ const ServicesSection: React.FC<ServicesSectionProps> = ({
     
     const allowedTypes = ['image/jpeg', 'image/png', 'image/webp', 'image/gif'];
     const maxFileSize = 5 * 1024 * 1024; // 5MB
+    const currentCount = formData.image_urls.length;
+    const selectedCount = e.target.files.length;
+
+    if (maxImages !== Infinity && currentCount + selectedCount > maxImages) {
+      notifyError(`Solo puedes tener ${maxImages} imagen${maxImages === 1 ? '' : 'es'} por servicio en tu plan actual. Elimina algunas antes de subir más.`);
+      return;
+    }
     
     setIsUploading(true);
     const files = Array.from(e.target.files);
@@ -195,12 +203,10 @@ const ServicesSection: React.FC<ServicesSectionProps> = ({
 
     try {
       for (const file of files) {
-        // Validación de tipo MIME
         if (!allowedTypes.includes(file.type)) {
           throw new Error(`El archivo ${file.name} no es una imagen válida (JPG, PNG, WEBP, GIF)`);
         }
         
-        // Validación de tamaño
         if (file.size > maxFileSize) {
           throw new Error(`El archivo ${file.name} supera el límite de 5MB`);
         }
@@ -510,7 +516,11 @@ const ServicesSection: React.FC<ServicesSectionProps> = ({
                       />
                     </label>
                   </div>
-                  <p className="text-xs text-slate-500 dark:text-slate-400">Puedes subir varias imágenes para mostrar tu trabajo.</p>
+                  <p className="text-xs text-slate-500 dark:text-slate-400">
+                    {maxImages === Infinity
+                      ? 'Galería ilimitada — sube todas las imágenes que quieras.'
+                      : `Hasta ${maxImages} imagen${maxImages === 1 ? '' : 'es'} por servicio (${formData.image_urls.length}/${maxImages} usadas).`}
+                  </p>
                 </div>
 
                 <div className="flex items-center gap-3 p-4 bg-slate-50 dark:bg-slate-800/50 rounded-xl">

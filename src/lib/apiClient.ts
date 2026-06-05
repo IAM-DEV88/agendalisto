@@ -76,7 +76,7 @@ export class ApiClient {
       mostrar_direccion: true,
       requiere_confirmacion: false,
       tiempo_minimo_cancelacion: 48,
-      notificaciones_email: true,
+      notificaciones_email: false,
       notificaciones_whatsapp: false
     };
     

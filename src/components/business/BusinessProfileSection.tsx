@@ -3,6 +3,7 @@ import { Camera, Save, Loader2, Globe, Phone, MapPin, Mail, Tag, Info, Settings 
 import { Business, updateBusiness, getBusinessCategories, BusinessCategory } from '../../lib/api';
 import { supabase } from '../../lib/supabase';
 import SectionHeader from '../ui/SectionHeader';
+import PhoneInput from '../ui/PhoneInput';
 
 interface BusinessProfileSectionProps {
   businessData: Business;
@@ -247,14 +248,11 @@ const BusinessProfileSection: React.FC<BusinessProfileSectionProps> = ({
                   <Phone className="w-4 h-4 text-slate-400" />
                   Teléfono de Contacto
                 </label>
-                <input
-                  type="text"
-                  name="phone"
+                <PhoneInput
                   id="phone"
                   value={businessData.phone}
-                  onChange={onChange}
-                  className="w-full px-4 py-2.5 rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 focus:ring-2 focus:ring-primary-500/20 focus:border-primary-500 outline-none transition-all font-medium text-slate-900 dark:text-white"
-                  placeholder="+56 9 1234 5678"
+                  onChange={(v) => onChange({ target: { name: 'phone', value: v } } as React.ChangeEvent<HTMLInputElement>)}
+                  placeholder="Número de teléfono"
                   required
                 />
               </div>

@@ -44,6 +44,7 @@ const ServiceCard: React.FC<{
       if (result.success) {
         setIsLiked(result.action === 'added');
         setLikesCount(prev => result.action === 'added' ? prev + 1 : prev - 1);
+        toast.success(result.action === 'added' ? 'Añadido a favoritos' : 'Eliminado de favoritos');
       }
     } catch { toast.error('Error al procesar'); } finally { setIsLiking(false); }
   };

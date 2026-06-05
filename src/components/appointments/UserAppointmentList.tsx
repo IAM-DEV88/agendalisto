@@ -4,6 +4,7 @@ import { es } from 'date-fns/locale';
 import { Link } from 'react-router-dom';
 import { Appointment } from '../../types/appointment';
 import { getStatusText } from '../../utils/appointmentUtils';
+import { slugify } from '../../lib/api';
 import {
   Star,
   Clock,
@@ -83,7 +84,7 @@ const UserAppointmentList: React.FC<UserAppointmentListProps> = ({
                     <div className="min-w-0">
                       <h4 className="text-lg font-black text-slate-900 dark:text-white truncate">
                         <Link
-                          to={`/${appointment.businesses?.slug || ''}`}
+                          to={`/${slugify(appointment.businesses?.name || '')}`}
                           className="hover:text-primary-600 dark:hover:text-primary-400 transition-colors"
                         >
                           {appointment.businesses?.name}

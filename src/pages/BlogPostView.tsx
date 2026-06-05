@@ -94,9 +94,12 @@ const BlogPostView = () => {
     if (res.success) {
       if (type === 'post') {
         setPost(prev => prev ? { ...prev, likes_count: res.action === 'added' ? prev.likes_count + 1 : prev.likes_count - 1 } : null);
+        toast.success(res.action === 'added' ? 'Añadido a favoritos' : 'Eliminado de favoritos');
       } else {
         setComments(prev => prev.map(c => c.id === targetId ? { ...c, likes_count: res.action === 'added' ? c.likes_count + 1 : c.likes_count - 1 } : c));
       }
+    } else {
+      toast.error(res.error || 'Error al procesar');
     }
   };
 

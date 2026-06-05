@@ -11,6 +11,7 @@ import { ApiClient } from '../lib/apiClient';
 import { useToast } from '../hooks/useToast';
 import { useUIConfig } from '../hooks/useUIConfig';
 import UserAppointmentList from '../components/appointments/UserAppointmentList';
+import FavoritesSection from '../components/profile/FavoritesSection';
 import type { Appointment } from '../types/appointment';
 import ReviewModal from '../components/appointments/ReviewModal';
 import TabNav from '../components/ui/TabNav';
@@ -135,7 +136,7 @@ const ProfileDashboard = ({ user }: ProfileDashboardProps) => {
     }
   };
 
-  const [activeTab, setActiveTab] = useState<'appointments' | 'settings'>('appointments');
+  const [activeTab, setActiveTab] = useState<'appointments' | 'favorites' | 'settings'>('appointments');
   const [activeAppointmentTab, setActiveAppointmentTab] = useState('upcoming');
   const [activeSettingsTab, setActiveSettingsTab] = useState('profile');
   const [selectedAppointmentForReview, setSelectedAppointmentForReview] = useState<Appointment | null>(null);
@@ -308,6 +309,7 @@ const ProfileDashboard = ({ user }: ProfileDashboardProps) => {
 
   const tabs = [
     { id: 'appointments', label: 'Mis Citas', count: activeAppointmentsCount },
+    { id: 'favorites', label: 'Favoritos' },
     { id: 'settings', label: 'Configuración' },
   ];
 
@@ -449,7 +451,7 @@ const ProfileDashboard = ({ user }: ProfileDashboardProps) => {
 
           {/* ─── MAIN TABS ─── */}
           <div className="animate-in fade-in duration-500 delay-200">
-            <TabNav tabs={tabs} activeTabId={activeTab} onTabChange={(tab) => setActiveTab(tab as 'appointments' | 'settings')} />
+            <TabNav tabs={tabs} activeTabId={activeTab} onTabChange={(tab) => setActiveTab(tab as 'appointments' | 'favorites' | 'settings')} />
           </div>
 
           <div className="animate-in fade-in slide-in-from-bottom-4 duration-500 delay-300">
@@ -564,6 +566,13 @@ const ProfileDashboard = ({ user }: ProfileDashboardProps) => {
                     )
                   )}
                 </div>
+              </div>
+            )}
+
+            {/* ═══ FAVORITES TAB ═══ */}
+            {activeTab === 'favorites' && (
+              <div className="animate-in fade-in zoom-in-95 duration-300">
+                {user && <FavoritesSection user={user} />}
               </div>
             )}
 

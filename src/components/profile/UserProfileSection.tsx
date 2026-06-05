@@ -1,6 +1,7 @@
 import React, { type FormEvent, type ChangeEvent, useState, useEffect } from 'react';
 import { supabase } from '../../lib/supabase';
 import { Camera, Check } from 'lucide-react';
+import PhoneInput from '../../components/ui/PhoneInput';
 
 interface UserProfileSectionProps {
   profileData: {
@@ -157,14 +158,11 @@ const UserProfileSection: React.FC<UserProfileSectionProps> = ({
                 <label htmlFor="phone" className="block text-sm font-bold text-slate-700 dark:text-slate-300 mb-1.5">
                   Teléfono
                 </label>
-                <input
-                  type="tel"
-                  name="phone"
+                <PhoneInput
                   id="phone"
                   value={profileData.phone}
-                  onChange={onChange}
-                  placeholder="+34 000 000 000"
-                  className="w-full"
+                  onChange={(v) => onChange({ target: { name: 'phone', value: v } } as ChangeEvent<HTMLInputElement>)}
+                  placeholder="Número de teléfono"
                 />
               </div>
             </div>

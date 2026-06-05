@@ -38,20 +38,21 @@ export const PLAN_FEATURES: Record<Plan, { label: string; included: boolean }[]>
   starter: [
     { label: '1 negocio', included: true },
     { label: 'Hasta 5 servicios', included: true },
+    { label: 'Galería limitada a 1 imagen por servicio', included: true },
     { label: 'Gestión manual de citas', included: true },
     { label: 'Perfil público básico', included: true },
-    { label: 'Notificaciones por email', included: true },
+    { label: 'Notificaciones por email', included: false },
     { label: 'Integración WhatsApp', included: false },
     { label: 'Analytics básicos', included: false },
     { label: 'Badge "Pro"', included: false },
     { label: 'Posición prioritaria en búsquedas', included: false },
-    { label: 'Múltiples negocios', included: false },
     { label: 'Branding personalizado', included: false },
     { label: 'Insights de clientes', included: false },
   ],
   pro: [
-    { label: '1 negocio', included: true },
-    { label: 'Servicios ilimitados', included: true },
+    { label: 'Hasta 5 negocios', included: true },
+    { label: 'Hasta 10 servicios por negocio', included: true },
+    { label: 'Galería limitada a 5 imágenes por servicio', included: true },
     { label: 'Gestión manual de citas', included: true },
     { label: 'Perfil público básico', included: true },
     { label: 'Notificaciones por email', included: true },
@@ -59,16 +60,15 @@ export const PLAN_FEATURES: Record<Plan, { label: string; included: boolean }[]>
     { label: 'Analytics básicos (ingresos, citas, clientes)', included: true },
     { label: 'Badge "Pro"', included: true },
     { label: 'Posición prioritaria en búsquedas', included: true },
-    { label: 'Múltiples negocios', included: false },
-    { label: 'Branding personalizado', included: false },
-    { label: 'Insights de clientes', included: false },
+    { label: 'Branding personalizado', included: true },
+    { label: 'Insights de clientes', included: true },
   ],
   premium: [
-    { label: '1 negocio', included: true },
-    { label: 'Hasta 3 negocios', included: true },
+    { label: 'Negocios ilimitados', included: true },
     { label: 'Servicios ilimitados', included: true },
-    { label: 'Gestión manual de citas', included: true },
-    { label: 'Perfil público básico', included: true },
+    { label: 'Galerías ilimitadas', included: true },
+    { label: 'Asistencia de IA para Gestión de citas', included: true },
+    { label: 'Perfil público avanzado', included: true },
     { label: 'Notificaciones por email', included: true },
     { label: 'Integración WhatsApp', included: true },
     { label: 'Analytics avanzados (servicio top, hora pico, tendencias, retención)', included: true },
@@ -117,13 +117,25 @@ export function canBook(role: string): boolean {
 // ─── Plan-based helpers ───
 
 export function getMaxBusinesses(plan: Plan): number {
-  if (plan === 'premium') return 3;
+  if (plan === 'premium') return Infinity;
+  if (plan === 'pro') return 5;
   return 1;
 }
 
 export function getMaxServices(plan: Plan): number {
   if (plan === 'starter') return 5;
+  if (plan === 'pro') return 10;
   return Infinity;
+}
+
+export function getMaxImages(plan: Plan): number {
+  if (plan === 'starter') return 1;
+  if (plan === 'pro') return 5;
+  return Infinity;
+}
+
+export function canUseEmailNotifications(plan: Plan | string): boolean {
+  return (plan as Plan) !== 'starter';
 }
 
 export function hasFeature(plan: Plan | string, featureLabel: string): boolean {
@@ -146,5 +158,5 @@ export function canUseWhatsApp(plan: Plan | string): boolean {
 }
 
 export function canCustomBranding(plan: Plan | string): boolean {
-  return (plan as Plan) === 'premium';
+  return (plan as Plan) === 'pro' || (plan as Plan) === 'premium';
 }

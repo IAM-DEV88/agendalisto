@@ -3,6 +3,7 @@ import { Settings, Eye, Bell, ListOrdered, Save, Loader2, CheckCircle2, AlertCir
 import { BusinessConfig } from '../../lib/api';
 import { useItemsPerPage } from '../../hooks/useItemsPerPage';
 import { useAuth } from '../../hooks/useAuth';
+import { canUseEmailNotifications } from '../../lib/roles';
 import SectionHeader from '../ui/SectionHeader';
 
 interface BusinessConfigSectionProps {
@@ -12,6 +13,7 @@ interface BusinessConfigSectionProps {
   message: { text: string; type: 'success' | 'error' } | null;
   onSave: (e: React.FormEvent) => Promise<boolean | void>;
   onConfigChange: (field: keyof BusinessConfig, value: any) => void;
+  plan?: 'starter' | 'pro' | 'premium';
 }
 
 export const BusinessConfigSection: React.FC<BusinessConfigSectionProps> = ({
@@ -20,7 +22,8 @@ export const BusinessConfigSection: React.FC<BusinessConfigSectionProps> = ({
   saving,
   message,
   onSave,
-  onConfigChange
+  onConfigChange,
+  plan = 'starter'
 }) => {
   const { user } = useAuth();
   const { localItemsPerPage, setLocalItemsPerPage, saveItemsPerPage } = useItemsPerPage(user?.id);
@@ -33,19 +36,20 @@ export const BusinessConfigSection: React.FC<BusinessConfigSectionProps> = ({
     }
   };
 
-  const ConfigToggle = ({ id, label, description, checked, onChange }: { id: string, label: string, description: string, checked: boolean, onChange: (checked: boolean) => void }) => (
-    <label htmlFor={id} className="flex items-start gap-3 p-3 rounded-xl hover:bg-slate-50 dark:hover:bg-slate-800/50 transition-colors cursor-pointer group">
+  const ConfigToggle = ({ id, label, description, checked, onChange, disabled }: { id: string, label: string, description: string, checked: boolean, onChange: (checked: boolean) => void, disabled?: boolean }) => (
+    <label htmlFor={id} className={`flex items-start gap-3 p-3 rounded-xl transition-colors ${disabled ? 'opacity-50 cursor-not-allowed' : 'hover:bg-slate-50 dark:hover:bg-slate-800/50 cursor-pointer group'}`}>
       <div className="flex items-center h-5 mt-0.5">
         <input
           id={id}
           type="checkbox"
           checked={checked}
+          disabled={disabled}
           onChange={(e) => onChange(e.target.checked)}
-          className="w-5 h-5 rounded-md border-slate-300 text-primary-600 focus:ring-primary-500"
+          className="w-5 h-5 rounded-md border-slate-300 text-primary-600 focus:ring-primary-500 disabled:opacity-50"
         />
       </div>
       <div className="min-w-0">
-        <span className="block text-sm font-bold text-slate-700 dark:text-slate-200 group-hover:text-primary-600 dark:group-hover:text-primary-400 transition-colors">
+        <span className="block text-sm font-bold text-slate-700 dark:text-slate-200 transition-colors">
           {label}
         </span>
         <span className="block text-xs text-slate-500 dark:text-slate-400 mt-0.5">
@@ -187,8 +191,9 @@ export const BusinessConfigSection: React.FC<BusinessConfigSectionProps> = ({
                 <ConfigToggle 
                   id="notificaciones_email"
                   label="Notificaciones por email"
-                  description="Recibir alertas de nuevas reservas en tu correo electrónico."
+                  description={canUseEmailNotifications(plan) ? "Recibir alertas de nuevas reservas en tu correo electrónico." : "Disponible en plan Pro o superior."}
                   checked={config.notificaciones_email}
+                  disabled={!canUseEmailNotifications(plan)}
                   onChange={(val) => onConfigChange('notificaciones_email', val)}
                 />
                 <ConfigToggle 

@@ -266,22 +266,27 @@ export async function getBusinessClients(businessId: string): Promise<{ success:
 // API functions for business management
 export const createBusiness = async (business: Omit<Business, 'id' | 'plan' | 'plan_score' | 'likes_count' | 'created_at' | 'updated_at'>) => {
   try {
-    // Exclude slug field from insert payload; it doesn't exist in the DB
-    const { slug, ...payload } = business;
+    const cleanSlug = slugify(business.name);
     const { data, error } = await supabase
       .from('agendaya_businesses')
       .insert([{
-        ...payload,
+        ...business,
+        slug: cleanSlug,
+        plan: undefined,
+        plan_score: undefined,
+        likes_count: undefined,
         updated_at: new Date().toISOString()
       }])
       .select()
       .single();
 
-    if (error) throw error;
-    // Attach slug to the newly created business
-    const businessWithSlug = { ...data, slug: slugify(data.name) } as Business;
-    return { success: true, business: businessWithSlug };
+    if (error) {
+      console.error('[createBusiness] Supabase error:', error);
+      throw error;
+    }
+    return { success: true, business: { ...data, slug: slugify(data.name) } as Business };
   } catch (error) {
+    console.error('[createBusiness] Caught:', error);
     return { success: false, error };
   }
 };
@@ -364,7 +369,177 @@ export const toggleLike = async (userId: string, targetId: string, type: 'busine
     return { success: false, error: error.message };
   }
 };
+export interface FavoriteItem {
+  id: string;
+  like_id: string;
+  business_id: string;
+  name: string;
+  slug: string;
+  description: string | null;
+  address: string | null;
+  logo_url: string | null;
+  phone: string | null;
+  likes_count: number;
+  category_id: string | null;
+}
+
+export const getUserFavorites = async (userId: string) => {
+  try {
+    const { data, error } = await supabase
+      .from('agendaya_user_likes')
+      .select(`
+        id,
+        business_id,
+        businesses:agendaya_businesses (
+          id,
+          name,
+          description,
+          address,
+          logo_url,
+          phone,
+          likes_count,
+          category_id
+        )
+      `)
+      .eq('user_id', userId)
+      .not('business_id', 'is', null)
+      .order('created_at', { ascending: false });
+
+    if (error) throw error;
+    const favorites: FavoriteItem[] = data
+      .filter((item: any) => item.businesses)
+      .map((item: any) => ({
+        id: item.businesses.id,
+        like_id: item.id,
+        business_id: item.business_id,
+        name: item.businesses.name,
+        slug: slugify(item.businesses.name),
+        description: item.businesses.description,
+        address: item.businesses.address,
+        logo_url: item.businesses.logo_url,
+        phone: item.businesses.phone,
+        likes_count: item.businesses.likes_count,
+        category_id: item.businesses.category_id,
+      }));
+    return { success: true, data: favorites };
+  } catch (error: any) {
+    console.error('[getUserFavorites] Error:', error);
+    return { success: false, error: error.message };
+  }
+};
 // --- End Likes Functions ---
+
+export interface ServiceFavoriteItem {
+  like_id: string;
+  service_id: string;
+  business_id: string;
+  business_name: string;
+  business_slug: string;
+  name: string;
+  description: string;
+  price: number;
+  duration: number;
+  image_urls: string[];
+  likes_count: number;
+}
+
+export interface BlogPostFavoriteItem {
+  like_id: string;
+  post_id: string;
+  title: string;
+  excerpt: string | null;
+  image_url: string | null;
+  likes_count: number;
+  created_at: string;
+}
+
+export const getUserFavoriteServices = async (userId: string) => {
+  try {
+    const { data, error } = await supabase
+      .from('agendaya_user_likes')
+      .select(`
+        id,
+        service_id,
+        services:agendaya_services (
+          id,
+          name,
+          description,
+          price,
+          duration,
+          image_urls,
+          likes_count,
+          business_id,
+          businesses:agendaya_businesses (
+            name,
+            slug
+          )
+        )
+      `)
+      .eq('user_id', userId)
+      .not('service_id', 'is', null)
+      .order('created_at', { ascending: false });
+
+    if (error) throw error;
+    const favorites: ServiceFavoriteItem[] = data
+      .filter((item: any) => item.services)
+      .map((item: any) => ({
+        like_id: item.id,
+        service_id: item.service_id,
+        business_id: item.services.business_id,
+        business_name: item.services.businesses?.name || '',
+        business_slug: item.services.businesses?.slug || '',
+        name: item.services.name,
+        description: item.services.description,
+        price: item.services.price,
+        duration: item.services.duration,
+        image_urls: item.services.image_urls || [],
+        likes_count: item.services.likes_count,
+      }));
+    return { success: true, data: favorites };
+  } catch (error: any) {
+    console.error('[getUserFavoriteServices] Error:', error);
+    return { success: false, error: error.message };
+  }
+};
+
+export const getUserFavoriteBlogPosts = async (userId: string) => {
+  try {
+    const { data, error } = await supabase
+      .from('agendaya_blog_likes')
+      .select(`
+        id,
+        post_id,
+        posts:agendaya_blog_posts (
+          id,
+          title,
+          excerpt,
+          image_url,
+          likes_count,
+          created_at
+        )
+      `)
+      .eq('user_id', userId)
+      .not('post_id', 'is', null)
+      .order('created_at', { ascending: false });
+
+    if (error) throw error;
+    const favorites: BlogPostFavoriteItem[] = data
+      .filter((item: any) => item.posts)
+      .map((item: any) => ({
+        like_id: item.id,
+        post_id: item.post_id,
+        title: item.posts.title,
+        excerpt: item.posts.excerpt || item.posts.content?.substring(0, 150) || null,
+        image_url: item.posts.image_url,
+        likes_count: item.posts.likes_count,
+        created_at: item.posts.created_at,
+      }));
+    return { success: true, data: favorites };
+  } catch (error: any) {
+    console.error('[getUserFavoriteBlogPosts] Error:', error);
+    return { success: false, error: error.message };
+  }
+};
 
 // API functions for business hours
 export const setBusinessHours = async (hours: Omit<BusinessHours, 'id'>[]) => {
@@ -551,7 +726,7 @@ export async function getBusinessConfig(businessId: string): Promise<{ success: 
     mostrar_direccion: true,
     requiere_confirmacion: false,
     tiempo_minimo_cancelacion: 48,
-    notificaciones_email: true,
+    notificaciones_email: false,
     notificaciones_whatsapp: false
   };
   try {

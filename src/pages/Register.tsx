@@ -4,10 +4,10 @@ import { signUp } from '../lib/supabase';
 import { supabase } from '../lib/supabase';
 import { notifySuccess, notifyError } from '../lib/toast';
 import SEO from '../components/SEO';
+import PhoneInput from '../components/ui/PhoneInput';
 import {
   User,
   Mail,
-  Phone,
   Lock,
   Eye,
   EyeOff,
@@ -200,20 +200,14 @@ const Register = () => {
               <label htmlFor="phone" className="block text-sm font-bold text-slate-700 dark:text-slate-300 mb-1.5">
                 Teléfono
               </label>
-              <div className="relative">
-                <Phone className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
-                <input
-                  id="phone"
-                  name="phone"
-                  type="tel"
-                  autoComplete="tel"
-                  required
-                  value={phone}
-                  onChange={(e) => { setPhone(e.target.value); clearError(); }}
-                  placeholder="+34 600 000 000"
-                  className="w-full pl-10"
-                />
-              </div>
+              <PhoneInput
+                id="phone"
+                name="phone"
+                value={phone}
+                onChange={(v) => { setPhone(v); clearError(); }}
+                placeholder="Número de teléfono"
+                required
+              />
             </div>
 
             {/* Password + Confirm side by side */}

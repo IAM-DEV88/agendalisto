@@ -2,10 +2,12 @@ import { useState, useEffect, useMemo } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useSelector } from 'react-redux';
 import { createBusiness, updateUserProfile, updateProfileRole, getBusinessCategories, BusinessCategory } from '../lib/api';
+import { supabase } from '../lib/supabase';
 import type { UserProfile } from '../lib/supabase';
 import type { RootState } from '../store';
 import { getMaxBusinesses } from '../lib/roles';
 import SEO from '../components/SEO';
+import PhoneInput from '../components/ui/PhoneInput';
 import {
   Store,
   Building2,
@@ -70,6 +72,11 @@ const BusinessRegister = ({ user }: BusinessRegisterProps) => {
     setError(null);
   };
 
+  const handlePhoneChange = (field: string) => (value: string) => {
+    setForm(prev => ({ ...prev, [field]: value }));
+    setError(null);
+  };
+
   const slug = useMemo(() =>
     form.businessName
       .trim()
@@ -101,6 +108,24 @@ const BusinessRegister = ({ user }: BusinessRegisterProps) => {
     }
 
     try {
+      // Pre-check: si ya tiene un negocio en la DB (ej: intento fallido anterior)
+      const { data: existingBiz } = await supabase
+        .from('agendaya_businesses')
+        .select('id')
+        .eq('owner_id', user.id)
+        .maybeSingle();
+
+      if (existingBiz) {
+        await updateUserProfile(user.id, { is_business: true, business_id: existingBiz.id });
+        await updateProfileRole(user.id, 'business_owner');
+        window.dispatchEvent(new CustomEvent('userProfileUpdated', {
+          detail: { profile: { ...user, role: 'business_owner' } }
+        }));
+        setSubmitted(true);
+        setTimeout(() => navigate('/business/dashboard'), 1500);
+        return;
+      }
+
       const businessData = {
         owner_id: user.id,
         slug,
@@ -130,7 +155,12 @@ const BusinessRegister = ({ user }: BusinessRegisterProps) => {
         setSubmitted(true);
         setTimeout(() => navigate('/business/dashboard'), 1500);
       } else {
-        throw new Error(apiError instanceof Error ? apiError.message : 'Error al registrar el negocio');
+        const msg = apiError instanceof Error ? apiError.message
+          : typeof apiError === 'object' && apiError !== null
+            ? JSON.stringify(apiError)
+            : 'Error al registrar el negocio';
+        console.error('[BusinessRegister] createBusiness error:', apiError);
+        throw new Error(msg);
       }
     } catch (err: any) {
       setError(err.message || 'Error al registrar el negocio. Por favor, intenta de nuevo.');
@@ -317,18 +347,13 @@ const BusinessRegister = ({ user }: BusinessRegisterProps) => {
                   <label htmlFor="phone" className="block text-sm font-bold text-slate-700 dark:text-slate-300 mb-1.5">
                     Teléfono <span className="text-red-500">*</span>
                   </label>
-                  <div className="relative">
-                    <Phone className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
-                    <input
-                      type="tel"
-                      id="phone"
-                      value={form.phone}
-                      onChange={updateField('phone')}
-                      required
-                      placeholder="+34 000 000 000"
-                      className="w-full pl-10"
-                    />
-                  </div>
+                  <PhoneInput
+                    id="phone"
+                    value={form.phone}
+                    onChange={handlePhoneChange('phone')}
+                    placeholder="Número de teléfono"
+                    required
+                  />
                 </div>
 
                 {/* Email */}
@@ -355,17 +380,12 @@ const BusinessRegister = ({ user }: BusinessRegisterProps) => {
                   <label htmlFor="whatsapp" className="block text-sm font-bold text-slate-700 dark:text-slate-300 mb-1.5">
                     WhatsApp <span className="text-slate-400 font-normal">(opcional)</span>
                   </label>
-                  <div className="relative">
-                    <MessageCircle className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-emerald-500" />
-                    <input
-                      type="tel"
-                      id="whatsapp"
-                      value={form.whatsapp}
-                      onChange={updateField('whatsapp')}
-                      placeholder="+34 000 000 000"
-                      className="w-full pl-10"
-                    />
-                  </div>
+                  <PhoneInput
+                    id="whatsapp"
+                    value={form.whatsapp}
+                    onChange={handlePhoneChange('whatsapp')}
+                    placeholder="Número de WhatsApp"
+                  />
                 </div>
 
                 {/* Instagram */}

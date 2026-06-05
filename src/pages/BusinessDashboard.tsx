@@ -12,7 +12,7 @@ import { useAuth } from '../hooks/useAuth';
 import { useBusinessConfig } from '../hooks/useBusinessConfig';
 import { useBusinessHours } from '../hooks/useBusinessHours';
 import { useBusinessClients } from '../hooks/useBusinessClients';
-import { canAccessAdvancedAnalytics } from '../lib/roles';
+import { canAccessAdvancedAnalytics, canAccessAnalytics } from '../lib/roles';
 import type { RootState } from '../store';
 
 import TabNav, { Tab } from '../components/ui/TabNav';
@@ -243,38 +243,46 @@ export const BusinessDashboard: React.FC = () => {
   const pagedPast = getPaginatedItems(pastAppointments, 'history');
   const pagedClients = getPaginatedItems(businessClients, 'clients');
 
-  const completedAppointments = appointments.filter(a => a.status === 'completed');
-  const totalRevenue = completedAppointments.reduce((sum, a) => sum + (a.services?.price ?? 0), 0);
-  const confirmationRate = appointments.length > 0
+  const hasAnalytics = canAccessAnalytics(plan);
+  const completedAppointments = hasAnalytics ? appointments.filter(a => a.status === 'completed') : [];
+  const totalRevenue = hasAnalytics
+    ? completedAppointments.reduce((sum, a) => sum + (a.services?.price ?? 0), 0) : 0;
+  const confirmationRate = hasAnalytics && appointments.length > 0
     ? (appointments.filter(a => a.status === 'confirmed').length / appointments.length) * 100 : 0;
-  const cancellationRate = appointments.length > 0
+  const cancellationRate = hasAnalytics && appointments.length > 0
     ? (appointments.filter(a => a.status === 'cancelled').length / appointments.length) * 100 : 0;
-  const avgDuration = completedAppointments.length > 0
+  const avgDuration = hasAnalytics && completedAppointments.length > 0
     ? completedAppointments.reduce((sum, a) => sum + (a.services?.duration ?? 0), 0) / completedAppointments.length : 0;
-  const avgPrice = completedAppointments.length > 0 ? totalRevenue / completedAppointments.length : 0;
+  const avgPrice = hasAnalytics && completedAppointments.length > 0 ? totalRevenue / completedAppointments.length : 0;
 
   const serviceCounts: Record<string, number> = {};
-  appointments.forEach(a => {
-    const name = a.services?.name ?? '';
-    serviceCounts[name] = (serviceCounts[name] || 0) + 1;
-  });
+  if (hasAnalytics) {
+    appointments.forEach(a => {
+      const name = a.services?.name ?? '';
+      serviceCounts[name] = (serviceCounts[name] || 0) + 1;
+    });
+  }
   const [topServiceName, topServiceCount] = Object.entries(serviceCounts).sort((a, b) => b[1] - a[1])[0] || ['-', 0];
 
   const dayCounts: Record<number, number> = {};
-  appointments.forEach(a => {
-    const idx = new Date(a.start_time).getDay();
-    dayCounts[idx] = (dayCounts[idx] || 0) + 1;
-  });
+  if (hasAnalytics) {
+    appointments.forEach(a => {
+      const idx = new Date(a.start_time).getDay();
+      dayCounts[idx] = (dayCounts[idx] || 0) + 1;
+    });
+  }
   const peakDayIndex = Number(Object.entries(dayCounts).sort((a, b) => b[1] - a[1])[0]?.[0]) || 0;
   const peakDayName = days[peakDayIndex] || '-';
 
   const peakHourCounts: Record<number, number> = {};
-  appointments.forEach(a => {
-    const h = new Date(a.start_time).getHours();
-    peakHourCounts[h] = (peakHourCounts[h] || 0) + 1;
-  });
+  if (hasAnalytics) {
+    appointments.forEach(a => {
+      const h = new Date(a.start_time).getHours();
+      peakHourCounts[h] = (peakHourCounts[h] || 0) + 1;
+    });
+  }
   const peakHour = Number(Object.entries(peakHourCounts).sort((a, b) => b[1] - a[1])[0]?.[0]) || 0;
-  const lifetimeValueAvg = businessClients.length > 0 ? totalRevenue / businessClients.length : 0;
+  const lifetimeValueAvg = hasAnalytics && businessClients.length > 0 ? totalRevenue / businessClients.length : 0;
 
   const tabs: Tab[] = [
     { id: 'appointments', label: 'Citas', count: activeAppointmentsCount },
@@ -307,7 +315,7 @@ export const BusinessDashboard: React.FC = () => {
             <div className="flex flex-col md:flex-row md:items-center justify-between gap-6">
               <div className="flex items-center gap-5 group">
                 {businessData ? (
-                  <Link to={`/${businessData.slug || slugify(businessData.name)}`} className="flex items-center gap-5 group">
+                  <Link to={`/${slugify(businessData.name)}`} className="flex items-center gap-5 group">
                     <div className="relative">
                       <div className="h-16 w-16 rounded-2xl overflow-hidden ring-2 ring-white dark:ring-slate-800 shadow-xl transition-transform duration-300 group-hover:scale-105">
                         <img
@@ -550,6 +558,7 @@ export const BusinessDashboard: React.FC = () => {
                       message={configMessage}
                       onSave={handleConfigSave}
                       onConfigChange={handleConfigChange}
+                      plan={plan}
                     />
                   )}
 
