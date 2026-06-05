@@ -12,7 +12,7 @@ import { useAuth } from '../hooks/useAuth';
 import { useBusinessConfig } from '../hooks/useBusinessConfig';
 import { useBusinessHours } from '../hooks/useBusinessHours';
 import { useBusinessClients } from '../hooks/useBusinessClients';
-import { canAccessAdvancedAnalytics, canAccessAnalytics } from '../lib/roles';
+import { canAccessAnalytics, PLAN_BADGE, PLAN_LABELS } from '../lib/roles';
 import type { RootState } from '../store';
 
 import TabNav, { Tab } from '../components/ui/TabNav';
@@ -105,12 +105,6 @@ export const BusinessDashboard: React.FC = () => {
   const [activeTab, setActiveTab] = useState('appointments');
   const [activeAppointmentTab, setActiveAppointmentTab] = useState('pending');
   const [activeSettingsTab, setActiveSettingsTab] = useState('profile');
-
-  useEffect(() => {
-    if (activeSettingsTab === 'stats' && !canAccessAdvancedAnalytics(plan)) {
-      setActiveSettingsTab('profile');
-    }
-  }, [plan, activeSettingsTab]);
 
   useEffect(() => {
     const loadBusinessData = async () => {
@@ -284,10 +278,14 @@ export const BusinessDashboard: React.FC = () => {
   const peakHour = Number(Object.entries(peakHourCounts).sort((a, b) => b[1] - a[1])[0]?.[0]) || 0;
   const lifetimeValueAvg = hasAnalytics && businessClients.length > 0 ? totalRevenue / businessClients.length : 0;
 
+  const canStats = canAccessAnalytics(plan);
+  const planBadge = PLAN_BADGE[plan];
+
   const tabs: Tab[] = [
     { id: 'appointments', label: 'Citas', count: activeAppointmentsCount },
     { id: 'services', label: 'Servicios', count: totalServices },
     { id: 'clients', label: 'Clientes', count: businessClients.length },
+    ...(canStats ? [{ id: 'stats' as const, label: 'Estadísticas' }] : []),
     { id: 'settings', label: 'Configuración' },
   ];
 
@@ -301,7 +299,6 @@ export const BusinessDashboard: React.FC = () => {
     { id: 'profile', label: 'Perfil' },
     { id: 'hours', label: 'Horarios' },
     { id: 'config', label: 'Ajustes' },
-    ...(canAccessAdvancedAnalytics(plan) ? [{ id: 'stats' as const, label: 'Estadísticas' }] : []),
   ];
 
   return (
@@ -327,12 +324,19 @@ export const BusinessDashboard: React.FC = () => {
                       <div className="absolute -bottom-1 -right-1 w-5 h-5 bg-emerald-500 border-[3px] border-white dark:border-slate-900 rounded-full shadow-lg" />
                     </div>
                     <div>
-                      <h1 className="text-2xl font-black text-slate-900 dark:text-white tracking-tight group-hover:text-primary-600 dark:group-hover:text-primary-400 transition-colors">
-                        {businessData.name}
-                      </h1>
+                      <div className="flex items-center gap-2">
+                        <h1 className="text-2xl font-black text-slate-900 dark:text-white tracking-tight group-hover:text-primary-600 dark:group-hover:text-primary-400 transition-colors">
+                          {businessData.name}
+                        </h1>
+                        {planBadge && (
+                          <span className={`px-2.5 py-0.5 text-[10px] font-bold rounded-full uppercase tracking-wider ${planBadge.className}`}>
+                            {planBadge.text}
+                          </span>
+                        )}
+                      </div>
                       <p className="text-sm font-medium text-slate-500 dark:text-slate-400 flex items-center gap-1.5">
                         <Store className="w-3.5 h-3.5" />
-                        Panel de Administración
+                        Panel de Administración — Plan {PLAN_LABELS[plan]}
                       </p>
                     </div>
                   </Link>
@@ -517,11 +521,35 @@ export const BusinessDashboard: React.FC = () => {
               </div>
             )}
 
+            {/* ─── ESTADÍSTICAS ─── */}
+            {activeTab === 'stats' && (
+              <div className="animate-in fade-in zoom-in-95 duration-300">
+                <StatsSection
+                  totalAppointments={appointments.length}
+                  upcomingAppointments={confirmedAppointments.length}
+                  pastAppointments={pastAppointments.length}
+                  totalClients={businessClients.length}
+                  totalServices={totalServices}
+                  plan={plan}
+                  totalRevenue={totalRevenue}
+                  confirmationRate={confirmationRate}
+                  cancellationRate={cancellationRate}
+                  avgDuration={avgDuration}
+                  avgPrice={avgPrice}
+                  topServiceName={topServiceName}
+                  topServiceCount={topServiceCount}
+                  peakDay={peakDayName}
+                  peakHour={peakHour}
+                  lifetimeValueAvg={lifetimeValueAvg}
+                />
+              </div>
+            )}
+
             {/* ─── CONFIGURACIÓN ─── */}
             {activeTab === 'settings' && businessData && (
               <div className="space-y-6">
                 <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-                  <SectionHeader title="Configuración" description="Perfil, horarios, ajustes y estadísticas del negocio" />
+                  <SectionHeader title="Configuración" description="Perfil, horarios y ajustes del negocio" />
                   <div className="bg-white dark:bg-slate-900 p-1 rounded-2xl border border-slate-200 dark:border-slate-800 shadow-sm self-start">
                     <TabNav tabs={settingsTabs} activeTabId={activeSettingsTab} onTabChange={setActiveSettingsTab} />
                   </div>
@@ -559,26 +587,6 @@ export const BusinessDashboard: React.FC = () => {
                       onSave={handleConfigSave}
                       onConfigChange={handleConfigChange}
                       plan={plan}
-                    />
-                  )}
-
-                  {activeSettingsTab === 'stats' && (
-                    <StatsSection
-                      totalAppointments={appointments.length}
-                      upcomingAppointments={confirmedAppointments.length}
-                      pastAppointments={pastAppointments.length}
-                      totalClients={businessClients.length}
-                      totalServices={totalServices}
-                      totalRevenue={totalRevenue}
-                      confirmationRate={confirmationRate}
-                      cancellationRate={cancellationRate}
-                      avgDuration={avgDuration}
-                      avgPrice={avgPrice}
-                      topServiceName={topServiceName}
-                      topServiceCount={topServiceCount}
-                      peakDay={peakDayName}
-                      peakHour={peakHour}
-                      lifetimeValueAvg={lifetimeValueAvg}
                     />
                   )}
                 </div>

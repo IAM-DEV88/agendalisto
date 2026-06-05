@@ -1,11 +1,12 @@
 import React, { useState, useEffect } from 'react';
-import { Plus, Edit2, Trash2, Clock, DollarSign, User, Info, CheckCircle, XCircle, Loader2, Image as ImageIcon, X } from 'lucide-react';
+import { Link } from 'react-router-dom';
+import { Plus, Edit2, Trash2, Clock, DollarSign, User, Info, CheckCircle, XCircle, Loader2, Image as ImageIcon, X, Sparkles } from 'lucide-react';
 import type { Service } from '../../lib/api';
 import { notifySuccess, notifyError } from '../../lib/toast';
 import SectionHeader from '../ui/SectionHeader';
 import { Pagination } from '../ui/Pagination';
 import { supabase } from '../../lib/supabase';
-import { getMaxServices, getMaxImages } from '../../lib/roles';
+import { getMaxServices, getMaxImages, PLAN_LABELS } from '../../lib/roles';
 
 interface ServicesSectionProps {
   businessId: string;
@@ -251,7 +252,7 @@ const ServicesSection: React.FC<ServicesSectionProps> = ({
     <div className="space-y-6">
       <SectionHeader 
         title="Servicios" 
-        description={`${maxServices === Infinity ? 'Servicios ilimitados' : `Hasta ${maxServices} servicios — Plan ${plan}`} (${services.length} actuales)`}
+        description={`${maxServices === Infinity ? 'Servicios ilimitados' : `Hasta ${maxServices} servicios — Plan ${PLAN_LABELS[plan]}`} (${services.length} actuales)`}
         actionButton={
           <button
             type="button"
@@ -270,6 +271,23 @@ const ServicesSection: React.FC<ServicesSectionProps> = ({
           </button>
         }
       />
+
+      {maxServices !== Infinity && services.length >= maxServices && (
+        <div className="flex items-center justify-between p-4 bg-amber-50 dark:bg-amber-950/30 border border-amber-200 dark:border-amber-800 rounded-xl">
+          <div className="flex items-center gap-3">
+            <Sparkles className="w-5 h-5 text-amber-600 dark:text-amber-400 flex-shrink-0" />
+            <p className="text-sm font-bold text-amber-800 dark:text-amber-200">
+              Has alcanzado el límite de {maxServices} servicios de tu plan {PLAN_LABELS[plan]}.
+            </p>
+          </div>
+          <Link
+            to="/plans"
+            className="flex-shrink-0 px-4 py-2 bg-amber-600 hover:bg-amber-700 text-white text-xs font-bold rounded-xl transition-all shadow-lg shadow-amber-500/25"
+          >
+            Actualizar plan
+          </Link>
+        </div>
+      )}
 
       {error && (
         <div className="alert alert-error flex items-center gap-3">

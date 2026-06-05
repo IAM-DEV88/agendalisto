@@ -87,6 +87,16 @@ const BusinessCard = ({ business, categories, currentUser }: { business: Busines
             {cat.name}
           </span>
         )}
+        {business.plan === 'premium' && (
+          <span className="absolute top-3 right-3 px-2.5 py-1 bg-amber-100/90 dark:bg-amber-900/90 backdrop-blur-sm text-amber-700 dark:text-amber-300 rounded-lg text-[10px] font-black uppercase tracking-wider shadow-sm">
+            Premium
+          </span>
+        )}
+        {business.plan === 'pro' && (
+          <span className="absolute top-3 right-3 px-2.5 py-1 bg-blue-100/90 dark:bg-blue-900/90 backdrop-blur-sm text-blue-700 dark:text-blue-300 rounded-lg text-[10px] font-black uppercase tracking-wider shadow-sm">
+            Pro
+          </span>
+        )}
       </div>
 
       {/* Content */}

@@ -31,7 +31,7 @@ import {
   ListChecks,
   UserPlus,
 } from 'lucide-react';
-import { ROLE_LABELS } from '../lib/roles';
+import { ROLE_LABELS, PLAN_BADGE, PLAN_LABELS } from '../lib/roles';
 import { updateProfileRole } from '../lib/api';
 
 const FALLBACK_AVATAR = 'https://upload.wikimedia.org/wikipedia/commons/8/89/Portrait_Placeholder.png';
@@ -353,10 +353,19 @@ const ProfileDashboard = ({ user }: ProfileDashboardProps) => {
                     </h1>
                     <span className="text-lg">{greeting.includes('noches') ? '🌙' : greeting.includes('tardes') ? '☀️' : '🌅'}</span>
                     {user?.role && user.role !== 'visitor' && (
-                      <span className="ml-2 px-2.5 py-0.5 text-xs font-bold rounded-full bg-primary-100 text-primary-700 dark:bg-primary-900/30 dark:text-primary-400">
+                      <span className="px-2.5 py-0.5 text-xs font-bold rounded-full bg-primary-100 text-primary-700 dark:bg-primary-900/30 dark:text-primary-400">
                         {ROLE_LABELS[user.role as keyof typeof ROLE_LABELS] || user.role}
                       </span>
                     )}
+                    {user?.plan && (() => {
+                      const p = user.plan as 'starter' | 'pro' | 'premium';
+                      const badge = PLAN_BADGE[p];
+                      return badge ? (
+                        <span className={`px-2.5 py-0.5 text-[10px] font-bold rounded-full uppercase tracking-wider ${badge.className}`}>
+                          {PLAN_LABELS[p]}
+                        </span>
+                      ) : null;
+                    })()}
                   </div>
                   <p className="text-sm font-medium text-slate-500 dark:text-slate-400 mt-0.5">
                     {activeAppointmentsCount > 0

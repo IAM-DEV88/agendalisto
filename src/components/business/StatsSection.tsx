@@ -1,5 +1,6 @@
 import React from 'react';
 import { DollarSign, Calendar, Users, TrendingUp, Award } from 'lucide-react';
+import { canAccessAdvancedAnalytics } from '../../lib/roles';
 
 interface StatsSectionProps {
   totalAppointments: number;
@@ -7,6 +8,7 @@ interface StatsSectionProps {
   pastAppointments: number;
   totalClients: number;
   totalServices: number;
+  plan: 'starter' | 'pro' | 'premium';
   totalRevenue?: number;
   confirmationRate?: number;
   cancellationRate?: number;
@@ -45,8 +47,11 @@ const StatsSection: React.FC<StatsSectionProps> = ({
   avgDuration = 0, avgPrice = 0,
   topServiceName = '-', topServiceCount = 0,
   peakDay = '-', peakHour = 0, lifetimeValueAvg = 0,
+  plan,
 }) => {
-  const stats = [
+  const hasAdvanced = canAccessAdvancedAnalytics(plan);
+
+  const basicStats = [
     {
       label: 'Ingresos Totales',
       value: `$${totalRevenue.toLocaleString(undefined, { minimumFractionDigits: 0 })}`,
@@ -68,6 +73,9 @@ const StatsSection: React.FC<StatsSectionProps> = ({
       icon: <DollarSign className="w-5 h-5 text-teal-600 dark:text-teal-400" />,
       color: 'bg-teal-50 dark:bg-teal-500/10',
     },
+  ];
+
+  const advancedStats = [
     {
       label: 'Servicio Top',
       value: topServiceName,
@@ -95,13 +103,33 @@ const StatsSection: React.FC<StatsSectionProps> = ({
     <div className="space-y-6">
       <div>
         <h2 className="text-xl font-black text-slate-900 dark:text-white">Estadísticas del negocio</h2>
-        <p className="text-sm font-medium text-slate-500 dark:text-slate-400 mt-0.5">Resumen de rendimiento y métricas clave</p>
+        <p className="text-sm font-medium text-slate-500 dark:text-slate-400 mt-0.5">
+          {hasAdvanced ? 'Resumen de rendimiento y métricas clave' : 'Métricas básicas de tu negocio'}
+          {!hasAdvanced && (
+            <span className="text-amber-600 dark:text-amber-400"> — Actualiza a Premium para ver analytics avanzados.</span>
+          )}
+        </p>
       </div>
 
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
-        {stats.map((s, i) => (
-          <StatCard key={i} {...s} />
-        ))}
+      <div className="space-y-4">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+          {basicStats.map((s, i) => (
+            <StatCard key={`basic-${i}`} {...s} />
+          ))}
+        </div>
+
+        {hasAdvanced && (
+          <>
+            <div className="border-t border-slate-100 dark:border-slate-800 pt-4">
+              <p className="text-xs font-bold text-slate-400 dark:text-slate-500 uppercase tracking-wider mb-3">Analytics Avanzados</p>
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+                {advancedStats.map((s, i) => (
+                  <StatCard key={`adv-${i}`} {...s} />
+                ))}
+              </div>
+            </div>
+          </>
+        )}
       </div>
     </div>
   );
