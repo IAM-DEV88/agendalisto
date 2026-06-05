@@ -1,11 +1,12 @@
 import React from 'react';
-import { DollarSign, Calendar, Users, TrendingUp, Award } from 'lucide-react';
+import { DollarSign, Calendar, Users, TrendingUp, Award, CalendarCheck, CalendarClock, Star, ListChecks } from 'lucide-react';
 import { canAccessAdvancedAnalytics } from '../../lib/roles';
 
 interface StatsSectionProps {
   totalAppointments: number;
   upcomingAppointments: number;
-  pastAppointments: number;
+  pendingAppointments: number;
+  completedAppointments: number;
   totalClients: number;
   totalServices: number;
   plan: 'starter' | 'pro' | 'premium';
@@ -41,7 +42,7 @@ const StatCard = ({ icon, label, value, sub, color }: {
 );
 
 const StatsSection: React.FC<StatsSectionProps> = ({
-  totalAppointments,
+  totalAppointments, upcomingAppointments, pendingAppointments, completedAppointments,
   totalClients, totalRevenue = 0,
   confirmationRate = 0, cancellationRate = 0,
   avgDuration = 0, avgPrice = 0,
@@ -50,6 +51,33 @@ const StatsSection: React.FC<StatsSectionProps> = ({
   plan,
 }) => {
   const hasAdvanced = canAccessAdvancedAnalytics(plan);
+
+  const countCards = [
+    {
+      label: 'Confirmadas',
+      value: String(upcomingAppointments),
+      icon: <CalendarCheck className="w-5 h-5 text-emerald-600 dark:text-emerald-400" />,
+      color: 'bg-emerald-50 dark:bg-emerald-500/10',
+    },
+    {
+      label: 'Pendientes',
+      value: String(pendingAppointments),
+      icon: <CalendarClock className="w-5 h-5 text-amber-600 dark:text-amber-400" />,
+      color: 'bg-amber-50 dark:bg-amber-500/10',
+    },
+    {
+      label: 'Completadas',
+      value: String(completedAppointments),
+      icon: <Star className="w-5 h-5 text-primary-600 dark:text-primary-400" />,
+      color: 'bg-primary-50 dark:bg-primary-500/10',
+    },
+    {
+      label: 'Clientes',
+      value: String(totalClients),
+      icon: <ListChecks className="w-5 h-5 text-slate-600 dark:text-slate-400" />,
+      color: 'bg-slate-100 dark:bg-slate-800',
+    },
+  ];
 
   const basicStats = [
     {
@@ -111,7 +139,13 @@ const StatsSection: React.FC<StatsSectionProps> = ({
         </p>
       </div>
 
-      <div className="space-y-4">
+      <div className="space-y-6">
+        <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 sm:gap-4">
+          {countCards.map((s, i) => (
+            <StatCard key={`count-${i}`} {...s} />
+          ))}
+        </div>
+
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
           {basicStats.map((s, i) => (
             <StatCard key={`basic-${i}`} {...s} />

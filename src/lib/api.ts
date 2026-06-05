@@ -694,6 +694,21 @@ export const updateUserProfile = async (userId: string, updates: Partial<UserPro
   return data;
 };
 
+export async function getUserBusinesses(userId: string) {
+  try {
+    const { data, error } = await supabase
+      .from('agendaya_businesses')
+      .select('*')
+      .eq('owner_id', userId)
+      .order('created_at', { ascending: false });
+    if (error) throw error;
+    const businesses = (data || []).map(b => ({ ...b, slug: slugify(b.name) })) as Business[];
+    return { success: true, businesses };
+  } catch (err: any) {
+    return { success: false, error: err.message || 'Error desconocido' };
+  }
+}
+
 export async function getUserBusiness(userId: string) {
   try {
     const { data, error } = await supabase

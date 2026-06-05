@@ -34,6 +34,34 @@ export class ApiClient {
     }
   }
 
+  static async getUserBusinesses(userId: string): Promise<ApiResponse<Business[]>> {
+    try {
+      const { data, error } = await supabase
+        .from('agendaya_businesses')
+        .select('*')
+        .eq('owner_id', userId)
+        .order('created_at', { ascending: false });
+
+      if (error) throw error;
+      return { success: true, data: data as Business[] };
+    } catch (err: any) {
+      return { success: false, error: err.message || 'Error fetching businesses' };
+    }
+  }
+
+  static async setActiveBusiness(userId: string, businessId: string): Promise<ApiResponse<null>> {
+    try {
+      const { error } = await supabase.rpc('set_active_business', {
+        p_user_id: userId,
+        p_business_id: businessId,
+      });
+      if (error) throw error;
+      return { success: true };
+    } catch (err: any) {
+      return { success: false, error: err.message || 'Error switching business' };
+    }
+  }
+
   static async getUserBusiness(userId: string): Promise<ApiResponse<Business | null>> {
     try {
       const { data, error } = await supabase

@@ -62,7 +62,7 @@ export const BusinessConfigSection: React.FC<BusinessConfigSectionProps> = ({
   return (
     <div className="space-y-6">
       <SectionHeader 
-        title="Configuración" 
+        title="Comportamiento" 
         description="Personaliza el comportamiento y la visibilidad de tu negocio en la plataforma"
       />
       

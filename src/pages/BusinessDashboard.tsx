@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { Link } from 'react-router-dom';
 import { useSelector } from 'react-redux';
 import { Business } from '../lib/api';
@@ -9,6 +9,8 @@ import { useBusinessAppointments } from '../hooks/useBusinessAppointments';
 import { useToast } from '../hooks/useToast';
 import { useUIConfig } from '../hooks/useUIConfig';
 import { useAuth } from '../hooks/useAuth';
+import { useAppDispatch } from '../hooks/useAppDispatch';
+import { setBusinesses } from '../store/userSlice';
 import { useBusinessConfig } from '../hooks/useBusinessConfig';
 import { useBusinessHours } from '../hooks/useBusinessHours';
 import { useBusinessClients } from '../hooks/useBusinessClients';
@@ -23,6 +25,7 @@ import BusinessProfileSection from '../components/business/BusinessProfileSectio
 import BusinessConfigSection from '../components/business/BusinessConfigSection';
 import BusinessHoursSection from '../components/business/BusinessHoursSection';
 import ServicesSection from '../components/business/ServicesSection';
+import BusinessSwitcher from '../components/business/BusinessSwitcher';
 import BusinessAppointmentList from '../components/appointments/BusinessAppointmentList';
 import Pagination from '../components/ui/Pagination';
 import EmptyState from '../components/ui/EmptyState';
@@ -32,32 +35,9 @@ import {
   Store,
   CalendarCheck,
   CalendarClock,
-  Users,
   ArrowLeft,
-  TrendingUp,
   Clock,
 } from 'lucide-react';
-
-function StatCard({ icon, label, value, color }: {
-  icon: React.ReactNode;
-  label: string;
-  value: number | string;
-  color: string;
-}) {
-  return (
-    <div className="relative bg-white dark:bg-slate-900 rounded-2xl border border-slate-200 dark:border-slate-800 p-5 transition-all hover:shadow-lg hover:border-slate-300 dark:hover:border-slate-700">
-      <div className="flex items-center gap-4">
-        <div className={`w-12 h-12 rounded-2xl flex items-center justify-center ${color}`}>
-          {icon}
-        </div>
-        <div>
-          <p className="text-2xl font-black text-slate-900 dark:text-white">{value}</p>
-          <p className="text-xs font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider">{label}</p>
-        </div>
-      </div>
-    </div>
-  );
-}
 
 const slugify = (str: string): string =>
   str.toLowerCase().replace(/\s+/g, '-').replace(/[^\w\-]+/g, '');
@@ -65,6 +45,7 @@ const slugify = (str: string): string =>
 export const BusinessDashboard: React.FC = () => {
   const { user } = useAuth();
   const userProfile = useSelector((state: RootState) => state.user.userProfile);
+  const businesses = useSelector((state: RootState) => state.user.businesses);
   const plan = (userProfile?.plan as 'starter' | 'pro' | 'premium') || 'starter';
   const { itemsPerPage } = useUIConfig();
   const toast = useToast();
@@ -106,30 +87,51 @@ export const BusinessDashboard: React.FC = () => {
   const [activeAppointmentTab, setActiveAppointmentTab] = useState('pending');
   const [activeSettingsTab, setActiveSettingsTab] = useState('profile');
 
-  useEffect(() => {
-    const loadBusinessData = async () => {
-      if (!user?.id) return;
-      try {
-        const response = await ApiClient.getUserBusiness(user.id);
-        if (response.success && response.data) {
-          setBusinessData(response.data);
-          const servicesResponse = await ApiClient.getBusinessServices(response.data.id);
-          if (servicesResponse.success && servicesResponse.data) {
-            setTotalServices(servicesResponse.data.length);
-          }
-        } else {
-          setBusinessMessage({
-            text: response.error || 'No se encontró información de tu negocio',
-            type: 'error',
-          });
+  const loadBusinessData = useCallback(async (businessId?: string) => {
+    const id = businessId || userProfile?.business_id;
+    if (!user?.id || !id) return;
+    try {
+      const response = await ApiClient.getBusinessById(id);
+      if (response.success && response.data) {
+        setBusinessData(response.data);
+        const servicesResponse = await ApiClient.getBusinessServices(response.data.id);
+        if (servicesResponse.success && servicesResponse.data) {
+          setTotalServices(servicesResponse.data.length);
         }
-      } catch (err: any) {
-        setBusinessMessage({ text: err.message || 'Error al cargar los datos del negocio', type: 'error' });
-        toast.error(err.message || 'Error al cargar los datos del negocio');
+      } else {
+        setBusinessMessage({
+          text: response.error || 'No se encontró información de tu negocio',
+          type: 'error',
+        });
       }
-    };
+    } catch (err: any) {
+      setBusinessMessage({ text: err.message || 'Error al cargar los datos del negocio', type: 'error' });
+      toast.error(err.message || 'Error al cargar los datos del negocio');
+    }
+  }, [user?.id, userProfile?.business_id]);
+
+  const dispatch = useAppDispatch();
+  const [allBusinesses, setAllBusinesses] = useState<Business[]>([]);
+
+  useEffect(() => {
     loadBusinessData();
+  }, [loadBusinessData]);
+
+  useEffect(() => {
+    if (!user?.id) return;
+    ApiClient.getUserBusinesses(user.id).then(res => {
+      if (res.success && res.data) {
+        setAllBusinesses(res.data);
+        if (res.data.length > 0) {
+          dispatch(setBusinesses(res.data));
+        }
+      }
+    });
   }, [user?.id]);
+
+  const handleBusinessSwitch = useCallback((newBusinessId: string) => {
+    loadBusinessData(newBusinessId);
+  }, [loadBusinessData]);
 
   useEffect(() => {
     const handleReviewEvent = (e: any) => {
@@ -238,7 +240,7 @@ export const BusinessDashboard: React.FC = () => {
   const pagedClients = getPaginatedItems(businessClients, 'clients');
 
   const hasAnalytics = canAccessAnalytics(plan);
-  const completedAppointments = hasAnalytics ? appointments.filter(a => a.status === 'completed') : [];
+  const completedAppointments = appointments.filter(a => a.status === 'completed');
   const totalRevenue = hasAnalytics
     ? completedAppointments.reduce((sum, a) => sum + (a.services?.price ?? 0), 0) : 0;
   const confirmationRate = hasAnalytics && appointments.length > 0
@@ -351,42 +353,19 @@ export const BusinessDashboard: React.FC = () => {
                 )}
               </div>
 
-              <Link
-                to="/dashboard"
-                className="inline-flex items-center gap-2 px-5 py-2.5 bg-white dark:bg-slate-900 text-slate-700 dark:text-slate-300 text-sm font-bold rounded-xl border border-slate-200 dark:border-slate-800 hover:bg-slate-50 dark:hover:bg-slate-800 hover:border-slate-300 dark:hover:border-slate-700 transition-all shadow-sm hover:-translate-y-0.5 active:translate-y-0"
-              >
-                <ArrowLeft className="w-4 h-4" />
-                Mi Perfil
-              </Link>
+              <div className="flex items-center gap-3">
+                {(allBusinesses.length > 0 || businesses.length > 0) && (
+                  <BusinessSwitcher currentBusiness={businessData} businesses={allBusinesses} onSwitch={handleBusinessSwitch} />
+                )}
+                <Link
+                  to="/dashboard"
+                  className="inline-flex items-center gap-2 px-5 py-2.5 bg-white dark:bg-slate-900 text-slate-700 dark:text-slate-300 text-sm font-bold rounded-xl border border-slate-200 dark:border-slate-800 hover:bg-slate-50 dark:hover:bg-slate-800 hover:border-slate-300 dark:hover:border-slate-700 transition-all shadow-sm hover:-translate-y-0.5 active:translate-y-0"
+                >
+                  <ArrowLeft className="w-4 h-4" />
+                  Mi Perfil
+                </Link>
+              </div>
             </div>
-          </div>
-
-          {/* ═══ STATS ROW ═══ */}
-          <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 sm:gap-4 animate-in fade-in slide-in-from-bottom-4 duration-500 delay-100">
-            <StatCard
-              icon={<CalendarClock className="w-6 h-6 text-amber-600 dark:text-amber-400" />}
-              label="Pendientes"
-              value={pendingAppointments.length}
-              color="bg-amber-50 dark:bg-amber-500/10"
-            />
-            <StatCard
-              icon={<CalendarCheck className="w-6 h-6 text-emerald-600 dark:text-emerald-400" />}
-              label="Confirmadas"
-              value={confirmedAppointments.length}
-              color="bg-emerald-50 dark:bg-emerald-500/10"
-            />
-            <StatCard
-              icon={<TrendingUp className="w-6 h-6 text-primary-600 dark:text-primary-400" />}
-              label="Completadas"
-              value={completedAppointments.length}
-              color="bg-primary-50 dark:bg-primary-500/10"
-            />
-            <StatCard
-              icon={<Users className="w-6 h-6 text-slate-600 dark:text-slate-400" />}
-              label="Clientes"
-              value={businessClients.length}
-              color="bg-slate-100 dark:bg-slate-800"
-            />
           </div>
 
           {/* ═══ TABS ═══ */}
@@ -527,7 +506,8 @@ export const BusinessDashboard: React.FC = () => {
                 <StatsSection
                   totalAppointments={appointments.length}
                   upcomingAppointments={confirmedAppointments.length}
-                  pastAppointments={pastAppointments.length}
+                  pendingAppointments={pendingAppointments.length}
+                  completedAppointments={completedAppointments.length}
                   totalClients={businessClients.length}
                   totalServices={totalServices}
                   plan={plan}

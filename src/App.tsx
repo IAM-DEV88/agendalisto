@@ -24,7 +24,8 @@ import ProtectedRoute from './components/ProtectedRoute';
 import { useSelector } from 'react-redux';
 import { useAppDispatch } from './hooks/useAppDispatch';
 import type { RootState } from './store';
-import { setUser, setUserProfile, setLoading, setAuthInitialized } from './store/userSlice';
+import { setUser, setUserProfile, setBusinesses, setLoading, setAuthInitialized } from './store/userSlice';
+import { getUserBusinesses } from './lib/api';
 import { Toaster } from 'react-hot-toast';
 import { notifySuccess } from './lib/toast';
 
@@ -66,6 +67,12 @@ function App() {
       
       if (success && perfil) {
         dispatch(setUserProfile(perfil));
+        if (perfil.role === 'business_owner' || perfil.role === 'admin' || perfil.role === 'moderator') {
+          const bizRes = await getUserBusinesses(userId);
+          if (bizRes.success && bizRes.businesses) {
+            dispatch(setBusinesses(bizRes.businesses));
+          }
+        }
         return true;
       } else {
         
@@ -109,6 +116,7 @@ function App() {
         } else {
           dispatch(setUser(null));
           dispatch(setUserProfile(null));
+          dispatch(setBusinesses([]));
         }
       } catch (err) {
       } finally {
@@ -148,6 +156,7 @@ function App() {
         } else if (event === 'SIGNED_OUT') {
           dispatch(setUser(null));
           dispatch(setUserProfile(null));
+          dispatch(setBusinesses([]));
           notifySuccess('Sesión cerrada');
         }
         

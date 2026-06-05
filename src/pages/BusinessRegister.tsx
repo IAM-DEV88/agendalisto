@@ -1,11 +1,11 @@
 import { useState, useEffect, useMemo } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { useSelector } from 'react-redux';
-import { createBusiness, updateUserProfile, updateProfileRole, getBusinessCategories, BusinessCategory } from '../lib/api';
-import { supabase } from '../lib/supabase';
+import { useSelector, useDispatch } from 'react-redux';
+import { createBusiness, updateUserProfile, updateProfileRole, getBusinessCategories, BusinessCategory, getUserBusinesses } from '../lib/api';
 import type { UserProfile } from '../lib/supabase';
 import type { RootState } from '../store';
-import { getMaxBusinesses } from '../lib/roles';
+import { setBusinesses, setUserProfile } from '../store/userSlice';
+import { getMaxBusinesses, PLAN_LABELS } from '../lib/roles';
 import SEO from '../components/SEO';
 import PhoneInput from '../components/ui/PhoneInput';
 import {
@@ -25,6 +25,7 @@ import {
   AlertCircle,
   PenLine,
   Sparkles,
+  Crown,
 } from 'lucide-react';
 
 type BusinessRegisterProps = {
@@ -45,8 +46,11 @@ const initialForm = {
 
 const BusinessRegister = ({ user }: BusinessRegisterProps) => {
   const navigate = useNavigate();
+  const dispatch = useDispatch();
   const userProfile = useSelector((state: RootState) => state.user.userProfile);
+  const businesses = useSelector((state: RootState) => state.user.businesses);
   const plan = (userProfile?.plan as 'starter' | 'pro' | 'premium') || 'starter';
+  const maxBusinesses = getMaxBusinesses(plan);
   const [form, setForm] = useState({ ...initialForm, email: user?.email || '' });
   const [categories, setCategories] = useState<BusinessCategory[]>([]);
   const [loading, setLoading] = useState(false);
@@ -54,12 +58,14 @@ const BusinessRegister = ({ user }: BusinessRegisterProps) => {
   const [slugPreview, setSlugPreview] = useState('');
   const [submitted, setSubmitted] = useState(false);
 
-  // Redirect if user already has a business
+  const existingCount = businesses.length;
+
+  // Redirect if user hit the limit
   useEffect(() => {
-    if (user?.business_id && getMaxBusinesses(plan) <= 1) {
+    if (existingCount >= maxBusinesses) {
       navigate('/business/dashboard', { replace: true });
     }
-  }, [user, plan, navigate]);
+  }, [existingCount, maxBusinesses, navigate]);
 
   useEffect(() => {
     getBusinessCategories().then(({ success, data }) => {
@@ -100,31 +106,13 @@ const BusinessRegister = ({ user }: BusinessRegisterProps) => {
     setLoading(true);
     setError(null);
 
-    // Solo se permite un negocio por cuenta
-    if (user?.business_id) {
-      setError('Ya tienes un negocio registrado.');
+    if (existingCount >= maxBusinesses) {
+      setError(`Has alcanzado el límite de ${maxBusinesses === Infinity ? 'negocios ilimitados' : `${maxBusinesses} negocios`} de tu plan ${PLAN_LABELS[plan]}. ${plan === 'starter' ? 'Actualiza a Pro o Premium para crear más negocios.' : ''}`);
       setLoading(false);
       return;
     }
 
     try {
-      // Pre-check: si ya tiene un negocio en la DB (ej: intento fallido anterior)
-      const { data: existingBiz } = await supabase
-        .from('agendaya_businesses')
-        .select('id')
-        .eq('owner_id', user.id)
-        .maybeSingle();
-
-      if (existingBiz) {
-        await updateUserProfile(user.id, { is_business: true, business_id: existingBiz.id });
-        await updateProfileRole(user.id, 'business_owner');
-        window.dispatchEvent(new CustomEvent('userProfileUpdated', {
-          detail: { profile: { ...user, role: 'business_owner' } }
-        }));
-        setSubmitted(true);
-        setTimeout(() => navigate('/business/dashboard'), 1500);
-        return;
-      }
 
       const businessData = {
         owner_id: user.id,
@@ -149,9 +137,9 @@ const BusinessRegister = ({ user }: BusinessRegisterProps) => {
       if (success && business) {
         await updateUserProfile(user.id, { is_business: true, business_id: business.id });
         await updateProfileRole(user.id, 'business_owner');
-        window.dispatchEvent(new CustomEvent('userProfileUpdated', {
-          detail: { profile: { ...user, role: 'business_owner' } }
-        }));
+        dispatch(setUserProfile({ ...userProfile!, role: 'business_owner', business_id: business.id }));
+        const bizRes = await getUserBusinesses(user.id);
+        if (bizRes.success && bizRes.businesses) dispatch(setBusinesses(bizRes.businesses));
         setSubmitted(true);
         setTimeout(() => navigate('/business/dashboard'), 1500);
       } else {
@@ -215,6 +203,19 @@ const BusinessRegister = ({ user }: BusinessRegisterProps) => {
           <div className="flex items-start gap-3 px-5 py-4 mb-8 bg-red-50 dark:bg-red-500/10 border border-red-200 dark:border-red-800 rounded-2xl animate-in fade-in slide-in-from-top-2 duration-300">
             <AlertCircle className="w-5 h-5 text-red-500 flex-shrink-0 mt-0.5" />
             <p className="text-sm font-bold text-red-700 dark:text-red-400">{error}</p>
+          </div>
+        )}
+
+        {/* Plan upgrade banner */}
+        {existingCount > 0 && existingCount < maxBusinesses && (
+          <div className="flex items-start gap-3 px-5 py-4 mb-8 bg-amber-50 dark:bg-amber-500/10 border border-amber-200 dark:border-amber-800 rounded-2xl animate-in fade-in slide-in-from-top-2 duration-300">
+            <Crown className="w-5 h-5 text-amber-500 flex-shrink-0 mt-0.5" />
+            <div className="text-sm font-medium text-amber-800 dark:text-amber-300">
+              Tienes <strong>{existingCount}</strong> de {maxBusinesses === Infinity ? 'negocios ilimitados' : <strong>{maxBusinesses}</strong>} negocio{maxBusinesses !== 1 ? 's' : ''} en tu plan {PLAN_LABELS[plan]}.
+              {existingCount === maxBusinesses - 1 && plan !== 'premium' && (
+                <span> <a href="/plans" className="font-bold underline hover:text-amber-600">Actualiza tu plan</a> para crear más.</span>
+              )}
+            </div>
           </div>
         )}
 

@@ -1,10 +1,12 @@
 import { createSlice, PayloadAction } from '@reduxjs/toolkit';
 import { User } from '@supabase/supabase-js';
 import { UserProfile } from '../lib/supabase';
+import { Business } from '../lib/api';
 
 interface UserState {
   user: User | null;
   userProfile: UserProfile | null;
+  businesses: Business[];
   loading: boolean;
   authInitialized: boolean;
 }
@@ -12,6 +14,7 @@ interface UserState {
 const initialState: UserState = {
   user: null,
   userProfile: null,
+  businesses: [],
   loading: true,
   authInitialized: false,
 };
@@ -26,6 +29,14 @@ const userSlice = createSlice({
     setUserProfile(state, action: PayloadAction<UserProfile | null>) {
       state.userProfile = action.payload;
     },
+    setBusinesses(state, action: PayloadAction<Business[]>) {
+      state.businesses = action.payload;
+    },
+    setActiveBusinessId(state, action: PayloadAction<string | undefined>) {
+      if (state.userProfile) {
+        state.userProfile.business_id = action.payload;
+      }
+    },
     setLoading(state, action: PayloadAction<boolean>) {
       state.loading = action.payload;
     },
@@ -35,5 +46,5 @@ const userSlice = createSlice({
   },
 });
 
-export const { setUser, setUserProfile, setLoading, setAuthInitialized } = userSlice.actions;
+export const { setUser, setUserProfile, setBusinesses, setActiveBusinessId, setLoading, setAuthInitialized } = userSlice.actions;
 export default userSlice.reducer; 

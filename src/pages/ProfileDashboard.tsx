@@ -1,5 +1,6 @@
 import { useState, useEffect, useMemo, useCallback } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
+import { useSelector } from 'react-redux';
 import { supabase } from '../lib/supabase';
 import { dispatchUserProfileUpdated } from '../lib/events';
 import UserProfileSection from '../components/profile/UserProfileSection';
@@ -7,6 +8,7 @@ import { useAppDispatch } from '../hooks/useAppDispatch';
 import { setUserProfile } from '../store/userSlice';
 import { useAppointments } from '../hooks/useAppointments';
 import type { UserProfile } from '../lib/supabase';
+import type { RootState } from '../store';
 import { ApiClient } from '../lib/apiClient';
 import { useToast } from '../hooks/useToast';
 import { useUIConfig } from '../hooks/useUIConfig';
@@ -30,8 +32,9 @@ import {
   ChevronRight,
   ListChecks,
   UserPlus,
+  Plus,
 } from 'lucide-react';
-import { ROLE_LABELS, PLAN_BADGE, PLAN_LABELS } from '../lib/roles';
+import { ROLE_LABELS, PLAN_BADGE, PLAN_LABELS, getMaxBusinesses } from '../lib/roles';
 import { updateProfileRole } from '../lib/api';
 
 const FALLBACK_AVATAR = 'https://upload.wikimedia.org/wikipedia/commons/8/89/Portrait_Placeholder.png';
@@ -104,7 +107,10 @@ const ProfileDashboard = ({ user }: ProfileDashboardProps) => {
       : supabase.storage.from('avatars').getPublicUrl(user.avatar_url).data.publicUrl;
   }, [user?.avatar_url]);
 
+  const businesses = useSelector((state: RootState) => state.user.businesses);
   const [hasBusiness, setHasBusiness] = useState(false);
+  const plan = (user?.plan || 'starter') as 'starter' | 'pro' | 'premium';
+  const canCreateMore = hasBusiness && businesses.length < getMaxBusinesses(plan) && plan !== 'starter';
 
   const [profileData, setProfileData] = useState({
     full_name: user?.full_name || '',
@@ -136,7 +142,7 @@ const ProfileDashboard = ({ user }: ProfileDashboardProps) => {
     }
   };
 
-  const [activeTab, setActiveTab] = useState<'appointments' | 'favorites' | 'settings'>('appointments');
+  const [activeTab, setActiveTab] = useState<'appointments' | 'favorites' | 'stats' | 'settings'>('appointments');
   const [activeAppointmentTab, setActiveAppointmentTab] = useState('upcoming');
   const [activeSettingsTab, setActiveSettingsTab] = useState('profile');
   const [selectedAppointmentForReview, setSelectedAppointmentForReview] = useState<Appointment | null>(null);
@@ -182,8 +188,8 @@ const ProfileDashboard = ({ user }: ProfileDashboardProps) => {
     const checkBusiness = async () => {
       if (!user) return;
       try {
-        const response = await ApiClient.getUserBusiness(user.id);
-        setHasBusiness(response.success && !!response.data);
+        const response = await ApiClient.getUserBusinesses(user.id);
+        setHasBusiness(!!(response.success && response.data && response.data.length > 0));
       } catch {
         setHasBusiness(false);
       }
@@ -310,6 +316,7 @@ const ProfileDashboard = ({ user }: ProfileDashboardProps) => {
   const tabs = [
     { id: 'appointments', label: 'Mis Citas', count: activeAppointmentsCount },
     { id: 'favorites', label: 'Favoritos' },
+    { id: 'stats', label: 'Estadísticas' },
     { id: 'settings', label: 'Configuración' },
   ];
 
@@ -386,14 +393,25 @@ const ProfileDashboard = ({ user }: ProfileDashboardProps) => {
                   </button>
                 ) : null}
                 {hasBusiness ? (
-                  <Link
-                    to="/business/dashboard"
-                    className="inline-flex items-center gap-2 px-5 py-2.5 bg-primary-600 hover:bg-primary-700 text-white text-sm font-bold rounded-xl transition-all shadow-lg shadow-primary-500/25 hover:-translate-y-0.5 active:translate-y-0"
-                  >
-                    <Store className="w-4 h-4" />
-                    Mi Negocio
-                    <ChevronRight className="w-4 h-4" />
-                  </Link>
+                  <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-2">
+                    <Link
+                      to="/business/dashboard"
+                      className="inline-flex items-center justify-center gap-2 px-5 py-2.5 bg-primary-600 hover:bg-primary-700 text-white text-sm font-bold rounded-xl transition-all shadow-lg shadow-primary-500/25 hover:-translate-y-0.5 active:translate-y-0"
+                    >
+                      <Store className="w-4 h-4" />
+                      Mi Negocio
+                      <ChevronRight className="w-4 h-4" />
+                    </Link>
+                    {canCreateMore && (
+                      <Link
+                        to="/business/register"
+                        className="inline-flex items-center justify-center gap-2 px-5 py-2.5 bg-white dark:bg-slate-900 text-primary-600 dark:text-primary-400 text-sm font-bold rounded-xl border border-primary-200 dark:border-primary-800 hover:bg-primary-50 dark:hover:bg-primary-900/20 hover:border-primary-300 dark:hover:border-primary-700 transition-all shadow-sm hover:-translate-y-0.5 active:translate-y-0"
+                      >
+                        <Plus className="w-4 h-4" />
+                        Crear otro negocio
+                      </Link>
+                    )}
+                  </div>
                 ) : (
                   <Link
                     to="/business/register"
@@ -430,37 +448,9 @@ const ProfileDashboard = ({ user }: ProfileDashboardProps) => {
             </div>
           )}
 
-          {/* ─── STATS CARDS ─── */}
-          <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 sm:gap-4 animate-in fade-in slide-in-from-bottom-4 duration-500 delay-100">
-            <StatCard
-              icon={<CalendarCheck className="w-6 h-6 text-emerald-600 dark:text-emerald-400" />}
-              label="Confirmadas"
-              value={upcomingCount}
-              color="bg-emerald-50 dark:bg-emerald-500/10"
-            />
-            <StatCard
-              icon={<CalendarClock className="w-6 h-6 text-amber-600 dark:text-amber-400" />}
-              label="Pendientes"
-              value={pendingCount}
-              color="bg-amber-50 dark:bg-amber-500/10"
-            />
-            <StatCard
-              icon={<Star className="w-6 h-6 text-primary-600 dark:text-primary-400" />}
-              label="Completadas"
-              value={pastAppointments.filter(a => a.status === 'completed').length}
-              color="bg-primary-50 dark:bg-primary-500/10"
-            />
-            <StatCard
-              icon={<ListChecks className="w-6 h-6 text-slate-600 dark:text-slate-400" />}
-              label="Total"
-              value={appointments.length}
-              color="bg-slate-100 dark:bg-slate-800"
-            />
-          </div>
-
           {/* ─── MAIN TABS ─── */}
           <div className="animate-in fade-in duration-500 delay-200">
-            <TabNav tabs={tabs} activeTabId={activeTab} onTabChange={(tab) => setActiveTab(tab as 'appointments' | 'favorites' | 'settings')} />
+            <TabNav tabs={tabs} activeTabId={activeTab} onTabChange={(tab) => setActiveTab(tab as 'appointments' | 'favorites' | 'stats' | 'settings')} />
           </div>
 
           <div className="animate-in fade-in slide-in-from-bottom-4 duration-500 delay-300">
@@ -582,6 +572,68 @@ const ProfileDashboard = ({ user }: ProfileDashboardProps) => {
             {activeTab === 'favorites' && (
               <div className="animate-in fade-in zoom-in-95 duration-300">
                 {user && <FavoritesSection user={user} />}
+              </div>
+            )}
+
+            {/* ═══ STATS TAB ═══ */}
+            {activeTab === 'stats' && (
+              <div className="animate-in fade-in zoom-in-95 duration-300 space-y-6">
+                <div>
+                  <h2 className="text-xl font-black text-slate-900 dark:text-white">Estadísticas de tus citas</h2>
+                  <p className="text-sm font-medium text-slate-500 dark:text-slate-400 mt-0.5">
+                    Resumen de tu actividad como cliente
+                  </p>
+                </div>
+
+                <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 sm:gap-4">
+                  <StatCard
+                    icon={<CalendarCheck className="w-6 h-6 text-emerald-600 dark:text-emerald-400" />}
+                    label="Confirmadas"
+                    value={upcomingCount}
+                    color="bg-emerald-50 dark:bg-emerald-500/10"
+                  />
+                  <StatCard
+                    icon={<CalendarClock className="w-6 h-6 text-amber-600 dark:text-amber-400" />}
+                    label="Pendientes"
+                    value={pendingCount}
+                    color="bg-amber-50 dark:bg-amber-500/10"
+                  />
+                  <StatCard
+                    icon={<Star className="w-6 h-6 text-primary-600 dark:text-primary-400" />}
+                    label="Completadas"
+                    value={pastAppointments.filter(a => a.status === 'completed').length}
+                    color="bg-primary-50 dark:bg-primary-500/10"
+                  />
+                  <StatCard
+                    icon={<ListChecks className="w-6 h-6 text-slate-600 dark:text-slate-400" />}
+                    label="Total"
+                    value={appointments.length}
+                    color="bg-slate-100 dark:bg-slate-800"
+                  />
+                </div>
+
+                {appointments.length > 0 && (
+                  <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+                    <div className="bg-white dark:bg-slate-900 rounded-2xl border border-slate-200 dark:border-slate-800 p-5">
+                      <p className="text-xs font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider mb-1">Tasa de Finalización</p>
+                      <p className="text-xl font-black text-slate-900 dark:text-white">
+                        {Math.round((pastAppointments.filter(a => a.status === 'completed').length / appointments.length) * 100)}%
+                      </p>
+                    </div>
+                    <div className="bg-white dark:bg-slate-900 rounded-2xl border border-slate-200 dark:border-slate-800 p-5">
+                      <p className="text-xs font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider mb-1">Canceladas</p>
+                      <p className="text-xl font-black text-slate-900 dark:text-white">
+                        {appointments.filter(a => a.status === 'cancelled').length}
+                      </p>
+                    </div>
+                    <div className="bg-white dark:bg-slate-900 rounded-2xl border border-slate-200 dark:border-slate-800 p-5">
+                      <p className="text-xs font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider mb-1">Negocios Visitados</p>
+                      <p className="text-xl font-black text-slate-900 dark:text-white">
+                        {new Set(appointments.map(a => a.business_id)).size}
+                      </p>
+                    </div>
+                  </div>
+                )}
               </div>
             )}
 

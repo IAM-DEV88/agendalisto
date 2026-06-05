@@ -1,10 +1,12 @@
 import { Link, useNavigate, useLocation } from 'react-router-dom';
 import { useState, useEffect, useRef } from 'react';
+import { useSelector } from 'react-redux';
 import { signOut, supabase } from '../lib/supabase';
 import { UserProfile } from '../lib/supabase';
 import { useTheme } from '../contexts/ThemeContext';
-import { canManageBusiness } from '../lib/roles';
-import { Sun, Moon } from 'lucide-react';
+import { canManageBusiness, getMaxBusinesses } from '../lib/roles';
+import type { RootState } from '../store';
+import { Plus, Sun, Moon } from 'lucide-react';
 
 type NavProps = {
   user: UserProfile | null;
@@ -16,8 +18,11 @@ const Nav = ({ user }: NavProps) => {
   const location = useLocation();
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [isUserDropdownOpen, setIsUserDropdownOpen] = useState(false);
+  const businesses = useSelector((state: RootState) => state.user.businesses);
   const canManage = canManageBusiness(user?.role || '');
   const hasBusiness = canManage && !!user?.business_id;
+  const plan = (user?.plan || 'starter') as 'starter' | 'pro' | 'premium';
+  const canCreateMore = hasBusiness && businesses.length < getMaxBusinesses(plan) && plan !== 'starter';
   const dropdownRef = useRef<HTMLDivElement>(null);
   const buttonRef = useRef<HTMLButtonElement>(null);
   const mobileMenuRef = useRef<HTMLDivElement>(null);
@@ -149,6 +154,12 @@ const Nav = ({ user }: NavProps) => {
                           Mi Negocio
                         </Link>
                       )}
+                      {canCreateMore && (
+                        <Link to="/business/register" onClick={() => setIsUserDropdownOpen(false)} className="flex items-center px-4 py-2 text-sm text-primary-600 dark:text-primary-400 hover:bg-primary-50 dark:hover:bg-slate-700 transition-colors">
+                          <Plus className="mr-3 h-4 w-4" />
+                          Crear negocio
+                        </Link>
+                      )}
                       <button onClick={() => { setIsUserDropdownOpen(false); handleLogout(); }} className="flex w-full items-center px-4 py-2 text-sm text-red-600 hover:bg-red-50 dark:hover:bg-red-900/20 transition-colors">
                         <svg className="mr-3 h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" /></svg>
                         Cerrar Sesión
@@ -228,6 +239,11 @@ const Nav = ({ user }: NavProps) => {
                   {hasBusiness && (
                     <Link to="/business/dashboard" onClick={() => setIsMenuOpen(false)} className="block px-4 py-3 text-base font-bold text-slate-700 dark:text-slate-300 rounded-xl hover:bg-primary-50 dark:hover:bg-slate-800">
                       Mi Negocio
+                    </Link>
+                  )}
+                  {canCreateMore && (
+                    <Link to="/business/register" onClick={() => setIsMenuOpen(false)} className="block px-4 py-3 text-base font-bold text-primary-600 dark:text-primary-400 rounded-xl hover:bg-primary-50 dark:hover:bg-slate-800">
+                      + Crear negocio
                     </Link>
                   )}
                   <button onClick={() => { setIsMenuOpen(false); handleLogout(); }} className="block w-full text-left px-4 py-3 text-base font-bold text-red-600 rounded-xl hover:bg-red-50 dark:hover:bg-red-900/20 transition-all">
