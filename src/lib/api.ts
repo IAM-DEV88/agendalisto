@@ -89,7 +89,7 @@ export const getBusinesses = async (search?: string, _category?: string, locatio
     query = query.eq('category_id', _category);
   }
 
-  query = query.order('plan_score', { ascending: false }).order('created_at', { ascending: false });
+  query = query.order('plan_score', { ascending: false }).order('likes_count', { ascending: false }).order('created_at', { ascending: false });
   
   const { data, error } = await query;
   
