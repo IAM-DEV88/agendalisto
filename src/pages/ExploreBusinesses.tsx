@@ -1,12 +1,13 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useMemo } from 'react';
 import { Link, useSearchParams } from 'react-router-dom';
-import { Search, MapPin, ArrowRight, Heart, Share2, Check, Store, SlidersHorizontal, X, ChevronDown } from 'lucide-react';
+import { Search, MapPin, ArrowRight, Heart, Share2, Check, Store, SlidersHorizontal, X } from 'lucide-react';
 import { getBusinesses, getBusinessCategories, BusinessCategory, toggleLike, checkIfLiked } from '../lib/api';
 import type { Business } from '../lib/api';
 import { supabase } from '../lib/supabase';
 import { toast } from 'react-hot-toast';
 import SEO from '../components/SEO';
 import EmptyState from '../components/ui/EmptyState';
+import SelectMenu from '../components/ui/SelectMenu';
 
 const FALLBACK_LOGO = 'https://upload.wikimedia.org/wikipedia/commons/8/89/Portrait_Placeholder.png';
 
@@ -204,6 +205,11 @@ const ExploreBusinesses = () => {
     return () => clearTimeout(timer);
   }, [searchTerm, locationTerm, category]);
 
+  const categoryOptions = useMemo(() => [
+    { value: 'all', label: 'Todas' },
+    ...categories.map(cat => ({ value: cat.id, label: cat.name })),
+  ], [categories]);
+
   const hasFilters = searchTerm || locationTerm || category !== 'all';
   const clearFilters = () => { setSearchTerm(''); setLocationTerm(''); setCategory('all'); };
 
@@ -238,7 +244,7 @@ const ExploreBusinesses = () => {
                 value={searchTerm}
                 onChange={(e) => setSearchTerm(e.target.value)}
                 placeholder="¿Qué servicio buscas?"
-                className="w-full pl-10 pr-4 py-3 rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 focus:ring-2 focus:ring-primary-500/20 focus:border-primary-500 outline-none transition-all text-sm font-medium"
+                className="w-full pl-10 pr-4 py-3 rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 text-slate-900 dark:text-slate-100 focus:ring-2 focus:ring-primary-500/20 focus:border-primary-500 outline-none transition-all text-sm font-medium"
               />
             </div>
             <div className="flex-1 relative">
@@ -248,22 +254,16 @@ const ExploreBusinesses = () => {
                 value={locationTerm}
                 onChange={(e) => setLocationTerm(e.target.value)}
                 placeholder="Ubicación"
-                className="w-full pl-10 pr-4 py-3 rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 focus:ring-2 focus:ring-primary-500/20 focus:border-primary-500 outline-none transition-all text-sm font-medium"
+                className="w-full pl-10 pr-4 py-3 rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 text-slate-900 dark:text-slate-100 focus:ring-2 focus:ring-primary-500/20 focus:border-primary-500 outline-none transition-all text-sm font-medium"
               />
             </div>
             <div className="lg:w-48 relative">
-              <SlidersHorizontal className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400 pointer-events-none" />
-              <select
+              <SlidersHorizontal className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400 pointer-events-none z-10" />
+              <SelectMenu
                 value={category}
-                onChange={(e) => setCategory(e.target.value)}
-                className="w-full pl-10 pr-10 py-3 rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 focus:ring-2 focus:ring-primary-500/20 focus:border-primary-500 outline-none transition-all text-sm font-bold appearance-none"
-              >
-                <option value="all">Todas</option>
-                {categories.map((cat) => (
-                  <option key={cat.id} value={cat.id}>{cat.name}</option>
-                ))}
-              </select>
-              <ChevronDown className="absolute right-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400 pointer-events-none" />
+                onChange={setCategory}
+                options={categoryOptions}
+              />
             </div>
           </div>
           {hasFilters && (
