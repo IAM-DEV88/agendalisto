@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
-import { Heart, MessageSquare, ArrowRight, Clock, User, Share2 } from 'lucide-react';
+import { Heart, MessageSquare, ArrowRight, Clock, User } from 'lucide-react';
 import { getLatestBlogPost, getPopularPosts, BlogPost, toggleBlogLike } from '../lib/api';
 import { supabase } from '../lib/supabase';
 import { toast } from 'react-hot-toast';

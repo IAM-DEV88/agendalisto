@@ -1,9 +1,10 @@
 import React, { useState, useEffect } from 'react';
-import { MapPin, Phone, Globe, MessageCircle, Facebook, Instagram, Mail, Star, Heart, Share2, Check } from 'lucide-react';
+import { MapPin, Phone, Globe, MessageCircle, Facebook, Instagram, Mail, Star, Heart } from 'lucide-react';
 import { Business, getBusinessCategories, BusinessCategory, toggleLike, checkIfLiked } from '../../../lib/api';
 import { supabase } from '../../../lib/supabase';
 import { Link } from 'react-router-dom';
 import { toast } from 'react-hot-toast';
+import ShareButton from '../../ui/ShareButton';
 
 interface BusinessHeaderProps {
   businessData: Business;
@@ -19,8 +20,6 @@ const BusinessHeader: React.FC<BusinessHeaderProps> = ({ businessData, averageRa
   const [isLiked, setIsLiked] = useState(false);
   const [likesCount, setLikesCount] = useState(businessData.likes_count || 0);
   const [isLiking, setIsLiking] = useState(false);
-  const [isCopied, setIsCopied] = useState(false);
-  
   // Memoria local para URL inválidas para evitar intentos repetidos
   const invalidUrlsRef = React.useRef<Set<string>>(new Set());
 
@@ -56,14 +55,6 @@ const BusinessHeader: React.FC<BusinessHeaderProps> = ({ businessData, averageRa
     }
   };
 
-  const handleShare = () => {
-    const url = window.location.href;
-    navigator.clipboard.writeText(url);
-    setIsCopied(true);
-    toast.success('¡Enlace del negocio copiado!');
-    setTimeout(() => setIsCopied(false), 2000);
-  };
-  
   // Verificar si una URL realmente existe y es accesible
   const verifyImageUrl = async (url: string): Promise<boolean> => {
     if (!url || url === 'https://upload.wikimedia.org/wikipedia/commons/8/89/Portrait_Placeholder.png') return true; // La URL fallback siempre existe
@@ -307,18 +298,11 @@ const BusinessHeader: React.FC<BusinessHeaderProps> = ({ businessData, averageRa
                 
                 <div className="w-px h-6 bg-slate-200 dark:bg-slate-700 mx-1"></div>
                 
-                <button
-                  onClick={handleShare}
-                  className={`flex items-center gap-2 px-4 py-2 rounded-xl transition-all ${
-                    isCopied 
-                      ? 'bg-emerald-500 text-white shadow-md shadow-emerald-200 dark:shadow-emerald-900/20' 
-                      : 'hover:bg-slate-200 dark:hover:bg-slate-700 text-slate-600 dark:text-slate-400'
-                  }`}
-                  title="Compartir negocio"
-                >
-                  {isCopied ? <Check className="h-5 w-5" /> : <Share2 className="h-5 w-5" />}
-                  <span className="font-bold text-sm">{isCopied ? '¡Copiado!' : 'Compartir'}</span>
-                </button>
+                <ShareButton
+                  title={businessData.name}
+                  description={businessData.description || 'Visita este negocio en AgendaYa'}
+                  variant="full"
+                />
               </div>
 
               {/* Redes Sociales Existentes */}

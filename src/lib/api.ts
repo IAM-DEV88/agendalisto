@@ -1586,3 +1586,164 @@ export const contributeToMilestone = async (id: string, amount: number): Promise
     return { success: false, error: err.message };
   }
 };
+
+// --- Newsletter ---
+
+export const subscribeToNewsletter = async (email: string): Promise<{ success: boolean; error?: string }> => {
+  try {
+    const { error } = await supabase
+      .from('agendaya_newsletter_subscriptions')
+      .insert([{ email, subscribed_at: new Date().toISOString() }]);
+    if (error && error.code === '23505') {
+      return { success: false, error: 'Este correo ya está suscrito' };
+    }
+    if (error) throw error;
+    return { success: true };
+  } catch (err: any) {
+    return { success: false, error: err.message };
+  }
+};
+
+// --- Referral System ---
+
+const REFERRAL_PREFIX = 'AG';
+
+export const generateReferralCode = (userId: string): string => {
+  return REFERRAL_PREFIX + btoa(userId).replace(/=/g, '');
+};
+
+export const decodeReferralCode = (code: string): string | null => {
+  if (!code.startsWith(REFERRAL_PREFIX)) return null;
+  try {
+    const encoded = code.slice(REFERRAL_PREFIX.length);
+    return atob(encoded);
+  } catch {
+    return null;
+  }
+};
+
+export const getReferralLink = (userId: string): string => {
+  const code = generateReferralCode(userId);
+  return `${window.location.origin}/register?ref=${code}`;
+};
+
+export const applyReferralCode = async (newUserId: string, referralCode: string): Promise<{ success: boolean; error?: string }> => {
+  try {
+    const referrerId = decodeReferralCode(referralCode);
+    if (!referrerId) return { success: false, error: 'Código de referido inválido' };
+    const { error } = await supabase
+      .from('agendaya_profiles')
+      .update({ referred_by: referrerId })
+      .eq('id', newUserId);
+    if (error) throw error;
+    return { success: true };
+  } catch (err: any) {
+    return { success: false, error: err.message };
+  }
+};
+
+export const getReferralCount = async (userId: string): Promise<{ success: boolean; count?: number; error?: string }> => {
+  try {
+    const { count, error } = await supabase
+      .from('agendaya_profiles')
+      .select('*', { count: 'exact', head: true })
+      .eq('referred_by', userId);
+    if (error) throw error;
+    return { success: true, count: count || 0 };
+  } catch (err: any) {
+    return { success: false, error: err.message };
+  }
+};
+
+export type ReferredUser = {
+  id: string;
+  full_name: string | null;
+  email: string | null;
+  created_at: string;
+  role: string;
+  plan: string;
+};
+
+export const getReferredUsers = async (userId: string): Promise<{ success: boolean; data?: ReferredUser[]; error?: string }> => {
+  try {
+    const { data, error } = await supabase
+      .from('agendaya_profiles')
+      .select('id, full_name, email, created_at, role, plan')
+      .eq('referred_by', userId)
+      .order('created_at', { ascending: false });
+    if (error) throw error;
+    return { success: true, data: data as ReferredUser[] };
+  } catch (err: any) {
+    return { success: false, error: err.message };
+  }
+};
+
+export type ReferralStat = {
+  referrer_id: string;
+  referrer_name: string | null;
+  referrer_email: string | null;
+  count: number;
+};
+
+export const getTopReferrers = async (limit = 10): Promise<{ success: boolean; data?: ReferralStat[]; error?: string }> => {
+  try {
+    const { data, error } = await supabase
+      .from('agendaya_profiles')
+      .select('referred_by')
+      .not('referred_by', 'is', null);
+    if (error) throw error;
+
+    const countMap = new Map<string, number>();
+    (data as { referred_by: string }[]).forEach(row => {
+      countMap.set(row.referred_by, (countMap.get(row.referred_by) || 0) + 1);
+    });
+
+    const referrerIds = Array.from(countMap.keys());
+    if (referrerIds.length === 0) return { success: true, data: [] };
+
+    const { data: profiles, error: profilesError } = await supabase
+      .from('agendaya_profiles')
+      .select('id, full_name, email')
+      .in('id', referrerIds);
+    if (profilesError) throw profilesError;
+
+    const profileMap = new Map((profiles as { id: string; full_name: string | null; email: string | null }[]).map(p => [p.id, p]));
+
+    const stats: ReferralStat[] = referrerIds
+      .map(id => ({
+        referrer_id: id,
+        referrer_name: profileMap.get(id)?.full_name || null,
+        referrer_email: profileMap.get(id)?.email || null,
+        count: countMap.get(id) || 0,
+      }))
+      .sort((a, b) => b.count - a.count)
+      .slice(0, limit);
+
+    return { success: true, data: stats };
+  } catch (err: any) {
+    return { success: false, error: err.message };
+  }
+};
+
+export const getAdminReferralStats = async (): Promise<{ success: boolean; data?: { total_referrals: number; unique_referrers: number }; error?: string }> => {
+  try {
+    const { data, error } = await supabase
+      .from('agendaya_profiles')
+      .select('referred_by')
+      .not('referred_by', 'is', null);
+    if (error) throw error;
+
+    const referrals = data as { referred_by: string }[];
+    const uniqueReferrers = new Set(referrals.map(r => r.referred_by));
+
+    return {
+      success: true,
+      data: {
+        total_referrals: referrals.length,
+        unique_referrers: uniqueReferrers.size,
+      },
+    };
+  } catch (err: any) {
+    return { success: false, error: err.message };
+  }
+};

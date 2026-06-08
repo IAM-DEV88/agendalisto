@@ -1,8 +1,9 @@
 import { useState, useMemo } from 'react';
-import { Link, useNavigate } from 'react-router-dom';
+import { Link, useNavigate, useSearchParams } from 'react-router-dom';
 import { signUp } from '../lib/supabase';
 import { supabase } from '../lib/supabase';
 import { notifySuccess, notifyError } from '../lib/toast';
+import { applyReferralCode, decodeReferralCode } from '../lib/api';
 import SEO from '../components/SEO';
 import PhoneInput from '../components/ui/PhoneInput';
 import {
@@ -19,6 +20,8 @@ import {
 
 const Register = () => {
   const navigate = useNavigate();
+  const [searchParams] = useSearchParams();
+  const refCode = searchParams.get('ref');
   const [fullName, setFullName] = useState('');
   const [email, setEmail] = useState('');
   const [phone, setPhone] = useState('');
@@ -68,6 +71,14 @@ const Register = () => {
           });
         } catch {
           // Non-blocking
+        }
+
+        // Aplicar referido si existe código en la URL
+        if (refCode) {
+          const referrerId = decodeReferralCode(refCode);
+          if (referrerId && referrerId !== data.user.id) {
+            await applyReferralCode(data.user.id, refCode);
+          }
         }
 
         setRegistered(true);

@@ -1,10 +1,11 @@
 import React, { useState, useEffect } from 'react';
 import { useParams, Link } from 'react-router-dom';
-import { MessageSquare, Heart, Clock, User, ArrowLeft, Send, Share2, Check, Bot } from 'lucide-react';
+import { MessageSquare, Heart, Clock, User, ArrowLeft, Send, Bot } from 'lucide-react';
 import { getBlogPost, getBlogComments, createBlogComment, toggleBlogLike, BlogPost, BlogComment, getBlogPosts } from '../lib/api';
 import { supabase } from '../lib/supabase';
 import { toast } from 'react-hot-toast';
 import SEO from '../components/SEO';
+import ShareButton from '../components/ui/ShareButton';
 
 // Función para parsear el contenido del mensaje (reutilizada del chat)
 const MessageContent = ({ content }: { content: string }) => {
@@ -37,7 +38,6 @@ const BlogPostView = () => {
   const [newComment, setNewComment] = useState('');
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [user, setUser] = useState<any>(null);
-  const [isCopied, setIsCopied] = useState(false);
   const [showOffensiveWarning, setShowOffensiveWarning] = useState(false);
   const [otherPostsContext, setOtherPostsContext] = useState<string>('');
 
@@ -101,13 +101,6 @@ const BlogPostView = () => {
     } else {
       toast.error(res.error || 'Error al procesar');
     }
-  };
-
-  const handleShare = () => {
-    navigator.clipboard.writeText(window.location.href);
-    setIsCopied(true);
-    toast.success('¡Enlace copiado!');
-    setTimeout(() => setIsCopied(false), 2000);
   };
 
   const handleSubmitComment = async (e: React.FormEvent) => {
@@ -345,9 +338,13 @@ const BlogPostView = () => {
                 <span className="font-bold text-lg">{comments.length}</span>
               </div>
             </div>
-            <button onClick={handleShare} className="p-3 bg-slate-100 dark:bg-slate-800 rounded-xl hover:bg-primary-600 hover:text-white transition-all transform hover:-translate-y-1">
-              {isCopied ? <Check className="w-6 h-6" /> : <Share2 className="w-6 h-6" />}
-            </button>
+            <ShareButton
+              variant="icon"
+              iconSize={24}
+              className="p-3 bg-slate-100 dark:bg-slate-800 hover:bg-primary-600 hover:text-white !rounded-xl !shadow-none"
+              title={post.title}
+              description={post.excerpt || post.content.substring(0, 160)}
+            />
           </div>
         </article>
 

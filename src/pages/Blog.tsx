@@ -1,7 +1,7 @@
 import { useState, useEffect, useRef, useCallback } from 'react';
 import { Link } from 'react-router-dom';
-import { MessageSquare, Heart, Clock, User, Search, ChevronRight, Loader2, BookOpen, X } from 'lucide-react';
-import { getBlogPosts, BlogPost, toggleBlogLike } from '../lib/api';
+import { MessageSquare, Heart, Clock, User, Search, ChevronRight, Loader2, BookOpen, X, Mail, Send, Check } from 'lucide-react';
+import { getBlogPosts, BlogPost, toggleBlogLike, subscribeToNewsletter } from '../lib/api';
 import { supabase } from '../lib/supabase';
 import { toast } from 'react-hot-toast';
 import SEO from '../components/SEO';
@@ -29,6 +29,7 @@ const Blog = () => {
   const [user, setUser] = useState<any>(null);
   const [page, setPage] = useState(0);
   const [hasMore, setHasMore] = useState(true);
+  const [newsletterOpen, setNewsletterOpen] = useState(false);
 
   const observer = useRef<IntersectionObserver | null>(null);
   const lastPostElementRef = useCallback((node: HTMLDivElement | null) => {
@@ -144,75 +145,78 @@ const Blog = () => {
         ) : (
           <>
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-12 animate-in fade-in slide-in-from-bottom-4 duration-500 delay-200">
-              {posts.map((post, index) => (
-                <div
-                  key={post.id}
-                  ref={index === posts.length - 1 ? lastPostElementRef : undefined}
-                >
-                  <Link
-                    to={`/blog/${post.id}`}
-                    className="group block h-full"
+              {posts.map((post, index) => {
+                const isLast = index === posts.length - 1;
+                return (
+                  <div
+                    key={post.id}
+                    ref={isLast ? lastPostElementRef : undefined}
                   >
-                    <div className="bg-white dark:bg-slate-900 rounded-2xl border border-slate-200 dark:border-slate-800 overflow-hidden hover:border-primary-300 dark:hover:border-primary-700 hover:shadow-2xl transition-all duration-300 hover:-translate-y-1 h-full flex flex-col">
-                    {/* Image */}
-                    <div className="h-48 overflow-hidden bg-slate-100 dark:bg-slate-800 flex-shrink-0">
-                      {post.image_url ? (
-                        <img src={post.image_url} alt={post.title} className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110" />
-                      ) : (
-                        <div className="w-full h-full flex items-center justify-center">
-                          <BookOpen className="w-10 h-10 text-slate-300 dark:text-slate-600" />
-                        </div>
-                      )}
-                    </div>
-
-                    {/* Content */}
-                    <div className="p-6 flex-1 flex flex-col">
-                      {/* Meta */}
-                      <div className="flex items-center gap-4 text-[10px] font-black text-slate-400 uppercase tracking-widest mb-3">
-                        <span className="flex items-center gap-1.5">
-                          <Clock className="w-3 h-3" />
-                          {new Date(post.created_at).toLocaleDateString('es', { day: 'numeric', month: 'short', year: 'numeric' })}
-                        </span>
-                        <span className="flex items-center gap-1.5 text-primary-600 dark:text-primary-400">
-                          <User className="w-3 h-3" />
-                          {post.author_name}
-                        </span>
+                    <Link
+                      to={`/blog/${post.id}`}
+                      className="group block h-full"
+                    >
+                      <div className="bg-white dark:bg-slate-900 rounded-2xl border border-slate-200 dark:border-slate-800 overflow-hidden hover:border-primary-300 dark:hover:border-primary-700 hover:shadow-2xl transition-all duration-300 hover:-translate-y-1 h-full flex flex-col">
+                      {/* Image */}
+                      <div className="h-48 overflow-hidden bg-slate-100 dark:bg-slate-800 flex-shrink-0">
+                        {post.image_url ? (
+                          <img src={post.image_url} alt={post.title} className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110" />
+                        ) : (
+                          <div className="w-full h-full flex items-center justify-center">
+                            <BookOpen className="w-10 h-10 text-slate-300 dark:text-slate-600" />
+                          </div>
+                        )}
                       </div>
 
-                      {/* Title */}
-                      <h3 className="text-lg font-black text-slate-900 dark:text-white mb-3 group-hover:text-primary-600 dark:group-hover:text-primary-400 transition-colors line-clamp-2 leading-tight">
-                        {post.title}
-                      </h3>
-
-                      {/* Excerpt */}
-                      <p className="text-sm text-slate-600 dark:text-slate-400 mb-6 line-clamp-3 leading-relaxed flex-1">
-                        {post.excerpt || post.content.substring(0, 120) + '...'}
-                      </p>
-
-                      {/* Footer */}
-                      <div className="pt-4 border-t border-slate-100 dark:border-slate-800 flex items-center justify-between">
-                        <div className="flex items-center gap-4">
-                          <div className="flex items-center gap-1.5 text-slate-500 hover:text-rose-500 transition-colors text-xs font-bold">
-                            <button onClick={(e) => handleLike(e, post.id)} className="flex items-center gap-1.5">
-                              <Heart className={`w-4 h-4 ${post.likes_count > 0 ? 'fill-rose-500 text-rose-500' : ''}`} />
-                              {post.likes_count}
-                            </button>
-                          </div>
-                          <div className="flex items-center gap-1.5 text-slate-500 text-xs font-bold">
-                            <MessageSquare className="w-4 h-4" />
-                            {post.comment_count}
-                          </div>
+                      {/* Content */}
+                      <div className="p-6 flex-1 flex flex-col">
+                        {/* Meta */}
+                        <div className="flex items-center gap-4 text-[10px] font-black text-slate-400 uppercase tracking-widest mb-3">
+                          <span className="flex items-center gap-1.5">
+                            <Clock className="w-3 h-3" />
+                            {new Date(post.created_at).toLocaleDateString('es', { day: 'numeric', month: 'short', year: 'numeric' })}
+                          </span>
+                          <span className="flex items-center gap-1.5 text-primary-600 dark:text-primary-400">
+                            <User className="w-3 h-3" />
+                            {post.author_name}
+                          </span>
                         </div>
-                        <span className="text-primary-600 dark:text-primary-400 font-black text-xs uppercase tracking-widest flex items-center gap-1 group-hover:translate-x-1 transition-transform">
-                          Leer más <ChevronRight className="w-3 h-3" />
-                        </span>
+
+                        {/* Title */}
+                        <h3 className="text-lg font-black text-slate-900 dark:text-white mb-3 group-hover:text-primary-600 dark:group-hover:text-primary-400 transition-colors line-clamp-2 leading-tight">
+                          {post.title}
+                        </h3>
+
+                        {/* Excerpt */}
+                        <p className="text-sm text-slate-600 dark:text-slate-400 mb-6 line-clamp-3 leading-relaxed flex-1">
+                          {post.excerpt || post.content.substring(0, 120) + '...'}
+                        </p>
+
+                        {/* Footer */}
+                        <div className="pt-4 border-t border-slate-100 dark:border-slate-800 flex items-center justify-between">
+                          <div className="flex items-center gap-4">
+                            <div className="flex items-center gap-1.5 text-slate-500 hover:text-rose-500 transition-colors text-xs font-bold">
+                              <button onClick={(e) => handleLike(e, post.id)} className="flex items-center gap-1.5">
+                                <Heart className={`w-4 h-4 ${post.likes_count > 0 ? 'fill-rose-500 text-rose-500' : ''}`} />
+                                {post.likes_count}
+                              </button>
+                            </div>
+                            <div className="flex items-center gap-1.5 text-slate-500 text-xs font-bold">
+                              <MessageSquare className="w-4 h-4" />
+                              {post.comment_count}
+                            </div>
+                          </div>
+                          <span className="text-primary-600 dark:text-primary-400 font-black text-xs uppercase tracking-widest flex items-center gap-1 group-hover:translate-x-1 transition-transform">
+                            Leer más <ChevronRight className="w-3 h-3" />
+                          </span>
+                        </div>
                       </div>
                     </div>
+                   </Link>
                   </div>
-                 </Link>
-                </div>
-               ))}
-            </div>
+                );
+              })}
+                    </div>
 
             {/* Loading more */}
             {loadingMore && (
@@ -236,6 +240,106 @@ const Blog = () => {
             )}
           </>
         )}
+      </div>
+
+      {/* Botón flotante del Newsletter */}
+      <button
+        onClick={() => setNewsletterOpen(true)}
+        className="fixed bottom-6 left-6 z-40 flex items-center gap-3 px-5 py-3.5 bg-gradient-to-br from-primary-600 to-primary-800 dark:from-primary-700 dark:to-primary-900 text-white rounded-2xl shadow-2xl shadow-primary-500/30 hover:shadow-primary-500/50 hover:scale-105 active:scale-95 transition-all duration-300 group"
+      >
+        <div className="relative">
+          <Mail className="w-5 h-5" />
+          <span className="absolute -top-1 -right-1 w-2.5 h-2.5 bg-emerald-400 rounded-full animate-ping" />
+        </div>
+        <span className="font-bold text-sm">Newsletter</span>
+      </button>
+
+      {/* Modal del Newsletter */}
+      {newsletterOpen && (
+        <NewsletterModal onClose={() => setNewsletterOpen(false)} />
+      )}
+    </div>
+  );
+};
+
+const NewsletterModal = ({ onClose }: { onClose: () => void }) => {
+  const [email, setEmail] = useState('');
+  const [subscribing, setSubscribing] = useState(false);
+  const [subscribed, setSubscribed] = useState(false);
+
+  const handleSubscribe = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!email.trim() || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
+      toast.error('Ingresa un correo válido');
+      return;
+    }
+    setSubscribing(true);
+    const res = await subscribeToNewsletter(email.trim());
+    setSubscribing(false);
+    if (res.success) {
+      setSubscribed(true);
+      setEmail('');
+      toast.success('¡Suscrito al newsletter!');
+      setTimeout(() => setSubscribed(false), 5000);
+    } else {
+      toast.error(res.error || 'Error al suscribir');
+    }
+  };
+
+  return (
+    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 animate-in fade-in duration-200">
+      <div className="absolute inset-0 bg-black/40 backdrop-blur-sm" onClick={onClose} />
+      <div className="relative w-full max-w-md bg-gradient-to-br from-primary-600 to-primary-800 dark:from-primary-700 dark:to-primary-900 rounded-3xl p-8 sm:p-10 shadow-2xl shadow-primary-500/30 text-center animate-in zoom-in-95 duration-200">
+        <div className="absolute inset-0 bg-[radial-gradient(circle_at_top_right,_rgba(255,255,255,0.1)_0%,_transparent_60%)] pointer-events-none rounded-3xl" />
+
+        <button
+          onClick={onClose}
+          className="absolute top-4 right-4 p-2 rounded-xl bg-white/10 hover:bg-white/20 text-white/70 hover:text-white transition-all z-10"
+        >
+          <X className="w-4 h-4" />
+        </button>
+
+        <div className="relative z-10">
+          <div className="w-14 h-14 mx-auto mb-5 rounded-2xl bg-white/15 flex items-center justify-center backdrop-blur-sm">
+            <Mail className="w-7 h-7 text-white" />
+          </div>
+          <h3 className="text-2xl font-black text-white mb-2">Newsletter AgendaYa</h3>
+          <p className="text-white/70 text-sm font-medium mb-7 max-w-xs mx-auto">
+            Recibe consejos, novedades y ofertas exclusivas de los mejores negocios.
+          </p>
+          {subscribed ? (
+            <div className="flex items-center justify-center gap-2 text-emerald-200 font-bold py-4">
+              <Check className="w-5 h-5" />
+              ¡Gracias por suscribirte!
+            </div>
+          ) : (
+            <form onSubmit={handleSubscribe} className="flex flex-col gap-3">
+              <input
+                type="email"
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
+                placeholder="tu@correo.com"
+                className="w-full px-4 py-3.5 rounded-2xl bg-white/10 border border-white/20 text-white placeholder-white/50 text-sm font-medium focus:outline-none focus:ring-2 focus:ring-white/40 focus:border-transparent transition-all"
+              />
+              <button
+                type="submit"
+                disabled={subscribing || !email.trim()}
+                className="w-full px-6 py-3.5 bg-white text-primary-700 font-black text-sm rounded-2xl hover:bg-primary-50 transition-all disabled:opacity-50 flex items-center justify-center gap-2 shadow-xl shadow-black/10"
+              >
+                {subscribing ? (
+                  <>
+                    <Loader2 className="w-4 h-4 animate-spin" />
+                    Enviando...
+                  </>
+                ) : (
+                  <>
+                    Suscribirme <Send className="w-3.5 h-3.5" />
+                  </>
+                )}
+              </button>
+            </form>
+          )}
+        </div>
       </div>
     </div>
   );

@@ -1,7 +1,8 @@
 import React, { useState, useEffect } from 'react';
-import { Clock, ChevronLeft, ChevronRight, X, Heart, Share2, Check, LogIn } from 'lucide-react';
+import { Clock, ChevronLeft, ChevronRight, X, Heart, LogIn, Check } from 'lucide-react';
 import { Service, toggleLike, checkIfLiked } from '../../../lib/api';
 import { toast } from 'react-hot-toast';
+import ShareButton from '../../ui/ShareButton';
 
 interface ServicesListProps {
   services: Service[];
@@ -27,8 +28,6 @@ const ServiceCard: React.FC<{
   const [isLiked, setIsLiked] = useState(false);
   const [likesCount, setLikesCount] = useState(service.likes_count || 0);
   const [isLiking, setIsLiking] = useState(false);
-  const [isCopied, setIsCopied] = useState(false);
-
   useEffect(() => {
     if (currentUser?.id && service.id) {
       checkIfLiked(currentUser.id, service.id, 'service').then(setIsLiked);
@@ -36,6 +35,7 @@ const ServiceCard: React.FC<{
   }, [currentUser, service.id]);
 
   const handleToggleLike = async (e: React.MouseEvent) => {
+    e.preventDefault();
     e.stopPropagation();
     if (!currentUser) { toast.error('Debes iniciar sesión'); return; }
     try {
@@ -49,15 +49,7 @@ const ServiceCard: React.FC<{
     } catch { toast.error('Error al procesar'); } finally { setIsLiking(false); }
   };
 
-  const handleShare = (e: React.MouseEvent) => {
-    e.stopPropagation();
-    const baseUrl = window.location.origin;
-    const currentPath = window.location.pathname;
-    navigator.clipboard.writeText(`${baseUrl}${currentPath}/book/${service.id}`);
-    setIsCopied(true);
-    toast.success('¡Enlace de reserva copiado!');
-    setTimeout(() => setIsCopied(false), 2000);
-  };
+  const shareUrl = `${window.location.origin}${window.location.pathname}/book/${service.id}`;
 
   let images: string[] = [];
   if (Array.isArray(service.image_urls)) {
@@ -147,15 +139,15 @@ const ServiceCard: React.FC<{
               <Heart className={`w-3 h-3 ${isLiked ? 'fill-current' : ''}`} />
               {likesCount}
             </button>
-            <button
-              onClick={handleShare}
-              className={`flex items-center gap-1 px-2.5 py-1.5 rounded-xl text-[10px] font-black transition-all ${
-                isCopied ? 'bg-emerald-500 text-white' : 'bg-slate-100 dark:bg-slate-800 text-slate-500 dark:text-slate-400 hover:bg-slate-200 dark:hover:bg-slate-700'
-              }`}
-            >
-              {isCopied ? <Check className="w-3 h-3" /> : <Share2 className="w-3 h-3" />}
-              {isCopied ? 'Copiado' : 'Compartir'}
-            </button>
+            <div onClick={(e) => e.stopPropagation()}>
+              <ShareButton
+                url={shareUrl}
+                title={`Reservar: ${service.name}`}
+                variant="text"
+                iconSize={12}
+                className="bg-slate-100 dark:bg-slate-800 text-slate-500 dark:text-slate-400 hover:bg-slate-200 dark:hover:bg-slate-700"
+              />
+            </div>
           </div>
         </div>
 

@@ -2,8 +2,8 @@ import { useState, useEffect, useCallback } from 'react';
 import type { UserProfile } from '../lib/supabase';
 import { ROLE_LABELS } from '../lib/roles';
 import type { Role } from '../lib/roles';
-import { getAdminStats, getReviewStats, getPendingReviews, approveReview, rejectReview, getAdminDashboardMetrics } from '../lib/api';
-import type { DashboardMetrics } from '../lib/api';
+import { getAdminStats, getReviewStats, getPendingReviews, approveReview, rejectReview, getAdminDashboardMetrics, getAdminReferralStats, getTopReferrers, getReferredUsers } from '../lib/api';
+import type { DashboardMetrics, ReferralStat, ReferredUser } from '../lib/api';
 import { useToast } from '../hooks/useToast';
 import type { Review } from '../types/appointment';
 import TabNav from '../components/ui/TabNav';
@@ -26,6 +26,10 @@ import {
   Crown,
   TrendingUp,
   Clock,
+  Gift,
+  User,
+  ChevronDown,
+  ChevronUp,
 } from 'lucide-react';
 
 interface AdminDashboardProps {
@@ -88,12 +92,19 @@ const AdminDashboard = ({ user }: AdminDashboardProps) => {
   const [page, setPage] = useState(1);
   const [activeTab, setActiveTab] = useState('overview');
 
+  const [referralStats, setReferralStats] = useState<{ total_referrals: number; unique_referrers: number } | null>(null);
+  const [topReferrers, setTopReferrers] = useState<ReferralStat[]>([]);
+  const [expandedReferrer, setExpandedReferrer] = useState<string | null>(null);
+  const [referrerDetails, setReferrerDetails] = useState<Record<string, ReferredUser[]>>({});
+  const [referralLoading, setReferralLoading] = useState(true);
+
   const tabs = [
     { id: 'overview', label: 'Resumen' },
     { id: 'users', label: 'Usuarios' },
     { id: 'businesses', label: 'Negocios' },
     { id: 'reviews', label: 'Reseñas', count: reviewCounts.pending },
     { id: 'moderators', label: 'Moderadores' },
+    { id: 'referrals', label: 'Referidos' },
   ];
 
   const loadData = useCallback(async () => {
@@ -108,6 +119,17 @@ const AdminDashboard = ({ user }: AdminDashboardProps) => {
   }, []);
 
   useEffect(() => { loadData(); }, [loadData]);
+
+  useEffect(() => {
+    Promise.all([
+      getAdminReferralStats(),
+      getTopReferrers(10),
+    ]).then(([statsRes, topRes]) => {
+      if (statsRes.success && statsRes.data) setReferralStats(statsRes.data);
+      if (topRes.success && topRes.data) setTopReferrers(topRes.data);
+      setReferralLoading(false);
+    });
+  }, []);
 
   useEffect(() => {
     getAdminDashboardMetrics().then(res => {
@@ -462,6 +484,133 @@ const AdminDashboard = ({ user }: AdminDashboardProps) => {
           {activeTab === 'moderators' && (
             <div className="bg-white dark:bg-slate-900 rounded-2xl border border-slate-200 dark:border-slate-800 p-6">
               <p className="text-sm text-slate-500 dark:text-slate-400">Gestión de moderadores próximamente.</p>
+            </div>
+          )}
+
+          {activeTab === 'referrals' && (
+            <div className="animate-in fade-in zoom-in-95 duration-300 space-y-6">
+              {referralLoading ? (
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+                  {[1, 2, 3].map(i => (
+                    <div key={i} className="h-32 bg-white dark:bg-slate-900 rounded-2xl border border-slate-200 dark:border-slate-800 animate-pulse" />
+                  ))}
+                </div>
+              ) : (
+                <>
+                  {/* Stat Cards */}
+                  <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+                    <div className="bg-gradient-to-br from-primary-600 to-primary-800 dark:from-primary-700 dark:to-primary-900 rounded-2xl p-6 shadow-xl shadow-primary-500/20">
+                      <p className="text-primary-200 text-xs font-bold uppercase tracking-widest">Total Referidos</p>
+                      <p className="text-3xl font-black text-white mt-1">{referralStats?.total_referrals || 0}</p>
+                    </div>
+                    <div className="bg-white dark:bg-slate-900 rounded-2xl border border-slate-200 dark:border-slate-800 p-6">
+                      <p className="text-xs font-bold text-slate-400 uppercase tracking-widest">Referidores Únicos</p>
+                      <p className="text-3xl font-black text-slate-900 dark:text-white mt-1">{referralStats?.unique_referrers || 0}</p>
+                    </div>
+                    <div className="bg-white dark:bg-slate-900 rounded-2xl border border-slate-200 dark:border-slate-800 p-6">
+                      <p className="text-xs font-bold text-slate-400 uppercase tracking-widest">Promedio x Referidor</p>
+                      <p className="text-3xl font-black text-slate-900 dark:text-white mt-1">
+                        {referralStats && referralStats.unique_referrers > 0
+                          ? (referralStats.total_referrals / referralStats.unique_referrers).toFixed(1)
+                          : '0'}
+                      </p>
+                    </div>
+                  </div>
+
+                  {/* Top Referrers */}
+                  <div className="bg-white dark:bg-slate-900 rounded-2xl border border-slate-200 dark:border-slate-800 p-5 sm:p-6">
+                    <h3 className="text-sm font-black text-slate-500 dark:text-slate-400 uppercase tracking-widest mb-4">
+                      Top Referidores
+                    </h3>
+                    {topReferrers.length === 0 ? (
+                      <EmptyState
+                        icon={<Gift className="w-8 h-8" />}
+                        title="Sin referidos aún"
+                        description="Ningún usuario ha referido a otro. Comparte el programa."
+                      />
+                    ) : (
+                      <div className="space-y-2">
+                        {topReferrers.map((stat, i) => (
+                          <div key={stat.referrer_id}>
+                            <div
+                              className="flex items-center gap-4 p-3 rounded-xl bg-slate-50 dark:bg-slate-800/50 border border-slate-100 dark:border-slate-800 hover:bg-white dark:hover:bg-slate-800 transition-all cursor-pointer"
+                              onClick={async () => {
+                                if (expandedReferrer === stat.referrer_id) {
+                                  setExpandedReferrer(null);
+                                } else {
+                                  setExpandedReferrer(stat.referrer_id);
+                                  if (!referrerDetails[stat.referrer_id]) {
+                                    const res = await getReferredUsers(stat.referrer_id);
+                                    if (res.success && res.data) {
+                                      setReferrerDetails(prev => ({ ...prev, [stat.referrer_id]: res.data || [] }));
+                                    }
+                                  }
+                                }
+                              }}
+                            >
+                              <div className="w-8 h-8 rounded-full flex items-center justify-center flex-shrink-0 font-black text-sm
+                                ${i === 0 ? 'bg-amber-100 dark:bg-amber-900/40 text-amber-600 dark:text-amber-400' :
+                                i === 1 ? 'bg-slate-100 dark:bg-slate-800 text-slate-500 dark:text-slate-400' :
+                                i === 2 ? 'bg-orange-100 dark:bg-orange-900/40 text-orange-600 dark:text-orange-400' :
+                                'bg-slate-50 dark:bg-slate-800/50 text-slate-400 dark:text-slate-500'}">
+                                {i + 1}
+                              </div>
+                              <div className="flex-1 min-w-0">
+                                <p className="font-bold text-sm text-slate-900 dark:text-white truncate">
+                                  {stat.referrer_name || 'Usuario'}
+                                </p>
+                                <p className="text-xs text-slate-400 truncate">{stat.referrer_email || '—'}</p>
+                              </div>
+                              <div className="flex items-center gap-3">
+                                <span className="px-3 py-1 bg-primary-100 dark:bg-primary-900/40 text-primary-700 dark:text-primary-300 rounded-full text-xs font-bold">
+                                  {stat.count} ref.
+                                </span>
+                                {expandedReferrer === stat.referrer_id
+                                  ? <ChevronUp className="w-4 h-4 text-slate-400" />
+                                  : <ChevronDown className="w-4 h-4 text-slate-400" />}
+                              </div>
+                            </div>
+
+                            {/* Expanded details */}
+                            {expandedReferrer === stat.referrer_id && (
+                              <div className="ml-12 mt-2 mb-2 space-y-1.5 animate-in fade-in slide-in-from-top-2 duration-200">
+                                {(referrerDetails[stat.referrer_id]?.length || 0) > 0 ? (
+                                  referrerDetails[stat.referrer_id].map(ref => (
+                                    <div key={ref.id} className="flex items-center gap-3 p-2.5 rounded-xl bg-white dark:bg-slate-800 border border-slate-100 dark:border-slate-700">
+                                      <div className="w-8 h-8 rounded-full bg-slate-100 dark:bg-slate-700 flex items-center justify-center">
+                                        <User className="w-4 h-4 text-slate-500" />
+                                      </div>
+                                      <div className="flex-1 min-w-0">
+                                        <p className="font-bold text-xs text-slate-800 dark:text-slate-200 truncate">{ref.full_name || 'Usuario'}</p>
+                                        <p className="text-[10px] text-slate-400 truncate">{ref.email || '—'}</p>
+                                      </div>
+                                      <span className="text-[10px] text-slate-400 flex items-center gap-1">
+                                        <Calendar className="w-3 h-3" />
+                                        {new Date(ref.created_at).toLocaleDateString('es', { day: 'numeric', month: 'short' })}
+                                      </span>
+                                      <span className={`px-2 py-0.5 rounded-lg text-[10px] font-black uppercase tracking-wider ${
+                                        ref.role === 'business_owner'
+                                          ? 'bg-amber-100 dark:bg-amber-900/40 text-amber-700 dark:text-amber-300'
+                                          : ref.role === 'client'
+                                            ? 'bg-blue-100 dark:bg-blue-900/40 text-blue-700 dark:text-blue-300'
+                                            : 'bg-slate-100 dark:bg-slate-800 text-slate-500'
+                                      }`}>
+                                        {ref.role === 'business_owner' ? 'Negocio' : ref.role}
+                                      </span>
+                                    </div>
+                                  ))
+                                ) : (
+                                  <p className="text-xs text-slate-400 py-2 text-center">Cargando...</p>
+                                )}
+                              </div>
+                            )}
+                          </div>
+                        ))}
+                      </div>
+                    )}
+                  </div>
+                </>
+              )}
             </div>
           )}
         </div>

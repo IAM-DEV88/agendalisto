@@ -1,6 +1,6 @@
 import { useState, useEffect, useMemo } from 'react';
 import { Link, useSearchParams } from 'react-router-dom';
-import { Search, MapPin, ArrowRight, Heart, Share2, Check, Store, SlidersHorizontal, X } from 'lucide-react';
+import { MapPin, ArrowRight, Heart, Store, SlidersHorizontal, Search, X } from 'lucide-react';
 import { getBusinesses, getBusinessCategories, BusinessCategory, toggleLike, checkIfLiked } from '../lib/api';
 import type { Business } from '../lib/api';
 import { supabase } from '../lib/supabase';
@@ -8,6 +8,7 @@ import { toast } from 'react-hot-toast';
 import SEO from '../components/SEO';
 import EmptyState from '../components/ui/EmptyState';
 import SelectMenu from '../components/ui/SelectMenu';
+import ShareButton from '../components/ui/ShareButton';
 
 const FALLBACK_LOGO = 'https://upload.wikimedia.org/wikipedia/commons/8/89/Portrait_Placeholder.png';
 
@@ -15,8 +16,6 @@ const BusinessCard = ({ business, categories, currentUser }: { business: Busines
   const [isLiked, setIsLiked] = useState(false);
   const [likesCount, setLikesCount] = useState(business.likes_count || 0);
   const [isLiking, setIsLiking] = useState(false);
-  const [isCopied, setIsCopied] = useState(false);
-
   useEffect(() => {
     if (currentUser?.id && business.id) {
       checkIfLiked(currentUser.id, business.id, 'business').then(setIsLiked);
@@ -35,15 +34,6 @@ const BusinessCard = ({ business, categories, currentUser }: { business: Busines
         setLikesCount(prev => result.action === 'added' ? prev + 1 : prev - 1);
       }
     } catch { toast.error('Error al procesar'); } finally { setIsLiking(false); }
-  };
-
-  const handleShare = (e: React.MouseEvent) => {
-    e.preventDefault();
-    e.stopPropagation();
-    navigator.clipboard.writeText(`${window.location.origin}/${business.slug}`);
-    setIsCopied(true);
-    toast.success('¡Enlace copiado!');
-    setTimeout(() => setIsCopied(false), 2000);
   };
 
   const cat = categories.find(c => c.id === business.category_id);
@@ -72,14 +62,15 @@ const BusinessCard = ({ business, categories, currentUser }: { business: Busines
             >
               <Heart className={`h-4 w-4 ${isLiked ? 'fill-current' : ''}`} />
             </button>
-            <button
-              onClick={handleShare}
-              className={`p-2 rounded-xl backdrop-blur-md transition-all ${
-                isCopied ? 'bg-emerald-500 text-white' : 'bg-white/20 hover:bg-white/40 text-white'
-              }`}
-            >
-              {isCopied ? <Check className="h-4 w-4" /> : <Share2 className="h-4 w-4" />}
-            </button>
+            <div onClick={(e) => e.preventDefault()}>
+              <ShareButton
+                url={`${window.location.origin}/${business.slug}`}
+                title={business.name}
+                variant="icon"
+                iconSize={16}
+                className="!bg-white/20 !backdrop-blur-md hover:!bg-white/40 !text-white !rounded-xl"
+              />
+            </div>
           </div>
         </div>
         {/* Category badge on image */}

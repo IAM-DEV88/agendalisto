@@ -81,4 +81,5 @@ export interface UserProfile {
   business_id?: string;
   avatar_url?: string;
   items_per_page?: number;
+  referred_by?: string;
 } 
