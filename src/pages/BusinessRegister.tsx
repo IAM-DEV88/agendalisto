@@ -6,6 +6,7 @@ import type { UserProfile } from '../lib/supabase';
 import type { RootState } from '../store';
 import { setBusinesses, setUserProfile } from '../store/userSlice';
 import { getMaxBusinesses, PLAN_LABELS } from '../lib/roles';
+import toast from 'react-hot-toast';
 import SEO from '../components/SEO';
 import PhoneInput from '../components/ui/PhoneInput';
 import {
@@ -63,9 +64,12 @@ const BusinessRegister = ({ user }: BusinessRegisterProps) => {
   // Redirect if user hit the limit
   useEffect(() => {
     if (existingCount >= maxBusinesses) {
+      if (plan === 'pro') {
+        toast.error('Has alcanzado el límite de 5 negocios de tu plan Pro. Actualiza a Premium para crear negocios ilimitados.', { id: 'business-limit' });
+      }
       navigate('/business/dashboard', { replace: true });
     }
-  }, [existingCount, maxBusinesses, navigate]);
+  }, [existingCount, maxBusinesses, navigate, plan]);
 
   useEffect(() => {
     getBusinessCategories().then(({ success, data }) => {
@@ -107,7 +111,15 @@ const BusinessRegister = ({ user }: BusinessRegisterProps) => {
     setError(null);
 
     if (existingCount >= maxBusinesses) {
-      setError(`Has alcanzado el límite de ${maxBusinesses === Infinity ? 'negocios ilimitados' : `${maxBusinesses} negocios`} de tu plan ${PLAN_LABELS[plan]}. ${plan === 'starter' ? 'Actualiza a Pro o Premium para crear más negocios.' : ''}`);
+      const upgradeMsg = plan === 'starter'
+        ? 'Actualiza a Pro o Premium para crear más negocios.'
+        : plan === 'pro'
+          ? 'Actualiza a Premium para crear negocios ilimitados.'
+          : '';
+      setError(`Has alcanzado el límite de ${maxBusinesses === Infinity ? 'negocios ilimitados' : `${maxBusinesses} negocios`} de tu plan ${PLAN_LABELS[plan]}. ${upgradeMsg}`);
+      if (plan !== 'premium') {
+        toast.error(`Límite alcanzado: tu plan ${PLAN_LABELS[plan]} permite hasta ${maxBusinesses} negocios. ${upgradeMsg}`, { id: 'business-limit' });
+      }
       setLoading(false);
       return;
     }

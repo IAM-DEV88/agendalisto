@@ -164,12 +164,29 @@ const UserAppointmentList: React.FC<UserAppointmentListProps> = ({
                       )}
                       {appointment.status === 'completed' && onReview && (
                         appointment.review ? (
-                          <div className="inline-flex items-center justify-center gap-1.5 px-4 py-2 bg-amber-50 dark:bg-amber-500/10 rounded-xl border border-amber-200 dark:border-amber-800">
-                            <Star className="w-3.5 h-3.5 text-amber-500 fill-current" />
-                            <span className="text-xs font-black text-amber-700 dark:text-amber-400">
-                              {appointment.review.rating}.0
-                            </span>
-                          </div>
+                          appointment.review.status === 'pending' ? (
+                            <div className="inline-flex items-center justify-center gap-1.5 px-4 py-2 bg-amber-50 dark:bg-amber-500/10 rounded-xl border border-amber-200 dark:border-amber-800">
+                              <Star className="w-3.5 h-3.5 text-amber-500" />
+                              <span className="text-xs font-black text-amber-600 dark:text-amber-400">
+                                Pendiente
+                              </span>
+                            </div>
+                          ) : appointment.review.status === 'rejected' ? (
+                            <button
+                              onClick={() => onReview(appointment)}
+                              className="inline-flex items-center justify-center gap-1.5 px-4 py-2 bg-amber-500 hover:bg-amber-600 text-white text-xs font-black rounded-xl transition-all shadow-lg shadow-amber-500/25 active:scale-95 uppercase tracking-wider"
+                            >
+                              <Star className="w-3.5 h-3.5" />
+                              Reseñar
+                            </button>
+                          ) : (
+                            <div className="inline-flex items-center justify-center gap-1.5 px-4 py-2 bg-amber-50 dark:bg-amber-500/10 rounded-xl border border-amber-200 dark:border-amber-800">
+                              <Star className="w-3.5 h-3.5 text-amber-500 fill-current" />
+                              <span className="text-xs font-black text-amber-700 dark:text-amber-400">
+                                {appointment.review.rating}.0
+                              </span>
+                            </div>
+                          )
                         ) : (
                           <button
                             onClick={() => onReview(appointment)}

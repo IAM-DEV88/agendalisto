@@ -371,7 +371,8 @@ export class ApiClient {
       const { data, error } = await supabase
         .from('agendaya_reviews')
         .select('*')
-        .eq('business_id', businessId);
+        .eq('business_id', businessId)
+        .eq('status', 'approved');
         
       if (error) throw error;
       return { success: true, data: data as Review[] };
@@ -400,7 +401,7 @@ export class ApiClient {
         };
       }
 
-      // Si no existe una reseña, crear una nueva
+      // Si no existe una reseña, crear una nueva con status pending
       const { data, error } = await supabase
         .from('agendaya_reviews')
         .insert({
@@ -409,6 +410,7 @@ export class ApiClient {
           user_id: userId,
           rating: rating,
           comment: comment,
+          status: 'pending',
           created_at: new Date().toISOString()
         })
         .select()
@@ -418,6 +420,48 @@ export class ApiClient {
       return { success: true, data: data as Review };
     } catch (err: any) {
       return { success: false, error: err.message || 'Error creating business review' };
+    }
+  }
+
+  // ─── Moderation methods ───
+
+  static async getPendingReviews(): Promise<ApiResponse<Review[]>> {
+    try {
+      const { data, error } = await supabase
+        .from('agendaya_reviews')
+        .select('*')
+        .eq('status', 'pending')
+        .order('created_at', { ascending: false });
+      if (error) throw error;
+      return { success: true, data: data as Review[] };
+    } catch (err: any) {
+      return { success: false, error: err.message || 'Error fetching pending reviews' };
+    }
+  }
+
+  static async approveReview(reviewId: string): Promise<ApiResponse<undefined>> {
+    try {
+      const { error } = await supabase
+        .from('agendaya_reviews')
+        .update({ status: 'approved' })
+        .eq('id', reviewId);
+      if (error) throw error;
+      return { success: true };
+    } catch (err: any) {
+      return { success: false, error: err.message || 'Error approving review' };
+    }
+  }
+
+  static async rejectReview(reviewId: string): Promise<ApiResponse<undefined>> {
+    try {
+      const { error } = await supabase
+        .from('agendaya_reviews')
+        .update({ status: 'rejected' })
+        .eq('id', reviewId);
+      if (error) throw error;
+      return { success: true };
+    } catch (err: any) {
+      return { success: false, error: err.message || 'Error rejecting review' };
     }
   }
 } 

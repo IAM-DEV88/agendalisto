@@ -1,5 +1,5 @@
 import React from 'react';
-import { DollarSign, Calendar, Users, TrendingUp, Award, CalendarCheck, CalendarClock, Star, ListChecks } from 'lucide-react';
+import { DollarSign, Calendar, Users, TrendingUp, Award, CalendarCheck, CalendarClock, Star, ListChecks, Eye, Heart } from 'lucide-react';
 import { canAccessAdvancedAnalytics } from '../../lib/roles';
 
 interface StatsSectionProps {
@@ -20,6 +20,13 @@ interface StatsSectionProps {
   peakDay?: string;
   peakHour?: number;
   lifetimeValueAvg?: number;
+  totalVisits?: number;
+  visitsToday?: number;
+  visitsWeek?: number;
+  visitsMonth?: number;
+  uniqueVisitors?: number;
+  totalBusinessLikes?: number;
+  totalServiceLikes?: number;
 }
 
 const StatCard = ({ icon, label, value, sub, color }: {
@@ -48,6 +55,8 @@ const StatsSection: React.FC<StatsSectionProps> = ({
   avgDuration = 0, avgPrice = 0,
   topServiceName = '-', topServiceCount = 0,
   peakDay = '-', peakHour = 0, lifetimeValueAvg = 0,
+  totalVisits = 0, visitsToday = 0, visitsWeek = 0, visitsMonth = 0, uniqueVisitors = 0,
+  totalBusinessLikes = 0, totalServiceLikes = 0,
   plan,
 }) => {
   const hasAdvanced = canAccessAdvancedAnalytics(plan);
@@ -76,6 +85,30 @@ const StatsSection: React.FC<StatsSectionProps> = ({
       value: String(totalClients),
       icon: <ListChecks className="w-5 h-5 text-slate-600 dark:text-slate-400" />,
       color: 'bg-slate-100 dark:bg-slate-800',
+    },
+  ];
+
+  const visitCards = [
+    {
+      label: 'Visitas Totales',
+      value: totalVisits.toLocaleString(),
+      sub: `Hoy: ${visitsToday} · Esta semana: ${visitsWeek}`,
+      icon: <Eye className="w-5 h-5 text-blue-600 dark:text-blue-400" />,
+      color: 'bg-blue-50 dark:bg-blue-500/10',
+    },
+    {
+      label: 'Visitantes Únicos',
+      value: uniqueVisitors.toLocaleString(),
+      sub: `Este mes: ${visitsMonth}`,
+      icon: <Users className="w-5 h-5 text-violet-600 dark:text-violet-400" />,
+      color: 'bg-violet-50 dark:bg-violet-500/10',
+    },
+    {
+      label: 'En Favoritos',
+      value: totalBusinessLikes.toLocaleString(),
+      sub: `${totalServiceLikes} likes en servicios`,
+      icon: <Heart className="w-5 h-5 text-rose-600 dark:text-rose-400" />,
+      color: 'bg-rose-50 dark:bg-rose-500/10',
     },
   ];
 
@@ -144,6 +177,15 @@ const StatsSection: React.FC<StatsSectionProps> = ({
           {countCards.map((s, i) => (
             <StatCard key={`count-${i}`} {...s} />
           ))}
+        </div>
+
+        <div className="border-t border-slate-100 dark:border-slate-800 pt-4">
+          <p className="text-xs font-bold text-slate-400 dark:text-slate-500 uppercase tracking-wider mb-3">Visitas y Popularidad</p>
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+            {visitCards.map((s, i) => (
+              <StatCard key={`visit-${i}`} {...s} />
+            ))}
+          </div>
         </div>
 
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">

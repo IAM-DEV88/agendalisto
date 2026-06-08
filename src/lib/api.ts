@@ -74,29 +74,52 @@ export interface BusinessConfig {
 export const slugify = (str: string) => str.toLowerCase().replace(/\s+/g, '-').replace(/[^\w\-]+/g, '');
 
 // API functions for businesses
-export const getBusinesses = async (search?: string, _category?: string, location?: string) => {
-  let query = supabase.from('agendaya_businesses').select('*');
-  
-  if (search) {
-    query = query.or(`name.ilike.%${search}%,description.ilike.%${search}%`);
-  }
-  
-  if (location) {
-    query = query.ilike('address', `%${location}%`);
-  }
+export const getBusinesses = async (search?: string, category?: string, location?: string) => {
+  const { data, error } = await supabase.rpc('search_agendaya_businesses', {
+    p_search: search ?? null,
+    p_category_id: category ?? null,
+    p_location: location ?? null,
+  });
 
-  if (_category) {
-    query = query.eq('category_id', _category);
-  }
-
-  query = query.order('plan_score', { ascending: false }).order('likes_count', { ascending: false }).order('created_at', { ascending: false });
-  
-  const { data, error } = await query;
-  
   if (error) throw error;
-  // Add slug to each business object
   const businessesWithSlugs = (data as Business[]).map((b) => ({ ...b, slug: slugify(b.name) }));
   return businessesWithSlugs;
+};
+
+export interface BusinessStats {
+  total_visits: number;
+  visits_today: number;
+  visits_week: number;
+  visits_month: number;
+  unique_visitors: number;
+  total_business_likes: number;
+  total_service_likes: number;
+  total_services: number;
+}
+
+export const recordBusinessVisit = async (businessId: string, userId?: string) => {
+  let anonymousId: string | null = null;
+  if (!userId) {
+    anonymousId = localStorage.getItem('visitor_session') || crypto.randomUUID();
+    localStorage.setItem('visitor_session', anonymousId);
+  }
+  try {
+    await supabase.rpc('record_business_visit', {
+      p_business_id: businessId,
+      p_user_id: userId ?? null,
+      p_anonymous_id: anonymousId,
+    });
+  } catch (err) {
+    console.error('[recordBusinessVisit] Error:', err);
+  }
+};
+
+export const getBusinessStats = async (businessId: string) => {
+  const { data, error } = await supabase.rpc('get_business_stats', {
+    p_business_id: businessId,
+  });
+  if (error) throw error;
+  return data as BusinessStats;
 };
 
 export const getBusiness = async (id: string) => {
@@ -165,7 +188,8 @@ export async function getUserAppointments(userId: string) {
           comment,
           created_at,
           user_id,
-          business_id
+          business_id,
+          status
         )
       `)
       .eq('user_id', userId)
@@ -198,7 +222,8 @@ export async function getBusinessAppointments(businessId: string) {
           comment,
           created_at,
           user_id,
-          business_id
+          business_id,
+          status
         )
       `) 
       .eq('business_id', businessId)
@@ -894,6 +919,7 @@ export async function getBusinessReviews(businessId: string): Promise<{ success:
       .from('agendaya_reviews')
       .select('*')
       .eq('business_id', businessId)
+      .eq('status', 'approved')
       .order('created_at', { ascending: false });
     if (error) throw error;
     return { success: true, data: data as Review[] };
@@ -918,12 +944,135 @@ export async function createBusinessReview(
         user_id: userId,
         rating,
         comment,
+        status: 'pending',
         created_at: new Date().toISOString()
       }])
       .select()
       .single();
     if (error) throw error;
     return { success: true, data: data as Review };
+  } catch (err: any) {
+    return { success: false, error: err.message };
+  }
+}
+
+// ─── Moderation functions (admin/moderator) ───
+
+export async function getPendingReviews(): Promise<{ success: boolean; data: (Review & { profiles?: { full_name: string }; businesses?: { name: string } })[]; error?: string }> {
+  try {
+    const { data, error } = await supabase
+      .from('agendaya_reviews')
+      .select('*, profiles:agendaya_profiles!user_id(full_name), businesses:agendaya_businesses!business_id(name)')
+      .eq('status', 'pending')
+      .order('created_at', { ascending: false });
+    if (error) throw error;
+    return { success: true, data: data as any[] };
+  } catch (err: any) {
+    return { success: false, data: [], error: err.message };
+  }
+}
+
+export async function approveReview(reviewId: string): Promise<{ success: boolean; error?: string }> {
+  try {
+    const { error } = await supabase
+      .from('agendaya_reviews')
+      .update({ status: 'approved' })
+      .eq('id', reviewId);
+    if (error) throw error;
+    return { success: true };
+  } catch (err: any) {
+    return { success: false, error: err.message };
+  }
+}
+
+export async function rejectReview(reviewId: string): Promise<{ success: boolean; error?: string }> {
+  try {
+    const { error } = await supabase
+      .from('agendaya_reviews')
+      .update({ status: 'rejected' })
+      .eq('id', reviewId);
+    if (error) throw error;
+    return { success: true };
+  } catch (err: any) {
+    return { success: false, error: err.message };
+  }
+}
+
+export async function getReviewStats(): Promise<{ success: boolean; data?: { pending: number; approved: number; rejected: number; total: number }; error?: string }> {
+  try {
+    const { data, error } = await supabase
+      .from('agendaya_reviews')
+      .select('status');
+    if (error) throw error;
+    const counts = { pending: 0, approved: 0, rejected: 0, total: 0 };
+    (data as any[] || []).forEach(r => {
+      counts.total++;
+      if (r.status === 'pending') counts.pending++;
+      else if (r.status === 'approved') counts.approved++;
+      else if (r.status === 'rejected') counts.rejected++;
+    });
+    return { success: true, data: counts };
+  } catch (err: any) {
+    return { success: false, error: err.message };
+  }
+}
+
+// ─── Admin dashboard stats ───
+
+export async function getAdminStats(): Promise<{
+  success: boolean;
+  data?: {
+    totalUsers: number;
+    totalBusinesses: number;
+    totalBlogPosts: number;
+    totalComments: number;
+  };
+  error?: string;
+}> {
+  try {
+    const [usersRes, businessesRes, postsRes, commentsRes] = await Promise.all([
+      supabase.from('agendaya_profiles').select('id', { count: 'exact', head: true }),
+      supabase.from('agendaya_businesses').select('id', { count: 'exact', head: true }),
+      supabase.from('agendaya_blog_posts').select('id', { count: 'exact', head: true }),
+      supabase.from('agendaya_blog_comments').select('id', { count: 'exact', head: true }),
+    ]);
+    return {
+      success: true,
+      data: {
+        totalUsers: usersRes.count ?? 0,
+        totalBusinesses: businessesRes.count ?? 0,
+        totalBlogPosts: postsRes.count ?? 0,
+        totalComments: commentsRes.count ?? 0,
+      },
+    };
+  } catch (err: any) {
+    return { success: false, error: err.message };
+  }
+}
+
+export async function getModeratorStats(): Promise<{
+  success: boolean;
+  data?: {
+    pendingReviews: number;
+    totalBlogPosts: number;
+    totalComments: number;
+  };
+  error?: string;
+}> {
+  try {
+    const [pendingRes, postsRes, commentsRes] = await Promise.all([
+      supabase.from('agendaya_reviews').select('id', { count: 'exact', head: true }).eq('status', 'pending'),
+      supabase.from('agendaya_blog_posts').select('id', { count: 'exact', head: true }),
+      supabase.from('agendaya_blog_comments').select('id', { count: 'exact', head: true }),
+    ]);
+    return {
+      success: true,
+      data: {
+        pendingReviews: pendingRes.count ?? 0,
+        totalBlogPosts: postsRes.count ?? 0,
+        totalComments: commentsRes.count ?? 0,
+      },
+    };
   } catch (err: any) {
     return { success: false, error: err.message };
   }
@@ -1244,6 +1393,185 @@ export const updateBusinessPlan = async (
     return { success: false, error: err.message };
   }
 };
+
+// ─── Admin: user management ───
+
+export async function getUsersList(params: {
+  search?: string;
+  role?: string;
+  plan?: string;
+  page?: number;
+  perPage?: number;
+}): Promise<{ success: boolean; data: UserProfile[]; total: number; error?: string }> {
+  try {
+    const { search, role, plan, page = 1, perPage = 20 } = params;
+    let query = supabase
+      .from('agendaya_profiles')
+      .select('*', { count: 'exact' });
+
+    if (search) {
+      query = query.or(`full_name.ilike.%${search}%,email.ilike.%${search}%`);
+    }
+    if (role) {
+      query = query.eq('role', role);
+    }
+    if (plan) {
+      query = query.eq('plan', plan);
+    }
+
+    const from = (page - 1) * perPage;
+    const to = from + perPage - 1;
+
+    const { data, error, count } = await query
+      .order('created_at', { ascending: false })
+      .range(from, to);
+
+    if (error) throw error;
+    return { success: true, data: data as UserProfile[], total: count ?? 0 };
+  } catch (err: any) {
+    return { success: false, data: [], total: 0, error: err.message };
+  }
+}
+
+export async function adminUpdateUser(
+  targetUserId: string,
+  updates: { role?: string; plan?: string }
+): Promise<{ success: boolean; error?: string }> {
+  try {
+    const { error } = await supabase.rpc('admin_update_user', {
+      p_target_user_id: targetUserId,
+      p_new_role: updates.role ?? null,
+      p_new_plan: updates.plan ?? null,
+    });
+    if (error) throw error;
+    return { success: true };
+  } catch (err: any) {
+    return { success: false, error: err.message };
+  }
+}
+
+export type AdminBusiness = Business & {
+  owner_name: string | null;
+  owner_email: string | null;
+};
+
+export type DashboardMetrics = {
+  totals: { users: number; businesses: number; posts: number; comments: number };
+  visits: { total: number; today: number; week: number };
+  appointments: { total: number; pending: number; confirmed: number; completed: number; cancelled: number };
+  reviews: { total: number; pending: number; approved: number; rejected: number; avg_rating: number };
+  likes: { total: number; businesses: number; services: number };
+  subscriptions: { active: number };
+  roles: { visitor: number; client: number; business_owner: number; moderator: number; admin: number };
+  plans: { starter: number; pro: number; premium: number };
+  top_businesses: { id: string; name: string; logo_url: string | null; visits: number; likes_count: number; appointments: number }[];
+  active_users: { id: string; full_name: string; email: string; avatar_url: string | null; appointments_count: number; reviews_count: number }[];
+  top_services: { id: string; name: string; business_name: string; likes_count: number }[];
+  activity: { type: string; description: string; created_at: string }[];
+};
+
+export async function getAdminDashboardMetrics(): Promise<{ success: boolean; data?: DashboardMetrics; error?: string }> {
+  try {
+    const { data, error } = await supabase.rpc('get_admin_dashboard_metrics');
+    if (error) throw error;
+    return { success: true, data: data as DashboardMetrics };
+  } catch (err: any) {
+    return { success: false, error: err.message };
+  }
+}
+
+export async function getBusinessesList(params: {
+  search?: string;
+  plan?: string;
+  category_id?: string;
+  page?: number;
+  perPage?: number;
+}): Promise<{ success: boolean; data: AdminBusiness[]; total: number; error?: string }> {
+  try {
+    const { search, plan, category_id, page = 1, perPage = 15 } = params;
+
+    let query = supabase
+      .from('agendaya_businesses')
+      .select('*', { count: 'exact' });
+
+    if (search) {
+      query = query.or(`name.ilike.%${search}%,description.ilike.%${search}%`);
+    }
+    if (plan) {
+      query = query.eq('plan', plan);
+    }
+    if (category_id) {
+      query = query.eq('category_id', category_id);
+    }
+
+    const from = (page - 1) * perPage;
+    const to = from + perPage - 1;
+
+    const { data, error, count } = await query
+      .order('created_at', { ascending: false })
+      .range(from, to);
+
+    if (error) throw error;
+
+    const businesses = (data || []) as Business[];
+
+    const ownerIds = businesses.map(b => b.owner_id).filter(Boolean);
+    const { data: profiles } = await supabase
+      .from('agendaya_profiles')
+      .select('id, full_name, email')
+      .in('id', ownerIds);
+
+    const profileMap = new Map((profiles || []).map(p => [p.id, p]));
+
+    const mapped: AdminBusiness[] = businesses.map(b => ({
+      ...b,
+      owner_name: profileMap.get(b.owner_id)?.full_name || null,
+      owner_email: profileMap.get(b.owner_id)?.email || null,
+    }));
+
+    return { success: true, data: mapped, total: count ?? 0 };
+  } catch (err: any) {
+    return { success: false, data: [], total: 0, error: err.message };
+  }
+}
+
+export async function adminUpdateBusiness(
+  businessId: string,
+  updates: {
+    name?: string;
+    description?: string;
+    address?: string;
+    phone?: string;
+    email?: string;
+    whatsapp?: string;
+    instagram?: string;
+    facebook?: string;
+    website?: string;
+    plan?: string;
+    category_id?: string;
+  }
+): Promise<{ success: boolean; error?: string }> {
+  try {
+    const { error } = await supabase.rpc('admin_update_business', {
+      p_business_id: businessId,
+      p_name: updates.name ?? null,
+      p_description: updates.description ?? null,
+      p_address: updates.address ?? null,
+      p_phone: updates.phone ?? null,
+      p_email: updates.email ?? null,
+      p_whatsapp: updates.whatsapp ?? null,
+      p_instagram: updates.instagram ?? null,
+      p_facebook: updates.facebook ?? null,
+      p_website: updates.website ?? null,
+      p_plan: updates.plan ?? null,
+      p_category_id: updates.category_id ?? null,
+    });
+    if (error) throw error;
+    return { success: true };
+  } catch (err: any) {
+    return { success: false, error: err.message };
+  }
+}
 
 export const contributeToMilestone = async (id: string, amount: number): Promise<{ success: boolean; data?: Milestone; error?: string }> => {
   try {

@@ -4,9 +4,9 @@ import { useSelector } from 'react-redux';
 import { signOut, supabase } from '../lib/supabase';
 import { UserProfile } from '../lib/supabase';
 import { useTheme } from '../contexts/ThemeContext';
-import { canManageBusiness, getMaxBusinesses } from '../lib/roles';
+import { canManageBusiness, getMaxBusinesses, isStaff } from '../lib/roles';
 import type { RootState } from '../store';
-import { Plus, Sun, Moon } from 'lucide-react';
+import { Plus, Sun, Moon, Shield } from 'lucide-react';
 
 type NavProps = {
   user: UserProfile | null;
@@ -20,9 +20,10 @@ const Nav = ({ user }: NavProps) => {
   const [isUserDropdownOpen, setIsUserDropdownOpen] = useState(false);
   const businesses = useSelector((state: RootState) => state.user.businesses);
   const canManage = canManageBusiness(user?.role || '');
-  const hasBusiness = canManage && !!user?.business_id;
+  const hasBusiness = (canManage || isStaff(user?.role || '')) && !!user?.business_id;
   const plan = (user?.plan || 'starter') as 'starter' | 'pro' | 'premium';
   const canCreateMore = hasBusiness && businesses.length < getMaxBusinesses(plan) && plan !== 'starter';
+  const staffRole = isStaff(user?.role || '') ? user?.role : null;
   const dropdownRef = useRef<HTMLDivElement>(null);
   const buttonRef = useRef<HTMLButtonElement>(null);
   const mobileMenuRef = useRef<HTMLDivElement>(null);
@@ -148,10 +149,22 @@ const Nav = ({ user }: NavProps) => {
                         <svg className="mr-3 h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" /></svg>
                         Mi Perfil
                       </Link>
+                      {staffRole && (
+                        <Link to="/moderator/dashboard" onClick={() => setIsUserDropdownOpen(false)} className="flex items-center px-4 py-2 text-sm text-slate-700 dark:text-slate-300 hover:bg-primary-50 dark:hover:bg-slate-700 hover:text-primary-700 dark:hover:text-primary-400 transition-colors">
+                          <Shield className="mr-3 h-4 w-4" />
+                          Moderación
+                        </Link>
+                      )}
                       {hasBusiness && (
                         <Link to="/business/dashboard" onClick={() => setIsUserDropdownOpen(false)} className="flex items-center px-4 py-2 text-sm text-slate-700 dark:text-slate-300 hover:bg-primary-50 dark:hover:bg-slate-700 hover:text-primary-700 dark:hover:text-primary-400 transition-colors">
                           <svg className="mr-3 h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 13.255A23.931 23.931 0 0112 15c-3.183 0-6.22-.62-9-1.745M16 6V4a2 2 0 00-2-2h-4a2 2 0 00-2 2v2m4 6h.01M5 20h14a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" /></svg>
                           Mi Negocio
+                        </Link>
+                      )}
+                      {staffRole === 'admin' && (
+                        <Link to="/admin/dashboard" onClick={() => setIsUserDropdownOpen(false)} className="flex items-center px-4 py-2 text-sm text-slate-700 dark:text-slate-300 hover:bg-primary-50 dark:hover:bg-slate-700 hover:text-primary-700 dark:hover:text-primary-400 transition-colors">
+                          <svg className="mr-3 h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v2m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
+                          Administración
                         </Link>
                       )}
                       {canCreateMore && (
@@ -236,9 +249,21 @@ const Nav = ({ user }: NavProps) => {
                   <Link to="/dashboard" onClick={() => setIsMenuOpen(false)} className="block px-4 py-3 text-base font-bold text-slate-700 dark:text-slate-300 rounded-xl hover:bg-primary-50 dark:hover:bg-slate-800">
                     Mi Perfil
                   </Link>
+                  {staffRole && (
+                    <Link to="/moderator/dashboard" onClick={() => setIsMenuOpen(false)} className="flex items-center px-4 py-3 text-base font-bold text-slate-700 dark:text-slate-300 rounded-xl hover:bg-primary-50 dark:hover:bg-slate-800">
+                      <Shield className="mr-3 h-4 w-4" />
+                      Moderación
+                    </Link>
+                  )}
                   {hasBusiness && (
                     <Link to="/business/dashboard" onClick={() => setIsMenuOpen(false)} className="block px-4 py-3 text-base font-bold text-slate-700 dark:text-slate-300 rounded-xl hover:bg-primary-50 dark:hover:bg-slate-800">
                       Mi Negocio
+                    </Link>
+                  )}
+                  {staffRole === 'admin' && (
+                    <Link to="/admin/dashboard" onClick={() => setIsMenuOpen(false)} className="flex items-center px-4 py-3 text-base font-bold text-slate-700 dark:text-slate-300 rounded-xl hover:bg-primary-50 dark:hover:bg-slate-800">
+                      <svg className="mr-3 h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v2m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
+                      Administración
                     </Link>
                   )}
                   {canCreateMore && (

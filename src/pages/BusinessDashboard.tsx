@@ -1,7 +1,7 @@
 import { useState, useEffect, useCallback } from 'react';
 import { Link } from 'react-router-dom';
 import { useSelector } from 'react-redux';
-import { Business } from '../lib/api';
+import { Business, getBusinessStats, BusinessStats } from '../lib/api';
 import { ApiClient } from '../lib/apiClient';
 import { supabase } from '../lib/supabase';
 import { AppointmentStatus } from '../types/appointment';
@@ -64,6 +64,7 @@ export const BusinessDashboard: React.FC = () => {
     message: clientsMessage } = useBusinessClients(businessData?.id);
 
   const [totalServices, setTotalServices] = useState(0);
+  const [businessStats, setBusinessStats] = useState<BusinessStats | null>(null);
   const days = ['Lunes', 'Martes', 'Miércoles', 'Jueves', 'Viernes', 'Sábado', 'Domingo'];
 
   const [pagination, setPagination] = useState({
@@ -98,6 +99,7 @@ export const BusinessDashboard: React.FC = () => {
         if (servicesResponse.success && servicesResponse.data) {
           setTotalServices(servicesResponse.data.length);
         }
+        getBusinessStats(response.data.id).then(setBusinessStats).catch(() => {});
       } else {
         setBusinessMessage({
           text: response.error || 'No se encontró información de tu negocio',
@@ -111,7 +113,6 @@ export const BusinessDashboard: React.FC = () => {
   }, [user?.id, userProfile?.business_id]);
 
   const dispatch = useAppDispatch();
-  const [allBusinesses, setAllBusinesses] = useState<Business[]>([]);
 
   useEffect(() => {
     loadBusinessData();
@@ -119,14 +120,13 @@ export const BusinessDashboard: React.FC = () => {
 
   useEffect(() => {
     if (!user?.id) return;
-    ApiClient.getUserBusinesses(user.id).then(res => {
-      if (res.success && res.data) {
-        setAllBusinesses(res.data);
-        if (res.data.length > 0) {
+    if (businesses.length === 0) {
+      ApiClient.getUserBusinesses(user.id).then(res => {
+        if (res.success && res.data && res.data.length > 0) {
           dispatch(setBusinesses(res.data));
         }
-      }
-    });
+      });
+    }
   }, [user?.id]);
 
   const handleBusinessSwitch = useCallback((newBusinessId: string) => {
@@ -354,8 +354,8 @@ export const BusinessDashboard: React.FC = () => {
               </div>
 
               <div className="flex items-center gap-3">
-                {(allBusinesses.length > 0 || businesses.length > 0) && (
-                  <BusinessSwitcher currentBusiness={businessData} businesses={allBusinesses} onSwitch={handleBusinessSwitch} />
+                {businesses.length > 0 && (
+                  <BusinessSwitcher currentBusiness={businessData} onSwitch={handleBusinessSwitch} />
                 )}
                 <Link
                   to="/dashboard"
@@ -521,6 +521,13 @@ export const BusinessDashboard: React.FC = () => {
                   peakDay={peakDayName}
                   peakHour={peakHour}
                   lifetimeValueAvg={lifetimeValueAvg}
+                  totalVisits={businessStats?.total_visits ?? 0}
+                  visitsToday={businessStats?.visits_today ?? 0}
+                  visitsWeek={businessStats?.visits_week ?? 0}
+                  visitsMonth={businessStats?.visits_month ?? 0}
+                  uniqueVisitors={businessStats?.unique_visitors ?? 0}
+                  totalBusinessLikes={businessStats?.total_business_likes ?? 0}
+                  totalServiceLikes={businessStats?.total_service_likes ?? 0}
                 />
               </div>
             )}
@@ -529,7 +536,7 @@ export const BusinessDashboard: React.FC = () => {
             {activeTab === 'settings' && businessData && (
               <div className="space-y-6">
                 <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-                  <SectionHeader title="Configuración" description="Perfil, horarios y ajustes del negocio" />
+                  <SectionHeader title="Configuración" description="Perfil, horarios y comportamiento del negocio" />
                   <div className="bg-white dark:bg-slate-900 p-1 rounded-2xl border border-slate-200 dark:border-slate-800 shadow-sm self-start">
                     <TabNav tabs={settingsTabs} activeTabId={activeSettingsTab} onTabChange={setActiveSettingsTab} />
                   </div>

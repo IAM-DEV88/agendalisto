@@ -1,5 +1,7 @@
 export type AppointmentStatus = 'pending' | 'confirmed' | 'completed' | 'cancelled';
 
+export type ReviewStatus = 'pending' | 'approved' | 'rejected';
+
 export interface Review {
   id: string;
   rating: number;
@@ -8,6 +10,7 @@ export interface Review {
   appointment_id: string;
   business_id: string;
   user_id: string;
+  status: ReviewStatus;
 }
 
 export interface Service {

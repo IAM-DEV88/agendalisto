@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { useParams, Link, useNavigate, useLocation } from 'react-router-dom';
-import { getBusinessBySlug, getBusinessServices, getBusinessHours, getBusinessReviews, Service, BusinessHours, Review } from '../lib/api';
+import { getBusinessBySlug, getBusinessServices, getBusinessHours, getBusinessReviews, recordBusinessVisit, Service, BusinessHours, Review } from '../lib/api';
 import { supabase } from '../lib/supabase';
 import {
   BusinessHeader,
@@ -63,6 +63,7 @@ function BusinessPublicPage() {
         const { success, business, error: businessError } = await getBusinessBySlug(slug);
         if (!success || !business) { setError(businessError || 'Negocio no encontrado'); return; }
         setBusinessData(business);
+        recordBusinessVisit(business.id, user?.id);
 
         const { success: sS, data: sD } = await getBusinessServices(business.id);
         if (sS && sD) { setServices(sD); if (sD.length > 0) setSelectedService(sD[0].id); }

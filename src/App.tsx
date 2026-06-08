@@ -8,6 +8,8 @@ import Register from './pages/Register';
 import ProfileDashboard from './pages/ProfileDashboard';
 import BusinessRegister from './pages/BusinessRegister';
 import BusinessDashboard from './pages/BusinessDashboard';
+import AdminDashboard from './pages/AdminDashboard';
+import ModeratorDashboard from './pages/ModeratorDashboard';
 import BusinessPublicPage from './pages/BusinessPublicPage';
 import ForgotPassword from './pages/ForgotPassword';
 import ExploreBusinesses from './pages/ExploreBusinesses';
@@ -252,6 +254,16 @@ function App() {
             <Route path="/business/dashboard" element={
               <ProtectedRoute user={user} userProfile={userProfile} requiredRole="business_owner">
                 <BusinessDashboard />
+              </ProtectedRoute>
+            } />
+            <Route path="/moderator/dashboard" element={
+              <ProtectedRoute user={user} userProfile={userProfile} requiredRole="moderator">
+                <ModeratorDashboard user={userProfile} />
+              </ProtectedRoute>
+            } />
+            <Route path="/admin/dashboard" element={
+              <ProtectedRoute user={user} userProfile={userProfile} requiredRole="admin">
+                <AdminDashboard user={userProfile} />
               </ProtectedRoute>
             } />
             <Route path="/:slug/book/:serviceId" element={

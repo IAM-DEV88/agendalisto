@@ -283,7 +283,7 @@ const ProfileDashboard = ({ user }: ProfileDashboardProps) => {
         comment,
       );
       if (response.success) {
-        toast.success('Reseña enviada correctamente');
+        toast.success('Reseña enviada — pendiente de aprobación por un moderador');
         await refreshAppointments();
         window.dispatchEvent(new CustomEvent('businessReviewAdded', {
           detail: { businessId: selectedAppointmentForReview.business_id },

@@ -114,6 +114,10 @@ export function canBook(role: string): boolean {
   return (bookable as readonly string[]).includes(role);
 }
 
+export function isStaff(role: string): boolean {
+  return role === 'admin' || role === 'moderator';
+}
+
 // ─── Plan-based helpers ───
 
 export function getMaxBusinesses(plan: Plan): number {
