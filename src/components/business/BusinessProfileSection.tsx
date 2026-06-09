@@ -310,6 +310,28 @@ const BusinessProfileSection: React.FC<BusinessProfileSectionProps> = ({
           </div>
         </div>
 
+        {/* Showcase Toggle */}
+        <div className="bg-amber-50 dark:bg-amber-900/10 rounded-2xl border border-amber-200 dark:border-amber-800/50 p-5">
+          <div className="flex items-start gap-3">
+            <input
+              type="checkbox"
+              id="showcase_only"
+              name="showcase_only"
+              checked={!!businessData.showcase_only}
+              onChange={onChange}
+              className="mt-0.5 w-4 h-4 rounded-lg border-amber-300 text-amber-600 focus:ring-amber-500"
+            />
+            <div>
+              <label htmlFor="showcase_only" className="font-bold text-sm text-amber-800 dark:text-amber-300 cursor-pointer">
+                Solo mostrar información (escaparate)
+              </label>
+              <p className="text-xs text-amber-600/70 dark:text-amber-400/70 mt-0.5">
+                El negocio aparecerá en los resultados de búsqueda pero los clientos no podrán reservar online.
+              </p>
+            </div>
+          </div>
+        </div>
+
         <div className="flex justify-end pt-4">
           <button
             type="submit"
@@ -324,5 +346,4 @@ const BusinessProfileSection: React.FC<BusinessProfileSectionProps> = ({
     </div>
   );
 };
-
 export default BusinessProfileSection; 

@@ -1,9 +1,9 @@
 import { supabase } from './supabase';
 import { UserProfile } from './supabase';
-import { Appointment, AppointmentStatus, Review } from '../types/appointment';
+import { Appointment, AppointmentStatus, Review, GuestInfo } from '../types/appointment';
 
 // Re-export types from appointment.ts
-export type { Appointment, AppointmentStatus, Review };
+export type { Appointment, AppointmentStatus, Review, GuestInfo };
 
 // Type definitions for data models
 export type Business = {
@@ -26,6 +26,7 @@ export type Business = {
   plan: string;
   plan_score: number;
   likes_count: number;
+  showcase_only?: boolean;
   created_at: string;
   updated_at: string;
   /** Business configuration settings */
@@ -234,6 +235,64 @@ export async function getBusinessAppointments(businessId: string) {
     return { success: false, data: null, error: err.message || 'Error al cargar citas del negocio' };
   }
 }
+
+// --- Gift Codes ---
+
+export interface GiftCode {
+  id: string;
+  code: string;
+  service_id: string;
+  business_id: string;
+  sender_user_id: string | null;
+  recipient_name: string;
+  recipient_email: string;
+  recipient_phone: string | null;
+  message: string | null;
+  status: 'active' | 'redeemed' | 'expired';
+  redeemed_at: string | null;
+  created_at: string;
+  expires_at: string;
+}
+
+export const validateGiftCode = async (code: string, serviceId: string, businessId: string): Promise<{ success: boolean; gift?: GiftCode; error?: string }> => {
+  try {
+    const { data, error } = await supabase
+      .from('agendaya_gift_codes')
+      .select('*')
+      .eq('code', code)
+      .eq('service_id', serviceId)
+      .eq('business_id', businessId)
+      .eq('status', 'active')
+      .single();
+
+    if (error) {
+      if (error.code === 'PGRST116') return { success: false, error: 'Código inválido o ya fue canjeado' };
+      throw error;
+    }
+
+    const gift = data as GiftCode;
+    if (new Date(gift.expires_at) < new Date()) {
+      return { success: false, error: 'Este código de regalo ha expirado' };
+    }
+
+    return { success: true, gift };
+  } catch (err: any) {
+    return { success: false, error: err.message || 'Error al validar código' };
+  }
+};
+
+export const redeemGiftCode = async (code: string): Promise<{ success: boolean; error?: string }> => {
+  try {
+    const { error } = await supabase
+      .from('agendaya_gift_codes')
+      .update({ status: 'redeemed', redeemed_at: new Date().toISOString() })
+      .eq('code', code);
+    if (error) throw error;
+    return { success: true };
+  } catch (err: any) {
+    return { success: false, error: err.message };
+  }
+};
 
 export const createAppointment = async (appointment: Omit<Appointment, 'id' | 'created_at' | 'updated_at'>) => {
   const { data, error } = await supabase
@@ -1238,6 +1297,67 @@ export const getBlogPost = async (id: string): Promise<{ success: boolean; data?
   }
 };
 
+// --- Blog Admin CRUD ---
+
+export const adminGetAllPosts = async (): Promise<{ success: boolean; data?: BlogPost[]; error?: string }> => {
+  try {
+    const { data, error } = await supabase
+      .from('agendaya_blog_posts')
+      .select('*, blog_comments:agendaya_blog_comments(count)')
+      .order('created_at', { ascending: false });
+    if (error) throw error;
+    const posts = (data || []).map(p => ({
+      ...p,
+      comment_count: p.blog_comments?.[0]?.count || 0
+    }));
+    return { success: true, data: posts as BlogPost[] };
+  } catch (err: any) {
+    return { success: false, error: err.message };
+  }
+};
+
+export const createBlogPost = async (post: Omit<BlogPost, 'id' | 'likes_count' | 'comment_count' | 'created_at' | 'updated_at'>): Promise<{ success: boolean; data?: BlogPost; error?: string }> => {
+  try {
+    const { data, error } = await supabase
+      .from('agendaya_blog_posts')
+      .insert([post])
+      .select()
+      .single();
+    if (error) throw error;
+    return { success: true, data: data as BlogPost };
+  } catch (err: any) {
+    return { success: false, error: err.message };
+  }
+};
+
+export const updateBlogPost = async (id: string, updates: Partial<Pick<BlogPost, 'title' | 'content' | 'excerpt' | 'image_url' | 'author_name'>>): Promise<{ success: boolean; error?: string }> => {
+  try {
+    const { error } = await supabase
+      .from('agendaya_blog_posts')
+      .update(updates)
+      .eq('id', id);
+    if (error) throw error;
+    return { success: true };
+  } catch (err: any) {
+    return { success: false, error: err.message };
+  }
+};
+
+export const deleteBlogPost = async (id: string): Promise<{ success: boolean; error?: string }> => {
+  try {
+    const { error } = await supabase
+      .from('agendaya_blog_posts')
+      .delete()
+      .eq('id', id);
+    if (error) throw error;
+    return { success: true };
+  } catch (err: any) {
+    return { success: false, error: err.message };
+  }
+};
+
+// --- Blog Comments ---
+
 export const getBlogComments = async (postId: string): Promise<{ success: boolean; data?: BlogComment[]; error?: string }> => {
   try {
     const { data, error } = await supabase
@@ -1650,6 +1770,57 @@ export const getReferralCount = async (userId: string): Promise<{ success: boole
       .eq('referred_by', userId);
     if (error) throw error;
     return { success: true, count: count || 0 };
+  } catch (err: any) {
+    return { success: false, error: err.message };
+  }
+};
+
+// --- Admin: Marketing Tools ---
+
+export const getNewsletterSubscribers = async (): Promise<{ success: boolean; data?: { email: string; subscribed_at: string }[]; error?: string }> => {
+  try {
+    const { data, error } = await supabase
+      .from('agendaya_newsletter_subscriptions')
+      .select('email, subscribed_at')
+      .order('subscribed_at', { ascending: false });
+    if (error) throw error;
+    return { success: true, data: data as { email: string; subscribed_at: string }[] };
+  } catch (err: any) {
+    return { success: false, error: err.message };
+  }
+};
+
+export const getGiftCodes = async (): Promise<{ success: boolean; data?: any[]; error?: string }> => {
+  try {
+    const { data, error } = await supabase
+      .from('agendaya_gift_codes')
+      .select('*, agendaya_services(name), agendaya_businesses(name)')
+      .order('created_at', { ascending: false })
+      .limit(100);
+    if (error) throw error;
+    return { success: true, data: data as any[] };
+  } catch (err: any) {
+    return { success: false, error: err.message };
+  }
+};
+
+export const getAdminLoyaltyStats = async (): Promise<{ success: boolean; data?: { total_entries: number; vip_count: number; frecuente_count: number; regular_count: number }; error?: string }> => {
+  try {
+    const { data, error } = await supabase
+      .from('agendaya_loyalty')
+      .select('loyalty_level');
+    if (error) throw error;
+
+    const rows = data as { loyalty_level: string }[];
+    return {
+      success: true,
+      data: {
+        total_entries: rows.length,
+        vip_count: rows.filter(r => r.loyalty_level === 'vip').length,
+        frecuente_count: rows.filter(r => r.loyalty_level === 'frecuente').length,
+        regular_count: rows.filter(r => r.loyalty_level === 'regular').length,
+      },
+    };
   } catch (err: any) {
     return { success: false, error: err.message };
   }

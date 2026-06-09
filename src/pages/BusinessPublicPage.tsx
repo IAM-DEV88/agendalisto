@@ -92,6 +92,7 @@ function BusinessPublicPage() {
   }, [location.search, navigate, slug]);
 
   const handleServiceSelection = (serviceId: string) => {
+    if (businessData?.showcase_only) return;
     setSelectedService(serviceId);
     if (businessData?.config?.permitir_reservas_online) {
       if (!user) { navigate(`/login?redirect=/${slug}/book/${serviceId}`); }
@@ -108,11 +109,38 @@ function BusinessPublicPage() {
     "address": { "@type": "PostalAddress", "streetAddress": businessData.address },
     "telephone": businessData.phone,
     "url": window.location.href,
+    "priceRange": services.length > 0 ? `$${Math.min(...services.filter(s => s.price).map(s => s.price!))} - $${Math.max(...services.filter(s => s.price).map(s => s.price!))}` : undefined,
+    "openingHoursSpecification": businessHours.length > 0 ? businessHours.map(h => ({
+      "@type": "OpeningHoursSpecification",
+      "dayOfWeek": ["Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"][h.day_of_week],
+      "opens": !h.is_closed ? h.start_time : undefined,
+      "closes": !h.is_closed ? h.end_time : undefined,
+    })).filter(h => h.opens) : undefined,
     "aggregateRating": averageRating > 0 ? {
       "@type": "AggregateRating",
       "ratingValue": averageRating.toFixed(1),
-      "reviewCount": reviews.length
-    } : undefined
+      "reviewCount": reviews.length,
+      "bestRating": "5",
+    } : undefined,
+    "review": reviews.length > 0 ? reviews.slice(0, 5).map(r => ({
+      "@type": "Review",
+      "reviewRating": { "@type": "Rating", "ratingValue": r.rating },
+      "author": { "@type": "Person", "name": "Cliente" },
+      "reviewBody": r.comment,
+    })) : undefined,
+    "makesOffer": services.map(s => ({
+      "@type": "Offer",
+      "name": s.name,
+      "description": s.description,
+      "price": s.price || undefined,
+      "priceCurrency": "COP",
+      "duration": `PT${s.duration}M`,
+    })),
+    "sameAs": [
+      businessData.facebook ? `https://facebook.com/${businessData.facebook}` : undefined,
+      businessData.instagram ? `https://instagram.com/${businessData.instagram}` : undefined,
+      businessData.website || undefined,
+    ].filter(Boolean),
   } : undefined;
 
   if (loading) return (
@@ -142,12 +170,14 @@ function BusinessPublicPage() {
     </div>
   );
 
+  const ogImageUrl = `${window.location.origin}/.netlify/functions/og-image?type=business&name=${encodeURIComponent(businessData.name)}&slug=${slug}&rating=${averageRating}&logo=${encodeURIComponent(businessData.logo_url || '')}`;
+
   return (
     <div className="min-h-screen bg-gradient-to-b from-slate-50 to-white dark:from-slate-950 dark:to-slate-900 transition-colors duration-200">
       <SEO
         title={businessData.name}
         description={businessData.description}
-        ogImage={businessData.logo_url}
+        ogImage={businessData.logo_url || ogImageUrl}
         ogType="business.business"
         schemaData={businessSchema}
       />
@@ -155,6 +185,21 @@ function BusinessPublicPage() {
 
         {/* Business Header */}
         <BusinessHeader businessData={businessData} averageRating={averageRating} reviewsCount={reviews.length} />
+
+        {/* Showcase Banner */}
+        {businessData?.showcase_only && (
+          <div className="mt-6 bg-amber-50 dark:bg-amber-900/10 rounded-2xl p-5 border border-amber-200 dark:border-amber-800/50 flex items-start gap-3">
+            <div className="w-9 h-9 rounded-xl bg-amber-100 dark:bg-amber-900/30 flex items-center justify-center flex-shrink-0">
+              <Store className="w-4 h-4 text-amber-600 dark:text-amber-400" />
+            </div>
+            <div>
+              <p className="font-bold text-sm text-amber-800 dark:text-amber-300">Escaparate informativo</p>
+              <p className="text-xs text-amber-600/80 dark:text-amber-400/80 mt-0.5">
+                Este negocio solo muestra su información por ahora. Para contratar sus servicios, contáctalos directamente por los medios disponibles.
+              </p>
+            </div>
+          </div>
+        )}
 
         {/* Mobile Tabs */}
         <div className="mt-8 bg-white dark:bg-slate-900 rounded-2xl border border-slate-200 dark:border-slate-800 overflow-hidden md:hidden">
@@ -187,6 +232,7 @@ function BusinessPublicPage() {
                   showPrices={businessData?.config?.mostrar_precios}
                   currentUser={user}
                   businessOwnerId={businessData?.owner_id}
+                  showcaseOnly={!!businessData?.showcase_only}
                 />
                 {user && user.id === businessData?.owner_id && (
                   <Link to="/business/dashboard?tab=services" className="mt-6 inline-flex items-center gap-2 px-5 py-2.5 bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300 text-sm font-bold rounded-xl hover:bg-slate-200 dark:hover:bg-slate-700 transition-all w-full justify-center">
@@ -240,6 +286,7 @@ function BusinessPublicPage() {
                 showPrices={businessData?.config?.mostrar_precios}
                 currentUser={user}
                 businessOwnerId={businessData?.owner_id}
+                showcaseOnly={!!businessData?.showcase_only}
               />
               {user && user.id === businessData?.owner_id && (
                 <Link to="/business/dashboard?tab=services" className="mt-6 inline-flex items-center gap-2 px-5 py-2.5 bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300 text-sm font-bold rounded-xl hover:bg-slate-200 dark:hover:bg-slate-700 transition-all">

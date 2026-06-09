@@ -44,6 +44,7 @@ import {
 } from 'lucide-react';
 import { ROLE_LABELS, PLAN_BADGE, PLAN_LABELS, getMaxBusinesses } from '../lib/roles';
 import { updateProfileRole, getReferralLink, getReferralCount, getReferredUsers, ReferredUser } from '../lib/api';
+import VisitStreaks from '../components/business/VisitStreaks';
 
 const FALLBACK_AVATAR = 'https://upload.wikimedia.org/wikipedia/commons/8/89/Portrait_Placeholder.png';
 
@@ -279,7 +280,7 @@ const ProfileDashboard = ({ user }: ProfileDashboardProps) => {
     setSelectedAppointmentForReview(appointment);
   }, []);
 
-  const handleReviewSubmit = useCallback(async (rating: number, comment: string) => {
+  const handleReviewSubmit = useCallback(async (rating: number, comment: string, beforeImage?: string, afterImage?: string) => {
     if (!user || !selectedAppointmentForReview) return;
 
     try {
@@ -289,6 +290,8 @@ const ProfileDashboard = ({ user }: ProfileDashboardProps) => {
         user.id,
         rating,
         comment,
+        beforeImage,
+        afterImage,
       );
       if (response.success) {
         toast.success('Reseña enviada — pendiente de aprobación por un moderador');
@@ -592,6 +595,12 @@ const ProfileDashboard = ({ user }: ProfileDashboardProps) => {
             {/* ═══ STATS TAB ═══ */}
             {activeTab === 'stats' && (
               <div className="animate-in fade-in zoom-in-95 duration-300 space-y-6">
+                {user && appointments.length > 0 && (
+                  <VisitStreaks userId={user.id} businessId={appointments.filter(a => a.businesses?.name).reduce((acc, a) => {
+                    if (!acc.find(x => x.id === a.business_id)) acc.push({ id: a.business_id, name: a.businesses?.name || '' });
+                    return acc;
+                  }, [] as { id: string; name: string }[])[0]?.id || ''} />
+                )}
                 <div>
                   <h2 className="text-xl font-black text-slate-900 dark:text-white">Estadísticas de tus citas</h2>
                   <p className="text-sm font-medium text-slate-500 dark:text-slate-400 mt-0.5">
@@ -767,6 +776,7 @@ const ProfileDashboard = ({ user }: ProfileDashboardProps) => {
           onClose={() => setSelectedAppointmentForReview(null)}
           onSubmit={handleReviewSubmit}
           appointment={selectedAppointmentForReview}
+          userId={user?.id || ''}
         />
       )}
     </div>

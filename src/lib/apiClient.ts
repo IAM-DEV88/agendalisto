@@ -381,7 +381,7 @@ export class ApiClient {
     }
   }
 
-  static async createBusinessReview(appointmentId: string, businessId: string, userId: string, rating: number, comment: string): Promise<ApiResponse<Review>> {
+  static async createBusinessReview(appointmentId: string, businessId: string, userId: string, rating: number, comment: string, beforeImage?: string, afterImage?: string): Promise<ApiResponse<Review>> {
     try {
       // Verificar si ya existe una reseña para esta cita
       const { data: existingReview, error: checkError } = await supabase
@@ -401,16 +401,17 @@ export class ApiClient {
         };
       }
 
-      // Si no existe una reseña, crear una nueva con status pending
       const { data, error } = await supabase
         .from('agendaya_reviews')
         .insert({
           appointment_id: appointmentId,
           business_id: businessId,
           user_id: userId,
-          rating: rating,
-          comment: comment,
+          rating,
+          comment,
           status: 'pending',
+          before_image_url: beforeImage || null,
+          after_image_url: afterImage || null,
           created_at: new Date().toISOString()
         })
         .select()

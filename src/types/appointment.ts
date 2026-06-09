@@ -45,6 +45,9 @@ export interface Appointment {
   review?: Review;
   notes?: string | null;
   status_history?: StatusHistory[];
+  guest_info?: GuestInfo | null;
+  is_guest?: boolean;
+  cancel_reason?: string | null;
   created_at: string;
   updated_at: string;
   businesses?: {
@@ -53,6 +56,12 @@ export interface Appointment {
     slug?: string;
     logo_url?: string;
   };
+}
+
+export interface GuestInfo {
+  name: string;
+  email: string;
+  phone: string;
 }
 
 export default Appointment; 

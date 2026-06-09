@@ -1,6 +1,6 @@
-import { useState, useEffect, useMemo } from 'react';
+import { useState, useEffect, useMemo, lazy, Suspense } from 'react';
 import { Link, useSearchParams } from 'react-router-dom';
-import { MapPin, ArrowRight, Heart, Store, SlidersHorizontal, Search, X } from 'lucide-react';
+import { MapPin, ArrowRight, Heart, Store, SlidersHorizontal, Search, X, Map, List, MessageCircle } from 'lucide-react';
 import { getBusinesses, getBusinessCategories, BusinessCategory, toggleLike, checkIfLiked } from '../lib/api';
 import type { Business } from '../lib/api';
 import { supabase } from '../lib/supabase';
@@ -9,6 +9,8 @@ import SEO from '../components/SEO';
 import EmptyState from '../components/ui/EmptyState';
 import SelectMenu from '../components/ui/SelectMenu';
 import ShareButton from '../components/ui/ShareButton';
+
+const BusinessMap = lazy(() => import('../components/ui/BusinessMap'));
 
 const FALLBACK_LOGO = 'https://upload.wikimedia.org/wikipedia/commons/8/89/Portrait_Placeholder.png';
 
@@ -62,7 +64,7 @@ const BusinessCard = ({ business, categories, currentUser }: { business: Busines
             >
               <Heart className={`h-4 w-4 ${isLiked ? 'fill-current' : ''}`} />
             </button>
-            <div onClick={(e) => e.preventDefault()}>
+            <div onMouseDown={e => e.nativeEvent.stopImmediatePropagation()} onClick={e => { e.nativeEvent.stopImmediatePropagation(); e.stopPropagation(); }}>
               <ShareButton
                 url={`${window.location.origin}/${business.slug}`}
                 title={business.name}
@@ -71,6 +73,19 @@ const BusinessCard = ({ business, categories, currentUser }: { business: Busines
                 className="!bg-white/20 !backdrop-blur-md hover:!bg-white/40 !text-white !rounded-xl"
               />
             </div>
+            {business.whatsapp && (
+              <button
+                onClick={(e) => {
+                  e.preventDefault();
+                  e.stopPropagation();
+                  window.open(`https://wa.me/${business.whatsapp}?text=${encodeURIComponent('Hola, vi tu perfil en AgendaYa y quiero agendar una cita')}`, '_blank', 'noopener,noreferrer');
+                }}
+                className="p-2 rounded-xl backdrop-blur-md bg-emerald-500/80 hover:bg-emerald-500 text-white transition-all"
+                title="Hablar por WhatsApp"
+              >
+                <MessageCircle className="h-4 w-4" />
+              </button>
+            )}
           </div>
         </div>
         {/* Category badge on image */}
@@ -87,6 +102,11 @@ const BusinessCard = ({ business, categories, currentUser }: { business: Busines
         {business.plan === 'pro' && (
           <span className="absolute top-3 right-3 px-2.5 py-1 bg-blue-100/90 dark:bg-blue-900/90 backdrop-blur-sm text-blue-700 dark:text-blue-300 rounded-lg text-[10px] font-black uppercase tracking-wider shadow-sm">
             Pro
+          </span>
+        )}
+        {(business as any).showcase_only && (
+          <span className="absolute top-12 left-3 px-2 py-1 bg-amber-100/90 dark:bg-amber-900/90 backdrop-blur-sm text-amber-700 dark:text-amber-300 rounded-lg text-[10px] font-black uppercase tracking-wider shadow-sm">
+            Solo info
           </span>
         )}
       </div>
@@ -151,6 +171,7 @@ const ExploreBusinesses = () => {
   const [error, setError] = useState<string | null>(null);
   const [categories, setCategories] = useState<BusinessCategory[]>([]);
   const [user, setUser] = useState<any>(null);
+  const [viewMode, setViewMode] = useState<'list' | 'map'>('list');
 
   useEffect(() => {
     setSearchTerm(searchParams.get('search') || '');
@@ -280,7 +301,27 @@ const ExploreBusinesses = () => {
           </div>
         )}
 
-        {/* Grid */}
+        {/* View Toggle */}
+        {!loading && businesses.length > 0 && (
+          <div className="flex items-center justify-end mb-4 gap-2">
+            <button
+              onClick={() => setViewMode('list')}
+              className={`p-2 rounded-xl transition-all ${viewMode === 'list' ? 'bg-primary-100 dark:bg-primary-900/40 text-primary-600 dark:text-primary-400' : 'bg-slate-100 dark:bg-slate-800 text-slate-400 hover:text-slate-600'}`}
+              title="Vista lista"
+            >
+              <List className="w-4 h-4" />
+            </button>
+            <button
+              onClick={() => setViewMode('map')}
+              className={`p-2 rounded-xl transition-all ${viewMode === 'map' ? 'bg-primary-100 dark:bg-primary-900/40 text-primary-600 dark:text-primary-400' : 'bg-slate-100 dark:bg-slate-800 text-slate-400 hover:text-slate-600'}`}
+              title="Vista mapa"
+            >
+              <Map className="w-4 h-4" />
+            </button>
+          </div>
+        )}
+
+        {/* Content */}
         {loading ? (
           <div className="grid gap-6 grid-cols-1 sm:grid-cols-2 lg:grid-cols-3">
             {[1, 2, 3, 4, 5, 6].map(i => <SkeletonCard key={i} />)}
@@ -293,6 +334,12 @@ const ExploreBusinesses = () => {
               description="Intenta ajustar tus filtros o buscar con otros términos."
               action={hasFilters ? { label: 'Limpiar filtros', to: '/explore' } : undefined}
             />
+          </div>
+        ) : viewMode === 'map' ? (
+          <div className="animate-in fade-in duration-300">
+            <Suspense fallback={<div className="h-[400px] bg-slate-100 dark:bg-slate-800 rounded-2xl animate-pulse" />}>
+              <BusinessMap businesses={businesses} />
+            </Suspense>
           </div>
         ) : (
           <div className="grid gap-6 grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 animate-in fade-in slide-in-from-bottom-4 duration-500">

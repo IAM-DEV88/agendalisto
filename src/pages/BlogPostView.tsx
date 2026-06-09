@@ -236,12 +236,14 @@ const BlogPostView = () => {
     "dateModified": post.updated_at
   };
 
+  const ogImageUrl = post.image_url || `${window.location.origin}/.netlify/functions/og-image?type=post&title=${encodeURIComponent(post.title)}&author=${encodeURIComponent(post.author_name)}&date=${post.created_at}&excerpt=${encodeURIComponent((post.excerpt || post.content).substring(0, 120))}`;
+
   return (
     <div className="min-h-screen bg-slate-50 dark:bg-slate-900 transition-colors duration-200 py-12">
       <SEO 
         title={post.title}
         description={post.excerpt || post.content.substring(0, 160)}
-        ogImage={post.image_url || undefined}
+        ogImage={ogImageUrl}
         ogType="article"
         schemaData={articleSchema}
       />

@@ -1,12 +1,14 @@
 import React, { useState } from 'react';
-import { Star, X, MessageSquareText, Send, Heart } from 'lucide-react';
+import { Star, X, Send, Heart, Camera, MessageSquareText } from 'lucide-react';
 import { Appointment } from '../../types/appointment';
+import { uploadImage } from '../../lib/storage';
 
 interface ReviewModalProps {
   isOpen: boolean;
   onClose: () => void;
   appointment: Appointment | null;
-  onSubmit: (rating: number, comment: string) => Promise<void>;
+  onSubmit: (rating: number, comment: string, beforeImage?: string, afterImage?: string) => Promise<void>;
+  userId: string;
 }
 
 const ReviewModal: React.FC<ReviewModalProps> = ({
@@ -14,18 +16,33 @@ const ReviewModal: React.FC<ReviewModalProps> = ({
   onClose,
   appointment,
   onSubmit,
+  userId,
 }) => {
   const [rating, setRating] = useState(5);
   const [comment, setComment] = useState('');
   const [loading, setLoading] = useState(false);
+  const [beforeUrl, setBeforeUrl] = useState('');
+  const [afterUrl, setAfterUrl] = useState('');
+  const [uploadingPhoto, setUploadingPhoto] = useState(false);
 
   if (!isOpen || !appointment) return null;
+
+  const handleUpload = async (side: 'before' | 'after', file: File) => {
+    if (file.size > 10 * 1024 * 1024) return;
+    setUploadingPhoto(true);
+    const { url } = await uploadImage(file, 'service-images', userId);
+    if (url) {
+      if (side === 'before') setBeforeUrl(url);
+      else setAfterUrl(url);
+    }
+    setUploadingPhoto(false);
+  };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setLoading(true);
     try {
-      await onSubmit(rating, comment);
+      await onSubmit(rating, comment, beforeUrl || undefined, afterUrl || undefined);
       onClose();
     } finally {
       setLoading(false);
@@ -127,6 +144,34 @@ const ReviewModal: React.FC<ReviewModalProps> = ({
                 className="w-full pl-10 pr-4 py-3 rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 focus:ring-2 focus:ring-primary-500/20 focus:border-primary-500 outline-none transition-all text-sm"
                 placeholder="Cuéntanos qué te pareció el servicio..."
               />
+            </div>
+          </div>
+
+          {/* Before/After Photos */}
+          <div className="pt-3">
+            <p className="text-xs font-bold text-slate-500 dark:text-slate-400 flex items-center gap-1.5 mb-2">
+              <Camera className="w-3.5 h-3.5" /> ¿Antes y después? (opcional)
+            </p>
+            <div className="grid grid-cols-2 gap-3">
+              {(['before', 'after'] as const).map(side => (
+                <label key={side} className="flex flex-col items-center justify-center h-20 rounded-xl border-2 border-dashed border-slate-300 dark:border-slate-600 cursor-pointer hover:border-primary-400 bg-slate-50 dark:bg-slate-800/50 transition-all">
+                  {uploadingPhoto ? (
+                    <div className="animate-spin rounded-full h-5 w-5 border-2 border-primary-600 border-t-transparent" />
+                  ) : (side === 'before' ? beforeUrl : afterUrl) ? (
+                    <div className="relative w-full h-full">
+                      <img src={side === 'before' ? beforeUrl : afterUrl} alt="" className="w-full h-full object-cover rounded-lg" />
+                      <button type="button" onClick={(e) => { e.preventDefault(); if (side === 'before') setBeforeUrl(''); else setAfterUrl(''); }}
+                        className="absolute top-0.5 right-0.5 p-0.5 bg-black/50 rounded text-white text-[10px]">✕</button>
+                    </div>
+                  ) : (
+                    <>
+                      <Camera className="w-4 h-4 text-slate-400" />
+                      <span className="text-[10px] text-slate-400 mt-0.5">{side === 'before' ? 'Antes' : 'Después'}</span>
+                    </>
+                  )}
+                  <input type="file" accept="image/*" className="hidden" onChange={e => { const f = e.target.files?.[0]; if (f) handleUpload(side, f); }} />
+                </label>
+              ))}
             </div>
           </div>
 

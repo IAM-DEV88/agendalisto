@@ -26,6 +26,8 @@ import BusinessConfigSection from '../components/business/BusinessConfigSection'
 import BusinessHoursSection from '../components/business/BusinessHoursSection';
 import ServicesSection from '../components/business/ServicesSection';
 import BusinessSwitcher from '../components/business/BusinessSwitcher';
+import BusinessProgressSection from '../components/business/BusinessProgressSection';
+import BusinessQrCode from '../components/business/BusinessQrCode';
 import BusinessAppointmentList from '../components/appointments/BusinessAppointmentList';
 import Pagination from '../components/ui/Pagination';
 import EmptyState from '../components/ui/EmptyState';
@@ -184,8 +186,9 @@ export const BusinessDashboard: React.FC = () => {
   };
 
   const handleBusinessChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
-    const { name, value } = e.target;
-    setBusinessData(prev => prev ? ({ ...prev, [name]: value } as Business) : prev);
+    const { name, value, type } = e.target;
+    const val = type === 'checkbox' ? (e.target as HTMLInputElement).checked : value;
+    setBusinessData(prev => prev ? ({ ...prev, [name]: val } as Business) : prev);
   };
 
   const handleBusinessSubmit = async (e: React.FormEvent) => {
@@ -207,6 +210,7 @@ export const BusinessDashboard: React.FC = () => {
         website: businessData.website,
         lat: businessData.lat,
         lng: businessData.lng,
+        showcase_only: businessData.showcase_only ?? false,
       });
       if (response.success && response.data) {
         setBusinessData(response.data);
@@ -357,6 +361,9 @@ export const BusinessDashboard: React.FC = () => {
                 {businesses.length > 0 && (
                   <BusinessSwitcher currentBusiness={businessData} onSwitch={handleBusinessSwitch} />
                 )}
+                {businessData && (
+                  <BusinessQrCode businessSlug={slugify(businessData.name)} businessName={businessData.name} />
+                )}
                 <Link
                   to="/dashboard"
                   className="inline-flex items-center gap-2 px-5 py-2.5 bg-white dark:bg-slate-900 text-slate-700 dark:text-slate-300 text-sm font-bold rounded-xl border border-slate-200 dark:border-slate-800 hover:bg-slate-50 dark:hover:bg-slate-800 hover:border-slate-300 dark:hover:border-slate-700 transition-all shadow-sm hover:-translate-y-0.5 active:translate-y-0"
@@ -367,6 +374,11 @@ export const BusinessDashboard: React.FC = () => {
               </div>
             </div>
           </div>
+
+          {/* ═══ PROGRESS ═══ */}
+          {businessData && (
+            <BusinessProgressSection businessData={businessData} />
+          )}
 
           {/* ═══ TABS ═══ */}
           <div className="animate-in fade-in duration-500 delay-200">
@@ -574,6 +586,8 @@ export const BusinessDashboard: React.FC = () => {
                       onSave={handleConfigSave}
                       onConfigChange={handleConfigChange}
                       plan={plan}
+                      businessName={businessData?.name || ''}
+                      businessAddress={businessData?.address || ''}
                     />
                   )}
                 </div>

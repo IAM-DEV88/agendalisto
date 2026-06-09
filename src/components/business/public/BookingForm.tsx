@@ -1,14 +1,18 @@
 import React, { useState, useEffect, useMemo } from 'react';
-import { Clock, Calendar, CheckCircle, ArrowLeft, Send, AlertCircle } from 'lucide-react';
-import { createAppointment, Service, getBusinessHours, getBusinessAppointments, BusinessHours, Appointment } from '../../../lib/api';
+import { Clock, Calendar, CheckCircle, ArrowLeft, Send, AlertCircle, Gift, Check, X } from 'lucide-react';
+import CrossPromotion from '../CrossPromotion';
+import { createAppointment, Service, getBusinessHours, getBusinessAppointments, BusinessHours, Appointment, validateGiftCode, redeemGiftCode } from '../../../lib/api';
+import type { GuestInfo, GiftCode } from '../../../lib/api';
 import { notifyError, notifyLoading, dismissToast } from '../../../lib/toast';
+import { toast } from 'react-hot-toast';
 import { Link } from 'react-router-dom';
 
 interface BookingFormProps {
   businessId: string;
   businessName: string;
+  businessAddress?: string;
   serviceId: string;
-  userId: string;
+  userId?: string;
   service: Service | null;
   onClose: () => void;
   showPrices: boolean;
@@ -16,11 +20,13 @@ interface BookingFormProps {
   notifyEmail?: boolean;
   notifyWhatsapp?: boolean;
   minCancellationHours?: number;
+  guestInfo?: GuestInfo;
 }
 
 const BookingForm: React.FC<BookingFormProps> = ({
   businessId,
   businessName,
+  businessAddress = '',
   serviceId,
   userId,
   service,
@@ -30,12 +36,17 @@ const BookingForm: React.FC<BookingFormProps> = ({
   notifyEmail = false,
   notifyWhatsapp = false,
   minCancellationHours = 0,
+  guestInfo,
 }) => {
   const [confirmationChecked, setConfirmationChecked] = useState(!requireConfirmation);
   const [formData, setFormData] = useState({ date: '', time: '', notes: '' });
   const [submitting, setSubmitting] = useState(false);
   const [bookingSuccess, setBookingSuccess] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [giftCodeInput, setGiftCodeInput] = useState('');
+  const [giftApplied, setGiftApplied] = useState<GiftCode | null>(null);
+  const [giftError, setGiftError] = useState('');
+  const [validatingGift, setValidatingGift] = useState(false);
 
   const [businessHours, setBusinessHours] = useState<BusinessHours[]>([]);
   const [appointments, setAppointments] = useState<Appointment[]>([]);
@@ -118,8 +129,16 @@ const BookingForm: React.FC<BookingFormProps> = ({
       setError(`Debes aceptar las condiciones de cancelación (${minCancellationHours}h de antelación)`);
       return;
     }
-    if (!businessId || !serviceId || !userId || !service) {
+    if (!businessId || !serviceId || !service) {
       setError('Faltan datos para la reserva');
+      return;
+    }
+    if (!userId && !guestInfo) {
+      setError('Debes iniciar sesión o proporcionar tus datos');
+      return;
+    }
+    if (guestInfo && (!guestInfo.name.trim() || !guestInfo.email.trim())) {
+      setError('Completa tu nombre y correo para reservar');
       return;
     }
 
@@ -135,15 +154,20 @@ const BookingForm: React.FC<BookingFormProps> = ({
       const result = await createAppointment({
         business_id: businessId,
         service_id: serviceId,
-        user_id: userId,
+        user_id: userId || '',
         start_time: startTime.toISOString(),
         end_time: endTime.toISOString(),
         status: 'pending' as const,
         notes: formData.notes || null,
+        is_guest: !userId,
+        guest_info: !userId ? guestInfo! : null,
       });
 
       dismissToast(toastId);
       if (result) {
+        if (giftApplied) {
+          await redeemGiftCode(giftApplied.code);
+        }
         setBookingSuccess(true);
       } else {
         const msg = 'Error al enviar la solicitud. Intenta de nuevo.';
@@ -198,20 +222,42 @@ const BookingForm: React.FC<BookingFormProps> = ({
             </p>
           )}
         </div>
+        {!userId && (
+          <div className="mt-4 p-4 bg-primary-50 dark:bg-primary-900/20 rounded-2xl border border-primary-200 dark:border-primary-800/50">
+            <p className="text-sm font-bold text-primary-800 dark:text-primary-300 mb-1">
+              ¿Quieres guardar tus reservas?
+            </p>
+            <p className="text-xs text-primary-600 dark:text-primary-400 mb-3">
+              Crea una cuenta gratis para ver el historial y recibir notificaciones.
+            </p>
+            <a
+              href="/register"
+              className="inline-flex items-center gap-2 px-5 py-2.5 bg-primary-600 hover:bg-primary-700 text-white font-bold text-xs rounded-xl transition-all"
+            >
+              Registrarme ahora
+            </a>
+          </div>
+        )}
         <div className="flex flex-col sm:flex-row items-center justify-center gap-3 mt-8">
-          <Link
-            to="/dashboard"
-            className="w-full sm:w-auto inline-flex items-center justify-center gap-2 px-6 py-3 bg-primary-600 hover:bg-primary-700 text-white font-bold rounded-xl transition-all shadow-lg shadow-primary-500/25 active:scale-[0.98]"
-          >
-            Ver mis reservas
-          </Link>
+          {userId && (
+            <Link
+              to="/dashboard"
+              className="w-full sm:w-auto inline-flex items-center justify-center gap-2 px-6 py-3 bg-primary-600 hover:bg-primary-700 text-white font-bold rounded-xl transition-all shadow-lg shadow-primary-500/25 active:scale-[0.98]"
+            >
+              Ver mis reservas
+            </Link>
+          )}
           <button
             onClick={() => { resetForm(); onClose(); }}
             className="w-full sm:w-auto inline-flex items-center justify-center gap-2 px-6 py-3 bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300 font-bold rounded-xl hover:bg-slate-200 dark:hover:bg-slate-700 transition-all active:scale-[0.98]"
           >
-            Cerrar
+            {userId ? 'Cerrar' : 'Volver'}
           </button>
         </div>
+
+        {businessAddress && (
+          <CrossPromotion businessId={businessId} businessAddress={businessAddress} excludeId={businessId} />
+        )}
       </div>
     );
   }
@@ -238,6 +284,56 @@ const BookingForm: React.FC<BookingFormProps> = ({
           <Clock className="w-3.5 h-3.5" />
           {service?.duration} min
         </div>
+      </div>
+
+      {/* Gift Code */}
+      <div className="mb-5 p-3 bg-rose-50 dark:bg-rose-900/10 rounded-2xl border border-rose-200 dark:border-rose-800/50">
+        <p className="text-xs font-bold text-rose-600 dark:text-rose-400 flex items-center gap-1.5 mb-2">
+          <Gift className="w-3.5 h-3.5" /> ¿Tienes un código de regalo?
+        </p>
+        {giftApplied ? (
+          <div className="flex items-center justify-between bg-white dark:bg-slate-800 rounded-xl p-2.5 border border-emerald-200 dark:border-emerald-800">
+            <div className="flex items-center gap-2 text-sm">
+              <Check className="w-4 h-4 text-emerald-500" />
+              <span className="font-bold text-emerald-700 dark:text-emerald-300">Código aplicado</span>
+              <span className="text-xs text-slate-400 ml-1">— Servicio gratis</span>
+            </div>
+            <button onClick={() => setGiftApplied(null)} className="p-1 rounded-lg hover:bg-slate-100 text-slate-400">
+              <X className="w-3.5 h-3.5" />
+            </button>
+          </div>
+        ) : (
+          <div className="flex gap-2">
+            <input
+              type="text"
+              value={giftCodeInput}
+              onChange={e => setGiftCodeInput(e.target.value.toUpperCase())}
+              placeholder="Ej: GIFT-ABC123"
+              className="flex-1 px-3 py-2 text-sm rounded-xl border border-rose-200 dark:border-rose-800 bg-white dark:bg-slate-800 focus:ring-2 focus:ring-rose-500/20 focus:border-rose-500 outline-none"
+            />
+            <button
+              onClick={async () => {
+                if (!giftCodeInput.trim()) return;
+                setValidatingGift(true);
+                setGiftError('');
+                const res = await validateGiftCode(giftCodeInput.trim(), serviceId, businessId);
+                setValidatingGift(false);
+                if (res.success && res.gift) {
+                  setGiftApplied(res.gift);
+                  setGiftCodeInput('');
+                  toast.success('¡Código de regalo aplicado!');
+                } else {
+                  setGiftError(res.error || 'Código inválido');
+                }
+              }}
+              disabled={validatingGift || !giftCodeInput.trim()}
+              className="px-4 py-2 bg-rose-600 hover:bg-rose-700 text-white text-sm font-bold rounded-xl transition-all disabled:opacity-50"
+            >
+              {validatingGift ? '...' : 'Canjear'}
+            </button>
+          </div>
+        )}
+        {giftError && <p className="text-xs text-red-500 mt-1.5">{giftError}</p>}
       </div>
 
       {/* Error */}

@@ -14,6 +14,11 @@ export default defineConfig(({ mode }) => {
       watch: {
         usePolling: true,
       },
+      hmr: {
+        protocol: 'ws',
+        host: 'localhost',
+        port: 3000,
+      },
       proxy: {
         '/.netlify/functions': {
           target: 'http://localhost:8888',

@@ -1,10 +1,11 @@
-import React from 'react';
-import { Settings, Eye, Bell, ListOrdered, Save, Loader2, CheckCircle2, AlertCircle, Clock } from 'lucide-react';
-import { BusinessConfig } from '../../lib/api';
+import React, { useState } from 'react';
+import { Settings, Eye, Bell, ListOrdered, Save, Loader2, CheckCircle2, AlertCircle, Clock, ChevronDown, Link as LinkIcon, Copy, Check, ExternalLink } from 'lucide-react';
+import { BusinessConfig, slugify } from '../../lib/api';
 import { useItemsPerPage } from '../../hooks/useItemsPerPage';
 import { useAuth } from '../../hooks/useAuth';
 import { canUseEmailNotifications } from '../../lib/roles';
 import SectionHeader from '../ui/SectionHeader';
+import { toast } from 'react-hot-toast';
 
 interface BusinessConfigSectionProps {
   config: BusinessConfig;
@@ -14,6 +15,8 @@ interface BusinessConfigSectionProps {
   onSave: (e: React.FormEvent) => Promise<boolean | void>;
   onConfigChange: (field: keyof BusinessConfig, value: any) => void;
   plan?: 'starter' | 'pro' | 'premium';
+  businessName?: string;
+  businessAddress?: string;
 }
 
 export const BusinessConfigSection: React.FC<BusinessConfigSectionProps> = ({
@@ -23,7 +26,9 @@ export const BusinessConfigSection: React.FC<BusinessConfigSectionProps> = ({
   message,
   onSave,
   onConfigChange,
-  plan = 'starter'
+  plan = 'starter',
+  businessName = '',
+  businessAddress = '',
 }) => {
   const { user } = useAuth();
   const { localItemsPerPage, setLocalItemsPerPage, saveItemsPerPage } = useItemsPerPage(user?.id);
@@ -246,6 +251,137 @@ export const BusinessConfigSection: React.FC<BusinessConfigSectionProps> = ({
             </button>
           </div>
         </form>
+      )}
+
+      {/* Google My Business Guide */}
+      <GoogleMyBusinessGuide businessName={businessName || ''} businessAddress={businessAddress || ''} />
+    </div>
+  );
+};
+
+const GoogleMyBusinessGuide = ({ businessName, businessAddress }: { businessName: string; businessAddress?: string }) => {
+  const [expanded, setExpanded] = useState(false);
+  const [copied, setCopied] = useState(false);
+
+  const businessSlug = slugify(businessName);
+  const businessPageUrl = `${window.location.origin}/${businessSlug}`;
+  const gmbUrl = `https://business.google.com/create?name=${encodeURIComponent(businessName)}${businessAddress ? `&address=${encodeURIComponent(businessAddress)}` : ''}`;
+
+  const handleCopyBusinessLink = async () => {
+    try {
+      await navigator.clipboard.writeText(businessPageUrl);
+      setCopied(true);
+      toast.success('¡Enlace de tu negocio copiado!');
+      setTimeout(() => setCopied(false), 2500);
+    } catch {
+      toast.error('No se pudo copiar el enlace');
+    }
+  };
+
+  return (
+    <div className="mt-10 bg-white dark:bg-slate-900 rounded-2xl border border-slate-200 dark:border-slate-800 overflow-hidden">
+      <button
+        onClick={() => setExpanded(!expanded)}
+        className="w-full flex items-center justify-between p-5 sm:p-6 hover:bg-slate-50 dark:hover:bg-slate-800/50 transition-all text-left"
+      >
+        <div className="flex items-center gap-3">
+          <div className="w-10 h-10 rounded-xl bg-amber-100 dark:bg-amber-900/30 flex items-center justify-center flex-shrink-0">
+            <svg className="w-5 h-5 text-amber-600 dark:text-amber-400" viewBox="0 0 24 24" fill="currentColor">
+              <path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7zm0 9.5c-1.38 0-2.5-1.12-2.5-2.5s1.12-2.5 2.5-2.5 2.5 1.12 2.5 2.5-1.12 2.5-2.5 2.5z"/>
+            </svg>
+          </div>
+          <div>
+            <h3 className="font-black text-slate-900 dark:text-white text-sm">Google My Business</h3>
+            <p className="text-xs text-slate-500 dark:text-slate-400 mt-0.5">Aparece en Google Maps y búsquedas locales</p>
+          </div>
+        </div>
+        <ChevronDown className={`w-5 h-5 text-slate-400 transition-transform ${expanded ? 'rotate-180' : ''}`} />
+      </button>
+
+      {expanded && (
+        <div className="px-5 sm:px-6 pb-6 animate-in fade-in slide-in-from-top-2 duration-200">
+          <div className="border-t border-slate-100 dark:border-slate-800 pt-5 space-y-5">
+            <div className="bg-amber-50 dark:bg-amber-900/10 rounded-2xl p-5 border border-amber-100 dark:border-amber-800/30">
+              <p className="text-sm font-bold text-amber-800 dark:text-amber-300 mb-2">📈 ¿Por qué es importante?</p>
+              <p className="text-sm text-amber-700 dark:text-amber-400/80 leading-relaxed">
+                El 76% de las personas que buscan un negocio local visitan el local en 24 horas.
+                Tener tu perfil en Google My Business multiplica tu visibilidad en búsquedas locales y Google Maps.
+              </p>
+            </div>
+
+            {/* ENLAZAR PÁGINA DE AGENDAYA */}
+            <div className="bg-primary-50 dark:bg-primary-900/10 rounded-2xl p-5 border border-primary-100 dark:border-primary-800/30">
+              <h4 className="text-sm font-black text-primary-800 dark:text-primary-300 mb-3 flex items-center gap-2">
+                <LinkIcon className="w-4 h-4" />
+                Enlaza tu página de AgendaYa con Google
+              </h4>
+              <p className="text-sm text-primary-700 dark:text-primary-400/80 leading-relaxed mb-4">
+                Agrega el enlace de tu perfil público en AgendaYa a tu ficha de Google My Business.
+                Así tus clientes podrán reservar directamente desde Google Maps.
+              </p>
+              <div className="flex flex-col sm:flex-row items-stretch gap-2 mb-4">
+                <div className="flex-1 flex items-center gap-2 px-4 py-2.5 bg-white dark:bg-slate-800 rounded-xl border border-primary-200 dark:border-primary-800/50 text-sm font-mono text-slate-600 dark:text-slate-300 truncate">
+                  <ExternalLink className="w-4 h-4 flex-shrink-0 text-primary-500" />
+                  <span className="truncate">{businessPageUrl}</span>
+                </div>
+                <button
+                  onClick={handleCopyBusinessLink}
+                  className={`flex items-center justify-center gap-2 px-5 py-2.5 rounded-xl font-bold text-sm transition-all ${
+                    copied
+                      ? 'bg-emerald-500 text-white'
+                      : 'bg-white dark:bg-slate-800 border border-primary-200 dark:border-primary-800/50 text-primary-700 dark:text-primary-300 hover:bg-primary-50 dark:hover:bg-primary-900/20'
+                  }`}
+                >
+                  {copied ? <Check className="w-4 h-4" /> : <Copy className="w-4 h-4" />}
+                  {copied ? 'Copiado' : 'Copiar'}
+                </button>
+              </div>
+              <p className="text-xs text-primary-600/70 dark:text-primary-400/60 leading-relaxed">
+                <strong>¿Cómo hacerlo?</strong> En tu perfil de Google My Business, ve a "Información" → "Sitio web"
+                y pega este enlace. Así los clientes que te encuentren en Google podrán ver tus servicios y reservar online.
+              </p>
+            </div>
+
+            <div className="space-y-3">
+              <h4 className="text-xs font-black text-slate-400 uppercase tracking-widest">Checklist para aparecer en Google</h4>
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                {[
+                  { emoji: '✅', title: 'Crea tu perfil', desc: 'Regístrate gratis en Google My Business' },
+                  { emoji: '🔗', title: 'Enlaza tu web', desc: 'Agrega tu enlace de AgendaYa en "Sitio web"' },
+                  { emoji: '📸', title: 'Agrega fotos', desc: 'Sube fotos de tu local, servicios y equipo' },
+                  { emoji: '📝', title: 'Completa tu info', desc: 'Dirección, horarios, teléfono consistentes' },
+                  { emoji: '⭐', title: 'Responde reseñas', desc: 'Responde a tus clientes, aumenta tu reputación' },
+                  { emoji: '📊', title: 'Publica novedades', desc: 'Comparte ofertas y actualizaciones semanales' },
+                ].map((item, i) => (
+                  <div key={i} className="flex items-start gap-3 p-3 bg-slate-50 dark:bg-slate-800/50 rounded-xl border border-slate-100 dark:border-slate-800">
+                    <span className="text-lg flex-shrink-0">{item.emoji}</span>
+                    <div>
+                      <p className="font-bold text-xs text-slate-800 dark:text-slate-200">{item.title}</p>
+                      <p className="text-[11px] text-slate-500 dark:text-slate-400 mt-0.5">{item.desc}</p>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </div>
+
+            <a
+              href={gmbUrl}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="inline-flex items-center gap-2 px-6 py-3 bg-amber-500 hover:bg-amber-600 text-white font-bold text-sm rounded-xl transition-all shadow-lg shadow-amber-500/25"
+            >
+              <svg className="w-4 h-4" viewBox="0 0 24 24" fill="currentColor">
+                <path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7zm0 9.5c-1.38 0-2.5-1.12-2.5-2.5s1.12-2.5 2.5-2.5 2.5 1.12 2.5 2.5-1.12 2.5-2.5 2.5z"/>
+              </svg>
+              Registrarme en Google My Business
+            </a>
+
+            <p className="text-[11px] text-slate-400 leading-relaxed">
+              💡 <strong className="text-slate-500">Tip:</strong> Usa fotos de alta calidad y actualiza tu horario semanalmente.
+              Los negocios con fotos reciben 42% más indicaciones de llegada en Google Maps.
+            </p>
+          </div>
+        </div>
       )}
     </div>
   );

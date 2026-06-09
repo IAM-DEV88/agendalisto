@@ -12,6 +12,8 @@ import Pagination from '../components/ui/Pagination';
 import EmptyState from '../components/ui/EmptyState';
 import UserManagementSection from '../components/admin/UserManagementSection';
 import BusinessManagementSection from '../components/admin/BusinessManagementSection';
+import BlogManagementSection from '../components/admin/BlogManagementSection';
+import MarketingSection from '../components/admin/MarketingSection';
 import {
   Users,
   Store,
@@ -105,6 +107,8 @@ const AdminDashboard = ({ user }: AdminDashboardProps) => {
     { id: 'reviews', label: 'Reseñas', count: reviewCounts.pending },
     { id: 'moderators', label: 'Moderadores' },
     { id: 'referrals', label: 'Referidos' },
+    { id: 'blog', label: 'Blog' },
+    { id: 'marketing', label: 'Marketing' },
   ];
 
   const loadData = useCallback(async () => {
@@ -486,6 +490,9 @@ const AdminDashboard = ({ user }: AdminDashboardProps) => {
               <p className="text-sm text-slate-500 dark:text-slate-400">Gestión de moderadores próximamente.</p>
             </div>
           )}
+
+          {activeTab === 'blog' && <BlogManagementSection />}
+          {activeTab === 'marketing' && <MarketingSection />}
 
           {activeTab === 'referrals' && (
             <div className="animate-in fade-in zoom-in-95 duration-300 space-y-6">

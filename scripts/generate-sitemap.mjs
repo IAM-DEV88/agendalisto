@@ -42,12 +42,57 @@ async function generateSitemap() {
   </url>`);
   }
 
+  // Rutas SEO local: categorías desde DB
+  try {
+    const { data: cats } = await supabase
+      .from('agendaya_business_categories')
+      .select('name');
+    if (cats) {
+      for (const cat of cats) {
+        const slug = cat.name.toLowerCase().replace(/\s+/g, '-').replace(/[^\w\-]/g, '');
+        urls.push(`  <url>
+    <loc>${SITE_URL}/categorias/${slug}</loc>
+    <changefreq>weekly</changefreq>
+    <priority>0.8</priority>
+  </url>`);
+      }
+      console.log(`[sitemap] ✅ ${cats.length} páginas de categorías añadidas`);
+    }
+  } catch (err) {
+    console.warn('[sitemap] ⚠️ Error fetching categories:', err.message);
+  }
+
+  // Rutas SEO local: ciudades
+  try {
+    const { data: cities } = await supabase
+      .from('agendaya_businesses')
+      .select('address')
+      .not('address', 'is', null);
+    if (cities) {
+      const citySet = new Set();
+      for (const b of cities) {
+        const parts = b.address.split(',').map(s => s.trim());
+        const city = parts[parts.length - 2] || parts[0];
+        if (city && city.length < 50) citySet.add(city.toLowerCase().replace(/\s+/g, '-').replace(/[^\w\-]/g, ''));
+      }
+      for (const citySlug of citySet) {
+        urls.push(`  <url>
+    <loc>${SITE_URL}/ciudades/${citySlug}</loc>
+    <changefreq>weekly</changefreq>
+    <priority>0.7</priority>
+  </url>`);
+      }
+      console.log(`[sitemap] ✅ ${citySet.size} páginas de ciudades añadidas`);
+    }
+  } catch (err) {
+    console.warn('[sitemap] ⚠️ Error fetching cities:', err.message);
+  }
+
   // Rutas dinámicas: negocios
   try {
     const { data: businesses } = await supabase
       .from('agendaya_businesses')
-      .select('slug, updated_at')
-      .eq('status', 'active');
+      .select('slug, updated_at');
 
     if (businesses) {
       for (const b of businesses) {
@@ -71,8 +116,7 @@ async function generateSitemap() {
   try {
     const { data: posts } = await supabase
       .from('agendaya_blog_posts')
-      .select('id, updated_at, created_at')
-      .eq('status', 'published');
+      .select('id, updated_at, created_at');
 
     if (posts) {
       for (const p of posts) {

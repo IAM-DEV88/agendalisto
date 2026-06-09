@@ -1,0 +1,28 @@
+{
+  "name": "AgendaYa - Reserva servicios cerca de ti",
+  "short_name": "AgendaYa",
+  "description": "Encuentra y reserva servicios profesionales cerca de ti: barbería, belleza, salud y más.",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#ffffff",
+  "theme_color": "#7C3AED",
+  "orientation": "portrait-primary",
+  "lang": "es-CO",
+  "categories": ["lifestyle", "business"],
+  "icons": [
+    {
+      "src": "/icons/icon-192.svg",
+      "sizes": "192x192",
+      "type": "image/svg+xml",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "/icons/icon-512.svg",
+      "sizes": "512x512",
+      "type": "image/svg+xml",
+      "purpose": "any maskable"
+    }
+  ],
+  "screenshots": [],
+  "prefer_related_applications": false
+}

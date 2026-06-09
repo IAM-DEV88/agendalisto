@@ -58,6 +58,7 @@ const BusinessRegister = ({ user }: BusinessRegisterProps) => {
   const [error, setError] = useState<string | null>(null);
   const [slugPreview, setSlugPreview] = useState('');
   const [submitted, setSubmitted] = useState(false);
+  const [showcaseOnly, setShowcaseOnly] = useState(false);
 
   const existingCount = businesses.length;
 
@@ -67,7 +68,7 @@ const BusinessRegister = ({ user }: BusinessRegisterProps) => {
       if (plan === 'pro') {
         toast.error('Has alcanzado el límite de 5 negocios de tu plan Pro. Actualiza a Premium para crear negocios ilimitados.', { id: 'business-limit' });
       }
-      navigate('/business/dashboard', { replace: true });
+      navigate('/business/onboarding', { replace: true });
     }
   }, [existingCount, maxBusinesses, navigate, plan]);
 
@@ -142,6 +143,7 @@ const BusinessRegister = ({ user }: BusinessRegisterProps) => {
         website: null,
         lat: null,
         lng: null,
+        showcase_only: showcaseOnly,
       };
 
       const { success, business, error: apiError } = await createBusiness(businessData);
@@ -153,7 +155,7 @@ const BusinessRegister = ({ user }: BusinessRegisterProps) => {
         const bizRes = await getUserBusinesses(user.id);
         if (bizRes.success && bizRes.businesses) dispatch(setBusinesses(bizRes.businesses));
         setSubmitted(true);
-        setTimeout(() => navigate('/business/dashboard'), 1500);
+        setTimeout(() => navigate('/business/onboarding'), 1500);
       } else {
         const msg = apiError instanceof Error ? apiError.message
           : typeof apiError === 'object' && apiError !== null
@@ -475,6 +477,27 @@ const BusinessRegister = ({ user }: BusinessRegisterProps) => {
                 </div>
               </div>
             )}
+
+            {/* ═══ SHOWCASE OPTION ═══ */}
+            <div className="px-6 sm:px-8 pb-4">
+              <div className="flex items-start gap-3 p-4 bg-amber-50 dark:bg-amber-900/10 rounded-2xl border border-amber-200 dark:border-amber-800/50">
+                <input
+                  type="checkbox"
+                  id="showcaseOnly"
+                  checked={showcaseOnly}
+                  onChange={e => setShowcaseOnly(e.target.checked)}
+                  className="mt-0.5 w-4 h-4 rounded-lg border-amber-300 text-amber-600 focus:ring-amber-500"
+                />
+                <div>
+                  <label htmlFor="showcaseOnly" className="font-bold text-sm text-amber-800 dark:text-amber-300 cursor-pointer">
+                    Solo mostrar mi información (escaparate gratuito)
+                  </label>
+                  <p className="text-xs text-amber-600/70 dark:text-amber-400/70 mt-0.5">
+                    Por ahora solo quiero aparecer en AgendaYa para que me conozcan. Activaré reservas online después.
+                  </p>
+                </div>
+              </div>
+            </div>
 
             {/* ═══ ACTIONS ═══ */}
             <div className="p-6 sm:p-8 flex flex-col sm:flex-row items-center justify-between gap-4 bg-slate-50/80 dark:bg-slate-800/40">

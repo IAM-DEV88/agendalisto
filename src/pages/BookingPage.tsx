@@ -8,9 +8,10 @@ import {
 } from '../lib/api';
 import { supabase } from '../lib/supabase';
 import { BookingForm } from '../components/business/public';
-import { ArrowLeft, ChevronLeft, ChevronRight, X, Store, Calendar, Clock } from 'lucide-react';
+import { ArrowLeft, ChevronLeft, ChevronRight, X, Store, Calendar, Clock, Mail, User, Phone } from 'lucide-react';
 import EmptyState from '../components/ui/EmptyState';
 import SEO from '../components/SEO';
+
 
 function BookingPageSkeleton() {
   return (
@@ -48,6 +49,8 @@ function BookingPage() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [user, setUser] = useState<any>(null);
+  const [guestMode, setGuestMode] = useState(false);
+  const [guestInfo, setGuestInfo] = useState({ name: '', email: '', phone: '' });
 
   const [activeImageIndex, setActiveImageIndex] = useState(0);
   const [fullscreenImage, setFullscreenImage] = useState<string | null>(null);
@@ -58,11 +61,12 @@ function BookingPage() {
       try {
         setLoading(true);
         const { data: { user } } = await supabase.auth.getUser();
-        if (!user) { navigate(`/login?redirect=/${slug}/book/${serviceId}`); return; }
         setUser(user);
+        setGuestMode(!user);
 
         const { success: bS, business, error: bE } = await getBusinessBySlug(slug);
         if (!bS || !business) { setError(bE || 'Negocio no encontrado'); return; }
+        if (business.showcase_only) { setError('Este negocio no acepta reservas online'); navigate(`/${slug}`); return; }
         setBusinessData(business);
 
         const { success: sS, data: sD, error: sE } = await getService(serviceId);
@@ -72,7 +76,7 @@ function BookingPage() {
       finally { setLoading(false); }
     };
     fetchData();
-  }, [slug, serviceId, navigate]);
+  }, [slug, serviceId]);
 
   const images = service?.image_urls
     ? (Array.isArray(service.image_urls) ? service.image_urls : [])
@@ -177,13 +181,53 @@ function BookingPage() {
           </div>
 
           {/* ─── RIGHT: Booking Form ─── */}
-          <div className="lg:col-span-3">
+          <div className="lg:col-span-3 space-y-4">
+            {guestMode && (
+              <div className="bg-amber-50 dark:bg-amber-900/10 rounded-2xl p-5 border border-amber-200 dark:border-amber-800/50">
+                <p className="text-sm font-bold text-amber-800 dark:text-amber-300 mb-3">
+                  Reserva sin cuenta
+                </p>
+                <div className="space-y-3">
+                  <div className="relative">
+                    <User className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
+                    <input
+                      type="text"
+                      value={guestInfo.name}
+                      onChange={(e) => setGuestInfo({ ...guestInfo, name: e.target.value })}
+                      placeholder="Tu nombre"
+                      className="w-full pl-10 py-2.5 text-sm rounded-xl border border-amber-200 dark:border-amber-800 bg-white dark:bg-slate-800"
+                    />
+                  </div>
+                  <div className="relative">
+                    <Mail className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
+                    <input
+                      type="email"
+                      value={guestInfo.email}
+                      onChange={(e) => setGuestInfo({ ...guestInfo, email: e.target.value })}
+                      placeholder="Tu correo"
+                      className="w-full pl-10 py-2.5 text-sm rounded-xl border border-amber-200 dark:border-amber-800 bg-white dark:bg-slate-800"
+                    />
+                  </div>
+                  <div className="relative">
+                    <Phone className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
+                    <input
+                      type="tel"
+                      value={guestInfo.phone}
+                      onChange={(e) => setGuestInfo({ ...guestInfo, phone: e.target.value })}
+                      placeholder="Tu teléfono"
+                      className="w-full pl-10 py-2.5 text-sm rounded-xl border border-amber-200 dark:border-amber-800 bg-white dark:bg-slate-800"
+                    />
+                  </div>
+                </div>
+              </div>
+            )}
             <div className="bg-white dark:bg-slate-900 rounded-2xl border border-slate-200 dark:border-slate-800 shadow-xl shadow-slate-200/50 dark:shadow-none p-6 sm:p-8">
               <BookingForm
                 businessId={businessData.id}
                 businessName={businessData.name}
+                businessAddress={businessData.address}
                 serviceId={service.id}
-                userId={user.id}
+                userId={user?.id}
                 service={service}
                 onClose={() => navigate(`/${slug}`)}
                 showPrices={businessData.config?.mostrar_precios ?? true}
@@ -191,7 +235,16 @@ function BookingPage() {
                 notifyEmail={businessData.config?.notificaciones_email}
                 notifyWhatsapp={businessData.config?.notificaciones_whatsapp}
                 minCancellationHours={businessData.config?.tiempo_minimo_cancelacion}
+                guestInfo={guestMode ? guestInfo : undefined}
               />
+              {guestMode && (
+                <p className="text-xs text-slate-400 text-center mt-4">
+                  ¿Ya tienes cuenta?{' '}
+                  <a href={`/login?redirect=/${slug}/book/${serviceId}`} className="font-bold text-primary-600 hover:text-primary-500">
+                    Inicia sesión
+                  </a>
+                </p>
+              )}
             </div>
           </div>
         </div>

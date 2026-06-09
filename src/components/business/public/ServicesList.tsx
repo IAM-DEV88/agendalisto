@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Clock, ChevronLeft, ChevronRight, X, Heart, LogIn, Check } from 'lucide-react';
+import { Clock, ChevronLeft, ChevronRight, X, Heart, LogIn, Check, Gift } from 'lucide-react';
 import { Service, toggleLike, checkIfLiked } from '../../../lib/api';
 import { toast } from 'react-hot-toast';
 import ShareButton from '../../ui/ShareButton';
@@ -11,6 +11,7 @@ interface ServicesListProps {
   showPrices: boolean;
   currentUser: any;
   businessOwnerId: string;
+  showcaseOnly?: boolean;
 }
 
 const ServiceCard: React.FC<{
@@ -24,7 +25,8 @@ const ServiceCard: React.FC<{
   handleNextImage: (e: React.MouseEvent, serviceId: string, max: number) => void;
   openFullscreen: (e: React.MouseEvent, url: string) => void;
   currentImgIdx: number;
-}> = ({ service, selectedService, onSelectService, showPrices, currentUser, businessOwnerId, handlePrevImage, handleNextImage, openFullscreen, currentImgIdx }) => {
+  showcaseOnly?: boolean;
+}> = ({ service, selectedService, onSelectService, showPrices, currentUser, businessOwnerId, handlePrevImage, handleNextImage, openFullscreen, currentImgIdx, showcaseOnly }) => {
   const [isLiked, setIsLiked] = useState(false);
   const [likesCount, setLikesCount] = useState(service.likes_count || 0);
   const [isLiking, setIsLiking] = useState(false);
@@ -59,7 +61,7 @@ const ServiceCard: React.FC<{
   }
 
   const hasImages = images.length > 0;
-  const canReserve = currentUser && currentUser.id !== businessOwnerId;
+  const canReserve = !showcaseOnly && currentUser && currentUser.id !== businessOwnerId;
 
   return (
     <div
@@ -139,7 +141,15 @@ const ServiceCard: React.FC<{
               <Heart className={`w-3 h-3 ${isLiked ? 'fill-current' : ''}`} />
               {likesCount}
             </button>
-            <div onClick={(e) => e.stopPropagation()}>
+            <div onClick={(e) => e.stopPropagation()} className="flex items-center gap-1">
+              <a
+                href={`/${window.location.pathname.split('/')[1]}/gift/${service.id}`}
+                onClick={(e) => { e.stopPropagation(); }}
+                className="flex items-center gap-1 px-2.5 py-1.5 rounded-xl text-[10px] font-black transition-all bg-rose-50 dark:bg-rose-900/20 text-rose-500 dark:text-rose-400 hover:bg-rose-100 dark:hover:bg-rose-900/40"
+                title="Regalar este servicio"
+              >
+                <Gift className="w-3 h-3" />
+              </a>
               <ShareButton
                 url={shareUrl}
                 title={`Reservar: ${service.name}`}
@@ -158,12 +168,16 @@ const ServiceCard: React.FC<{
           </div>
         )}
 
-        {!currentUser && (
+        {showcaseOnly ? (
+          <div className="mt-3 pt-3 border-t border-slate-100 dark:border-slate-800 text-center text-[10px] font-black uppercase tracking-widest text-amber-500">
+            Solo informativo — Contacta directamente
+          </div>
+        ) : !currentUser ? (
           <div className="mt-3 pt-3 border-t border-slate-100 dark:border-slate-800 flex items-center justify-center gap-1.5 text-[10px] font-black uppercase tracking-widest text-amber-600 dark:text-amber-400">
             <LogIn className="w-3 h-3" />
             Inicia sesión para reservar
           </div>
-        )}
+        ) : null}
 
         {currentUser && currentUser.id === businessOwnerId && (
           <div className="mt-3 pt-3 border-t border-slate-100 dark:border-slate-800 text-center text-[10px] font-black uppercase tracking-widest text-primary-500">
@@ -176,7 +190,7 @@ const ServiceCard: React.FC<{
 };
 
 const ServicesList: React.FC<ServicesListProps> = ({
-  services, selectedService, onSelectService, showPrices, currentUser, businessOwnerId,
+  services, selectedService, onSelectService, showPrices, currentUser, businessOwnerId, showcaseOnly,
 }) => {
   const [activeImageIndex, setActiveImageIndex] = useState<Record<string, number>>({});
   const [fullscreenImage, setFullscreenImage] = useState<string | null>(null);
@@ -206,19 +220,20 @@ const ServicesList: React.FC<ServicesListProps> = ({
     <>
       <div className="grid grid-cols-1 sm:grid-cols-2 gap-5">
         {services.map(service => (
-          <ServiceCard
-            key={service.id}
-            service={service}
-            selectedService={selectedService}
-            onSelectService={onSelectService}
-            showPrices={showPrices}
-            currentUser={currentUser}
-            businessOwnerId={businessOwnerId}
-            handlePrevImage={handlePrevImage}
-            handleNextImage={handleNextImage}
-            openFullscreen={openFullscreen}
-            currentImgIdx={activeImageIndex[service.id] || 0}
-          />
+            <ServiceCard
+              key={service.id}
+              service={service}
+              selectedService={selectedService}
+              onSelectService={onSelectService}
+              showPrices={showPrices}
+              currentUser={currentUser}
+              businessOwnerId={businessOwnerId}
+              handlePrevImage={handlePrevImage}
+              handleNextImage={handleNextImage}
+              openFullscreen={openFullscreen}
+              currentImgIdx={activeImageIndex[service.id] || 0}
+              showcaseOnly={showcaseOnly}
+            />
         ))}
       </div>
 

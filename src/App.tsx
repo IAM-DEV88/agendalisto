@@ -11,10 +11,18 @@ import BusinessDashboard from './pages/BusinessDashboard';
 import AdminDashboard from './pages/AdminDashboard';
 import ModeratorDashboard from './pages/ModeratorDashboard';
 import BusinessPublicPage from './pages/BusinessPublicPage';
+import BusinessOnboarding from './pages/BusinessOnboarding';
+import SEOLandingPage from './pages/SEOLandingPage';
 import ForgotPassword from './pages/ForgotPassword';
 import ExploreBusinesses from './pages/ExploreBusinesses';
 import Crowdfunding from './pages/Crowdfunding';
 import Plans from './pages/Plans';
+import PaymentSuccess from './pages/PaymentSuccess';
+import GiftBooking from './pages/GiftBooking';
+import Embajadores from './pages/Embajadores';
+import CajasCompensacion from './pages/CajasCompensacion';
+import B2BHoteles from './pages/B2BHoteles';
+import EmbedWidget from './pages/EmbedWidget';
 import Blog from './pages/Blog';
 import BlogPostView from './pages/BlogPostView';
 import BookingPage from './pages/BookingPage';
@@ -22,6 +30,7 @@ import ScrollToTop from './components/ScrollToTop';
 import Nav from './components/Nav';
 import Footer from './components/Footer';
 import ChatGuia from './components/ChatGuia';
+import InstallApp from './components/ui/InstallApp';
 import ProtectedRoute from './components/ProtectedRoute';
 import { useSelector } from 'react-redux';
 import { useAppDispatch } from './hooks/useAppDispatch';
@@ -239,6 +248,12 @@ function App() {
             <Route path="/explore" element={<ExploreBusinesses />} />
             <Route path="/crowdfunding" element={<Crowdfunding />} />
             <Route path="/plans" element={<Plans />} />
+            <Route path="/payment/success" element={<PaymentSuccess />} />
+            <Route path="/:slug/gift/:serviceId" element={<GiftBooking />} />
+            <Route path="/widget/:slug" element={<EmbedWidget />} />
+            <Route path="/embajadores" element={<Embajadores />} />
+            <Route path="/cajas-compensacion" element={<CajasCompensacion />} />
+            <Route path="/hoteles" element={<B2BHoteles />} />
             <Route path="/blog" element={<Blog />} />
             <Route path="/blog/:id" element={<BlogPostView />} />
             <Route path="/dashboard" element={
@@ -249,6 +264,11 @@ function App() {
             <Route path="/business/register" element={
               <ProtectedRoute user={user} userProfile={userProfile} requiredRole="client">
                 <BusinessRegister user={userProfile} />
+              </ProtectedRoute>
+            } />
+            <Route path="/business/onboarding" element={
+              <ProtectedRoute user={user} userProfile={userProfile} requiredRole="business_owner">
+                <BusinessOnboarding />
               </ProtectedRoute>
             } />
             <Route path="/business/dashboard" element={
@@ -266,16 +286,15 @@ function App() {
                 <AdminDashboard user={userProfile} />
               </ProtectedRoute>
             } />
-            <Route path="/:slug/book/:serviceId" element={
-              <ProtectedRoute user={user} userProfile={userProfile} requiredRole="client">
-                <BookingPage />
-              </ProtectedRoute>
-            } />
+            <Route path="/ciudades/:city" element={<SEOLandingPage />} />
+            <Route path="/categorias/:category" element={<SEOLandingPage />} />
+            <Route path="/:slug/book/:serviceId" element={<BookingPage />} />
             <Route path="/:slug" element={<BusinessPublicPage />} />
           </Routes>
         </main>
         <Footer />
         <ChatGuia />
+        <InstallApp />
         {/* Toaster para mostrar notificaciones */}
         <Toaster position="top-right" />
       </div>
