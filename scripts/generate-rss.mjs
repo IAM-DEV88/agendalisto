@@ -6,7 +6,7 @@
  */
 
 import { createClient } from '@supabase/supabase-js';
-import { readFileSync, writeFileSync, existsSync } from 'fs';
+import { readFileSync, writeFileSync, mkdirSync, existsSync } from 'fs';
 import { resolve, dirname } from 'path';
 import { fileURLToPath } from 'url';
 
@@ -83,6 +83,7 @@ async function generateRss() {
 </rss>`;
 
   const outputPath = resolve(__dirname, '..', 'dist', 'blog', 'rss.xml');
+  mkdirSync(dirname(outputPath), { recursive: true });
   writeFileSync(outputPath, rss, 'utf-8');
   console.log(`[RSS] ✅ RSS feed generado: ${outputPath} (${posts.length} artículos)`);
 }

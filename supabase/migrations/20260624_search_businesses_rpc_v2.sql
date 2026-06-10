@@ -1,10 +1,15 @@
 -- ============================================================
 -- 20260624_search_businesses_rpc_v2.sql
 -- Reemplaza search_agendaya_businesses con versión que:
--- 1. Usa likes_count (columna precomputada) en vez de subquery
--- 2. Agrega LIMIT / OFFSET para paginación
--- 3. Ordena por plan_score DESC, likes_count DESC, created_at DESC
+-- 1. Agrega LIMIT / OFFSET para paginación
+-- 2. Ordena por likes reales DESC, plan_score DESC, created_at DESC
+-- 3. Backfill likes_count para datos históricos
 -- ============================================================
+
+-- Backfill likes_count desde datos reales (por si hay likes previos a la columna)
+UPDATE public.agendaya_businesses b
+SET likes_count = (SELECT COUNT(*) FROM public.agendaya_user_likes l WHERE l.business_id = b.id)
+WHERE EXISTS (SELECT 1 FROM public.agendaya_user_likes l WHERE l.business_id = b.id);
 
 DROP FUNCTION IF EXISTS public.search_agendaya_businesses(p_search TEXT, p_category_id TEXT, p_location TEXT);
 
@@ -35,8 +40,8 @@ BEGIN
     AND (p_category_id IS NULL OR b.category_id = v_category_id)
     AND (p_location IS NULL OR b.address ILIKE '%' || p_location || '%')
   ORDER BY
+    (SELECT COUNT(*) FROM public.agendaya_user_likes l WHERE l.business_id = b.id) DESC,
     b.plan_score DESC,
-    b.likes_count DESC,
     b.created_at DESC
   LIMIT p_limit
   OFFSET p_offset;
