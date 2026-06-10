@@ -63,18 +63,22 @@ export const updatePassword = async (newPassword: string) => {
   }
 };
 
-export const signInWithProvider = async (provider: 'google' | 'facebook') => {
+export const signInWithProvider = async (provider: 'google') => {
   try {
+    const options: any = {
+      redirectTo: `${window.location.origin}/dashboard`,
+    };
+
+    if (provider === 'google') {
+      options.queryParams = {
+        access_type: 'offline',
+        prompt: 'consent',
+      };
+    }
+
     const { data, error } = await supabase.auth.signInWithOAuth({
       provider,
-      options: {
-        redirectTo: `${window.location.origin}/dashboard`,
-        queryParams: provider === 'facebook' ? {
-          // Solicitar email como mínimo para Facebook
-          access_type: 'offline',
-          prompt: 'consent',
-        } : undefined,
-      },
+      options,
     });
     if (error) throw error;
     return { data, error: null };
