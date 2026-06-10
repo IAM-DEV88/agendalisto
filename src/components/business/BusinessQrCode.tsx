@@ -59,7 +59,7 @@ export default function BusinessQrCode({ businessSlug, businessName }: { busines
       </button>
 
       {showQr && (
-        <div className="absolute left-0 sm:left-auto sm:right-0 top-full mt-2 z-50 w-72 bg-white dark:bg-slate-900 rounded-2xl border border-slate-200 dark:border-slate-700 shadow-2xl p-5 animate-in fade-in slide-in-from-top-2 duration-200">
+        <div className="absolute left-1/2 -translate-x-1/2 sm:left-auto sm:translate-x-0 sm:right-0 top-full mt-2 z-50 w-72 max-w-[calc(100vw-2rem)] bg-white dark:bg-slate-900 rounded-2xl border border-slate-200 dark:border-slate-700 shadow-2xl p-5 animate-in fade-in slide-in-from-top-2 duration-200">
           <div className="text-center mb-4">
             <img
               src={qrApiUrl}
