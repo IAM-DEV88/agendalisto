@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
-import { getBusinessBySlug, getService, Service } from '../lib/api';
+import { getBusinessBySlug, getService, createGiftCode, Service } from '../lib/api';
 import { supabase } from '../lib/supabase';
 import { toast } from 'react-hot-toast';
 import SEO from '../components/SEO';
@@ -39,6 +39,27 @@ export default function GiftBooking() {
     setSending(true);
     const code = `GIFT-${Date.now().toString(36).toUpperCase()}`;
     setGiftCode(code);
+
+    const expiresAt = new Date();
+    expiresAt.setFullYear(expiresAt.getFullYear() + 1);
+
+    const { success, error } = await createGiftCode({
+      code,
+      service_id: serviceId!,
+      business_id: business?.id || '',
+      sender_user_id: user.id,
+      recipient_name: form.recipientName.trim(),
+      recipient_email: form.recipientEmail.trim(),
+      recipient_phone: form.recipientPhone.trim() || undefined,
+      message: form.message.trim() || undefined,
+      expires_at: expiresAt.toISOString(),
+    });
+
+    if (!success) {
+      toast.error(error || 'Error al generar el código de regalo');
+      setSending(false);
+      return;
+    }
 
     setSent(true);
     setSending(false);

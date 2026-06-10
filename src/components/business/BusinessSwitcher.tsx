@@ -2,7 +2,7 @@ import { useState, useRef, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useSelector, useDispatch } from 'react-redux';
 import { Store, ChevronDown, Plus, Check } from 'lucide-react';
-import { ApiClient } from '../../lib/apiClient';
+import { setActiveBusiness } from '../../lib/api';
 import { setUserProfile, setActiveBusinessId } from '../../store/userSlice';
 import type { RootState } from '../../store';
 import type { Business } from '../../lib/api';
@@ -39,7 +39,7 @@ export default function BusinessSwitcher({ currentBusiness, businesses: propBusi
     setLoading(true);
     setOpen(false);
 
-    const res = await ApiClient.setActiveBusiness(user.id, biz.id);
+    const res = await setActiveBusiness(user.id, biz.id);
     if (res.success) {
       dispatch(setUserProfile({ ...userProfile, business_id: biz.id }));
       dispatch(setActiveBusinessId(biz.id));

@@ -1,8 +1,8 @@
-import { useState, useEffect, useMemo, lazy, Suspense } from 'react';
+import { useState, useEffect, useMemo, useCallback, useRef, lazy, Suspense } from 'react';
 import { Link, useSearchParams } from 'react-router-dom';
-import { MapPin, ArrowRight, Heart, Store, SlidersHorizontal, Search, X, Map, List, MessageCircle } from 'lucide-react';
-import { getBusinesses, getBusinessCategories, BusinessCategory, toggleLike, checkIfLiked } from '../lib/api';
-import type { Business } from '../lib/api';
+import { MapPin, ArrowRight, Heart, Store, SlidersHorizontal, Search, X, Map, List, MessageCircle, Loader2 } from 'lucide-react';
+import { getBusinesses, getBusinessCategories, getBusinessesMapData, toggleLike, checkLikedBusinesses } from '../lib/api';
+import type { Business, BusinessCategory } from '../lib/api';
 import { supabase } from '../lib/supabase';
 import { toast } from 'react-hot-toast';
 import SEO from '../components/SEO';
@@ -13,16 +13,22 @@ import ShareButton from '../components/ui/ShareButton';
 const BusinessMap = lazy(() => import('../components/ui/BusinessMap'));
 
 const FALLBACK_LOGO = 'https://upload.wikimedia.org/wikipedia/commons/8/89/Portrait_Placeholder.png';
+const PAGE_SIZE = 12;
 
-const BusinessCard = ({ business, categories, currentUser }: { business: Business; categories: BusinessCategory[]; currentUser: any }) => {
-  const [isLiked, setIsLiked] = useState(false);
+const BusinessCard = ({ business, categories, isLiked: initialLiked, currentUser, onToggleLike }: {
+  business: Business;
+  categories: BusinessCategory[];
+  isLiked: boolean;
+  currentUser: any;
+  onToggleLike: (id: string) => void;
+}) => {
+  const [isLiked, setIsLiked] = useState(initialLiked);
   const [likesCount, setLikesCount] = useState(business.likes_count || 0);
   const [isLiking, setIsLiking] = useState(false);
+
   useEffect(() => {
-    if (currentUser?.id && business.id) {
-      checkIfLiked(currentUser.id, business.id, 'business').then(setIsLiked);
-    }
-  }, [currentUser, business.id]);
+    setIsLiked(initialLiked);
+  }, [initialLiked]);
 
   const handleToggleLike = async (e: React.MouseEvent) => {
     e.preventDefault();
@@ -34,6 +40,7 @@ const BusinessCard = ({ business, categories, currentUser }: { business: Busines
       if (result.success) {
         setIsLiked(result.action === 'added');
         setLikesCount(prev => result.action === 'added' ? prev + 1 : prev - 1);
+        onToggleLike(business.id);
       }
     } catch { toast.error('Error al procesar'); } finally { setIsLiking(false); }
   };
@@ -45,7 +52,6 @@ const BusinessCard = ({ business, categories, currentUser }: { business: Busines
       to={`/${business.slug}`}
       className="group bg-white dark:bg-slate-900 rounded-2xl border border-slate-200 dark:border-slate-800 overflow-hidden hover:border-primary-300 dark:hover:border-primary-700 hover:shadow-2xl transition-all duration-300 hover:-translate-y-1 flex flex-col"
     >
-      {/* Image */}
       <div className="h-48 sm:h-52 bg-slate-100 dark:bg-slate-800 relative overflow-hidden flex-shrink-0">
         <img
           src={business.logo_url || FALLBACK_LOGO}
@@ -88,7 +94,6 @@ const BusinessCard = ({ business, categories, currentUser }: { business: Busines
             )}
           </div>
         </div>
-        {/* Category badge on image */}
         {cat && (
           <span className="absolute top-3 left-3 px-2.5 py-1 bg-white/90 dark:bg-slate-900/90 backdrop-blur-sm text-slate-700 dark:text-slate-300 rounded-lg text-[10px] font-black uppercase tracking-wider shadow-sm">
             {cat.name}
@@ -111,7 +116,6 @@ const BusinessCard = ({ business, categories, currentUser }: { business: Busines
         )}
       </div>
 
-      {/* Content */}
       <div className="p-5 flex-1 flex flex-col">
         <div className="flex items-start justify-between gap-2 mb-2">
           <h3 className="text-lg font-black text-slate-900 dark:text-white leading-tight group-hover:text-primary-600 dark:group-hover:text-primary-400 transition-colors line-clamp-1">
@@ -163,6 +167,9 @@ const ExploreBusinesses = () => {
   const [searchParams, setSearchParams] = useSearchParams();
   const [businesses, setBusinesses] = useState<Business[]>([]);
   const [loading, setLoading] = useState(true);
+  const [loadingMore, setLoadingMore] = useState(false);
+  const [page, setPage] = useState(0);
+  const [hasMore, setHasMore] = useState(true);
 
   const [searchTerm, setSearchTerm] = useState(searchParams.get('search') || '');
   const [locationTerm, setLocationTerm] = useState(searchParams.get('location') || '');
@@ -172,6 +179,21 @@ const ExploreBusinesses = () => {
   const [categories, setCategories] = useState<BusinessCategory[]>([]);
   const [user, setUser] = useState<any>(null);
   const [viewMode, setViewMode] = useState<'list' | 'map'>('list');
+  const [likedIds, setLikedIds] = useState<Set<string>>(new Set());
+  const [mapBusinesses, setMapBusinesses] = useState<Pick<Business, 'id' | 'name' | 'slug' | 'lat' | 'lng'>[]>([]);
+  const [mapLoading, setMapLoading] = useState(false);
+
+  const observer = useRef<IntersectionObserver | null>(null);
+  const lastCardRef = useCallback((node: HTMLDivElement | null) => {
+    if (loading || loadingMore) return;
+    if (observer.current) observer.current.disconnect();
+    observer.current = new IntersectionObserver(entries => {
+      if (entries[0].isIntersecting && hasMore) {
+        setPage(prev => prev + 1);
+      }
+    });
+    if (node) observer.current.observe(node);
+  }, [loading, loadingMore, hasMore]);
 
   useEffect(() => {
     setSearchTerm(searchParams.get('search') || '');
@@ -197,25 +219,62 @@ const ExploreBusinesses = () => {
     });
   }, []);
 
+  // Reset on filter change
   useEffect(() => {
-    const timer = setTimeout(async () => {
-      setLoading(true);
-      setError(null);
-      try {
-        const data = await getBusinesses(
-          searchTerm || undefined,
-          category !== 'all' ? category : undefined,
-          locationTerm || undefined,
-        );
-        setBusinesses(data);
-      } catch {
-        setError('Error al cargar los negocios. Intenta de nuevo.');
-      } finally {
-        setLoading(false);
-      }
-    }, 300);
-    return () => clearTimeout(timer);
+    setPage(0);
+    setBusinesses([]);
+    setHasMore(true);
+    setLikedIds(new Set());
+    fetchPage(0, true);
   }, [searchTerm, locationTerm, category]);
+
+  // Load next page
+  useEffect(() => {
+    if (page > 0) {
+      fetchPage(page, false);
+    }
+  }, [page]);
+
+  const fetchPage = async (pageNum: number, isInitial: boolean) => {
+    if (isInitial) setLoading(true);
+    else setLoadingMore(true);
+    setError(null);
+
+    try {
+      const data = await getBusinesses(
+        searchTerm || undefined,
+        category !== 'all' ? category : undefined,
+        locationTerm || undefined,
+        PAGE_SIZE,
+        pageNum * PAGE_SIZE,
+      );
+      setBusinesses(prev => isInitial ? data : [...prev, ...data]);
+      setHasMore(data.length === PAGE_SIZE);
+
+      // Batch fetch likes for new businesses
+      if (user && data.length > 0) {
+        const ids = data.map(b => b.id);
+        const liked = await checkLikedBusinesses(user.id, ids);
+        setLikedIds(prev => new Set([...prev, ...liked]));
+      }
+    } catch {
+      setError('Error al cargar los negocios. Intenta de nuevo.');
+    } finally {
+      setLoading(false);
+      setLoadingMore(false);
+    }
+  };
+
+  // Load map data when switching to map view
+  useEffect(() => {
+    if (viewMode === 'map' && mapBusinesses.length === 0 && !mapLoading) {
+      setMapLoading(true);
+      getBusinessesMapData()
+        .then(data => setMapBusinesses(data))
+        .catch(() => {})
+        .finally(() => setMapLoading(false));
+    }
+  }, [viewMode, mapBusinesses.length, mapLoading]);
 
   const categoryOptions = useMemo(() => [
     { value: 'all', label: 'Todas' },
@@ -224,6 +283,14 @@ const ExploreBusinesses = () => {
 
   const hasFilters = searchTerm || locationTerm || category !== 'all';
   const clearFilters = () => { setSearchTerm(''); setLocationTerm(''); setCategory('all'); };
+  const handleToggleLike = (id: string) => {
+    setLikedIds(prev => {
+      const next = new Set(prev);
+      if (next.has(id)) next.delete(id);
+      else next.add(id);
+      return next;
+    });
+  };
 
   return (
     <div className="min-h-screen bg-gradient-to-b from-slate-50 to-white dark:from-slate-950 dark:to-slate-900 transition-colors duration-200">
@@ -322,7 +389,7 @@ const ExploreBusinesses = () => {
         )}
 
         {/* Content */}
-        {loading ? (
+        {loading && businesses.length === 0 ? (
           <div className="grid gap-6 grid-cols-1 sm:grid-cols-2 lg:grid-cols-3">
             {[1, 2, 3, 4, 5, 6].map(i => <SkeletonCard key={i} />)}
           </div>
@@ -337,21 +404,54 @@ const ExploreBusinesses = () => {
           </div>
         ) : viewMode === 'map' ? (
           <div className="animate-in fade-in duration-300">
-            <Suspense fallback={<div className="h-[400px] bg-slate-100 dark:bg-slate-800 rounded-2xl animate-pulse" />}>
-              <BusinessMap businesses={businesses} />
-            </Suspense>
+            {mapLoading ? (
+              <div className="h-[400px] bg-slate-100 dark:bg-slate-800 rounded-2xl animate-pulse flex items-center justify-center">
+                <Loader2 className="w-8 h-8 text-primary-600 animate-spin" />
+              </div>
+            ) : (
+              <Suspense fallback={<div className="h-[400px] bg-slate-100 dark:bg-slate-800 rounded-2xl animate-pulse" />}>
+                <BusinessMap businesses={mapBusinesses as any} />
+              </Suspense>
+            )}
           </div>
         ) : (
-          <div className="grid gap-6 grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 animate-in fade-in slide-in-from-bottom-4 duration-500">
-            {businesses.map((business) => (
-              <BusinessCard
-                key={business.id}
-                business={business}
-                categories={categories}
-                currentUser={user}
-              />
-            ))}
-          </div>
+          <>
+            <div className="grid gap-6 grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 animate-in fade-in slide-in-from-bottom-4 duration-500">
+              {businesses.map((business, index) => {
+                const isLast = index === businesses.length - 1;
+                return (
+                  <div key={business.id} ref={isLast ? lastCardRef : undefined}>
+                    <BusinessCard
+                      business={business}
+                      categories={categories}
+                      isLiked={likedIds.has(business.id)}
+                      currentUser={user}
+                      onToggleLike={handleToggleLike}
+                    />
+                  </div>
+                );
+              })}
+            </div>
+
+            {loadingMore && (
+              <div className="flex justify-center py-8 animate-in fade-in duration-300">
+                <div className="flex items-center gap-3 px-6 py-3 bg-white dark:bg-slate-900 rounded-2xl shadow-lg border border-slate-200 dark:border-slate-700">
+                  <Loader2 className="w-5 h-5 text-primary-600 animate-spin" />
+                  <span className="text-sm font-black text-slate-600 dark:text-slate-400 uppercase tracking-widest">Cargando más...</span>
+                </div>
+              </div>
+            )}
+
+            {!hasMore && businesses.length > 0 && (
+              <div className="text-center py-10 animate-in fade-in duration-300">
+                <div className="inline-flex items-center gap-3 px-6 py-2.5 bg-slate-100 dark:bg-slate-800/50 rounded-full border border-slate-200 dark:border-slate-700">
+                  <div className="w-1.5 h-1.5 rounded-full bg-slate-300 dark:bg-slate-600" />
+                  <span className="text-xs font-bold text-slate-400 uppercase tracking-widest">Has llegado al final</span>
+                  <div className="w-1.5 h-1.5 rounded-full bg-slate-300 dark:bg-slate-600" />
+                </div>
+              </div>
+            )}
+          </>
         )}
       </div>
     </div>

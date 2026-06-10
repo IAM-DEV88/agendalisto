@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import { UserProfile } from '../lib/supabase';
 import { getBusinessClients } from '../lib/api';
-import { useToast } from './useToast';
+import { notifyError } from '../lib/toast';
 
 export interface UseBusinessClientsResult {
   clients: UserProfile[];
@@ -14,8 +14,6 @@ export const useBusinessClients = (businessId: string | undefined): UseBusinessC
   const [clients, setClients] = useState<UserProfile[]>([]);
   const [loading, setLoading] = useState(true);
   const [message, setMessage] = useState<{ text: string; type: 'success' | 'error' } | null>(null);
-  const toast = useToast();
-
   const loadClients = async () => {
     if (!businessId) {
       setLoading(false);
@@ -38,7 +36,7 @@ export const useBusinessClients = (businessId: string | undefined): UseBusinessC
         text: err.message || 'Error al cargar los clientes del negocio', 
         type: 'error' 
       });
-      toast.error(err.message || 'Error al cargar los clientes del negocio');
+      notifyError(err.message || 'Error al cargar los clientes del negocio');
     } finally {
       setLoading(false);
     }

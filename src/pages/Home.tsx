@@ -22,8 +22,6 @@ const Home = () => {
   let registerLink = '/register';
   let secondText = 'Iniciar Sesión';
   let secondLink = '/login';
-  const exploreText = 'Buscar ahora';
-  const exploreLink = '/explore';
 
   if (!loading && user) {
     secondText = 'Mi Perfil';

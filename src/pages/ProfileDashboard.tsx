@@ -9,14 +9,15 @@ import { setUserProfile } from '../store/userSlice';
 import { useAppointments } from '../hooks/useAppointments';
 import type { UserProfile } from '../lib/supabase';
 import type { RootState } from '../store';
-import { ApiClient } from '../lib/apiClient';
-import { useToast } from '../hooks/useToast';
+import { getUserBusinesses, updateUserProfile, createBusinessReview as apiCreateBusinessReview } from '../lib/api';
 import { toast } from 'react-hot-toast';
+import { notifySuccess, notifyError } from '../lib/toast';
 import { useUIConfig } from '../hooks/useUIConfig';
 import UserAppointmentList from '../components/appointments/UserAppointmentList';
 import FavoritesSection from '../components/profile/FavoritesSection';
 import type { Appointment } from '../types/appointment';
 import ReviewModal from '../components/appointments/ReviewModal';
+import CancelRescheduleModal from '../components/appointments/CancelRescheduleModal';
 import TabNav from '../components/ui/TabNav';
 import SectionHeader from '../components/ui/SectionHeader';
 import Pagination from '../components/ui/Pagination';
@@ -41,15 +42,13 @@ import {
   Calendar,
   Mail,
   User,
+  Check,
 } from 'lucide-react';
 import { ROLE_LABELS, PLAN_BADGE, PLAN_LABELS, getMaxBusinesses } from '../lib/roles';
 import { updateProfileRole, getReferralLink, getReferralCount, getReferredUsers, ReferredUser } from '../lib/api';
 import VisitStreaks from '../components/business/VisitStreaks';
 
 const FALLBACK_AVATAR = 'https://upload.wikimedia.org/wikipedia/commons/8/89/Portrait_Placeholder.png';
-
-const slugify = (str: string): string =>
-  str.toLowerCase().replace(/\s+/g, '-').replace(/[^\w\-]+/g, '');
 
 function getGreeting(): string {
   const hour = new Date().getHours();
@@ -104,7 +103,6 @@ function StatCard({ icon, label, value, color }: {
 const ProfileDashboard = ({ user }: ProfileDashboardProps) => {
   const dispatch = useAppDispatch();
   const { itemsPerPage, saveItemsPerPage } = useUIConfig();
-  const toast = useToast();
   const navigate = useNavigate();
 
   const { appointments, refreshAppointments, loading: appointmentsLoading } = useAppointments(user?.id);
@@ -145,9 +143,9 @@ const ProfileDashboard = ({ user }: ProfileDashboardProps) => {
     if (result.success) {
       const updated = { ...user, role: 'client' } as UserProfile;
       dispatch(setUserProfile(updated));
-      toast.success('¡Cuenta de cliente activada! Ya puedes agendar citas.');
+      notifySuccess('¡Cuenta de cliente activada! Ya puedes agendar citas.');
     } else {
-      toast.error(result.error || 'Error al activar cuenta de cliente');
+      notifyError(result.error || 'Error al activar cuenta de cliente');
     }
   };
 
@@ -155,6 +153,7 @@ const ProfileDashboard = ({ user }: ProfileDashboardProps) => {
   const [activeAppointmentTab, setActiveAppointmentTab] = useState('upcoming');
   const [activeSettingsTab, setActiveSettingsTab] = useState('profile');
   const [selectedAppointmentForReview, setSelectedAppointmentForReview] = useState<Appointment | null>(null);
+  const [selectedAppointmentForCancel, setSelectedAppointmentForCancel] = useState<Appointment | null>(null);
 
   const confirmedAppointments = useMemo(
     () => appointments.filter(a => a.status === 'confirmed'),
@@ -197,8 +196,8 @@ const ProfileDashboard = ({ user }: ProfileDashboardProps) => {
     const checkBusiness = async () => {
       if (!user) return;
       try {
-        const response = await ApiClient.getUserBusinesses(user.id);
-        setHasBusiness(!!(response.success && response.data && response.data.length > 0));
+        const response = await getUserBusinesses(user.id);
+        setHasBusiness(!!(response.success && response.businesses && response.businesses.length > 0));
       } catch {
         setHasBusiness(false);
       }
@@ -231,7 +230,7 @@ const ProfileDashboard = ({ user }: ProfileDashboardProps) => {
       const { data: { session } } = await supabase.auth.getSession();
       if (!session?.user) throw new Error('No se pudo obtener la sesión');
 
-      const response = await ApiClient.updateUserProfile(user.id, {
+      const response = await updateUserProfile(user.id, {
         full_name: profileData.full_name,
         phone: profileData.phone,
         avatar_url: profileData.avatar_url || undefined,
@@ -242,39 +241,26 @@ const ProfileDashboard = ({ user }: ProfileDashboardProps) => {
         setProfileData(prev => ({ ...prev, ...response.data }));
         dispatchUserProfileUpdated(session.user, response.data);
         setProfileMessage({ text: 'Perfil actualizado correctamente', type: 'success' });
-        toast.success('Perfil actualizado correctamente');
+        notifySuccess('Perfil actualizado correctamente');
       } else {
         throw new Error(response.error || 'Error al actualizar perfil');
       }
     } catch (error: any) {
       const errorMsg = error.message || 'Error al actualizar perfil';
       setProfileMessage({ text: errorMsg, type: 'error' });
-      toast.error(errorMsg);
+      notifyError(errorMsg);
     } finally {
       setSaving(false);
     }
   }, [user, profileData, toast]);
 
   const handleReschedule = useCallback((appointment: Appointment) => {
-    const businessName = appointment.businesses?.name;
-    if (!businessName) return;
-    const slug = slugify(businessName);
-    navigate(`/${slug}?reschedule=true&serviceId=${appointment.service_id}&date=${encodeURIComponent(appointment.start_time)}`);
-  }, [navigate]);
+    setSelectedAppointmentForCancel(appointment);
+  }, []);
 
-  const handleCancel = useCallback(async (appointment: Appointment) => {
-    if (!user) return;
-    try {
-      const response = await ApiClient.updateAppointmentStatus(appointment.id, 'cancelled');
-      if (!response.success) {
-        toast.error(response.error || 'Error al cancelar la cita');
-      } else {
-        toast.success('Cita cancelada correctamente');
-      }
-    } catch (err: any) {
-      toast.error(err.message || 'Error al cancelar la cita');
-    }
-  }, [user, toast]);
+  const handleCancel = useCallback((appointment: Appointment) => {
+    setSelectedAppointmentForCancel(appointment);
+  }, []);
 
   const handleReview = useCallback((appointment: Appointment) => {
     setSelectedAppointmentForReview(appointment);
@@ -284,7 +270,7 @@ const ProfileDashboard = ({ user }: ProfileDashboardProps) => {
     if (!user || !selectedAppointmentForReview) return;
 
     try {
-      const response = await ApiClient.createBusinessReview(
+      const response = await apiCreateBusinessReview(
         selectedAppointmentForReview.id,
         selectedAppointmentForReview.business_id,
         user.id,
@@ -294,17 +280,17 @@ const ProfileDashboard = ({ user }: ProfileDashboardProps) => {
         afterImage,
       );
       if (response.success) {
-        toast.success('Reseña enviada — pendiente de aprobación por un moderador');
+        notifySuccess('Reseña enviada — pendiente de aprobación por un moderador');
         await refreshAppointments();
         window.dispatchEvent(new CustomEvent('businessReviewAdded', {
           detail: { businessId: selectedAppointmentForReview.business_id },
         }));
         setSelectedAppointmentForReview(null);
       } else {
-        toast.error(response.error || 'Error al enviar la reseña');
+        notifyError(response.error || 'Error al enviar la reseña');
       }
     } catch (err: any) {
-      toast.error(err.message || 'Error al enviar la reseña');
+      notifyError(err.message || 'Error al enviar la reseña');
     }
   }, [user, selectedAppointmentForReview, toast, refreshAppointments]);
 
@@ -770,6 +756,12 @@ const ProfileDashboard = ({ user }: ProfileDashboardProps) => {
         </div>
       </div>
 
+      <CancelRescheduleModal
+        isOpen={!!selectedAppointmentForCancel}
+        onClose={() => setSelectedAppointmentForCancel(null)}
+        appointment={selectedAppointmentForCancel}
+      />
+
       {selectedAppointmentForReview && (
         <ReviewModal
           isOpen={!!selectedAppointmentForReview}
@@ -785,6 +777,13 @@ const ProfileDashboard = ({ user }: ProfileDashboardProps) => {
 
 /* ═══ REFERRAL SECTION ═══ */
 
+const REFERRAL_MILESTONES = [
+  { goal: 3, reward: 'Badge "Bronce" + mención en comunidad' },
+  { goal: 10, reward: '1 mes gratis de plan Pro' },
+  { goal: 25, reward: 'Badge "Platino" + 3 meses Pro gratis' },
+  { goal: 50, reward: 'Plan Premium gratis por 1 año' },
+];
+
 const ReferralSection = ({ userId }: { userId: string }) => {
   const [referralCount, setReferralCount] = useState(0);
   const [referredUsers, setReferredUsers] = useState<ReferredUser[]>([]);
@@ -792,6 +791,7 @@ const ReferralSection = ({ userId }: { userId: string }) => {
   const [copied, setCopied] = useState(false);
 
   const referralLink = getReferralLink(userId);
+  const businessOwnersReferred = referredUsers.filter(u => u.role === 'business_owner').length;
 
   useEffect(() => {
     getReferralCount(userId).then(res => {
@@ -807,10 +807,10 @@ const ReferralSection = ({ userId }: { userId: string }) => {
     try {
       await navigator.clipboard.writeText(referralLink);
       setCopied(true);
-      toast.success('¡Enlace de referido copiado!');
+      notifySuccess('¡Enlace de referido copiado!');
       setTimeout(() => setCopied(false), 2500);
     } catch {
-      toast.error('No se pudo copiar el enlace');
+      notifyError('No se pudo copiar el enlace');
     }
   };
 
@@ -855,7 +855,56 @@ const ReferralSection = ({ userId }: { userId: string }) => {
             <UserPlus className="w-7 h-7 text-white" />
           </div>
         </div>
+        <div className="grid grid-cols-2 gap-3 mt-4 pt-4 border-t border-white/10">
+          <div className="text-center">
+            <p className="text-white/60 text-[10px] font-bold uppercase tracking-widest">Registrados</p>
+            <p className="text-white font-black text-lg">{referredUsers.length}</p>
+          </div>
+          <div className="text-center">
+            <p className="text-white/60 text-[10px] font-bold uppercase tracking-widest">Con negocio</p>
+            <p className="text-white font-black text-lg">{businessOwnersReferred}</p>
+          </div>
+        </div>
       </div>
+
+      {/* Rewards Milestones */}
+      {referralCount > 0 && (
+        <div className="bg-white dark:bg-slate-900 rounded-2xl border border-slate-200 dark:border-slate-800 p-5 sm:p-6">
+          <h3 className="text-sm font-black text-slate-500 dark:text-slate-400 uppercase tracking-widest mb-4">
+            Logros por referidos
+          </h3>
+          <div className="space-y-3">
+            {REFERRAL_MILESTONES.map((m, i) => {
+              const unlocked = referralCount >= m.goal;
+              const progress = Math.min(100, (referralCount / m.goal) * 100);
+              return (
+                <div key={i} className="flex items-center gap-3">
+                  <div className={`w-8 h-8 rounded-xl flex items-center justify-center flex-shrink-0 ${
+                    unlocked ? 'bg-emerald-100 dark:bg-emerald-900/30 text-emerald-600' : 'bg-slate-100 dark:bg-slate-800 text-slate-400'
+                  }`}>
+                    {unlocked ? <Check className="w-4 h-4" /> : <span className="text-xs font-black">{m.goal}</span>}
+                  </div>
+                  <div className="flex-1 min-w-0">
+                    <div className="flex items-center justify-between">
+                      <p className={`text-xs font-bold ${unlocked ? 'text-emerald-700 dark:text-emerald-300' : 'text-slate-600 dark:text-slate-400'}`}>
+                        {m.goal} referidos — {m.reward}
+                      </p>
+                      {!unlocked && (
+                        <span className="text-[10px] text-slate-400 ml-2">{referralCount}/{m.goal}</span>
+                      )}
+                    </div>
+                    {!unlocked && (
+                      <div className="w-full h-1.5 bg-slate-200 dark:bg-slate-700 rounded-full mt-1">
+                        <div className="h-full bg-primary-500 rounded-full transition-all" style={{ width: `${progress}%` }} />
+                      </div>
+                    )}
+                  </div>
+                </div>
+              );
+            })}
+          </div>
+        </div>
+      )}
 
       {/* Referral Link */}
       <div className="bg-white dark:bg-slate-900 rounded-2xl border border-slate-200 dark:border-slate-800 p-5 sm:p-6">

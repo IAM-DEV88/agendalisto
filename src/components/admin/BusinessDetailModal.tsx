@@ -2,7 +2,7 @@ import { useState } from 'react';
 import { PLANS } from '../../lib/roles';
 import { adminUpdateBusiness, getBusinessCategories } from '../../lib/api';
 import type { AdminBusiness, BusinessCategory } from '../../lib/api';
-import { useToast } from '../../hooks/useToast';
+import { notifySuccess, notifyError } from '../../lib/toast';
 import { X, Building2 } from 'lucide-react';
 
 interface BusinessDetailModalProps {
@@ -12,7 +12,6 @@ interface BusinessDetailModalProps {
 }
 
 const BusinessDetailModal = ({ business, onClose, onUpdated }: BusinessDetailModalProps) => {
-  const toast = useToast();
   const [name, setName] = useState(business.name);
   const [description, setDescription] = useState(business.description);
   const [address, setAddress] = useState(business.address);
@@ -66,7 +65,7 @@ const BusinessDetailModal = ({ business, onClose, onUpdated }: BusinessDetailMod
       category_id: categoryId !== (business.category_id || '') ? (categoryId || undefined) : undefined,
     });
     if (res.success) {
-      toast.success('Negocio actualizado correctamente');
+      notifySuccess('Negocio actualizado correctamente');
       onUpdated({
         ...business,
         name, description, address,
@@ -81,7 +80,7 @@ const BusinessDetailModal = ({ business, onClose, onUpdated }: BusinessDetailMod
       } as AdminBusiness);
       onClose();
     } else {
-      toast.error(res.error || 'Error al actualizar negocio');
+      notifyError(res.error || 'Error al actualizar negocio');
     }
     setSaving(false);
   };

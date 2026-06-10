@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import { BusinessConfig, getBusinessConfig, updateBusinessConfig } from '../lib/api';
-import { useToast } from './useToast';
+import { DEFAULT_BUSINESS_CONFIG } from '../lib/defaults';
+import { notifySuccess, notifyError } from '../lib/toast';
 
 export interface UseBusinessConfigResult {
   config: BusinessConfig;
@@ -11,26 +12,11 @@ export interface UseBusinessConfigResult {
   saveConfig: (e: React.FormEvent) => Promise<boolean>;
 }
 
-export const defaultConfig: BusinessConfig = {
-  permitir_reservas_online: true,
-  mostrar_precios: true,
-  mostrar_telefono: true,
-  mostrar_email: false,
-  mostrar_redes_sociales: true,
-  mostrar_direccion: true,
-  requiere_confirmacion: false,
-  tiempo_minimo_cancelacion: 48,
-  notificaciones_email: false,
-  notificaciones_whatsapp: false
-};
-
 export const useBusinessConfig = (businessId: string | undefined): UseBusinessConfigResult => {
-  const [config, setConfig] = useState<BusinessConfig>(defaultConfig);
+  const [config, setConfig] = useState<BusinessConfig>(DEFAULT_BUSINESS_CONFIG);
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const [message, setMessage] = useState<{ text: string; type: 'success' | 'error' } | null>(null);
-  const toast = useToast();
-
   useEffect(() => {
     const loadConfig = async () => {
       if (!businessId) {
@@ -68,7 +54,7 @@ export const useBusinessConfig = (businessId: string | undefined): UseBusinessCo
     
     if (!businessId) {
       setMessage({ type: 'error', text: 'No business ID available' });
-      toast.error('No business ID available');
+      notifyError('No business ID available');
       return false;
     }
 
@@ -79,16 +65,16 @@ export const useBusinessConfig = (businessId: string | undefined): UseBusinessCo
       const result = await updateBusinessConfig(businessId, config);
       if (result.success) {
         setMessage({ text: 'Configuración guardada correctamente', type: 'success' });
-        toast.success('Configuración guardada correctamente');
+        notifySuccess('Configuración guardada correctamente');
         return true;
       } else {
         setMessage({ text: result.error || 'Error al guardar la configuración', type: 'error' });
-        toast.error(result.error || 'Error al guardar la configuración');
+        notifyError(result.error || 'Error al guardar la configuración');
         return false;
       }
     } catch (err: any) {
       setMessage({ text: err.message || 'Error al guardar la configuración', type: 'error' });
-      toast.error(err.message || 'Error al guardar la configuración');
+      notifyError(err.message || 'Error al guardar la configuración');
       return false;
     } finally {
       setSaving(false);

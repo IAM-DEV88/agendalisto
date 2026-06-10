@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { BusinessHours, getBusinessHours, setBusinessHours } from '../lib/api';
-import { useToast } from './useToast';
+import { notifySuccess, notifyError } from '../lib/toast';
 
 export interface UseBusinessHoursResult {
   businessHours: BusinessHours[];
@@ -16,8 +16,6 @@ export const useBusinessHours = (businessId: string | undefined): UseBusinessHou
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const [message, setMessage] = useState<{ text: string; type: 'success' | 'error' } | null>(null);
-  const toast = useToast();
-
   const days = ['Lunes', 'Martes', 'Miércoles', 'Jueves', 'Viernes', 'Sábado', 'Domingo'];
 
   useEffect(() => {
@@ -53,7 +51,7 @@ export const useBusinessHours = (businessId: string | undefined): UseBusinessHou
           text: err.message || 'Error al cargar los horarios del negocio', 
           type: 'error' 
         });
-        toast.error(err.message || 'Error al cargar los horarios del negocio');
+        notifyError(err.message || 'Error al cargar los horarios del negocio');
       } finally {
         setLoading(false);
       }
@@ -75,7 +73,7 @@ export const useBusinessHours = (businessId: string | undefined): UseBusinessHou
     
     if (!businessId) {
       setMessage({ type: 'error', text: 'No business ID available' });
-      toast.error('No business ID available');
+      notifyError('No business ID available');
       return false;
     }
 
@@ -94,11 +92,11 @@ export const useBusinessHours = (businessId: string | undefined): UseBusinessHou
       
       await setBusinessHours(payload);
       setMessage({ text: 'Horarios actualizados correctamente', type: 'success' });
-      toast.success('Horarios actualizados correctamente');
+      notifySuccess('Horarios actualizados correctamente');
       return true;
     } catch (err: any) {
       setMessage({ text: err.message || 'Error al actualizar horarios', type: 'error' });
-      toast.error(err.message || 'Error al actualizar horarios');
+      notifyError(err.message || 'Error al actualizar horarios');
       return false;
     } finally {
       setSaving(false);

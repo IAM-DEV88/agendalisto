@@ -1,6 +1,7 @@
 import { supabase } from './supabase';
 import { UserProfile } from './supabase';
 import { Appointment, AppointmentStatus, Review, GuestInfo } from '../types/appointment';
+import { DEFAULT_BUSINESS_CONFIG } from './defaults';
 
 // Re-export types from appointment.ts
 export type { Appointment, AppointmentStatus, Review, GuestInfo };
@@ -75,16 +76,27 @@ export interface BusinessConfig {
 export const slugify = (str: string) => str.toLowerCase().replace(/\s+/g, '-').replace(/[^\w\-]+/g, '');
 
 // API functions for businesses
-export const getBusinesses = async (search?: string, category?: string, location?: string) => {
+export const getBusinesses = async (search?: string, category?: string, location?: string, limit?: number, offset?: number) => {
   const { data, error } = await supabase.rpc('search_agendaya_businesses', {
     p_search: search ?? null,
     p_category_id: category ?? null,
     p_location: location ?? null,
+    p_limit: limit ?? null,
+    p_offset: offset ?? 0,
   });
 
   if (error) throw error;
-  const businessesWithSlugs = (data as Business[]).map((b) => ({ ...b, slug: slugify(b.name) }));
-  return businessesWithSlugs;
+  return (data as Business[]);
+};
+
+export const getBusinessesMapData = async () => {
+  const { data, error } = await supabase
+    .from('agendaya_businesses')
+    .select('id, name, slug, lat, lng')
+    .not('lat', 'is', null)
+    .not('lng', 'is', null);
+  if (error) throw error;
+  return data as Pick<Business, 'id' | 'name' | 'slug' | 'lat' | 'lng'>[];
 };
 
 export interface BusinessStats {
@@ -131,8 +143,7 @@ export const getBusiness = async (id: string) => {
     .single();
   
   if (error) throw error;
-  // Add slug to the business object
-  return { ...data, slug: slugify(data.name) } as Business;
+  return data as Business;
 };
 
 // API functions for business services
@@ -147,9 +158,65 @@ export const getBusinessServices = async (businessId: string) => {
     if (error) throw error;
     return { success: true, data: data as Service[] };
   } catch (err: any) {
-    return { success: false, error: err.message || 'Error al obtener servicios' };
+    return { success: false, error: err.message };
   }
 };
+
+// ─── Functions migrated from apiClient.ts ───
+
+export async function getBusinessById(id: string): Promise<{ success: boolean; data?: Business; error?: string }> {
+  try {
+    const { data, error } = await supabase
+      .from('agendaya_businesses')
+      .select('*')
+      .eq('id', id)
+      .single();
+    if (error) throw error;
+    return { success: true, data: data as Business };
+  } catch (err: any) {
+    return { success: false, error: err.message || 'Error fetching business' };
+  }
+}
+
+export async function setActiveBusiness(userId: string, businessId: string): Promise<{ success: boolean; error?: string }> {
+  try {
+    const { error } = await supabase.rpc('set_active_business', {
+      p_user_id: userId,
+      p_business_id: businessId,
+    });
+    if (error) throw error;
+    return { success: true };
+  } catch (err: any) {
+    return { success: false, error: err.message || 'Error switching business' };
+  }
+}
+
+export async function getUserProfile(userId: string): Promise<{ success: boolean; data?: UserProfile; error?: string }> {
+  try {
+    const { data, error } = await supabase
+      .from('agendaya_profiles')
+      .select('*')
+      .eq('id', userId)
+      .single();
+    if (error) throw error;
+    return { success: true, data: data as UserProfile };
+  } catch (err: any) {
+    return { success: false, error: err.message || 'Error fetching user profile' };
+  }
+}
+
+export async function saveItemsPerPage(userId: string, itemsPerPage: number): Promise<{ success: boolean; error?: string }> {
+  try {
+    const { error } = await supabase
+      .from('agendaya_profiles')
+      .update({ items_per_page: itemsPerPage })
+      .eq('id', userId);
+    if (error) throw error;
+    return { success: true };
+  } catch (err: any) {
+    return { success: false, error: err.message || 'Error saving items per page' };
+  }
+}
 
 // API functions for business hours
 export const getBusinessHours = async (businessId: string) => {
@@ -254,6 +321,31 @@ export interface GiftCode {
   expires_at: string;
 }
 
+export const createGiftCode = async (gift: {
+  code: string;
+  service_id: string;
+  business_id: string;
+  sender_user_id: string;
+  recipient_name: string;
+  recipient_email: string;
+  recipient_phone?: string;
+  message?: string;
+  expires_at: string;
+}): Promise<{ success: boolean; error?: string }> => {
+  try {
+    const { error } = await supabase
+      .from('agendaya_gift_codes')
+      .insert([{
+        ...gift,
+        status: 'active',
+      }]);
+    if (error) throw error;
+    return { success: true };
+  } catch (err: any) {
+    return { success: false, error: err.message };
+  }
+};
+
 export const validateGiftCode = async (code: string, serviceId: string, businessId: string): Promise<{ success: boolean; gift?: GiftCode; error?: string }> => {
   try {
     const { data, error } = await supabase
@@ -321,6 +413,32 @@ export const updateAppointmentStatus = async (id: string, status: AppointmentSta
   }
 };
 
+export const cancelAppointment = async (id: string, reason?: string): Promise<{ success: boolean; error?: string }> => {
+  try {
+    const { error } = await supabase
+      .from('agendaya_appointments')
+      .update({ status: 'cancelled', cancel_reason: reason || null })
+      .eq('id', id);
+    if (error) throw error;
+    return { success: true };
+  } catch (err: any) {
+    return { success: false, error: err.message };
+  }
+};
+
+export const rescheduleAppointment = async (id: string, startTime: string, endTime: string): Promise<{ success: boolean; error?: string }> => {
+  try {
+    const { error } = await supabase
+      .from('agendaya_appointments')
+      .update({ start_time: startTime, end_time: endTime, status: 'pending' })
+      .eq('id', id);
+    if (error) throw error;
+    return { success: true };
+  } catch (err: any) {
+    return { success: false, error: err.message };
+  }
+};
+
 // Function to get unique clients of a business based on appointments
 export async function getBusinessClients(businessId: string): Promise<{ success: boolean; data: UserProfile[] | null; error: string | null }> {
   try {
@@ -350,12 +468,10 @@ export async function getBusinessClients(businessId: string): Promise<{ success:
 // API functions for business management
 export const createBusiness = async (business: Omit<Business, 'id' | 'plan' | 'plan_score' | 'likes_count' | 'created_at' | 'updated_at'>) => {
   try {
-    const cleanSlug = slugify(business.name);
     const { data, error } = await supabase
       .from('agendaya_businesses')
       .insert([{
         ...business,
-        slug: cleanSlug,
         plan: undefined,
         plan_score: undefined,
         likes_count: undefined,
@@ -368,7 +484,7 @@ export const createBusiness = async (business: Omit<Business, 'id' | 'plan' | 'p
       console.error('[createBusiness] Supabase error:', error);
       throw error;
     }
-    return { success: true, business: { ...data, slug: slugify(data.name) } as Business };
+    return { success: true, business: data as Business };
   } catch (error) {
     console.error('[createBusiness] Caught:', error);
     return { success: false, error };
@@ -384,12 +500,24 @@ export const updateBusiness = async (id: string, updates: Partial<Business>) => 
     .single();
   
   if (error) throw error;
-  // Attach slug to the updated business
-  const updatedWithSlug = { ...data, slug: slugify(data.name) } as Business;
-  return updatedWithSlug;
+  return data as Business;
 };
 
 // --- Likes Functions ---
+export const checkLikedBusinesses = async (userId: string, businessIds: string[]): Promise<Set<string>> => {
+  if (!userId || businessIds.length === 0) return new Set();
+  try {
+    const { data, error } = await supabase.rpc('check_user_likes_batch', {
+      p_user_id: userId,
+      p_business_ids: businessIds,
+    });
+    if (error) throw error;
+    return new Set((data as { business_id: string }[]).map(r => r.business_id));
+  } catch {
+    return new Set();
+  }
+};
+
 export const checkIfLiked = async (userId: string, targetId: string, type: 'business' | 'service') => {
   try {
     const query = supabase
@@ -477,6 +605,7 @@ export const getUserFavorites = async (userId: string) => {
         businesses:agendaya_businesses (
           id,
           name,
+          slug,
           description,
           address,
           logo_url,
@@ -497,7 +626,7 @@ export const getUserFavorites = async (userId: string) => {
         like_id: item.id,
         business_id: item.business_id,
         name: item.businesses.name,
-        slug: slugify(item.businesses.name),
+        slug: item.businesses.slug,
         description: item.businesses.description,
         address: item.businesses.address,
         logo_url: item.businesses.logo_url,
@@ -786,8 +915,7 @@ export async function getUserBusinesses(userId: string) {
       .eq('owner_id', userId)
       .order('created_at', { ascending: false });
     if (error) throw error;
-    const businesses = (data || []).map(b => ({ ...b, slug: slugify(b.name) })) as Business[];
-    return { success: true, businesses };
+    return { success: true, businesses: (data || []) as Business[] };
   } catch (err: any) {
     return { success: false, error: err.message || 'Error desconocido' };
   }
@@ -806,8 +934,7 @@ export async function getUserBusiness(userId: string) {
     if (!data) {
       return { success: true, business: null };
     }
-    const businessWithSlug = { ...data, slug: slugify(data.name) } as Business;
-    return { success: true, business: businessWithSlug };
+    return { success: true, business: data as Business };
   } catch (err: any) {
     return { success: false, error: err.message || 'Error desconocido' };
   }
@@ -815,19 +942,6 @@ export async function getUserBusiness(userId: string) {
 
 // API functions for business config
 export async function getBusinessConfig(businessId: string): Promise<{ success: boolean, config?: BusinessConfig, error?: string }> {
-  // Default configuration if none exists
-  const defaultConfig: BusinessConfig = {
-    permitir_reservas_online: true,
-    mostrar_precios: true,
-    mostrar_telefono: true,
-    mostrar_email: false,
-    mostrar_redes_sociales: true,
-    mostrar_direccion: true,
-    requiere_confirmacion: false,
-    tiempo_minimo_cancelacion: 48,
-    notificaciones_email: false,
-    notificaciones_whatsapp: false
-  };
   try {
     const { data, error } = await supabase
       .from('agendaya_business_config')
@@ -837,7 +951,7 @@ export async function getBusinessConfig(businessId: string): Promise<{ success: 
     if (error) {
       // No config row: return default
       if (error.code === 'PGRST116') {
-        return { success: true, config: defaultConfig };
+        return { success: true, config: DEFAULT_BUSINESS_CONFIG };
       }
       // Other errors
       return { success: false, error: error.message };
@@ -929,27 +1043,23 @@ export async function getBusinessBySlug(slug: string) {
   try {
     const { data, error } = await supabase
       .from('agendaya_businesses')
-      .select('*');
+      .select('*')
+      .eq('slug', slug)
+      .maybeSingle();
     
     if (error) throw error;
     
-    if (!data || data.length === 0) {
-      return { success: false, error: 'No businesses found' };
-    }
-    
-    const business = data.find((business: Business) => slugify(business.name) === slug);
-    
-    if (!business) {
+    if (!data) {
       return { success: false, error: 'Business not found' };
     }
     
+    const business = data as Business;
     const { success: configSuccess, config } = await getBusinessConfig(business.id);
     
     if (configSuccess && config) {
       business.config = config;
     }
     
-    business.slug = slug;
     return { success: true, business };
   } catch (error: any) {
     return { success: false, error: error.message };
@@ -992,17 +1102,32 @@ export async function createBusinessReview(
   businessId: string,
   userId: string,
   rating: number,
-  comment: string
+  comment: string,
+  beforeImage?: string,
+  afterImage?: string
 ): Promise<{ success: boolean; data?: Review; error?: string }> {
   try {
+    const { data: existingReview, error: checkError } = await supabase
+      .from('agendaya_reviews')
+      .select('id')
+      .eq('appointment_id', appointmentId)
+      .single();
+
+    if (checkError && checkError.code !== 'PGRST116') throw checkError;
+    if (existingReview) {
+      return { success: false, error: 'Esta cita ya tiene una reseña' };
+    }
+
     const { data, error } = await supabase
       .from('agendaya_reviews')
-      .insert([{ 
+      .insert([{
         appointment_id: appointmentId,
         business_id: businessId,
         user_id: userId,
         rating,
         comment,
+        before_image_url: beforeImage || null,
+        after_image_url: afterImage || null,
         status: 'pending',
         created_at: new Date().toISOString()
       }])
@@ -1248,16 +1373,21 @@ export const getPopularPosts = async (limit = 4): Promise<{ success: boolean; da
   }
 };
 
-export const getBlogPosts = async (page = 0, limit = 6): Promise<{ success: boolean; data?: BlogPost[]; error?: string; hasMore?: boolean }> => {
+export const getBlogPosts = async (page = 0, limit = 6, search?: string): Promise<{ success: boolean; data?: BlogPost[]; error?: string; hasMore?: boolean }> => {
   try {
     const from = page * limit;
     const to = from + limit - 1;
 
-    const { data, error, count } = await supabase
+    let query = supabase
       .from('agendaya_blog_posts')
       .select('*, blog_comments:agendaya_blog_comments(count)', { count: 'exact' })
-      .order('created_at', { ascending: false })
-      .range(from, to);
+      .order('created_at', { ascending: false });
+
+    if (search) {
+      query = query.or(`title.ilike.%${search}%,content.ilike.%${search}%,excerpt.ilike.%${search}%`);
+    }
+
+    const { data, error, count } = await query.range(from, to);
     
     if (error) throw error;
     

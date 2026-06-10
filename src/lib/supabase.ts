@@ -8,10 +8,6 @@ if (!SUPABASE_URL || !SUPABASE_ANON_KEY) {
 // Use default Supabase client settings (includes API key and auth automatically)
 export const supabase = createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
-// Escuchar cambios de autenticación de manera simple
-supabase.auth.onAuthStateChange(() => {
-});
-
 // Auth functions simplificadas
 export const signUp = async (email: string, password: string) => {
   try {

@@ -36,12 +36,12 @@ const Blog = () => {
     if (loading || loadingMore) return;
     if (observer.current) observer.current.disconnect();
     observer.current = new IntersectionObserver(entries => {
-      if (entries[0].isIntersecting && hasMore && !searchTerm) {
+      if (entries[0].isIntersecting && hasMore) {
         setPage(prev => prev + 1);
       }
     });
     if (node) observer.current.observe(node);
-  }, [loading, loadingMore, hasMore, searchTerm]);
+  }, [loading, loadingMore, hasMore]);
 
   useEffect(() => {
     supabase.auth.getUser().then(({ data: { user } }) => setUser(user));
@@ -55,7 +55,7 @@ const Blog = () => {
   }, [searchTerm]);
 
   useEffect(() => {
-    if (page > 0 && !searchTerm) {
+    if (page > 0) {
       fetchPosts(page, false);
     }
   }, [page]);
@@ -64,7 +64,7 @@ const Blog = () => {
     if (isInitial) setLoading(true);
     else setLoadingMore(true);
 
-    const res = await getBlogPosts(pageToFetch, 6);
+    const res = await getBlogPosts(pageToFetch, 6, searchTerm || undefined);
 
     if (res.success && res.data) {
       setPosts(prev => isInitial ? res.data! : [...prev, ...res.data!]);
@@ -229,7 +229,7 @@ const Blog = () => {
             )}
 
             {/* End indicator */}
-            {!hasMore && posts.length > 0 && !searchTerm && (
+            {!hasMore && posts.length > 0 && (
               <div className="text-center py-10 animate-in fade-in duration-300">
                 <div className="inline-flex items-center gap-3 px-6 py-2.5 bg-slate-100 dark:bg-slate-800/50 rounded-full border border-slate-200 dark:border-slate-700">
                   <div className="w-1.5 h-1.5 rounded-full bg-slate-300 dark:bg-slate-600" />

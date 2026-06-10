@@ -1,13 +1,15 @@
 import { useState, useEffect } from 'react';
-import { getNewsletterSubscribers, getGiftCodes, getAdminLoyaltyStats } from '../../lib/api';
-import { Mail, Gift, Heart, Users } from 'lucide-react';
+import { getNewsletterSubscribers, getGiftCodes, getAdminLoyaltyStats, getAdminReferralStats, getTopReferrers } from '../../lib/api';
+import { Mail, Gift, Heart, Users, Link as LinkIcon } from 'lucide-react';
 import EmptyState from '../ui/EmptyState';
 
 export default function MarketingSection() {
   const [subscribers, setSubscribers] = useState<{ email: string; subscribed_at: string }[]>([]);
   const [giftCodes, setGiftCodes] = useState<any[]>([]);
   const [loyalty, setLoyalty] = useState<{ total_entries: number; vip_count: number; frecuente_count: number; regular_count: number } | null>(null);
-  const [tab, setTab] = useState<'subscribers' | 'gifts' | 'loyalty'>('subscribers');
+  const [referralStats, setReferralStats] = useState<{ total_referrals: number; unique_referrers: number } | null>(null);
+  const [topReferrers, setTopReferrers] = useState<any[]>([]);
+  const [tab, setTab] = useState<'subscribers' | 'gifts' | 'loyalty' | 'referrals'>('subscribers');
   const [loading, setLoading] = useState(true);
   const [activeSubTab, setActiveSubTab] = useState<'all' | 'active' | 'redeemed'>('all');
 
@@ -16,10 +18,14 @@ export default function MarketingSection() {
       getNewsletterSubscribers(),
       getGiftCodes(),
       getAdminLoyaltyStats(),
-    ]).then(([subRes, giftRes, loyRes]) => {
+      getAdminReferralStats(),
+      getTopReferrers(10),
+    ]).then(([subRes, giftRes, loyRes, refRes, topRes]) => {
       if (subRes.success && subRes.data) setSubscribers(subRes.data);
       if (giftRes.success && giftRes.data) setGiftCodes(giftRes.data);
       if (loyRes.success && loyRes.data) setLoyalty(loyRes.data);
+      if (refRes.success && refRes.data) setReferralStats(refRes.data);
+      if (topRes.success && topRes.data) setTopReferrers(topRes.data);
       setLoading(false);
     });
   }, []);
@@ -38,45 +44,13 @@ export default function MarketingSection() {
 
   return (
     <div className="space-y-6">
-      {/* Stats Cards */}
-      <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
-        <div className="bg-white dark:bg-slate-900 rounded-2xl border border-slate-200 dark:border-slate-800 p-5">
-          <div className="flex items-center justify-between">
-            <div>
-              <p className="text-xs font-bold text-slate-400 uppercase tracking-widest">Newsletter</p>
-              <p className="text-2xl font-black text-slate-900 dark:text-white mt-1">{subscribers.length}</p>
-            </div>
-            <Mail className="w-8 h-8 text-primary-400" />
-          </div>
-        </div>
-        <div className="bg-white dark:bg-slate-900 rounded-2xl border border-slate-200 dark:border-slate-800 p-5">
-          <div className="flex items-center justify-between">
-            <div>
-              <p className="text-xs font-bold text-slate-400 uppercase tracking-widest">Gift Codes</p>
-              <p className="text-2xl font-black text-slate-900 dark:text-white mt-1">{giftCodes.filter(g => g.status === 'active').length}</p>
-              <p className="text-[10px] text-slate-400">{giftCodes.length} total · {giftCodes.filter(g => g.status === 'redeemed').length} canjeados</p>
-            </div>
-            <Gift className="w-8 h-8 text-rose-400" />
-          </div>
-        </div>
-        <div className="bg-white dark:bg-slate-900 rounded-2xl border border-slate-200 dark:border-slate-800 p-5">
-          <div className="flex items-center justify-between">
-            <div>
-              <p className="text-xs font-bold text-slate-400 uppercase tracking-widest">Fidelización</p>
-              <p className="text-2xl font-black text-slate-900 dark:text-white mt-1">{loyalty?.total_entries || 0}</p>
-              <p className="text-[10px] text-slate-400">VIP: {loyalty?.vip_count || 0} · Frec: {loyalty?.frecuente_count || 0} · Reg: {loyalty?.regular_count || 0}</p>
-            </div>
-            <Heart className="w-8 h-8 text-rose-400" />
-          </div>
-        </div>
-      </div>
-
       {/* Sub Tabs */}
       <div className="flex gap-2 border-b border-slate-200 dark:border-slate-700 pb-3">
         {[
           { id: 'subscribers', label: 'Suscriptores', icon: Mail },
           { id: 'gifts', label: 'Gift Codes', icon: Gift },
           { id: 'loyalty', label: 'Fidelización', icon: Heart },
+          { id: 'referrals', label: 'Referidos', icon: LinkIcon },
         ].map(t => (
           <button key={t.id} onClick={() => setTab(t.id as any)}
             className={`flex items-center gap-1.5 px-4 py-2 rounded-xl text-xs font-bold transition-all ${
@@ -166,6 +140,48 @@ export default function MarketingSection() {
               <p className="text-xs font-bold text-slate-400 mt-1">{item.label}</p>
             </div>
           ))}
+        </div>
+      )}
+
+      {/* Referrals Tab */}
+      {tab === 'referrals' && (
+        <div className="space-y-4">
+          <div className="bg-white dark:bg-slate-900 rounded-2xl border border-slate-200 dark:border-slate-800 p-5">
+            <h3 className="text-sm font-black text-slate-500 dark:text-slate-400 uppercase tracking-widest mb-3">
+              Top Referidores
+            </h3>
+            {topReferrers.length === 0 ? (
+              <EmptyState icon={<LinkIcon className="w-8 h-8" />} title="Sin referidos" description="Ningún usuario ha referido a otro." />
+            ) : (
+              <div className="space-y-2">
+                {topReferrers.map((r, i) => (
+                  <div key={r.referrer_id} className="flex items-center gap-4 p-3 rounded-xl bg-slate-50 dark:bg-slate-800/50 border border-slate-100 dark:border-slate-800">
+                    <div className={`w-8 h-8 rounded-full flex items-center justify-center flex-shrink-0 font-black text-sm ${
+                      i === 0 ? 'bg-amber-100 dark:bg-amber-900/40 text-amber-600' :
+                      i === 1 ? 'bg-slate-100 dark:bg-slate-800 text-slate-500' :
+                      i === 2 ? 'bg-orange-100 dark:bg-orange-900/40 text-orange-600' :
+                      'bg-slate-50 dark:bg-slate-800/50 text-slate-400'
+                    }`}>{i + 1}</div>
+                    <div className="flex-1 min-w-0">
+                      <p className="font-bold text-sm text-slate-900 dark:text-white truncate">{r.referrer_name || 'Usuario'}</p>
+                      <p className="text-xs text-slate-400 truncate">{r.referrer_email || '—'}</p>
+                    </div>
+                    <span className="px-3 py-1 bg-primary-100 dark:bg-primary-900/40 text-primary-700 dark:text-primary-300 rounded-full text-xs font-bold">{r.count} ref.</span>
+                  </div>
+                ))}
+              </div>
+            )}
+          </div>
+          <div className="grid grid-cols-2 gap-4">
+            <div className="bg-white dark:bg-slate-900 rounded-2xl border border-slate-200 dark:border-slate-800 p-5 text-center">
+              <p className="text-3xl font-black text-slate-900 dark:text-white">{referralStats?.total_referrals || 0}</p>
+              <p className="text-xs font-bold text-slate-400 mt-1">Total referidos</p>
+            </div>
+            <div className="bg-white dark:bg-slate-900 rounded-2xl border border-slate-200 dark:border-slate-800 p-5 text-center">
+              <p className="text-3xl font-black text-slate-900 dark:text-white">{referralStats?.unique_referrers || 0}</p>
+              <p className="text-xs font-bold text-slate-400 mt-1">Referidores únicos</p>
+            </div>
+          </div>
         </div>
       )}
     </div>

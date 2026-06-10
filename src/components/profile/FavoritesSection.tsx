@@ -7,7 +7,7 @@ import type { UserProfile } from '../../lib/supabase';
 import { TabNav } from '../ui/TabNav';
 import SectionHeader from '../ui/SectionHeader';
 import EmptyState from '../ui/EmptyState';
-import { useToast } from '../../hooks/useToast';
+import { notifySuccess, notifyError } from '../../lib/toast';
 
 const FALLBACK_LOGO = 'https://upload.wikimedia.org/wikipedia/commons/8/89/Portrait_Placeholder.png';
 const FALLBACK_BLOG_IMG = 'https://images.unsplash.com/photo-1499750310107-5fef28a66643?w=400&q=80';
@@ -24,8 +24,6 @@ interface FavoritesSectionProps {
 
 export default function FavoritesSection({ user }: FavoritesSectionProps) {
   const [activeTab, setActiveTab] = useState('businesses');
-  const toast = useToast();
-
   return (
     <div className="space-y-6">
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
@@ -39,9 +37,9 @@ export default function FavoritesSection({ user }: FavoritesSectionProps) {
       </div>
 
       <div className="animate-in fade-in zoom-in-95 duration-300">
-        {activeTab === 'businesses' && <BusinessFavorites userId={user.id} toast={toast} />}
-        {activeTab === 'services' && <ServiceFavorites userId={user.id} toast={toast} />}
-        {activeTab === 'posts' && <BlogFavorites userId={user.id} toast={toast} />}
+        {activeTab === 'businesses' && <BusinessFavorites userId={user.id} />}
+        {activeTab === 'services' && <ServiceFavorites userId={user.id} />}
+        {activeTab === 'posts' && <BlogFavorites userId={user.id} />}
       </div>
     </div>
   );
@@ -49,7 +47,7 @@ export default function FavoritesSection({ user }: FavoritesSectionProps) {
 
 // ─── Negocios ───
 
-function BusinessFavorites({ userId, toast }: { userId: string; toast: ReturnType<typeof useToast> }) {
+function BusinessFavorites({ userId }: { userId: string }) {
   const [favorites, setFavorites] = useState<FavoriteItem[]>([]);
   const [loading, setLoading] = useState(true);
   const [removingId, setRemovingId] = useState<string | null>(null);
@@ -69,12 +67,12 @@ function BusinessFavorites({ userId, toast }: { userId: string; toast: ReturnTyp
     const res = await toggleLike(userId, fav.business_id, 'business');
     if (res.success) {
       setFavorites(prev => prev.filter(f => f.like_id !== fav.like_id));
-      toast.success(`${fav.name} eliminado de favoritos`);
+      notifySuccess(`${fav.name} eliminado de favoritos`);
     } else {
-      toast.error('Error al eliminar de favoritos');
+      notifyError('Error al eliminar de favoritos');
     }
     setRemovingId(null);
-  }, [userId, toast]);
+  }, [userId]);
 
   if (loading) return <SkeletonGrid count={3} />;
   if (favorites.length === 0) return (
@@ -152,7 +150,7 @@ function FavoriteBusinessCard({ fav, removingId, onRemove }: { fav: FavoriteItem
 
 // ─── Servicios ───
 
-function ServiceFavorites({ userId, toast }: { userId: string; toast: ReturnType<typeof useToast> }) {
+function ServiceFavorites({ userId }: { userId: string }) {
   const [favorites, setFavorites] = useState<ServiceFavoriteItem[]>([]);
   const [loading, setLoading] = useState(true);
   const [removingId, setRemovingId] = useState<string | null>(null);
@@ -172,12 +170,12 @@ function ServiceFavorites({ userId, toast }: { userId: string; toast: ReturnType
     const res = await toggleLike(userId, fav.service_id, 'service');
     if (res.success) {
       setFavorites(prev => prev.filter(f => f.like_id !== fav.like_id));
-      toast.success(`${fav.name} eliminado de favoritos`);
+      notifySuccess(`${fav.name} eliminado de favoritos`);
     } else {
-      toast.error('Error al eliminar de favoritos');
+      notifyError('Error al eliminar de favoritos');
     }
     setRemovingId(null);
-  }, [userId, toast]);
+  }, [userId]);
 
   if (loading) return <SkeletonGrid count={3} />;
   if (favorites.length === 0) return (
@@ -258,7 +256,7 @@ function FavoriteServiceCard({ fav, removingId, onRemove }: { fav: ServiceFavori
 
 // ─── Publicaciones ───
 
-function BlogFavorites({ userId, toast }: { userId: string; toast: ReturnType<typeof useToast> }) {
+function BlogFavorites({ userId }: { userId: string }) {
   const [favorites, setFavorites] = useState<BlogPostFavoriteItem[]>([]);
   const [loading, setLoading] = useState(true);
   const [removingId, setRemovingId] = useState<string | null>(null);
@@ -278,12 +276,12 @@ function BlogFavorites({ userId, toast }: { userId: string; toast: ReturnType<ty
     const res = await toggleBlogLike(userId, fav.post_id, 'post');
     if (res.success) {
       setFavorites(prev => prev.filter(f => f.like_id !== fav.like_id));
-      toast.success(`${fav.title} eliminado de favoritos`);
+      notifySuccess(`${fav.title} eliminado de favoritos`);
     } else {
-      toast.error('Error al eliminar de favoritos');
+      notifyError('Error al eliminar de favoritos');
     }
     setRemovingId(null);
-  }, [userId, toast]);
+  }, [userId]);
 
   if (loading) return <SkeletonGrid count={3} />;
   if (favorites.length === 0) return (

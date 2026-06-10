@@ -1,6 +1,6 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useRef } from 'react';
 import { useSearchParams, Link } from 'react-router-dom';
-import { CheckCircle, Loader2 } from 'lucide-react';
+import { CheckCircle, Loader2, AlertTriangle } from 'lucide-react';
 import { supabase } from '../lib/supabase';
 import SEO from '../components/SEO';
 
@@ -8,6 +8,9 @@ export default function PaymentSuccess() {
   const [searchParams] = useSearchParams();
   const [status, setStatus] = useState<'loading' | 'success' | 'error'>('loading');
   const plan = searchParams.get('plan') || '';
+  const reference = searchParams.get('reference') || '';
+  const attemptsRef = useRef(0);
+  const MAX_ATTEMPTS = 6;
 
   useEffect(() => {
     const check = async () => {
@@ -17,28 +20,48 @@ export default function PaymentSuccess() {
         return;
       }
 
+      if (reference) {
+        const expectedPrefix = `AGD-${user.id}-`;
+        if (!reference.startsWith(expectedPrefix)) {
+          setStatus('error');
+          return;
+        }
+
+        const { data: sub } = await supabase
+          .from('agendaya_subscriptions')
+          .select('plan, status')
+          .eq('user_id', user.id)
+          .eq('status', 'active')
+          .maybeSingle();
+
+        const planMatch = sub?.plan === plan || sub?.plan === 'pro' || sub?.plan === 'premium';
+        if (sub && planMatch && sub.status === 'active') {
+          setStatus('success');
+          return;
+        }
+      }
+
       const { data: profile } = await supabase
         .from('agendaya_profiles')
         .select('plan')
         .eq('id', user.id)
         .single();
 
-      if (profile?.plan === plan || profile?.plan === 'premium' || profile?.plan === 'pro') {
+      const profilePlanMatch = profile?.plan === plan || profile?.plan === 'pro' || profile?.plan === 'premium';
+      if (profilePlanMatch) {
         setStatus('success');
+        return;
+      }
+
+      if (attemptsRef.current < MAX_ATTEMPTS) {
+        attemptsRef.current++;
+        setTimeout(check, 3000);
       } else {
-        // Esperar un momento para que el webhook procese
-        setTimeout(async () => {
-          const { data: retry } = await supabase
-            .from('agendaya_profiles')
-            .select('plan')
-            .eq('id', user.id)
-            .single();
-          setStatus(retry?.plan === plan || retry?.plan === 'pro' || retry?.plan === 'premium' ? 'success' : 'loading');
-        }, 3000);
+        setStatus('loading');
       }
     };
     check();
-  }, [plan]);
+  }, [plan, reference]);
 
   return (
     <div className="min-h-screen bg-gradient-to-b from-slate-50 to-white dark:from-slate-950 dark:to-slate-900 flex items-center justify-center px-4">
@@ -75,11 +98,11 @@ export default function PaymentSuccess() {
         {status === 'error' && (
           <>
             <div className="w-20 h-20 mx-auto mb-6 rounded-2xl bg-amber-50 dark:bg-amber-500/10 flex items-center justify-center">
-              <span className="text-4xl">⏳</span>
+              <AlertTriangle className="w-10 h-10 text-amber-500" />
             </div>
-            <h1 className="text-2xl font-black text-slate-900 dark:text-white mb-3">Pago en proceso</h1>
-            <p className="text-slate-500 mb-2">Tu pago está siendo procesado por Wompi.</p>
-            <p className="text-sm text-slate-400 mb-8">Te notificaremos cuando se confirme. Si pasan más de 10 minutos, contacta a soporte.</p>
+            <h1 className="text-2xl font-black text-slate-900 dark:text-white mb-3">Referencia inválida</h1>
+            <p className="text-slate-500 mb-2">No pudimos verificar tu transacción.</p>
+            <p className="text-sm text-slate-400 mb-8">Si crees que es un error, contacta a soporte.</p>
             <Link to="/plans" className="text-primary-600 font-bold hover:underline">Volver a planes</Link>
           </>
         )}

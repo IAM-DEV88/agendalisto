@@ -2,7 +2,6 @@ import { useState, useEffect } from 'react';
 import { Gift, Heart, Rocket, Target, CreditCard, ExternalLink, Loader2 } from 'lucide-react';
 import type { Milestone } from '../lib/api';
 import { getTopMilestones } from '../lib/api';
-import SectionHeader from '../ui/SectionHeader';
 
 const Crowdfunding = () => {
   const [milestones, setMilestones] = useState<Milestone[]>([]);

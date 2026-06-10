@@ -3,7 +3,7 @@ import type { UserProfile } from '../../lib/supabase';
 import { ROLES, PLANS, ROLE_LABELS } from '../../lib/roles';
 import type { Role } from '../../lib/roles';
 import { adminUpdateUser } from '../../lib/api';
-import { useToast } from '../../hooks/useToast';
+import { notifySuccess, notifyError } from '../../lib/toast';
 import { X } from 'lucide-react';
 
 interface UserDetailModalProps {
@@ -13,7 +13,6 @@ interface UserDetailModalProps {
 }
 
 const UserDetailModal = ({ user, onClose, onUpdated }: UserDetailModalProps) => {
-  const toast = useToast();
   const [role, setRole] = useState(user.role);
   const [plan, setPlan] = useState(user.plan);
   const [saving, setSaving] = useState(false);
@@ -24,11 +23,11 @@ const UserDetailModal = ({ user, onClose, onUpdated }: UserDetailModalProps) => 
     setSaving(true);
     const res = await adminUpdateUser(user.id, { role, plan });
     if (res.success) {
-      toast.success('Usuario actualizado correctamente');
+      notifySuccess('Usuario actualizado correctamente');
       onUpdated({ ...user, role, plan });
       onClose();
     } else {
-      toast.error(res.error || 'Error al actualizar usuario');
+      notifyError(res.error || 'Error al actualizar usuario');
     }
     setSaving(false);
   };

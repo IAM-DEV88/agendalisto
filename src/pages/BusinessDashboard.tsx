@@ -1,12 +1,11 @@
 import { useState, useEffect, useCallback } from 'react';
 import { Link } from 'react-router-dom';
 import { useSelector } from 'react-redux';
-import { Business, getBusinessStats, BusinessStats } from '../lib/api';
-import { ApiClient } from '../lib/apiClient';
+import { Business, getBusinessStats, getBusinessById, getBusinessServices, getUserBusinesses, updateAppointmentStatus, updateBusiness, createBusinessService, updateBusinessService, deleteBusinessService, BusinessStats } from '../lib/api';
 import { supabase } from '../lib/supabase';
 import { AppointmentStatus } from '../types/appointment';
 import { useBusinessAppointments } from '../hooks/useBusinessAppointments';
-import { useToast } from '../hooks/useToast';
+import { notifySuccess, notifyError } from '../lib/toast';
 import { useUIConfig } from '../hooks/useUIConfig';
 import { useAuth } from '../hooks/useAuth';
 import { useAppDispatch } from '../hooks/useAppDispatch';
@@ -41,16 +40,12 @@ import {
   Clock,
 } from 'lucide-react';
 
-const slugify = (str: string): string =>
-  str.toLowerCase().replace(/\s+/g, '-').replace(/[^\w\-]+/g, '');
-
 export const BusinessDashboard: React.FC = () => {
   const { user } = useAuth();
   const userProfile = useSelector((state: RootState) => state.user.userProfile);
   const businesses = useSelector((state: RootState) => state.user.businesses);
   const plan = (userProfile?.plan as 'starter' | 'pro' | 'premium') || 'starter';
   const { itemsPerPage } = useUIConfig();
-  const toast = useToast();
   const [businessData, setBusinessData] = useState<Business | null>(null);
   const [businessMessage, setBusinessMessage] = useState<{ text: string; type: 'success' | 'error' } | null>(null);
   const [savingBusiness, setSavingBusiness] = useState(false);
@@ -94,10 +89,10 @@ export const BusinessDashboard: React.FC = () => {
     const id = businessId || userProfile?.business_id;
     if (!user?.id || !id) return;
     try {
-      const response = await ApiClient.getBusinessById(id);
+      const response = await getBusinessById(id);
       if (response.success && response.data) {
         setBusinessData(response.data);
-        const servicesResponse = await ApiClient.getBusinessServices(response.data.id);
+        const servicesResponse = await getBusinessServices(response.data.id);
         if (servicesResponse.success && servicesResponse.data) {
           setTotalServices(servicesResponse.data.length);
         }
@@ -110,7 +105,7 @@ export const BusinessDashboard: React.FC = () => {
       }
     } catch (err: any) {
       setBusinessMessage({ text: err.message || 'Error al cargar los datos del negocio', type: 'error' });
-      toast.error(err.message || 'Error al cargar los datos del negocio');
+      notifyError(err.message || 'Error al cargar los datos del negocio');
     }
   }, [user?.id, userProfile?.business_id]);
 
@@ -123,9 +118,9 @@ export const BusinessDashboard: React.FC = () => {
   useEffect(() => {
     if (!user?.id) return;
     if (businesses.length === 0) {
-      ApiClient.getUserBusinesses(user.id).then(res => {
-        if (res.success && res.data && res.data.length > 0) {
-          dispatch(setBusinesses(res.data));
+      getUserBusinesses(user.id).then(res => {
+        if (res.success && res.businesses && res.businesses.length > 0) {
+          dispatch(setBusinesses(res.businesses));
         }
       });
     }
@@ -138,7 +133,7 @@ export const BusinessDashboard: React.FC = () => {
   useEffect(() => {
     const handleReviewEvent = (e: any) => {
       if (e.detail?.businessId === businessData?.id) {
-        toast.success('¡Nueva reseña recibida!');
+        notifySuccess('¡Nueva reseña recibida!');
         refreshAppointments();
       }
     };
@@ -157,7 +152,7 @@ export const BusinessDashboard: React.FC = () => {
         table: 'agendaya_reviews',
         filter: `business_id=eq.${businessData.id}`,
       }, async () => {
-        toast.success('¡Nueva reseña recibida!');
+        notifySuccess('¡Nueva reseña recibida!');
         await refreshAppointments();
       })
       .subscribe();
@@ -169,19 +164,19 @@ export const BusinessDashboard: React.FC = () => {
 
   const handleUpdateAppointmentStatus = async (id: string, newStatus: AppointmentStatus) => {
     try {
-      const response = await ApiClient.updateAppointmentStatus(id, newStatus);
+      const response = await updateAppointmentStatus(id, newStatus);
       if (response.success) {
         const statusText =
           newStatus === 'confirmed' ? 'confirmada' :
           newStatus === 'completed' ? 'completada' :
           newStatus === 'cancelled' ? 'cancelada' : 'actualizada';
-        toast.success(`Cita ${statusText} correctamente`);
+        notifySuccess(`Cita ${statusText} correctamente`);
         await refreshAppointments();
       } else {
-        toast.error(response.error || 'Error al actualizar el estado de la cita');
+        notifyError(response.error || 'Error al actualizar el estado de la cita');
       }
     } catch (err: any) {
-      toast.error(err.message || 'Error al actualizar el estado de la cita');
+      notifyError(err.message || 'Error al actualizar el estado de la cita');
     }
   };
 
@@ -197,7 +192,7 @@ export const BusinessDashboard: React.FC = () => {
     setSavingBusiness(true);
     setBusinessMessage(null);
     try {
-      const response = await ApiClient.updateBusiness(businessData.id, {
+      const response = await updateBusiness(businessData.id, {
         name: businessData.name,
         description: businessData.description,
         address: businessData.address,
@@ -212,17 +207,12 @@ export const BusinessDashboard: React.FC = () => {
         lng: businessData.lng,
         showcase_only: businessData.showcase_only ?? false,
       });
-      if (response.success && response.data) {
-        setBusinessData(response.data);
-        setBusinessMessage({ text: 'Datos del negocio actualizados', type: 'success' });
-        toast.success('Datos del negocio actualizados');
-      } else {
-        setBusinessMessage({ text: response.error || 'Error al actualizar', type: 'error' });
-        toast.error(response.error || 'Error al actualizar');
-      }
+      setBusinessData(response);
+      setBusinessMessage({ text: 'Datos del negocio actualizados', type: 'success' });
+      notifySuccess('Datos del negocio actualizados');
     } catch (err: any) {
       setBusinessMessage({ text: err.message || 'Error al actualizar', type: 'error' });
-      toast.error(err.message || 'Error al actualizar');
+      notifyError(err.message || 'Error al actualizar');
     } finally {
       setSavingBusiness(false);
     }
@@ -318,7 +308,7 @@ export const BusinessDashboard: React.FC = () => {
             <div className="flex flex-col md:flex-row md:items-center justify-between gap-6">
               <div className="flex items-center gap-5 group">
                 {businessData ? (
-                  <Link to={`/${slugify(businessData.name)}`} className="flex items-center gap-5 group">
+                  <Link to={`/${businessData.slug}`} className="flex items-center gap-5 group">
                     <div className="relative">
                       <div className="h-16 w-16 rounded-2xl overflow-hidden ring-2 ring-white dark:ring-slate-800 shadow-xl transition-transform duration-300 group-hover:scale-105">
                         <img
@@ -362,7 +352,7 @@ export const BusinessDashboard: React.FC = () => {
                   <BusinessSwitcher currentBusiness={businessData} onSwitch={handleBusinessSwitch} />
                 )}
                 {businessData && (
-                  <BusinessQrCode businessSlug={slugify(businessData.name)} businessName={businessData.name} />
+                  <BusinessQrCode businessSlug={businessData.slug!} businessName={businessData.name} />
                 )}
                 <Link
                   to="/dashboard"
@@ -482,10 +472,10 @@ export const BusinessDashboard: React.FC = () => {
               <div className="animate-in fade-in zoom-in-95 duration-300">
                 <ServicesSection
                   businessId={businessData.id}
-                  getServices={ApiClient.getBusinessServices}
-                  createService={ApiClient.createBusinessService}
-                  updateService={ApiClient.updateBusinessService}
-                  deleteService={ApiClient.deleteBusinessService}
+                  getServices={getBusinessServices}
+                  createService={createBusinessService}
+                  updateService={updateBusinessService}
+                  deleteService={deleteBusinessService}
                   itemsPerPage={itemsPerPage}
                   plan={plan}
                 />
@@ -588,6 +578,7 @@ export const BusinessDashboard: React.FC = () => {
                       plan={plan}
                       businessName={businessData?.name || ''}
                       businessAddress={businessData?.address || ''}
+                      businessSlug={businessData?.slug || ''}
                     />
                   )}
                 </div>

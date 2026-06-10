@@ -11,13 +11,23 @@ export interface Review {
   business_id: string;
   user_id: string;
   status: ReviewStatus;
+  before_image_url?: string | null;
+  after_image_url?: string | null;
 }
 
 export interface Service {
   id: string;
+  business_id: string;
   name: string;
-  price: number;
+  description: string;
   duration: number;
+  price: number;
+  likes_count: number;
+  is_active: boolean;
+  provider?: string;
+  image_urls?: string[];
+  created_at: string;
+  updated_at: string;
 }
 
 export interface Profile {
@@ -25,6 +35,9 @@ export interface Profile {
   full_name: string;
   email: string;
   phone: string;
+  role?: string;
+  plan?: string;
+  is_business?: boolean;
 }
 
 export interface StatusHistory {
@@ -64,4 +77,4 @@ export interface GuestInfo {
   phone: string;
 }
 
-export default Appointment; 
+export default Appointment;

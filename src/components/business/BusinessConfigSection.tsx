@@ -1,8 +1,8 @@
 import React, { useState } from 'react';
 import { Settings, Eye, Bell, ListOrdered, Save, Loader2, CheckCircle2, AlertCircle, Clock, ChevronDown, Link as LinkIcon, Copy, Check, ExternalLink } from 'lucide-react';
-import { BusinessConfig, slugify } from '../../lib/api';
-import { useItemsPerPage } from '../../hooks/useItemsPerPage';
+import { BusinessConfig } from '../../lib/api';
 import { useAuth } from '../../hooks/useAuth';
+import { useUIConfig } from '../../hooks/useUIConfig';
 import { canUseEmailNotifications } from '../../lib/roles';
 import SectionHeader from '../ui/SectionHeader';
 import { toast } from 'react-hot-toast';
@@ -17,6 +17,7 @@ interface BusinessConfigSectionProps {
   plan?: 'starter' | 'pro' | 'premium';
   businessName?: string;
   businessAddress?: string;
+  businessSlug?: string;
 }
 
 export const BusinessConfigSection: React.FC<BusinessConfigSectionProps> = ({
@@ -29,14 +30,15 @@ export const BusinessConfigSection: React.FC<BusinessConfigSectionProps> = ({
   plan = 'starter',
   businessName = '',
   businessAddress = '',
+  businessSlug = '',
 }) => {
   const { user } = useAuth();
-  const { localItemsPerPage, setLocalItemsPerPage, saveItemsPerPage } = useItemsPerPage(user?.id);
+  const { itemsPerPage, setItemsPerPageValue, saveItemsPerPage } = useUIConfig(user?.id);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    const result = await saveItemsPerPage(localItemsPerPage);
-    if (result.success) {
+    const saved = await saveItemsPerPage();
+    if (saved) {
       onSave(e);
     }
   };
@@ -229,8 +231,8 @@ export const BusinessConfigSection: React.FC<BusinessConfigSectionProps> = ({
                   id="items_per_page"
                   min="1"
                   max="50"
-                  value={localItemsPerPage}
-                  onChange={(e) => setLocalItemsPerPage(Math.max(1, Math.min(50, parseInt(e.target.value) || 1)))}
+                  value={itemsPerPage}
+                  onChange={(e) => setItemsPerPageValue(Math.max(1, Math.min(50, parseInt(e.target.value) || 1)))}
                   className="w-full px-4 py-2.5 rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 focus:ring-2 focus:ring-primary-500/20 focus:border-primary-500 outline-none transition-all text-sm font-bold"
                 />
                 <p className="text-xs text-slate-500 dark:text-slate-400 italic">
@@ -254,17 +256,16 @@ export const BusinessConfigSection: React.FC<BusinessConfigSectionProps> = ({
       )}
 
       {/* Google My Business Guide */}
-      <GoogleMyBusinessGuide businessName={businessName || ''} businessAddress={businessAddress || ''} />
+                      <GoogleMyBusinessGuide businessName={businessName || ''} businessAddress={businessAddress || ''} businessSlug={businessSlug || ''} />
     </div>
   );
 };
 
-const GoogleMyBusinessGuide = ({ businessName, businessAddress }: { businessName: string; businessAddress?: string }) => {
+const GoogleMyBusinessGuide = ({ businessName, businessAddress, businessSlug }: { businessName: string; businessAddress?: string; businessSlug?: string }) => {
   const [expanded, setExpanded] = useState(false);
   const [copied, setCopied] = useState(false);
 
-  const businessSlug = slugify(businessName);
-  const businessPageUrl = `${window.location.origin}/${businessSlug}`;
+  const businessPageUrl = `${window.location.origin}/${businessSlug || ''}`;
   const gmbUrl = `https://business.google.com/create?name=${encodeURIComponent(businessName)}${businessAddress ? `&address=${encodeURIComponent(businessAddress)}` : ''}`;
 
   const handleCopyBusinessLink = async () => {

@@ -3,7 +3,7 @@ import { useSelector, useDispatch } from 'react-redux';
 import { RootState } from '../store';
 import { setItemsPerPage } from '../store/uiSlice';
 import { supabase } from '../lib/supabase';
-import { useToast } from './useToast';
+import { notifySuccess, notifyError } from '../lib/toast';
 
 export interface UseUIConfigResult {
   // Theme settings
@@ -13,16 +13,15 @@ export interface UseUIConfigResult {
   // Items per page config
   itemsPerPage: number;
   setItemsPerPageValue: (value: number) => void;
-  saveItemsPerPage: (userId: string) => Promise<boolean>;
+  saveItemsPerPage: (userId?: string) => Promise<boolean>;
   
   // Loading state
   loading: boolean;
   message: string | null;
 }
 
-export const useUIConfig = (): UseUIConfigResult => {
+export const useUIConfig = (userId?: string): UseUIConfigResult => {
   const dispatch = useDispatch();
-  const toast = useToast();
   const itemsPerPage = useSelector((state: RootState) => state.ui.itemsPerPage);
   const [isDarkMode, setIsDarkMode] = useState<boolean>(
     localStorage.getItem('theme') === 'dark' || 
@@ -42,6 +41,27 @@ export const useUIConfig = (): UseUIConfigResult => {
     }
   }, [isDarkMode]);
 
+  // Load itemsPerPage from DB
+  useEffect(() => {
+    const loadItemsPerPage = async () => {
+      if (!userId) return;
+      try {
+        const { data, error } = await supabase
+          .from('agendaya_profiles')
+          .select('items_per_page')
+          .eq('id', userId)
+          .single();
+        if (error) throw error;
+        if (data?.items_per_page) {
+          dispatch(setItemsPerPage(data.items_per_page));
+        }
+      } catch (err) {
+        console.error('Error loading items_per_page:', err);
+      }
+    };
+    loadItemsPerPage();
+  }, [userId, dispatch]);
+
   const toggleDarkMode = () => {
     setIsDarkMode(prev => !prev);
   };
@@ -52,8 +72,9 @@ export const useUIConfig = (): UseUIConfigResult => {
     }
   };
 
-  const saveItemsPerPage = async (userId: string): Promise<boolean> => {
-    if (!userId) return false;
+  const saveItemsPerPage = async (userIdParam?: string): Promise<boolean> => {
+    const uid = userIdParam || userId;
+    if (!uid) return false;
     
     setLoading(true);
     setMessage(null);
@@ -62,16 +83,16 @@ export const useUIConfig = (): UseUIConfigResult => {
       const { error } = await supabase
         .from('agendaya_profiles')
         .update({ items_per_page: itemsPerPage })
-        .eq('id', userId);
+        .eq('id', uid);
         
       if (error) throw error;
       
-      toast.success('Configuración guardada correctamente');
+      notifySuccess('Configuración guardada correctamente');
       return true;
     } catch (err: any) {
       const errorMsg = err.message || 'Error al guardar la configuración';
       setMessage(errorMsg);
-      toast.error(errorMsg);
+      notifyError(errorMsg);
       return false;
     } finally {
       setLoading(false);

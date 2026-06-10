@@ -1,16 +1,14 @@
 import { createClient } from '@supabase/supabase-js';
+import type { Handler, HandlerEvent } from '@netlify/functions';
 
-// Initialize Supabase Admin client
 const supabase = createClient(
   process.env.SUPABASE_URL!,
   process.env.SUPABASE_SERVICE_ROLE_KEY!
 );
 
-export const handler = async (event) => {
-  // Read raw body
+export const handler: Handler = async (event: HandlerEvent) => {
   const rawBody = event.body || '';
 
-  // Verify IPN with PayPal
   const verificationResponse = await fetch(
     'https://ipnpb.paypal.com/cgi-bin/webscr',
     {
@@ -25,7 +23,6 @@ export const handler = async (event) => {
     return { statusCode: 400, body: 'Invalid IPN' };
   }
 
-  // Parse IPN fields
   const params = new URLSearchParams(rawBody);
   const status = params.get('payment_status');
   const milestoneId = params.get('custom');
@@ -33,7 +30,6 @@ export const handler = async (event) => {
   const amount = parseFloat(gross);
 
   if (status === 'Completed' && milestoneId) {
-    // Fetch existing current_amount
     const { data, error } = await supabase
       .from('agendaya_milestones')
       .select('current_amount')
@@ -43,7 +39,7 @@ export const handler = async (event) => {
     if (error || !data) {
       console.error('Error fetching milestone:', error);
     } else {
-      const newAmount = data.current_amount + amount;
+      const newAmount = (data as { current_amount: number }).current_amount + amount;
       const { error: updateError } = await supabase
         .from('agendaya_milestones')
         .update({ current_amount: newAmount })
@@ -53,4 +49,4 @@ export const handler = async (event) => {
   }
 
   return { statusCode: 200, body: 'OK' };
-}; 
+};
