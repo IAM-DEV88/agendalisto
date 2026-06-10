@@ -1,5 +1,5 @@
 import { useState, useEffect, useCallback } from 'react';
-import { Link } from 'react-router-dom';
+import { Link, useSearchParams } from 'react-router-dom';
 import { useSelector } from 'react-redux';
 import { Business, getBusinessStats, getBusinessById, getBusinessServices, getUserBusinesses, updateAppointmentStatus, updateBusiness, createBusinessService, updateBusinessService, deleteBusinessService, BusinessStats } from '../lib/api';
 import { supabase } from '../lib/supabase';
@@ -114,6 +114,21 @@ export const BusinessDashboard: React.FC = () => {
   useEffect(() => {
     loadBusinessData();
   }, [loadBusinessData]);
+
+  const [searchParams] = useSearchParams();
+
+  useEffect(() => {
+    const tabParam = searchParams.get('tab');
+    if (tabParam === 'services') {
+      setActiveTab('services');
+    } else if (tabParam === 'profile') {
+      setActiveTab('settings');
+      setActiveSettingsTab('profile');
+    } else if (tabParam === 'availability') {
+      setActiveTab('settings');
+      setActiveSettingsTab('hours');
+    }
+  }, [searchParams]);
 
   useEffect(() => {
     if (!user?.id) return;
