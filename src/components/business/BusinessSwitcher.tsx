@@ -64,7 +64,7 @@ export default function BusinessSwitcher({ currentBusiness, businesses: propBusi
       </button>
 
       {open && (
-        <div className="absolute right-0 mt-2 w-64 bg-white dark:bg-slate-900 rounded-2xl border border-slate-200 dark:border-slate-800 shadow-xl shadow-slate-200/50 dark:shadow-none z-50 overflow-hidden animate-in fade-in zoom-in-95 duration-200 origin-top-right">
+        <div className="absolute left-0 sm:left-auto sm:right-0 mt-2 w-64 bg-white dark:bg-slate-900 rounded-2xl border border-slate-200 dark:border-slate-800 shadow-xl shadow-slate-200/50 dark:shadow-none z-50 overflow-hidden animate-in fade-in zoom-in-95 duration-200 origin-top-right">
           <div className="p-2 space-y-0.5">
             {currentBusiness && (
               <button
