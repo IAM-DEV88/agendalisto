@@ -135,7 +135,8 @@ export const getBusinessStats = async (businessId: string) => {
     p_business_id: businessId,
   });
   if (error) throw error;
-  return data as BusinessStats;
+  const stats = Array.isArray(data) ? data[0] : data;
+  return stats as BusinessStats;
 };
 
 export const getBusiness = async (id: string) => {
@@ -276,32 +277,40 @@ export async function getBusinessAppointments(businessId: string) {
   try {
     const { data, error } = await supabase
       .from('agendaya_appointments')
-      .select(`
-        *, 
-        profiles:agendaya_profiles (
-          full_name, 
-          phone
-        ), 
-        services:agendaya_services (
-          name, 
-          duration, 
-          price
-        ),
-        review:agendaya_reviews!appointment_id (
-          id,
-          rating,
-          comment,
-          created_at,
-          user_id,
-          business_id,
-          status
-        )
-      `) 
+      .select('*')
       .eq('business_id', businessId)
       .order('start_time', { ascending: true });
     if (error) throw error;
-    return { success: true, data: data as Appointment[], error: null };
+    const appointments = (data || []) as Appointment[];
+
+    if (appointments.length === 0) {
+      return { success: true, data: appointments, error: null };
+    }
+
+    const userIds = [...new Set(appointments.map(a => a.user_id).filter(Boolean))];
+    const serviceIds = [...new Set(appointments.map(a => a.service_id).filter(Boolean))];
+
+    const [profilesRes, servicesRes] = await Promise.all([
+      userIds.length > 0
+        ? supabase.from('agendaya_profiles').select('id, full_name, phone').in('id', userIds)
+        : { data: [] },
+      serviceIds.length > 0
+        ? supabase.from('agendaya_services').select('id, name, duration, price').in('id', serviceIds)
+        : { data: [] },
+    ]);
+
+    const profileMap = new Map((profilesRes.data || []).map((p: any) => [p.id, p]));
+    const serviceMap = new Map((servicesRes.data || []).map((s: any) => [s.id, s]));
+
+    const enriched = appointments.map(a => ({
+      ...a,
+      profiles: profileMap.get(a.user_id) || null,
+      services: serviceMap.get(a.service_id) || null,
+    }));
+
+    return { success: true, data: enriched as Appointment[], error: null };
   } catch (err: any) {
+    console.error('[getBusinessAppointments] Error:', err);
     return { success: false, data: null, error: err.message || 'Error al cargar citas del negocio' };
   }
 }
