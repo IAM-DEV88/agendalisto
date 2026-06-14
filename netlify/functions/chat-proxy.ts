@@ -13,7 +13,7 @@ export const handler: Handler = async (event: HandlerEvent) => {
       return { statusCode: 400, body: JSON.stringify({ error: 'messages array is required' }) };
     }
 
-    const apiKey = process.env.GROQ_API_KEY;
+    const apiKey = process.env.GROQ_API_KEY || process.env.VITE_GROQ_API_KEY;
     if (!apiKey) {
       return { statusCode: 500, body: JSON.stringify({ error: 'GROQ_API_KEY not configured' }) };
     }
