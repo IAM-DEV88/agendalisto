@@ -3,6 +3,7 @@ import { useEffect, useCallback, useRef } from 'react';
 import { supabase } from './lib/supabase';
 import { obtenerPerfilUsuario } from './lib/api';
 import Home from './pages/Home';
+import NotFound from './pages/NotFound';
 import Login from './pages/Login';
 import Register from './pages/Register';
 import ProfileDashboard from './pages/ProfileDashboard';
@@ -303,6 +304,7 @@ function App() {
             <Route path="/categorias/:category" element={<SEOLandingPage />} />
             <Route path="/:slug/book/:serviceId" element={<BookingPage />} />
             <Route path="/:slug" element={<BusinessPublicPage />} />
+            <Route path="*" element={<NotFound />} />
           </Routes>
         </main>
         <Footer />

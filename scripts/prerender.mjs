@@ -47,6 +47,24 @@ function serveStatic(req, res) {
   res.end(content);
 }
 
+function fallbackCopy() {
+  const indexHtml = resolve(DIST, 'index.html');
+  if (!existsSync(indexHtml)) {
+    console.log('[prerender] ⚠️ No se encontró index.html en dist/');
+    return false;
+  }
+  const html = readFileSync(indexHtml, 'utf-8');
+  for (const route of ROUTES) {
+    if (route === '/') continue;
+    const dir = resolve(DIST, route.slice(1));
+    if (!existsSync(dir)) mkdirSync(dir, { recursive: true });
+    writeFileSync(resolve(dir, 'index.html'), html, 'utf-8');
+    console.log(`[prerender] 📄 ${route} → copia estática`);
+  }
+  console.log('[prerender] ✅ Fallback completado');
+  return true;
+}
+
 function startServer() {
   return new Promise((resolve) => {
     const server = createServer(serveStatic).listen(PORT, () => {
@@ -59,14 +77,19 @@ function startServer() {
 async function prerenderWithBrowser() {
   let puppeteer;
   try {
-    puppeteer = await import('puppeteer-core');
+    puppeteer = await import('puppeteer');
   } catch {
-    console.log('[prerender] ⏭️ puppeteer-core no disponible — omitiendo prerender');
-    return false;
+    try {
+      puppeteer = await import('puppeteer-core');
+    } catch {
+      console.log('[prerender] ⏭️ puppeteer no instalado — copiando HTML estático como fallback');
+      return fallbackCopy();
+    }
   }
 
   const CHROME_PATHS = [
     process.env.CHROME_BIN,
+    ...(puppeteer.executablePath ? [puppeteer.executablePath()] : []),
     '/usr/bin/google-chrome',
     '/usr/bin/google-chrome-stable',
     '/usr/bin/chromium',
@@ -89,8 +112,8 @@ async function prerenderWithBrowser() {
   }
 
   if (!browser) {
-    console.log('[prerender] ⏭️ No se encontró Chrome/Chromium — omitiendo prerender');
-    return false;
+    console.log('[prerender] ⏭️ No se encontró Chrome/Chromium — copiando HTML estático como fallback');
+    return fallbackCopy();
   }
 
   const server = await startServer();

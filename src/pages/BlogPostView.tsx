@@ -5,6 +5,7 @@ import { getBlogPost, getBlogComments, createBlogComment, toggleBlogLike, BlogPo
 import { supabase } from '../lib/supabase';
 import { toast } from 'react-hot-toast';
 import SEO from '../components/SEO';
+import Breadcrumbs from '../components/ui/Breadcrumbs';
 import ShareButton from '../components/ui/ShareButton';
 
 // Función para parsear el contenido del mensaje (reutilizada del chat)
@@ -248,6 +249,11 @@ const BlogPostView = () => {
         schemaData={articleSchema}
       />
       <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
+        <Breadcrumbs crumbs={[
+          { label: 'Inicio', href: '/' },
+          { label: 'Blog', href: '/blog' },
+          { label: post.title },
+        ]} />
         <Link to="/blog" className="inline-flex items-center gap-2 text-slate-500 hover:text-primary-600 font-bold mb-8 transition-colors group">
           <ArrowLeft className="w-4 h-4 group-hover:-translate-x-1 transition-transform" /> Volver al blog
         </Link>
@@ -255,7 +261,7 @@ const BlogPostView = () => {
         <article className="card p-8 sm:p-12 shadow-2xl shadow-slate-200/50 dark:shadow-none mb-12">
           {post.image_url && (
             <div className="h-64 sm:h-96 -mx-8 sm:-mx-12 -mt-8 sm:-mt-12 mb-10 overflow-hidden bg-slate-100 dark:bg-slate-800 border-b border-slate-100 dark:border-slate-800">
-              <img src={post.image_url} alt={post.title} className="w-full h-full object-cover" />
+              <img src={post.image_url} alt={post.title} loading="lazy" className="w-full h-full object-cover" />
             </div>
           )}
 

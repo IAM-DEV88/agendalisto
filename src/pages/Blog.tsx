@@ -160,7 +160,7 @@ const Blog = () => {
                       {/* Image */}
                       <div className="h-48 overflow-hidden bg-slate-100 dark:bg-slate-800 flex-shrink-0">
                         {post.image_url ? (
-                          <img src={post.image_url} alt={post.title} className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110" />
+                          <img src={post.image_url} alt={post.title} loading="lazy" className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110" />
                         ) : (
                           <div className="w-full h-full flex items-center justify-center">
                             <BookOpen className="w-10 h-10 text-slate-300 dark:text-slate-600" />

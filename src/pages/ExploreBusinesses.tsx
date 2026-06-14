@@ -56,6 +56,7 @@ const BusinessCard = ({ business, categories, isLiked: initialLiked, currentUser
         <img
           src={business.logo_url || FALLBACK_LOGO}
           alt={business.name}
+          loading="lazy"
           className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500"
           onError={(e) => { e.currentTarget.src = FALLBACK_LOGO; }}
         />

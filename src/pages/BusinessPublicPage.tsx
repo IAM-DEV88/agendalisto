@@ -10,6 +10,7 @@ import {
   ReviewsSection
 } from '../components/business/public';
 import SEO from '../components/SEO';
+import Breadcrumbs from '../components/ui/Breadcrumbs';
 import EmptyState from '../components/ui/EmptyState';
 import { Store, Clock, MapPin } from 'lucide-react';
 
@@ -182,6 +183,13 @@ function BusinessPublicPage() {
         schemaData={businessSchema}
       />
       <div className="max-w-7xl mx-auto py-8 px-4 sm:px-6 lg:px-8 animate-in fade-in duration-300">
+
+        {/* Breadcrumbs */}
+        <Breadcrumbs crumbs={[
+          { label: 'Inicio', href: '/' },
+          { label: 'Explorar', href: '/explore' },
+          { label: businessData.name },
+        ]} />
 
         {/* Business Header */}
         <BusinessHeader businessData={businessData} averageRating={averageRating} reviewsCount={reviews.length} />

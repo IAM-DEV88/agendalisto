@@ -47,6 +47,30 @@ const SEO: React.FC<SEOProps> = ({
       <meta name="twitter:image" content={image} />
 
       {/* Structured Data (Schema.org) */}
+      <script type="application/ld+json">
+        {JSON.stringify({
+          '@context': 'https://schema.org',
+          '@type': 'WebSite',
+          name: siteName,
+          url: siteUrl,
+          description: defaultDescription,
+          potentialAction: {
+            '@type': 'SearchAction',
+            target: { '@type': 'EntryPoint', urlTemplate: `${siteUrl}/explore?search={search_term_string}` },
+            'query-input': 'required name=search_term_string',
+          },
+        })}
+      </script>
+      <script type="application/ld+json">
+        {JSON.stringify({
+          '@context': 'https://schema.org',
+          '@type': 'Organization',
+          name: siteName,
+          url: siteUrl,
+          logo: `${siteUrl}/icons/icon-512.svg`,
+          description: defaultDescription,
+        })}
+      </script>
       {schemaData && (
         <script type="application/ld+json">
           {JSON.stringify(schemaData)}
