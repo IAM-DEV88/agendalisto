@@ -89,7 +89,7 @@ async function prerenderWithBrowser() {
 
   let bundledPath;
   try {
-    bundledPath = puppeteer.executablePath ? puppeteer.executablePath() : null;
+    bundledPath = puppeteer.executablePath ? await puppeteer.executablePath() : null;
   } catch {
     bundledPath = null;
   }
