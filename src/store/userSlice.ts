@@ -32,6 +32,10 @@ const userSlice = createSlice({
     setBusinesses(state, action: PayloadAction<Business[]>) {
       state.businesses = action.payload;
     },
+    updateBusinessInStore(state, action: PayloadAction<Business>) {
+      const idx = state.businesses.findIndex(b => b.id === action.payload.id);
+      if (idx !== -1) state.businesses[idx] = action.payload;
+    },
     setActiveBusinessId(state, action: PayloadAction<string | undefined>) {
       if (state.userProfile) {
         state.userProfile.business_id = action.payload;
@@ -46,5 +50,5 @@ const userSlice = createSlice({
   },
 });
 
-export const { setUser, setUserProfile, setBusinesses, setActiveBusinessId, setLoading, setAuthInitialized } = userSlice.actions;
+export const { setUser, setUserProfile, setBusinesses, updateBusinessInStore, setActiveBusinessId, setLoading, setAuthInitialized } = userSlice.actions;
 export default userSlice.reducer; 

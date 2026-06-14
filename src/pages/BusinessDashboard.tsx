@@ -9,7 +9,7 @@ import { notifySuccess, notifyError } from '../lib/toast';
 import { useUIConfig } from '../hooks/useUIConfig';
 import { useAuth } from '../hooks/useAuth';
 import { useAppDispatch } from '../hooks/useAppDispatch';
-import { setBusinesses } from '../store/userSlice';
+import { setBusinesses, updateBusinessInStore } from '../store/userSlice';
 import { useBusinessConfig } from '../hooks/useBusinessConfig';
 import { useBusinessHours } from '../hooks/useBusinessHours';
 import { useBusinessClients } from '../hooks/useBusinessClients';
@@ -223,6 +223,7 @@ export const BusinessDashboard: React.FC = () => {
         showcase_only: businessData.showcase_only ?? false,
       });
       setBusinessData(response);
+      dispatch(updateBusinessInStore(response));
       setBusinessMessage({ text: 'Datos del negocio actualizados', type: 'success' });
       notifySuccess('Datos del negocio actualizados');
     } catch (err: any) {
