@@ -1,7 +1,7 @@
 import { useState, useEffect, useCallback } from 'react';
 import { Link, useSearchParams } from 'react-router-dom';
 import { useSelector } from 'react-redux';
-import { Business, getBusinessStats, getBusinessById, getBusinessServices, getUserBusinesses, updateAppointmentStatus, updateBusiness, createBusinessService, updateBusinessService, deleteBusinessService, BusinessStats } from '../lib/api';
+import { Business, getBusinessStats, getBusinessById, getBusinessServices, getUserBusinesses, updateAppointmentStatus, updateBusiness, deleteBusinessService, BusinessStats } from '../lib/api';
 import { supabase } from '../lib/supabase';
 import { AppointmentStatus } from '../types/appointment';
 import { useBusinessAppointments } from '../hooks/useBusinessAppointments';
@@ -488,8 +488,6 @@ export const BusinessDashboard: React.FC = () => {
                 <ServicesSection
                   businessId={businessData.id}
                   getServices={getBusinessServices}
-                  createService={createBusinessService}
-                  updateService={updateBusinessService}
                   deleteService={deleteBusinessService}
                   itemsPerPage={itemsPerPage}
                   plan={plan}

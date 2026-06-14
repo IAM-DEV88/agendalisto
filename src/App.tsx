@@ -18,6 +18,7 @@ import ExploreBusinesses from './pages/ExploreBusinesses';
 import Crowdfunding from './pages/Crowdfunding';
 import Plans from './pages/Plans';
 import PaymentSuccess from './pages/PaymentSuccess';
+import ServicePaymentSuccess from './pages/ServicePaymentSuccess';
 import GiftBooking from './pages/GiftBooking';
 import Embajadores from './pages/Embajadores';
 import CajasCompensacion from './pages/CajasCompensacion';
@@ -26,6 +27,7 @@ import EmbedWidget from './pages/EmbedWidget';
 import Blog from './pages/Blog';
 import BlogPostView from './pages/BlogPostView';
 import BookingPage from './pages/BookingPage';
+import ServiceFormPage from './pages/ServiceFormPage';
 import ScrollToTop from './components/ScrollToTop';
 import Nav from './components/Nav';
 import Footer from './components/Footer';
@@ -249,6 +251,7 @@ function App() {
             <Route path="/crowdfunding" element={<Crowdfunding />} />
             <Route path="/plans" element={<Plans />} />
             <Route path="/payment/success" element={<PaymentSuccess />} />
+            <Route path="/payment/service/success" element={<ServicePaymentSuccess />} />
             <Route path="/:slug/gift/:serviceId" element={<GiftBooking />} />
             <Route path="/widget/:slug" element={<EmbedWidget />} />
             <Route path="/embajadores" element={<Embajadores />} />
@@ -274,6 +277,16 @@ function App() {
             <Route path="/business/dashboard" element={
               <ProtectedRoute user={user} userProfile={userProfile} requiredRole="business_owner">
                 <BusinessDashboard />
+              </ProtectedRoute>
+            } />
+            <Route path="/business/service/new" element={
+              <ProtectedRoute user={user} userProfile={userProfile} requiredRole="business_owner">
+                <ServiceFormPage />
+              </ProtectedRoute>
+            } />
+            <Route path="/business/service/:serviceId/edit" element={
+              <ProtectedRoute user={user} userProfile={userProfile} requiredRole="business_owner">
+                <ServiceFormPage />
               </ProtectedRoute>
             } />
             <Route path="/moderator/dashboard" element={

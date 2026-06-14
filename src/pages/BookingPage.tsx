@@ -136,7 +136,7 @@ function BookingPage() {
                   <img
                     src={images[activeImageIndex]}
                     alt={service.name}
-                    className="w-full h-full object-cover cursor-zoom-in transition-transform duration-500 group-hover:scale-105"
+                    className="w-full h-full object-contain bg-slate-100 dark:bg-slate-800 cursor-zoom-in transition-transform duration-500 group-hover:scale-105"
                     onClick={() => setFullscreenImage(images[activeImageIndex])}
                   />
                   {images.length > 1 && (

@@ -80,7 +80,7 @@ const ServiceCard: React.FC<{
           <img
             src={images[currentImgIdx]}
             alt={service.name}
-            className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
+            className="w-full h-full object-contain bg-slate-100 dark:bg-slate-800 transition-transform duration-500 group-hover:scale-105"
             onClick={(e) => openFullscreen(e, images[currentImgIdx])}
           />
           {images.length > 1 && (
@@ -142,14 +142,16 @@ const ServiceCard: React.FC<{
               {likesCount}
             </button>
             <div onClick={(e) => e.stopPropagation()} className="flex items-center gap-1">
-              <a
-                href={`/${window.location.pathname.split('/')[1]}/gift/${service.id}`}
-                onClick={(e) => { e.stopPropagation(); }}
-                className="flex items-center gap-1 px-2.5 py-1.5 rounded-xl text-[10px] font-black transition-all bg-rose-50 dark:bg-rose-900/20 text-rose-500 dark:text-rose-400 hover:bg-rose-100 dark:hover:bg-rose-900/40"
-                title="Regalar este servicio"
-              >
-                <Gift className="w-3 h-3" />
-              </a>
+              {service.can_be_gifted && (
+                <a
+                  href={`/${window.location.pathname.split('/')[1]}/gift/${service.id}`}
+                  onClick={(e) => { e.stopPropagation(); }}
+                  className="flex items-center gap-1 px-2.5 py-1.5 rounded-xl text-[10px] font-black transition-all bg-rose-50 dark:bg-rose-900/20 text-rose-500 dark:text-rose-400 hover:bg-rose-100 dark:hover:bg-rose-900/40"
+                  title="Regalar este servicio"
+                >
+                  <Gift className="w-3 h-3" />
+                </a>
+              )}
               <ShareButton
                 url={shareUrl}
                 title={`Reservar: ${service.name}`}

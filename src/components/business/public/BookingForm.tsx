@@ -1,11 +1,12 @@
 import React, { useState, useEffect, useMemo } from 'react';
-import { Clock, Calendar, CheckCircle, ArrowLeft, Send, AlertCircle, Gift, Check, X } from 'lucide-react';
+import { Clock, Calendar, CheckCircle, ArrowLeft, Send, AlertCircle, Gift, Check, X, Lock } from 'lucide-react';
 import CrossPromotion from '../CrossPromotion';
 import { createAppointment, Service, getBusinessHours, getBusinessAppointments, BusinessHours, Appointment, validateGiftCode, redeemGiftCode } from '../../../lib/api';
 import type { GuestInfo, GiftCode } from '../../../lib/api';
 import { notifyError, notifyLoading, dismissToast } from '../../../lib/toast';
 import { toast } from 'react-hot-toast';
 import { Link } from 'react-router-dom';
+import PaymentMethodSelector from '../../PaymentMethodSelector';
 
 interface BookingFormProps {
   businessId: string;
@@ -47,6 +48,7 @@ const BookingForm: React.FC<BookingFormProps> = ({
   const [giftApplied, setGiftApplied] = useState<GiftCode | null>(null);
   const [giftError, setGiftError] = useState('');
   const [validatingGift, setValidatingGift] = useState(false);
+  const [showPayment, setShowPayment] = useState(false);
 
   const [businessHours, setBusinessHours] = useState<BusinessHours[]>([]);
   const [appointments, setAppointments] = useState<Appointment[]>([]);
@@ -123,6 +125,32 @@ const BookingForm: React.FC<BookingFormProps> = ({
     });
   }, [formData.date, loadingSlots, businessHours, appointments, service]);
 
+  const paymentAmount = service?.payment_percentage != null
+    ? Math.round((service.price * service.payment_percentage) / 100)
+    : service?.price || 0;
+  const requiresPayment = !!service?.requires_payment && paymentAmount > 0 && !giftApplied;
+
+  const doCreateAppointment = async (paymentProvider?: string, paymentId?: string, paymentAmt?: number) => {
+    const startTime = new Date(`${formData.date}T${formData.time}`);
+    const endTime = new Date(startTime.getTime() + (service?.duration || 0) * 60000);
+
+    return await createAppointment({
+      business_id: businessId,
+      service_id: serviceId,
+      user_id: userId || '',
+      start_time: startTime.toISOString(),
+      end_time: endTime.toISOString(),
+      status: 'pending' as const,
+      notes: formData.notes || null,
+      is_guest: !userId,
+      guest_info: !userId ? guestInfo! : null,
+      payment_status: paymentProvider ? 'completed' : undefined,
+      payment_provider: paymentProvider || undefined,
+      payment_id: paymentId || undefined,
+      payment_amount: paymentAmt || undefined,
+    });
+  };
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (requireConfirmation && !confirmationChecked) {
@@ -141,27 +169,24 @@ const BookingForm: React.FC<BookingFormProps> = ({
       setError('Completa tu nombre y correo para reservar');
       return;
     }
+    if (!formData.date || !formData.time) {
+      setError('Selecciona fecha y hora');
+      return;
+    }
 
+    if (requiresPayment) {
+      setShowPayment(true);
+      return;
+    }
+
+    // Free booking: create directly
     let toastId = '';
     try {
       toastId = notifyLoading('Enviando solicitud...');
       setSubmitting(true);
       setError(null);
 
-      const startTime = new Date(`${formData.date}T${formData.time}`);
-      const endTime = new Date(startTime.getTime() + service.duration * 60000);
-
-      const result = await createAppointment({
-        business_id: businessId,
-        service_id: serviceId,
-        user_id: userId || '',
-        start_time: startTime.toISOString(),
-        end_time: endTime.toISOString(),
-        status: 'pending' as const,
-        notes: formData.notes || null,
-        is_guest: !userId,
-        guest_info: !userId ? guestInfo! : null,
-      });
+      const result = await doCreateAppointment();
 
       dismissToast(toastId);
       if (result) {
@@ -182,6 +207,113 @@ const BookingForm: React.FC<BookingFormProps> = ({
     } finally {
       setSubmitting(false);
     }
+  };
+
+  const handlePayPalCreateOrder = async (): Promise<string> => {
+    const res = await fetch('/.netlify/functions/create-service-payment', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        provider: 'paypal',
+        amount: paymentAmount,
+        currency: 'COP',
+        serviceName: service?.name || '',
+        businessName,
+        userId: userId || '',
+      }),
+    });
+    const data = await res.json();
+    if (!res.ok || !data.orderId) throw new Error(data.error || 'Error al crear pago');
+    return data.orderId;
+  };
+
+  const handlePayPalApprove = async (orderId: string) => {
+    let toastId = '';
+    try {
+      toastId = notifyLoading('Procesando pago...');
+      setSubmitting(true);
+      setError(null);
+
+      const res = await fetch('/.netlify/functions/capture-service-payment', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          provider: 'paypal',
+          orderId,
+          action: 'create_appointment',
+          actionData: {
+            business_id: businessId,
+            service_id: serviceId,
+            user_id: userId || '',
+            start_time: new Date(`${formData.date}T${formData.time}`).toISOString(),
+            end_time: new Date(new Date(`${formData.date}T${formData.time}`).getTime() + (service?.duration || 0) * 60000).toISOString(),
+            notes: formData.notes || null,
+            guest_info: !userId ? guestInfo! : null,
+            payment_provider: 'paypal',
+            payment_amount: paymentAmount,
+          },
+        }),
+      });
+
+      const result = await res.json();
+      dismissToast(toastId);
+
+      if (!res.ok || !result.success) {
+        throw new Error(result.error || 'Error al procesar pago');
+      }
+
+      if (giftApplied) {
+        await redeemGiftCode(giftApplied.code);
+      }
+      setBookingSuccess(true);
+    } catch (err: any) {
+      dismissToast(toastId);
+      const msg = err.message || 'Error al procesar pago';
+      setError(msg);
+      notifyError(msg);
+    } finally {
+      setSubmitting(false);
+    }
+  };
+
+  const handleWompiPay = async () => {
+    const startTime = new Date(`${formData.date}T${formData.time}`);
+    const endTime = new Date(startTime.getTime() + (service?.duration || 0) * 60000);
+
+    const res = await fetch('/.netlify/functions/create-service-payment', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        provider: 'wompi',
+        amount: paymentAmount,
+        currency: 'COP',
+        serviceName: service?.name || '',
+        businessName,
+        userId: userId || '',
+        userEmail: guestInfo?.email || '',
+        userName: guestInfo?.name || '',
+        action: 'create_appointment',
+        actionData: {
+          business_id: businessId,
+          service_id: serviceId,
+          user_id: userId || '',
+          start_time: startTime.toISOString(),
+          end_time: endTime.toISOString(),
+          notes: formData.notes || null,
+          guest_info: !userId ? guestInfo! : null,
+          amount: paymentAmount,
+          currency: 'COP',
+        },
+      }),
+    });
+
+    const data = await res.json();
+    if (!res.ok || !data.checkoutUrl) {
+      toast.error(data.error || 'Error al iniciar pago con Wompi');
+      return;
+    }
+
+    window.location.href = data.checkoutUrl;
   };
 
   const today = (() => {
@@ -441,40 +573,67 @@ const BookingForm: React.FC<BookingFormProps> = ({
           </label>
         )}
 
-        {/* Actions */}
-        <div className="flex flex-col sm:flex-row gap-3 pt-2">
-          <button
-            type="button"
-            onClick={onClose}
-            className="flex-1 inline-flex items-center justify-center gap-2 px-6 py-3.5 bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300 font-bold rounded-xl hover:bg-slate-200 dark:hover:bg-slate-700 transition-all active:scale-[0.98]"
-          >
-            <ArrowLeft className="w-4 h-4" />
-            Cancelar
-          </button>
-          <button
-            type="submit"
-            disabled={!formData.date || !formData.time || submitting}
-            className="flex-[2] inline-flex items-center justify-center gap-2 px-6 py-3.5 bg-primary-600 hover:bg-primary-700 text-white font-bold rounded-xl shadow-lg shadow-primary-500/25 transition-all hover:-translate-y-0.5 active:translate-y-0 disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:-translate-y-0"
-          >
-            {submitting ? (
-              <>
-                <div className="animate-spin rounded-full h-4 w-4 border-2 border-white border-t-transparent" />
-                Procesando...
-              </>
-            ) : (
-              <>
-                <Send className="w-4 h-4" />
-                {requireConfirmation ? 'Solicitar Cita' : 'Confirmar Reserva'}
-              </>
-            )}
-          </button>
-        </div>
+        {/* Payment step */}
+        {showPayment && (
+          <div className="space-y-4 pt-2 border-t border-slate-200 dark:border-slate-700">
+            <div className="flex items-center gap-2 p-3 bg-amber-50 dark:bg-amber-900/10 rounded-xl border border-amber-200 dark:border-amber-800/50">
+              <Lock className="w-4 h-4 text-amber-600 flex-shrink-0" />
+              <p className="text-xs text-amber-700 dark:text-amber-400">
+                Este servicio requiere pago online de <strong>${paymentAmount.toLocaleString()} COP</strong> para confirmar la reserva.
+              </p>
+            </div>
+            <PaymentMethodSelector
+              amount={paymentAmount}
+              currency="COP"
+              serviceName={service?.name || ''}
+              businessName={businessName}
+              userId={userId || ''}
+              onPayPalCreateOrder={handlePayPalCreateOrder}
+              onPayPalApprove={handlePayPalApprove}
+              onWompiPay={handleWompiPay}
+              disabled={submitting}
+            />
+          </div>
+        )}
 
-        <p className="text-center text-xs text-slate-400 font-medium">
-          {requireConfirmation
-            ? 'El negocio confirmará tu solicitud para validar la cita.'
-            : 'Tu cita será agendada instantáneamente.'}
-        </p>
+        {/* Actions (hidden during payment step) */}
+        {!showPayment && (
+          <>
+            <div className="flex flex-col sm:flex-row gap-3 pt-2">
+              <button
+                type="button"
+                onClick={onClose}
+                className="flex-1 inline-flex items-center justify-center gap-2 px-6 py-3.5 bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300 font-bold rounded-xl hover:bg-slate-200 dark:hover:bg-slate-700 transition-all active:scale-[0.98]"
+              >
+                <ArrowLeft className="w-4 h-4" />
+                Cancelar
+              </button>
+              <button
+                type="submit"
+                disabled={!formData.date || !formData.time || submitting}
+                className="flex-[2] inline-flex items-center justify-center gap-2 px-6 py-3.5 bg-primary-600 hover:bg-primary-700 text-white font-bold rounded-xl shadow-lg shadow-primary-500/25 transition-all hover:-translate-y-0.5 active:translate-y-0 disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:-translate-y-0"
+              >
+                {submitting ? (
+                  <>
+                    <div className="animate-spin rounded-full h-4 w-4 border-2 border-white border-t-transparent" />
+                    Procesando...
+                  </>
+                ) : (
+                  <>
+                    <Send className="w-4 h-4" />
+                    {requireConfirmation ? 'Solicitar Cita' : 'Confirmar Reserva'}
+                  </>
+                )}
+              </button>
+            </div>
+
+            <p className="text-center text-xs text-slate-400 font-medium">
+              {requireConfirmation
+                ? 'El negocio confirmará tu solicitud para validar la cita.'
+                : 'Tu cita será agendada instantáneamente.'}
+            </p>
+          </>
+        )}
       </form>
     </div>
   );

@@ -184,16 +184,18 @@ const ExploreBusinesses = () => {
   const [mapLoading, setMapLoading] = useState(false);
 
   const observer = useRef<IntersectionObserver | null>(null);
-  const lastCardRef = useCallback((node: HTMLDivElement | null) => {
-    if (loading || loadingMore) return;
+  const initialLoadRef = useRef(false);
+
+  const sentinelRef = useCallback((node: HTMLDivElement | null) => {
     if (observer.current) observer.current.disconnect();
+    if (!node || !initialLoadRef.current) return;
     observer.current = new IntersectionObserver(entries => {
-      if (entries[0].isIntersecting && hasMore) {
+      if (entries[0].isIntersecting && hasMore && !loadingMore) {
         setPage(prev => prev + 1);
       }
     });
-    if (node) observer.current.observe(node);
-  }, [loading, loadingMore, hasMore]);
+    observer.current.observe(node);
+  }, [hasMore, loadingMore]);
 
   useEffect(() => {
     setSearchTerm(searchParams.get('search') || '');
@@ -260,6 +262,7 @@ const ExploreBusinesses = () => {
     } catch {
       setError('Error al cargar los negocios. Intenta de nuevo.');
     } finally {
+      if (isInitial) initialLoadRef.current = true;
       setLoading(false);
       setLoadingMore(false);
     }
@@ -417,21 +420,23 @@ const ExploreBusinesses = () => {
         ) : (
           <>
             <div className="grid gap-6 grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 animate-in fade-in slide-in-from-bottom-4 duration-500">
-              {businesses.map((business, index) => {
-                const isLast = index === businesses.length - 1;
-                return (
-                  <div key={business.id} ref={isLast ? lastCardRef : undefined}>
-                    <BusinessCard
-                      business={business}
-                      categories={categories}
-                      isLiked={likedIds.has(business.id)}
-                      currentUser={user}
-                      onToggleLike={handleToggleLike}
-                    />
-                  </div>
-                );
-              })}
+              {businesses.map((business) => (
+                <div key={business.id}>
+                  <BusinessCard
+                    business={business}
+                    categories={categories}
+                    isLiked={likedIds.has(business.id)}
+                    currentUser={user}
+                    onToggleLike={handleToggleLike}
+                  />
+                </div>
+              ))}
             </div>
+
+            {/* Sentinel para infinite scroll — siempre visible si hay más páginas */}
+            {hasMore && (
+              <div ref={sentinelRef} className="h-4" />
+            )}
 
             {loadingMore && (
               <div className="flex justify-center py-8 animate-in fade-in duration-300">

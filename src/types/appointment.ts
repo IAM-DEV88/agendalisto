@@ -61,6 +61,10 @@ export interface Appointment {
   guest_info?: GuestInfo | null;
   is_guest?: boolean;
   cancel_reason?: string | null;
+  payment_status?: string | null;
+  payment_provider?: string | null;
+  payment_id?: string | null;
+  payment_amount?: number | null;
   created_at: string;
   updated_at: string;
   businesses?: {

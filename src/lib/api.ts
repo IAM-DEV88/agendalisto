@@ -46,7 +46,10 @@ export interface Service {
   updated_at: string;
   is_active: boolean;
   provider?: string;
-  image_urls?: string[]; // Array of image URLs for the service gallery
+  image_urls?: string[];
+  can_be_gifted?: boolean;
+  requires_payment?: boolean;
+  payment_percentage?: number;
 }
 
 export type BusinessHours = {
@@ -319,7 +322,33 @@ export interface GiftCode {
   redeemed_at: string | null;
   created_at: string;
   expires_at: string;
+  /** Payment fields */
+  payment_provider?: string | null;
+  payment_status?: string;
+  payment_id?: string | null;
+  payment_amount?: number | null;
+  payment_currency?: string | null;
 }
+
+export const checkPendingPayment = async (reference: string): Promise<{
+  success: boolean;
+  status?: string;
+  error?: string;
+  data?: any;
+}> => {
+  try {
+    const { data, error } = await supabase
+      .from('agendaya_pending_payments')
+      .select('*')
+      .eq('reference', reference)
+      .maybeSingle();
+    if (error) throw error;
+    if (!data) return { success: false, error: 'Referencia no encontrada' };
+    return { success: true, status: data.status, data };
+  } catch (err: any) {
+    return { success: false, error: err.message };
+  }
+};
 
 export const createGiftCode = async (gift: {
   code: string;
@@ -331,13 +360,30 @@ export const createGiftCode = async (gift: {
   recipient_phone?: string;
   message?: string;
   expires_at: string;
+  payment_provider: string;
+  payment_id: string;
+  payment_amount: number;
+  payment_currency: string;
 }): Promise<{ success: boolean; error?: string }> => {
   try {
     const { error } = await supabase
       .from('agendaya_gift_codes')
       .insert([{
-        ...gift,
+        code: gift.code,
+        service_id: gift.service_id,
+        business_id: gift.business_id,
+        sender_user_id: gift.sender_user_id,
+        recipient_name: gift.recipient_name,
+        recipient_email: gift.recipient_email,
+        recipient_phone: gift.recipient_phone || null,
+        message: gift.message || null,
+        expires_at: gift.expires_at,
         status: 'active',
+        payment_provider: gift.payment_provider,
+        payment_status: 'completed',
+        payment_id: gift.payment_id,
+        payment_amount: gift.payment_amount,
+        payment_currency: gift.payment_currency,
       }]);
     if (error) throw error;
     return { success: true };
