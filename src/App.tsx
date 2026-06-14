@@ -17,6 +17,7 @@ import SEOLandingPage from './pages/SEOLandingPage';
 import ForgotPassword from './pages/ForgotPassword';
 import ExploreBusinesses from './pages/ExploreBusinesses';
 import Crowdfunding from './pages/Crowdfunding';
+import FAQ from './pages/FAQ';
 import Plans from './pages/Plans';
 import PaymentSuccess from './pages/PaymentSuccess';
 import ServicePaymentSuccess from './pages/ServicePaymentSuccess';
@@ -28,6 +29,7 @@ import EmbedWidget from './pages/EmbedWidget';
 import Blog from './pages/Blog';
 import BlogPostView from './pages/BlogPostView';
 import BookingPage from './pages/BookingPage';
+import ReviewPage from './pages/ReviewPage';
 import ServiceFormPage from './pages/ServiceFormPage';
 import ScrollToTop from './components/ScrollToTop';
 import Nav from './components/Nav';
@@ -250,6 +252,7 @@ function App() {
             <Route path="/forgot-password" element={<ForgotPassword />} />
             <Route path="/explore" element={<ExploreBusinesses />} />
             <Route path="/crowdfunding" element={<Crowdfunding />} />
+            <Route path="/faq" element={<FAQ />} />
             <Route path="/plans" element={<Plans />} />
             <Route path="/payment/success" element={<PaymentSuccess />} />
             <Route path="/payment/service/success" element={<ServicePaymentSuccess />} />
@@ -302,6 +305,7 @@ function App() {
             } />
             <Route path="/ciudades/:city" element={<SEOLandingPage />} />
             <Route path="/categorias/:category" element={<SEOLandingPage />} />
+            <Route path="/review/:appointmentId" element={<ReviewPage />} />
             <Route path="/:slug/book/:serviceId" element={<BookingPage />} />
             <Route path="/:slug" element={<BusinessPublicPage />} />
             <Route path="*" element={<NotFound />} />

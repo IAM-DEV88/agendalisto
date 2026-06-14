@@ -35,6 +35,7 @@ async function generateSitemap() {
     { loc: '/login', changefreq: 'monthly', priority: '0.3' },
     { loc: '/register', changefreq: 'monthly', priority: '0.5' },
     { loc: '/forgot-password', changefreq: 'monthly', priority: '0.1' },
+    { loc: '/faq', changefreq: 'monthly', priority: '0.6' },
     { loc: '/crowdfunding', changefreq: 'weekly', priority: '0.6' },
   ];
 

@@ -1201,12 +1201,38 @@ export async function getPendingReviews(): Promise<{ success: boolean; data: (Re
   try {
     const { data, error } = await supabase
       .from('agendaya_reviews')
-      .select('*, profiles:agendaya_profiles!user_id(full_name), businesses:agendaya_businesses!business_id(name)')
+      .select('*')
       .eq('status', 'pending')
       .order('created_at', { ascending: false });
     if (error) throw error;
-    return { success: true, data: data as any[] };
+    const reviews = (data || []) as Review[];
+
+    if (reviews.length === 0) return { success: true, data: [] };
+
+    const userIds = [...new Set(reviews.map(r => r.user_id).filter(Boolean))];
+    const businessIds = [...new Set(reviews.map(r => r.business_id).filter(Boolean))];
+
+    const [profilesRes, businessesRes] = await Promise.all([
+      userIds.length > 0
+        ? supabase.from('agendaya_profiles').select('id, full_name').in('id', userIds)
+        : { data: [] },
+      businessIds.length > 0
+        ? supabase.from('agendaya_businesses').select('id, name').in('id', businessIds)
+        : { data: [] },
+    ]);
+
+    const profileMap = new Map((profilesRes.data || []).map((p: any) => [p.id, p]));
+    const businessMap = new Map((businessesRes.data || []).map((b: any) => [b.id, b]));
+
+    const enriched = reviews.map(r => ({
+      ...r,
+      profiles: profileMap.get(r.user_id) || null,
+      businesses: businessMap.get(r.business_id) || null,
+    }));
+
+    return { success: true, data: enriched as any[] };
   } catch (err: any) {
+    console.error('[getPendingReviews] Error:', err);
     return { success: false, data: [], error: err.message };
   }
 }

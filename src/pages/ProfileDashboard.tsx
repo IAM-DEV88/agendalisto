@@ -9,14 +9,13 @@ import { setUserProfile } from '../store/userSlice';
 import { useAppointments } from '../hooks/useAppointments';
 import type { UserProfile } from '../lib/supabase';
 import type { RootState } from '../store';
-import { getUserBusinesses, updateUserProfile, createBusinessReview as apiCreateBusinessReview } from '../lib/api';
+import { getUserBusinesses, updateUserProfile } from '../lib/api';
 import { toast } from 'react-hot-toast';
 import { notifySuccess, notifyError } from '../lib/toast';
 import { useUIConfig } from '../hooks/useUIConfig';
 import UserAppointmentList from '../components/appointments/UserAppointmentList';
 import FavoritesSection from '../components/profile/FavoritesSection';
 import type { Appointment } from '../types/appointment';
-import ReviewModal from '../components/appointments/ReviewModal';
 import CancelRescheduleModal from '../components/appointments/CancelRescheduleModal';
 import TabNav from '../components/ui/TabNav';
 import SectionHeader from '../components/ui/SectionHeader';
@@ -105,7 +104,7 @@ const ProfileDashboard = ({ user }: ProfileDashboardProps) => {
   const { itemsPerPage, saveItemsPerPage } = useUIConfig();
   const navigate = useNavigate();
 
-  const { appointments, refreshAppointments, loading: appointmentsLoading } = useAppointments(user?.id);
+  const { appointments, loading: appointmentsLoading } = useAppointments(user?.id);
 
   const avatarUrl = useMemo(() => {
     if (!user?.avatar_url) return FALLBACK_AVATAR;
@@ -152,7 +151,6 @@ const ProfileDashboard = ({ user }: ProfileDashboardProps) => {
   const [activeTab, setActiveTab] = useState<'appointments' | 'favorites' | 'stats' | 'settings' | 'referrals'>('appointments');
   const [activeAppointmentTab, setActiveAppointmentTab] = useState('upcoming');
   const [activeSettingsTab, setActiveSettingsTab] = useState('profile');
-  const [selectedAppointmentForReview, setSelectedAppointmentForReview] = useState<Appointment | null>(null);
   const [selectedAppointmentForCancel, setSelectedAppointmentForCancel] = useState<Appointment | null>(null);
 
   const confirmedAppointments = useMemo(
@@ -263,36 +261,8 @@ const ProfileDashboard = ({ user }: ProfileDashboardProps) => {
   }, []);
 
   const handleReview = useCallback((appointment: Appointment) => {
-    setSelectedAppointmentForReview(appointment);
-  }, []);
-
-  const handleReviewSubmit = useCallback(async (rating: number, comment: string, beforeImage?: string, afterImage?: string) => {
-    if (!user || !selectedAppointmentForReview) return;
-
-    try {
-      const response = await apiCreateBusinessReview(
-        selectedAppointmentForReview.id,
-        selectedAppointmentForReview.business_id,
-        user.id,
-        rating,
-        comment,
-        beforeImage,
-        afterImage,
-      );
-      if (response.success) {
-        notifySuccess('Reseña enviada — pendiente de aprobación por un moderador');
-        await refreshAppointments();
-        window.dispatchEvent(new CustomEvent('businessReviewAdded', {
-          detail: { businessId: selectedAppointmentForReview.business_id },
-        }));
-        setSelectedAppointmentForReview(null);
-      } else {
-        notifyError(response.error || 'Error al enviar la reseña');
-      }
-    } catch (err: any) {
-      notifyError(err.message || 'Error al enviar la reseña');
-    }
-  }, [user, selectedAppointmentForReview, toast, refreshAppointments]);
+    navigate(`/review/${appointment.id}`);
+  }, [navigate]);
 
   const handleItemsPerPageChange = useCallback((value: number) => {
     if (value >= 1 && value <= 50) {
@@ -762,15 +732,6 @@ const ProfileDashboard = ({ user }: ProfileDashboardProps) => {
         appointment={selectedAppointmentForCancel}
       />
 
-      {selectedAppointmentForReview && (
-        <ReviewModal
-          isOpen={!!selectedAppointmentForReview}
-          onClose={() => setSelectedAppointmentForReview(null)}
-          onSubmit={handleReviewSubmit}
-          appointment={selectedAppointmentForReview}
-          userId={user?.id || ''}
-        />
-      )}
     </div>
   );
 };
