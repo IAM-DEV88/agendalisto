@@ -304,8 +304,8 @@ const ProfileDashboard = ({ user }: ProfileDashboardProps) => {
 
   return (
     <div className="min-h-screen bg-gradient-to-b from-slate-50 to-white dark:from-slate-950 dark:to-slate-900 transition-colors duration-200">
-      <div className="max-w-7xl mx-auto pt-6 pb-20 sm:px-6 lg:px-8">
-        <div className="px-4 sm:px-0 space-y-8">
+      <div className="max-w-7xl mx-auto sm:px-6 lg:px-8">
+        <div className="px-4 sm:px-0 pt-6 space-y-8">
 
           {/* ─── HEADER ─── */}
           <div className="animate-in fade-in slide-in-from-top-4 duration-500">
@@ -416,13 +416,12 @@ const ProfileDashboard = ({ user }: ProfileDashboardProps) => {
             </div>
           )}
 
-          {/* ─── MAIN TABS ─── */}
-          <div className="animate-in fade-in duration-500 delay-200">
-            <TabNav tabs={tabs} activeTabId={activeTab} onTabChange={(tab) => setActiveTab(tab as 'appointments' | 'favorites' | 'stats' | 'settings' | 'referrals')} />
-          </div>
+          {/* ─── MAIN TABS ─── (outside space-y-8 to couple with Nav) */}
+        </div>
+        <TabNav tabs={tabs} activeTabId={activeTab} onTabChange={(tab) => setActiveTab(tab as 'appointments' | 'favorites' | 'stats' | 'settings' | 'referrals')} sticky />
+        <div className="px-4 sm:px-0 pt-4 pb-20 space-y-8">
 
-          <div className="animate-in fade-in slide-in-from-bottom-4 duration-500 delay-300">
-            {/* ═══ CITAS TAB ═══ */}
+          {/* ═══ CITAS TAB ═══ */}
             {activeTab === 'appointments' && (
               <div className="space-y-6">
                 <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
@@ -722,7 +721,7 @@ const ProfileDashboard = ({ user }: ProfileDashboardProps) => {
                 </div>
               </div>
             )}
-          </div>
+
         </div>
       </div>
 

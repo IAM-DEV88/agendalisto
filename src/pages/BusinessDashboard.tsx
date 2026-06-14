@@ -316,8 +316,8 @@ export const BusinessDashboard: React.FC = () => {
   return (
     <div className="min-h-screen bg-gradient-to-b from-slate-50 to-white dark:from-slate-950 dark:to-slate-900 transition-colors duration-200">
       <SEO title={businessData?.name ? `${businessData.name} — Panel` : 'Panel del negocio'} />
-      <div className="max-w-7xl mx-auto pt-6 pb-20 sm:px-6 lg:px-8">
-        <div className="px-4 sm:px-0 space-y-8">
+      <div className="max-w-7xl mx-auto sm:px-6 lg:px-8">
+        <div className="px-4 sm:px-0 pt-6 space-y-8">
 
           {/* ═══ HEADER ═══ */}
           <div className="animate-in fade-in slide-in-from-top-4 duration-500">
@@ -386,13 +386,12 @@ export const BusinessDashboard: React.FC = () => {
             <BusinessProgressSection businessData={businessData} />
           )}
 
-          {/* ═══ TABS ═══ */}
-          <div className="animate-in fade-in duration-500 delay-200">
-            <TabNav tabs={tabs} activeTabId={activeTab} onTabChange={setActiveTab} />
-          </div>
+          {/* ═══ TABS ═══ (outside space-y-8 to couple with Nav on scroll) */}
+        </div>
+        <TabNav tabs={tabs} activeTabId={activeTab} onTabChange={setActiveTab} sticky />
+        <div className="px-4 sm:px-0 pt-4 pb-20 space-y-8">
 
           {/* ═══ CONTENT ═══ */}
-          <div className="animate-in fade-in slide-in-from-bottom-4 duration-500 delay-300">
 
             {/* ─── CITAS ─── */}
             {activeTab === 'appointments' && (
@@ -599,7 +598,6 @@ export const BusinessDashboard: React.FC = () => {
               </div>
             )}
 
-          </div>
         </div>
       </div>
     </div>

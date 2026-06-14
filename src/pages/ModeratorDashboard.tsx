@@ -113,7 +113,7 @@ const ModeratorDashboard = ({ user }: ModeratorDashboardProps) => {
           <StatCard icon={<MessageSquare className="h-5 w-5 text-white" />} label="Comentarios" value={stats.totalComments} color="bg-blue-500" />
         </div>
 
-        <TabNav tabs={tabs} activeTabId={activeTab} onTabChange={setActiveTab} />
+        <TabNav tabs={tabs} activeTabId={activeTab} onTabChange={setActiveTab} sticky />
 
         <div className="mt-8">
           {activeTab === 'overview' && (

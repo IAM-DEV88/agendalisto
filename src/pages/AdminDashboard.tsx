@@ -146,7 +146,7 @@ const AdminDashboard = ({ user }: AdminDashboardProps) => {
           <StatCard icon={<Calendar className="h-5 w-5 text-white" />} label="Citas" value={metrics?.appointments.total ?? '...'} subtitle={metrics ? `${metrics.appointments.pending} pend` : ''} color="bg-cyan-500" />
         </div>
 
-        <TabNav tabs={tabs} activeTabId={activeTab} onTabChange={setActiveTab} />
+        <TabNav tabs={tabs} activeTabId={activeTab} onTabChange={setActiveTab} sticky />
 
         <div className="mt-8">
           {activeTab === 'overview' && (
