@@ -87,9 +87,16 @@ async function prerenderWithBrowser() {
     }
   }
 
+  let bundledPath;
+  try {
+    bundledPath = puppeteer.executablePath ? puppeteer.executablePath() : null;
+  } catch {
+    bundledPath = null;
+  }
+
   const CHROME_PATHS = [
     process.env.CHROME_BIN,
-    ...(puppeteer.executablePath ? [puppeteer.executablePath()] : []),
+    ...(bundledPath ? [bundledPath] : []),
     '/usr/bin/google-chrome',
     '/usr/bin/google-chrome-stable',
     '/usr/bin/chromium',
