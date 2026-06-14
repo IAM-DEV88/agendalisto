@@ -65,7 +65,7 @@ export default function FAQ() {
       </section>
 
       {/* ═══ CATEGORY GRID ═══ */}
-      <section className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8">
+      <section className="max-w-7xl mx-auto my-10 px-4 sm:px-6 lg:px-8">
         <div className="flex flex-wrap justify-center gap-2 sm:gap-3">
           {categories.map(cat => {
             const isActive = activeCategory === cat.name;
@@ -99,7 +99,7 @@ export default function FAQ() {
               )}
             </div>
 
-            <div className="space-y-3 max-w-3xl mx-auto">
+            <div className="space-y-3 max-w-7xl mx-auto">
               {activeQuestions.map((item, i) => {
                 const isOpen = openQuestion === i;
                 return (
@@ -138,13 +138,13 @@ export default function FAQ() {
               })}
             </div>
 
-            <div className="mt-10 text-center">
+            <div className="my-10 text-center">
               <Link
                 to="/business/register"
                 className="inline-flex items-center gap-2 px-6 py-3 bg-primary-600 hover:bg-primary-700 text-white font-bold rounded-xl transition-all shadow-lg shadow-primary-500/25 active:scale-[0.98]"
               >
                 <Sparkles className="w-4 h-4" />
-                Quiero AgendaYa para mi {activeCategory.toLowerCase()}
+                Quiero AgendaYa para mi negocio
               </Link>
             </div>
           </div>

@@ -161,10 +161,9 @@ function PlansContent() {
 
         {/* Footer note */}
         <p className="text-center text-sm text-slate-400 dark:text-slate-500 mt-12">
-          Todos los planes incluyen soporte por email. Los precios no incluyen impuestos.
-          ¿Tienes dudas?{' '}
-          <a href="#" className="font-bold text-primary-600 dark:text-primary-400 hover:underline">
-            Contáctanos
+          Todos los planes incluyen soporte por email. ¿Tienes dudas?{' '}
+          <a href="/faq" className="font-bold text-primary-600 dark:text-primary-400 hover:underline">
+            Preguntas frecuentes
           </a>.
         </p>
       </div>
