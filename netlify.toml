@@ -6,7 +6,7 @@
   NODE_VERSION = "22.14.0"
   CI = "false"
   COREPACK_INTEGRITY_KEYS = "0"
-  SITE_URL = "https://agendalisto.com"
+  SITE_URL = "https://agendaya.netlify.app"
 
 [functions]
   directory = "netlify/functions"

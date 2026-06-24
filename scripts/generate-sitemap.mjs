@@ -18,7 +18,7 @@ if (!SUPABASE_URL || !SUPABASE_ANON_KEY) {
 }
 
 const supabase = createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
-const SITE_URL = process.env.SITE_URL || 'https://agendalisto.com';
+const SITE_URL = process.env.SITE_URL || 'https://agendaya.netlify.app';
 
 async function generateSitemap() {
   const urls = [];
@@ -153,7 +153,7 @@ ${urls.join('\n')}
 }
 
 function generateStaticOnly() {
-  const SITE_URL = 'https://agendalisto.com';
+  const SITE_URL = 'https://agendaya.netlify.app';
   const urls = [
     '/', '/explore', '/blog', '/login', '/register',
     '/forgot-password', '/crowdfunding',

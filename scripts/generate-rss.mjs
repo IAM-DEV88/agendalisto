@@ -37,7 +37,7 @@ if (!supabaseUrl || !supabaseKey) {
 
 const supabase = createClient(supabaseUrl, supabaseKey);
 
-const SITE_URL = process.env.SITE_URL || 'https://agendalisto.com';
+const SITE_URL = process.env.SITE_URL || 'https://agendaya.netlify.app';
 
 async function generateRss() {
   console.log('[RSS] 📡 Generando RSS feed del blog...');

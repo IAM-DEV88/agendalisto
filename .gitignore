@@ -29,4 +29,9 @@ dist-ssr
 .env.local
 .env.development.local
 .env.test.local
-.env.production.local 
+.env.production.local
+.env.campaign
+
+# Campaign files
+.campaign-progress.json
+logs/ 

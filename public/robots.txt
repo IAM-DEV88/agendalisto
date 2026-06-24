@@ -5,4 +5,4 @@ Disallow: /business/dashboard
 Disallow: /business/register
 
 # Sitemap
-Sitemap: https://agendalisto.com/sitemap.xml
+Sitemap: https://agendaya.netlify.app/sitemap.xml

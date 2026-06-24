@@ -49,7 +49,7 @@ export const handler: Handler = async (event) => {
     const amountInCents = price * 100; // Wompi usa centavos
     const reference = `AGD-${userId}-${Date.now()}`;
     const currency = 'COP';
-    const siteUrl = process.env.SITE_URL || 'https://agendalisto.com';
+    const siteUrl = process.env.SITE_URL || 'https://agendaya.netlify.app';
     const redirectUrl = `${siteUrl}/payment/success?plan=${plan}&reference=${reference}`;
 
     const signature = generateSignature(reference, amountInCents, currency);

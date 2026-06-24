@@ -13,7 +13,11 @@
     "sitemap": "node scripts/generate-sitemap.mjs",
     "prerender": "node scripts/prerender.mjs",
     "rss": "node scripts/generate-rss.mjs",
-    "netlify-build": "pnpm install --frozen-lockfile && pnpm run build && pnpm run sitemap && pnpm run prerender && pnpm run rss"
+    "netlify-build": "pnpm install --frozen-lockfile && pnpm run build && pnpm run sitemap && pnpm run prerender && pnpm run rss",
+    "campaign:dry-run": "node scripts/sendCampaign.mjs --dry-run",
+    "campaign:start": "node scripts/sendCampaign.mjs",
+    "campaign:resume": "node scripts/sendCampaign.mjs --resume",
+    "campaign:resend": "node scripts/sendCampaign.mjs --resend"
   },
   "engines": {
     "node": ">=18.0.0",
@@ -60,6 +64,7 @@
     "eslint-plugin-react": "^7.37.5",
     "eslint-plugin-react-hooks": "^7.0.1",
     "eslint-plugin-react-refresh": "^0.4.26",
+    "nodemailer": "^8.0.11",
     "postcss": "^8.5.6",
     "puppeteer-core": "^25.0.4",
     "tailwindcss": "^3.4.1",
