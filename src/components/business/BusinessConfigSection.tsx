@@ -1,11 +1,15 @@
 import React, { useState } from 'react';
-import { Settings, Eye, Bell, ListOrdered, Save, Loader2, CheckCircle2, AlertCircle, Clock, ChevronDown, Link as LinkIcon, Copy, Check, ExternalLink } from 'lucide-react';
-import { BusinessConfig } from '../../lib/api';
+import { useNavigate } from 'react-router-dom';
+import { useDispatch, useSelector } from 'react-redux';
+import { Settings, Eye, Bell, ListOrdered, Save, Loader2, CheckCircle2, AlertCircle, Clock, ChevronDown, Link as LinkIcon, Copy, Check, ExternalLink, Trash2, AlertTriangle } from 'lucide-react';
+import { BusinessConfig, deleteBusiness } from '../../lib/api';
 import { useAuth } from '../../hooks/useAuth';
 import { useUIConfig } from '../../hooks/useUIConfig';
 import { canUseEmailNotifications } from '../../lib/roles';
 import SectionHeader from '../ui/SectionHeader';
 import { toast } from 'react-hot-toast';
+import { setBusinesses, setActiveBusinessId } from '../../store/userSlice';
+import type { RootState } from '../../store';
 
 interface BusinessConfigSectionProps {
   config: BusinessConfig;
@@ -18,6 +22,7 @@ interface BusinessConfigSectionProps {
   businessName?: string;
   businessAddress?: string;
   businessSlug?: string;
+  businessId?: string;
 }
 
 export const BusinessConfigSection: React.FC<BusinessConfigSectionProps> = ({
@@ -31,9 +36,16 @@ export const BusinessConfigSection: React.FC<BusinessConfigSectionProps> = ({
   businessName = '',
   businessAddress = '',
   businessSlug = '',
+  businessId,
 }) => {
   const { user } = useAuth();
+  const dispatch = useDispatch();
+  const navigate = useNavigate();
+  const businesses = useSelector((state: RootState) => state.user.businesses);
+  const userProfile = useSelector((state: RootState) => state.user.userProfile);
   const { itemsPerPage, setItemsPerPageValue, saveItemsPerPage } = useUIConfig(user?.id);
+  const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
+  const [deleting, setDeleting] = useState(false);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -257,6 +269,91 @@ export const BusinessConfigSection: React.FC<BusinessConfigSectionProps> = ({
 
       {/* Google My Business Guide */}
                       <GoogleMyBusinessGuide businessName={businessName || ''} businessAddress={businessAddress || ''} businessSlug={businessSlug || ''} />
+
+      {/* ─── ZONA DE PELIGRO ─── */}
+      <div className="mt-10 pt-8 border-t-2 border-red-200 dark:border-red-900/50">
+        <SectionHeader
+          title="Zona de Peligro"
+          description="Acciones irreversibles para tu negocio"
+        />
+        <div className="card p-6 border-red-200 dark:border-red-900/50 bg-red-50/50 dark:bg-red-950/20 mt-4">
+          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+            <div className="flex items-start gap-3">
+              <div className="p-2 bg-red-100 dark:bg-red-900/40 rounded-lg flex-shrink-0">
+                <Trash2 className="w-5 h-5 text-red-600 dark:text-red-400" />
+              </div>
+              <div>
+                <h3 className="text-lg font-black text-red-800 dark:text-red-300">Eliminar este negocio</h3>
+                <p className="text-sm text-red-600/80 dark:text-red-400/70 mt-1">
+                  Elimina permanentemente este negocio y todos sus datos (servicios, citas, horarios, reseñas). 
+                  Esta acción no se puede deshacer.
+                </p>
+              </div>
+            </div>
+            <button
+              onClick={() => setShowDeleteConfirm(true)}
+              className="flex-shrink-0 inline-flex items-center gap-2 px-6 py-3 bg-red-600 hover:bg-red-700 text-white font-bold rounded-xl transition-all shadow-lg shadow-red-500/25 disabled:opacity-50"
+            >
+              <Trash2 className="w-4 h-4" />
+              Eliminar negocio
+            </button>
+          </div>
+        </div>
+      </div>
+
+      {/* ─── MODAL CONFIRMACIÓN ELIMINAR ─── */}
+      {showDeleteConfirm && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50 backdrop-blur-sm animate-in fade-in duration-200">
+          <div className="bg-white dark:bg-slate-900 rounded-2xl shadow-2xl max-w-md w-full p-6 animate-in zoom-in-95 duration-200">
+            <div className="flex items-center gap-3 mb-4">
+              <div className="p-2 bg-red-100 dark:bg-red-900/40 rounded-full">
+                <AlertTriangle className="w-6 h-6 text-red-600 dark:text-red-400" />
+              </div>
+              <h3 className="text-xl font-black text-slate-900 dark:text-white">¿Eliminar negocio?</h3>
+            </div>
+            <p className="text-sm text-slate-600 dark:text-slate-400 leading-relaxed mb-6">
+              Esta acción eliminará permanentemente <strong className="text-slate-800 dark:text-slate-200">{businessName}</strong> 
+              y todos sus datos asociados. Una vez eliminado, no podrás recuperarlo.
+            </p>
+            <div className="flex gap-3 justify-end">
+              <button
+                onClick={() => setShowDeleteConfirm(false)}
+                disabled={deleting}
+                className="px-5 py-2.5 text-sm font-bold text-slate-700 dark:text-slate-300 bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 rounded-xl transition-all"
+              >
+                Cancelar
+              </button>
+              <button
+                onClick={async () => {
+                  if (!businessId) return;
+                  setDeleting(true);
+                  const result = await deleteBusiness(businessId);
+                  if (result.success) {
+                    toast.success('Negocio eliminado correctamente');
+                    const updated = businesses.filter(b => b.id !== businessId);
+                    dispatch(setBusinesses(updated));
+                    // If the deleted business was the active one, navigate
+                    if (userProfile?.business_id === businessId) {
+                      const nextBiz = updated[0]?.id;
+                      dispatch(setActiveBusinessId(nextBiz));
+                    }
+                    navigate('/dashboard');
+                  } else {
+                    toast.error(result.error || 'Error al eliminar el negocio');
+                    setDeleting(false);
+                    setShowDeleteConfirm(false);
+                  }
+                }}
+                disabled={deleting}
+                className="inline-flex items-center gap-2 px-5 py-2.5 text-sm font-bold text-white bg-red-600 hover:bg-red-700 rounded-xl transition-all disabled:opacity-50"
+              >
+                {deleting ? <Loader2 className="w-4 h-4 animate-spin" /> : <Trash2 className="w-4 h-4" />}
+                {deleting ? 'Eliminando...' : 'Sí, eliminar'}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 };

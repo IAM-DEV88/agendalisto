@@ -1,7 +1,9 @@
 import React, { useState, useEffect } from 'react';
-import { Camera, Save, Loader2, Globe, Phone, MapPin, Mail, Tag, Info, Settings } from 'lucide-react';
+import { Camera, Save, Loader2, Globe, Phone, MapPin, Mail, Tag, Info, Settings, Wand2 } from 'lucide-react';
 import { Business, updateBusiness, getBusinessCategories, BusinessCategory } from '../../lib/api';
 import { supabase } from '../../lib/supabase';
+import { generateBusinessDescription } from '../../lib/ai';
+import { toast } from 'react-hot-toast';
 import SectionHeader from '../ui/SectionHeader';
 import PhoneInput from '../ui/PhoneInput';
 
@@ -42,6 +44,7 @@ const BusinessProfileSection: React.FC<BusinessProfileSectionProps> = ({
   const [isUploading, setIsUploading] = useState(false);
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
   const [categories, setCategories] = useState<BusinessCategory[]>([]);
+  const [generatingDesc, setGeneratingDesc] = useState(false);
 
   // Sync previewUrl when businessData.logo_url changes externally (e.g., after saving)
   useEffect(() => {
@@ -228,10 +231,46 @@ const BusinessProfileSection: React.FC<BusinessProfileSectionProps> = ({
               </div>
 
               <div className="space-y-2 md:col-span-2">
-                <label htmlFor="description" className="text-sm font-bold text-slate-700 dark:text-slate-300 flex items-center gap-2">
-                  <Info className="w-4 h-4 text-slate-400" />
-                  Descripción
-                </label>
+                <div className="flex items-center justify-between">
+                  <label htmlFor="description" className="text-sm font-bold text-slate-700 dark:text-slate-300 flex items-center gap-2">
+                    <Info className="w-4 h-4 text-slate-400" />
+                    Descripción
+                  </label>
+                  <button
+                    type="button"
+                    onClick={async () => {
+                      if (!businessData.name.trim()) {
+                        toast.error('El negocio debe tener un nombre');
+                        return;
+                      }
+                      setGeneratingDesc(true);
+                      try {
+                        const category = categories.find(c => c.id === businessData.category_id);
+                        const desc = await generateBusinessDescription(
+                          businessData.name,
+                          category?.name
+                        );
+                        onChange({
+                          target: { name: 'description', value: desc }
+                        } as React.ChangeEvent<HTMLTextAreaElement>);
+                        toast.success('Descripción generada con IA');
+                      } catch (err: any) {
+                        toast.error(err.message || 'Error al generar descripción');
+                      } finally {
+                        setGeneratingDesc(false);
+                      }
+                    }}
+                    disabled={generatingDesc}
+                    className="inline-flex items-center gap-1.5 text-xs font-bold text-primary-600 dark:text-primary-400 hover:text-primary-700 dark:hover:text-primary-300 transition-colors disabled:opacity-50"
+                  >
+                    {generatingDesc ? (
+                      <Loader2 className="w-3.5 h-3.5 animate-spin" />
+                    ) : (
+                      <Wand2 className="w-3.5 h-3.5" />
+                    )}
+                    {generatingDesc ? 'Generando...' : 'Generar con IA'}
+                  </button>
+                </div>
                 <textarea
                   name="description"
                   id="description"

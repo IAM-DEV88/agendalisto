@@ -592,6 +592,7 @@ export const BusinessDashboard: React.FC = () => {
                       businessName={businessData?.name || ''}
                       businessAddress={businessData?.address || ''}
                       businessSlug={businessData?.slug || ''}
+                      businessId={businessData?.id || ''}
                     />
                   )}
                 </div>

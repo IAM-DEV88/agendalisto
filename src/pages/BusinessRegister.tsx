@@ -6,6 +6,7 @@ import type { UserProfile } from '../lib/supabase';
 import type { RootState } from '../store';
 import { setBusinesses, setUserProfile } from '../store/userSlice';
 import { getMaxBusinesses, PLAN_LABELS } from '../lib/roles';
+import { generateBusinessDescription } from '../lib/ai';
 import toast from 'react-hot-toast';
 import SEO from '../components/SEO';
 import PhoneInput from '../components/ui/PhoneInput';
@@ -27,6 +28,8 @@ import {
   PenLine,
   Sparkles,
   Crown,
+  Wand2,
+  Loader2,
 } from 'lucide-react';
 
 type BusinessRegisterProps = {
@@ -59,6 +62,7 @@ const BusinessRegister = ({ user }: BusinessRegisterProps) => {
   const [slugPreview, setSlugPreview] = useState('');
   const [submitted, setSubmitted] = useState(false);
   const [showcaseOnly, setShowcaseOnly] = useState(false);
+  const [generatingDesc, setGeneratingDesc] = useState(false);
 
   const existingCount = businesses.length;
 
@@ -299,9 +303,43 @@ const BusinessRegister = ({ user }: BusinessRegisterProps) => {
 
                 {/* Descripción */}
                 <div className="sm:col-span-2">
-                  <label htmlFor="description" className="block text-sm font-bold text-slate-700 dark:text-slate-300 mb-1.5">
-                    Descripción <span className="text-red-500">*</span>
-                  </label>
+                  <div className="flex items-center justify-between mb-1.5">
+                    <label htmlFor="description" className="block text-sm font-bold text-slate-700 dark:text-slate-300">
+                      Descripción <span className="text-red-500">*</span>
+                    </label>
+                    <button
+                      type="button"
+                      onClick={async () => {
+                        if (!form.businessName.trim()) {
+                          toast.error('Primero escribe el nombre del negocio');
+                          return;
+                        }
+                        setGeneratingDesc(true);
+                        try {
+                          const category = categories.find(c => c.id === form.categoryId);
+                          const desc = await generateBusinessDescription(
+                            form.businessName,
+                            category?.name
+                          );
+                          setForm(prev => ({ ...prev, description: desc.slice(0, 500) }));
+                          toast.success('Descripción generada con IA');
+                        } catch (err: any) {
+                          toast.error(err.message || 'Error al generar descripción');
+                        } finally {
+                          setGeneratingDesc(false);
+                        }
+                      }}
+                      disabled={generatingDesc}
+                      className="inline-flex items-center gap-1.5 text-xs font-bold text-primary-600 dark:text-primary-400 hover:text-primary-700 dark:hover:text-primary-300 transition-colors disabled:opacity-50"
+                    >
+                      {generatingDesc ? (
+                        <Loader2 className="w-3.5 h-3.5 animate-spin" />
+                      ) : (
+                        <Wand2 className="w-3.5 h-3.5" />
+                      )}
+                      {generatingDesc ? 'Generando...' : 'Generar con IA'}
+                    </button>
+                  </div>
                   <div className="relative">
                     <PenLine className="absolute top-3.5 left-3.5 w-4 h-4 text-slate-400" />
                     <textarea

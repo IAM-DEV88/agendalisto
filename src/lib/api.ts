@@ -558,6 +558,21 @@ export const updateBusiness = async (id: string, updates: Partial<Business>) => 
   return data as Business;
 };
 
+export const deleteBusiness = async (id: string): Promise<{ success: boolean; error?: string }> => {
+  try {
+    const { error } = await supabase
+      .from('agendaya_businesses')
+      .delete()
+      .eq('id', id);
+
+    if (error) throw error;
+    return { success: true };
+  } catch (error: any) {
+    console.error('Error al eliminar negocio:', error);
+    return { success: false, error: error.message || 'Error al eliminar negocio' };
+  }
+};
+
 // --- Likes Functions ---
 export const checkLikedBusinesses = async (userId: string, businessIds: string[]): Promise<Set<string>> => {
   if (!userId || businessIds.length === 0) return new Set();
@@ -1347,7 +1362,9 @@ export async function getModeratorStats(): Promise<{
 export type BusinessCategory = {
   id: string;
   name: string;
+  slug: string;
   description: string | null;
+  icon: string;
 };
 
 // Fetch all business categories
