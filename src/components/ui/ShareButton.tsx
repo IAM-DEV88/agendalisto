@@ -110,7 +110,7 @@ export default function ShareButton({
     >
       <div className="p-3 border-b border-slate-100 dark:border-slate-800 flex items-center justify-between">
         <span className="text-xs font-black text-slate-500 dark:text-slate-400 uppercase tracking-widest">Compartir</span>
-        <button onClick={() => setOpen(false)} className="p-1 rounded-lg hover:bg-slate-100 dark:hover:bg-slate-800 text-slate-400 transition-colors">
+        <button onClick={() => setOpen(false)} aria-label="Cerrar menú de compartir" className="p-1 rounded-lg hover:bg-slate-100 dark:hover:bg-slate-800 text-slate-400 transition-colors">
           <X className="w-3.5 h-3.5" />
         </button>
       </div>
@@ -149,7 +149,7 @@ export default function ShareButton({
 
   return (
     <div className="relative inline-flex">
-      <button ref={btnRef} onClick={toggle} className={btnCls} title="Compartir">
+      <button ref={btnRef} onClick={toggle} className={btnCls} title="Compartir" aria-label="Compartir">
         {variant === 'icon' ? (
           copied ? <Check style={{width: iconSize, height: iconSize}} /> : <Share2 style={{width: iconSize, height: iconSize}} />
         ) : variant === 'text' ? (

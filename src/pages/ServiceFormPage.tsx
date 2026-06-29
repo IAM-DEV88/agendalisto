@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { useSelector } from 'react-redux';
-import { getService, getBusinessServices, createBusinessService, updateBusinessService, Service } from '../lib/api';
+import { getService, getBusinessServices, createBusinessService, updateBusinessService } from '../lib/api';
 import { supabase } from '../lib/supabase';
 import { getMaxServices, getMaxImages, PLAN_LABELS } from '../lib/roles';
 import { notifySuccess, notifyError } from '../lib/toast';
@@ -9,7 +9,7 @@ import SEO from '../components/SEO';
 import type { RootState } from '../store';
 import {
   ArrowLeft, ChevronLeft, ChevronRight, X, Store,
-  Clock, DollarSign, User, Loader2, Image as ImageIcon, Plus,
+  Clock, User, Loader2, Image as ImageIcon, Plus,
   CheckCircle, XCircle, Sparkles, Save
 } from 'lucide-react';
 
@@ -61,7 +61,6 @@ export default function ServiceFormPage() {
   const [error, setError] = useState<string | null>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isUploading, setIsUploading] = useState(false);
-  const [existingServicesCount, setExistingServicesCount] = useState(0);
 
   const [formData, setFormData] = useState({
     name: '',

@@ -1,7 +1,7 @@
-import { supabase } from './supabase';
-import { UserProfile } from './supabase';
-import { Appointment, AppointmentStatus, Review, GuestInfo } from '../types/appointment';
+import { supabase, UserProfile } from './supabase';
+import type { Appointment, AppointmentStatus, Review, GuestInfo } from '../types/appointment';
 import { DEFAULT_BUSINESS_CONFIG } from './defaults';
+import { getErrorMessage } from './api-helpers';
 
 // Re-export types from appointment.ts
 export type { Appointment, AppointmentStatus, Review, GuestInfo };
@@ -139,17 +139,6 @@ export const getBusinessStats = async (businessId: string) => {
   return stats as BusinessStats;
 };
 
-export const getBusiness = async (id: string) => {
-  const { data, error } = await supabase
-    .from('agendaya_businesses')
-    .select('*')
-    .eq('id', id)
-    .single();
-  
-  if (error) throw error;
-  return data as Business;
-};
-
 // API functions for business services
 export const getBusinessServices = async (businessId: string) => {
   try {
@@ -192,20 +181,6 @@ export async function setActiveBusiness(userId: string, businessId: string): Pro
     return { success: true };
   } catch (err: any) {
     return { success: false, error: err.message || 'Error switching business' };
-  }
-}
-
-export async function getUserProfile(userId: string): Promise<{ success: boolean; data?: UserProfile; error?: string }> {
-  try {
-    const { data, error } = await supabase
-      .from('agendaya_profiles')
-      .select('*')
-      .eq('id', userId)
-      .single();
-    if (error) throw error;
-    return { success: true, data: data as UserProfile };
-  } catch (err: any) {
-    return { success: false, error: err.message || 'Error fetching user profile' };
   }
 }
 
@@ -845,23 +820,6 @@ export const setBusinessHours = async (hours: Omit<BusinessHours, 'id'>[]) => {
   return data;
 };
 
-// Helper para Promise con timeout
-function withTimeout<T>(promise: Promise<T>, ms: number, timeoutError = 'Operación excedió el tiempo límite'): Promise<T> {
-  const timeout = new Promise<never>((_, reject) => {
-    const id = setTimeout(() => {
-      clearTimeout(id);
-      reject(new Error(timeoutError));
-    }, ms);
-  });
-  return Promise.race([promise, timeout]);
-}
-
-// Define la estructura esperada de la respuesta de Supabase para .single()
-interface SingleResponse<T> {
-  data: T | null;
-  error: any | null; // Podrías usar PostgrestError si está disponible
-}
-
 export const obtenerPerfilUsuario = async (userId: string): Promise<{ success: boolean; perfil: UserProfile | null; error: string | null; }> => {
   try {
     if (!userId) {
@@ -869,37 +827,16 @@ export const obtenerPerfilUsuario = async (userId: string): Promise<{ success: b
     }
 
 
-    // Envolver la llamada async de Supabase en una Promise explícita
-    const supabaseQueryPromise = new Promise<SingleResponse<UserProfile>>(async (resolve, reject) => {
-      try {
-        // Ejecutar la consulta dentro del try/catch de la Promise
-        const response = await supabase
-          .from('agendaya_profiles')
-          .select('*')
-          .eq('id', userId)
-          .single();
-        
-        // Resolvemos con la estructura esperada
-        resolve({ data: response.data as UserProfile | null, error: response.error });
-        
-      } catch (queryError) {
-        // Rechazamos si la consulta misma lanza una excepción
-        reject(queryError);
-      }
-    });
+    const { data, error } = await supabase
+      .from('agendaya_profiles')
+      .select('*')
+      .eq('id', userId)
+      .single();
 
-    // Aplicar timeout a la promesa envuelta
-    const { data, error } = await withTimeout(supabaseQueryPromise, 1000, 'Timeout al obtener perfil de usuario');
-
-
-    const perfilNoEncontrado = error && error.code === 'PGRST116';
+    const perfilNoEncontrado = error?.code === 'PGRST116';
 
     if (error && !perfilNoEncontrado) {
-      const errorMessage = error.message || 'Error desconocido';
-      if (errorMessage === 'Timeout al obtener perfil de usuario') {
-      } else {
-      }
-      return { success: false, perfil: null, error: errorMessage };
+      return { success: false, perfil: null, error: getErrorMessage(error) };
     }
 
     if (data && !perfilNoEncontrado) {
@@ -914,13 +851,6 @@ export const obtenerPerfilUsuario = async (userId: string): Promise<{ success: b
           data.business_id = biz.id;
           await supabase.from('agendaya_profiles').update({ business_id: biz.id }).eq('id', userId);
         }
-      }
-      // Si el perfil existe pero es visitor, promover a client.
-      // updateProfileRole puede fallar si el RPC no existe en DB;
-      // igual se actualiza en memoria para que el usuario acceda.
-      if (data.role === 'visitor') {
-        try { await updateProfileRole(userId, 'client'); } catch {}
-        data.role = 'client';
       }
       return { success: true, perfil: data, error: null };
     }
@@ -942,12 +872,6 @@ export const obtenerPerfilUsuario = async (userId: string): Promise<{ success: b
         .single();
 
       if (retryResponse.data) {
-        // Usuario proveniente de otra app → ensure_user_app crea role='visitor'.
-        // Auto-promover a client para que pueda acceder a /dashboard y /business/register.
-        if (retryResponse.data.role === 'visitor') {
-          await updateProfileRole(userId, 'client');
-          retryResponse.data.role = 'client';
-        }
         return { success: true, perfil: retryResponse.data as UserProfile, error: null };
       }
     } catch {
@@ -956,25 +880,24 @@ export const obtenerPerfilUsuario = async (userId: string): Promise<{ success: b
 
     return { success: false, perfil: null, error: 'Perfil no encontrado' };
 
-  } catch (err: any) {
-    return {
-      success: false,
-      perfil: null,
-      error: err.message || 'Error desconocido'
-    };
+  } catch (err: unknown) {
+    return { success: false, perfil: null, error: getErrorMessage(err) };
   }
 };
 
-export const updateUserProfile = async (userId: string, updates: Partial<UserProfile>) => {
-  const { data, error } = await supabase
-    .from('agendaya_profiles')
-    .update({ ...updates, updated_at: new Date().toISOString() })
-    .eq('id', userId)
-    .select()
-    .single();
-  
-  if (error) throw error;
-  return data;
+export const updateUserProfile = async (userId: string, updates: Partial<UserProfile>): Promise<{ success: boolean; data?: UserProfile; error?: string }> => {
+  try {
+    const { data, error } = await supabase
+      .from('agendaya_profiles')
+      .update({ ...updates, updated_at: new Date().toISOString() })
+      .eq('id', userId)
+      .select()
+      .single();
+    if (error) throw error;
+    return { success: true, data: data as UserProfile };
+  } catch (err: unknown) {
+    return { success: false, error: getErrorMessage(err) };
+  }
 };
 
 export async function getUserBusinesses(userId: string) {

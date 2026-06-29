@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { getBusinesses } from '../../lib/api';
 import { Store, MapPin, ArrowRight } from 'lucide-react';
+import { parseCoordinatesFromAddress } from '../../utils/coordinates';
 
 const FALLBACK = 'https://upload.wikimedia.org/wikipedia/commons/8/89/Portrait_Placeholder.png';
 
@@ -27,17 +28,25 @@ export default function CrossPromotion({ businessId, businessAddress, excludeId 
         return;
       }
 
-      const currentLat = current.lat;
-      const currentLng = current.lng;
+      const currentCoords = current.lat && current.lng
+        ? { lat: current.lat, lng: current.lng }
+        : parseCoordinatesFromAddress(current.address || '');
 
       let sorted = results.filter(b => b.id !== excludeId);
 
-      if (currentLat && currentLng) {
+      if (currentCoords.lat !== null && currentCoords.lng !== null) {
         sorted = sorted
-          .map(b => ({
-            ...b,
-            _dist: b.lat && b.lng ? haversineDistance(currentLat, currentLng, b.lat, b.lng) : Infinity,
-          }))
+          .map(b => {
+            const bc = b.lat && b.lng
+              ? { lat: b.lat, lng: b.lng }
+              : parseCoordinatesFromAddress(b.address || '');
+            return {
+              ...b,
+              _dist: bc.lat !== null && bc.lng !== null
+                ? haversineDistance(currentCoords.lat!, currentCoords.lng!, bc.lat, bc.lng)
+                : Infinity,
+            };
+          })
           .filter(b => b._dist < 50)
           .sort((a, b) => a._dist - b._dist);
       } else {

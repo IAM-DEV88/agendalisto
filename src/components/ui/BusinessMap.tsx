@@ -2,6 +2,7 @@ import { useEffect, useRef } from 'react';
 import L from 'leaflet';
 import 'leaflet/dist/leaflet.css';
 import type { Business } from '../../lib/api';
+import { parseCoordinatesFromAddress } from '../../utils/coordinates';
 
 interface BusinessMapProps {
   businesses: Business[];
@@ -9,13 +10,24 @@ interface BusinessMapProps {
 
 const DEFAULT_CENTER: [number, number] = [4.142, -73.63];
 
+function getCoords(biz: Business): { lat: number; lng: number } | null {
+  if (biz.lat && biz.lng) return { lat: biz.lat, lng: biz.lng };
+  if (biz.address) {
+    const parsed = parseCoordinatesFromAddress(biz.address);
+    if (parsed.lat !== null && parsed.lng !== null) return parsed as { lat: number; lng: number };
+  }
+  return null;
+}
+
 export default function BusinessMap({ businesses }: BusinessMapProps) {
   const mapRef = useRef<HTMLDivElement>(null);
   const mapInstanceRef = useRef<L.Map | null>(null);
   const markersRef = useRef<L.Marker[]>([]);
+  const initializedRef = useRef(false);
 
   useEffect(() => {
-    if (!mapRef.current || mapInstanceRef.current) return;
+    if (!mapRef.current || initializedRef.current) return;
+    initializedRef.current = true;
 
     const map = L.map(mapRef.current, { zoomControl: true, attributionControl: false }).setView(DEFAULT_CENTER, 6);
 
@@ -28,12 +40,13 @@ export default function BusinessMap({ businesses }: BusinessMapProps) {
     return () => {
       map.remove();
       mapInstanceRef.current = null;
+      initializedRef.current = false;
     };
   }, []);
 
   useEffect(() => {
     const map = mapInstanceRef.current;
-    if (!map || !businesses.length) return;
+    if (!map) return;
 
     markersRef.current.forEach(m => m.remove());
     markersRef.current = [];
@@ -49,12 +62,11 @@ export default function BusinessMap({ businesses }: BusinessMapProps) {
     });
 
     businesses.forEach(biz => {
-      const lat = biz.lat;
-      const lng = biz.lng;
-      if (!lat || !lng) return;
+      const coords = getCoords(biz);
+      if (!coords) return;
 
       hasValidCoords = true;
-      const marker = L.marker([lat, lng], { icon })
+      const marker = L.marker([coords.lat, coords.lng], { icon })
         .addTo(map)
         .bindPopup(`
           <div style="min-width:200px;font-family:system-ui,sans-serif;">
@@ -67,23 +79,21 @@ export default function BusinessMap({ businesses }: BusinessMapProps) {
         `);
 
       markersRef.current.push(marker);
-      bounds.extend([lat, lng]);
+      bounds.extend([coords.lat, coords.lng]);
     });
 
     if (hasValidCoords) {
       map.fitBounds(bounds, { padding: [40, 40], maxZoom: 14 });
     }
+
+    setTimeout(() => map.invalidateSize(), 100);
   }, [businesses]);
 
-  const hasCoords = businesses.some(b => b.lat && b.lng);
-
-  if (!hasCoords) {
-    return (
-      <div className="flex items-center justify-center h-64 bg-slate-50 dark:bg-slate-800/50 rounded-2xl border border-slate-200 dark:border-slate-700">
-        <p className="text-sm text-slate-400">Los negocios no tienen ubicación configurada</p>
-      </div>
-    );
-  }
-
-  return <div ref={mapRef} className="w-full h-[400px] md:h-[500px] rounded-2xl overflow-hidden border border-slate-200 dark:border-slate-700 z-0" />;
+  return (
+    <div
+      ref={mapRef}
+      className="w-full h-[400px] md:h-[500px] rounded-2xl overflow-hidden border border-slate-200 dark:border-slate-700"
+      style={{ isolation: 'isolate' }}
+    />
+  );
 }

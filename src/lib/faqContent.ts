@@ -311,6 +311,276 @@ export function buildCategoryQuestions(name: string): FAQItem[] {
         a: 'Perfectamente. Publica servicios de "Traslado ejecutivo", "Alquiler con conductor por hora" o "Transporte aeropuerto". Los clientes reservan con anticipación y reciben confirmación con todos los detalles del servicio.',
       },
     ],
+    educación: [
+      {
+        q: 'Doy clases particulares a domicilio. ¿Cómo publico mis servicios?',
+        a: 'Crea servicios por materia o nivel: "Clase de matemáticas", "Refuerzo de inglés", "Preparación examen". Cada uno con su duración y precio. Tus alumnos ven tu disponibilidad y reservan la hora que mejor les quede.',
+      },
+      {
+        q: '¿Puedo ofrecer clases virtuales y presenciales?',
+        a: 'Sí, AgendaYa no distingue entre modalidades. Publica servicios separados: "Clase presencial" y "Clase online". En la descripción del servicio incluye los requisitos (plataforma, materiales) y los alumnos reservan según prefieran.',
+      },
+      {
+        q: '¿Cómo manejo grupos de estudiantes?',
+        a: 'Crea servicios como "Taller grupal" o "Curso intensivo" con cupo máximo definido. El sistema bloquea las reservas cuando se alcanza el límite. Ideal para academias que ofrecen cursos regulares.',
+      },
+      {
+        q: '¿Sirve para academias o escuelas grandes?',
+        a: 'Con el plan Premium puedes gestionar hasta 3 sedes o departamentos. Cada instructor puede tener sus propios servicios y horarios, y los estudiantes reservan directamente con el profesor que prefieran.',
+      },
+    ],
+    hotelería: [
+      {
+        q: 'Tengo un hotel pequeño. ¿Cómo uso AgendaYa para reservas?',
+        a: 'Crea servicios por tipo de habitación: "Habitación estándar", "Suite" o "Habitación ejecutiva". Define la duración como 1440 minutos (1 día) y el precio por noche. Los huéspedes reservan su habitación y reciben confirmación automática.',
+      },
+      {
+        q: '¿Puedo gestionar check-in y check-out?',
+        a: 'Puedes crear servicios adicionales como "Check-in temprano" o "Late check-out" con duraciones más cortas y precios independientes. Así ofreces flexibilidad sin complicar la reserva principal.',
+      },
+      {
+        q: '¿Manejan reservas para varios días?',
+        a: 'Crea un servicio de "Paquete de 3 noches" o "Semana completa" con el precio total. El cliente reserva una sola vez y recibe los detalles de su estancia completa en la confirmación.',
+      },
+      {
+        q: '¿Cómo evito overbooking si tengo pocas habitaciones?',
+        a: 'Define el cupo máximo por servicio (cantidad de habitaciones disponibles). Cuando se alcanza el límite, el sistema deja de aceptar reservas automáticamente, evitando sobreventas.',
+      },
+    ],
+    artesanía: [
+      {
+        q: 'Vendo artesanías, no servicios con cita. ¿Me sirve AgendaYa?',
+        a: 'AgendaYa te permite ofrecer servicios como "Taller de cerámica", "Curso de tejido" o "Pieza personalizada". Tus clientes reservan su espacio en el taller o solicitan una pieza única hecha a la medida.',
+      },
+      {
+        q: '¿Puedo ofrecer visitas guiadas a mi taller?',
+        a: 'Crea un servicio de "Visita al taller" con duración de 60 minutos. Los clientes reservan su recorrido y conocen tu proceso creativo en vivo. Ideal para conectar con compradores interesados en el arte local.',
+      },
+      {
+        q: '¿Cómo vendo piezas personalizadas?',
+        a: 'Publica "Pieza personalizada" como servicio y pide al cliente que describa lo que necesita en las notas de la reserva. Con los planes Pro y Premium puedes requerir un anticipo para empezar la elaboración.',
+      },
+      {
+        q: '¿Sirve para ferias y exposiciones?',
+        a: 'Puedes crear servicios temporales para ferias o mercados artesanales. Los clientes reservan su visita y tú organizas tu agenda de participación en eventos sin mezclarla con tus talleres regulares.',
+      },
+    ],
+    moda: [
+      {
+        q: 'Soy diseñador de moda independiente. ¿Cómo publico mis servicios?',
+        a: 'Crea servicios como "Diseño personalizado", "Arreglo de prendas" o "Asesoría de imagen". Cada uno con su duración y precio. Tus clientes reservan la sesión que necesitan sin tener que llamarte.',
+      },
+      {
+        q: '¿Puedo ofrecer servicio de styling para eventos?',
+        a: 'Crea "Styling para evento" con duración de 2 horas donde incluyes asesoría de vestuario para bodas, graduaciones o sesiones de fotos. El cliente reserva y tú preparas las opciones antes de la cita.',
+      },
+      {
+        q: '¿Manejan venta de prendas o solo servicios?',
+        a: 'AgendaYa está enfocado en servicios, pero puedes crear "Valoración de guardarropa" o "Closet coaching" como servicios. Para la venta directa de prendas, complementa con tu tienda física o redes sociales.',
+      },
+      {
+        q: '¿Cómo manejo clientes que necesitan varias pruebas?',
+        a: 'Puedes crear un servicio de "Paquete de 3 sesiones" que incluya prueba inicial, ajuste intermedio y entrega final. Así el cliente reserva una vez y tú gestionas las sesiones internamente sin que tenga que agendar cada una.',
+      },
+    ],
+    fotografía: [
+      {
+        q: 'Soy fotógrafo freelance. ¿Cómo gestiono mis sesiones?',
+        a: 'Crea servicios por tipo de sesión: "Retratos", "Sesión de productos", "Cobertura de eventos". Cada servicio con su duración estimada. Los clientes ven tu disponibilidad y reservan la fecha que prefieren.',
+      },
+      {
+        q: '¿Puedo cobrar una parte por adelantado?',
+        a: 'Sí, los planes Pro y Premium te permiten requerir un porcentaje de pago anticipado. Así te aseguras de que el cliente confirme la sesión y reduces las cancelaciones de último minuto.',
+      },
+      {
+        q: '¿Cómo entrego las fotos a mis clientes?',
+        a: 'AgendaYa no almacena archivos. Después de la sesión, puedes usar Google Drive, Dropbox o WeTransfer para compartir las fotos. La información de entrega la incluyes en las notas posteriores a la cita.',
+      },
+      {
+        q: '¿Sirve para sesiones de fotos de producto para e-commerce?',
+        a: 'Perfectamente. Crea "Sesión de productos" con duración según la cantidad de artículos. Tus clientes del mundo empresarial reservan sesiones periódicas para mantener actualizado su catálogo digital.',
+      },
+    ],
+    inmobiliaria: [
+      {
+        q: 'Soy agente inmobiliario. ¿Cómo uso AgendaYa para mostrar propiedades?',
+        a: 'Crea servicios como "Visita a propiedad", "Asesoría de compra" o "Tasación". Los clientes reservan una cita para recorrer el inmueble o recibir asesoría personalizada sin tener que llamar a la oficina.',
+      },
+      {
+        q: '¿Puedo mostrar varias propiedades como servicios diferentes?',
+        a: 'Sí, cada propiedad puede ser un servicio con su nombre, descripción y duración de visita. Incluso puedes incluir el precio de la propiedad en la descripción para atraer compradores calificados.',
+      },
+      {
+        q: '¿Cómo gestiono las visitas a propiedades?',
+        a: 'El sistema bloquea automáticamente los horarios ocupados. Si programas una visita para las 10am, ese bloque queda reservado y no recibes solicitudes que se traslapen, organizando tu jornada de showing.',
+      },
+      {
+        q: '¿Ofrecen algo para promocionar mis propiedades?',
+        a: 'Cada servicio se muestra en tu página pública con fotos y descripción. Los planes Pro y Premium mejoran tu posición en el buscador de AgendaYa, dando más visibilidad a tus propiedades destacadas.',
+      },
+    ],
+    legal: [
+      {
+        q: 'Soy abogado. ¿AgendaYa sirve para consultas jurídicas?',
+        a: 'Completamente. Crea servicios como "Consulta jurídica", "Revisión de contrato" o "Asesoría laboral". Tus clientes reservan su cita y tú atiendes sin interrupciones telefónicas. Los recordatorios automáticos reducen las inasistencias.',
+      },
+      {
+        q: '¿Puedo ofrecer consultas virtuales?',
+        a: 'Sí, AgendaYa no distingue entre presencial y virtual. Publica "Consulta virtual" con duración de 30-45 minutos. El cliente reserva y tú le envías el enlace de la videollamada (Zoom, Meet, etc.) antes de la cita.',
+      },
+      {
+        q: '¿Manejan confidencialidad de datos?',
+        a: 'AgendaYa almacena solo datos básicos de contacto. No compartimos información con terceros. La plataforma usa HTTPS. Para información sensible del caso, recomendamos usar canales seguros fuera de la plataforma.',
+      },
+      {
+        q: '¿Cómo manejo pagos por adelantado?',
+        a: 'Con los planes Pro y Premium puedes requerir un pago parcial al reservar. Ideal para consultorías especializadas donde quieres asegurar la asistencia del cliente antes de preparar el caso.',
+      },
+    ],
+    finanzas: [
+      {
+        q: 'Soy contador o asesor financiero. ¿Cómo publico mis servicios?',
+        a: 'Crea servicios como "Declaración de renta", "Contabilidad mensual" o "Asesoría financiera". Cada servicio con su duración y precio. Tus clientes reservan su cita y saben exactamente qué incluye cada servicio.',
+      },
+      {
+        q: '¿Manejan información fiscal sensible?',
+        a: 'AgendaYa solo gestiona la reserva. Los documentos fiscales los compartes por canales seguros externos (correo cifrado, nube privada). En las notas de la cita puedes incluir instrucciones sobre qué documentos debe llevar el cliente.',
+      },
+      {
+        q: '¿Puedo ofrecer paquetes de servicios?',
+        a: 'Crea servicios como "Paquete contable mensual" con precio recurrente. El cliente reserva una vez al mes y tú llevas el control de sus obligaciones. Ideal para pequeños empresarios que buscan formalizarse.',
+      },
+      {
+        q: '¿Cómo gestiono clientes recurrentes?',
+        a: 'Los clientes recurrentes ven tu disponibilidad y reservan directamente sin tener que llamar. Los recordatorios automáticos aseguran que no olviden sus citas mensuales de declaración o revisión contable.',
+      },
+    ],
+    entretenimiento: [
+      {
+        q: 'Organizo eventos. ¿Cómo publico mis servicios?',
+        a: 'Crea servicios por tipo de evento: "Fiesta privada", "Show en vivo", "Alquiler de equipo". Los clientes reservan con anticipación y recibes toda la información del evento en la confirmación.',
+      },
+      {
+        q: '¿Puedo vender entradas o boletas?',
+        a: 'Publica "Entrada general" o "Reserva VIP" como servicios con precio. Controlas el aforo definiendo el cupo máximo. Cuando se agotan, el sistema deja de aceptar reservas automáticamente.',
+      },
+      {
+        q: '¿Cómo promociono eventos especiales?',
+        a: 'Cada servicio es una página pública que puedes compartir en redes sociales. Los clientes ven la descripción, precios y disponibilidad. Ideal para promocionar shows, talleres o experiencias temporales.',
+      },
+      {
+        q: '¿Sirve para alquiler de equipos de sonido o gaming?',
+        a: 'Sí, crea "Alquiler de equipo" con duración del período de alquiler (ej: 24 horas). El cliente reserva, tú preparas el equipo y coordinas la entrega. Los recordatorios evitan que se olviden de devolverlo.',
+      },
+    ],
+    turismo: [
+      {
+        q: 'Soy guía turístico. ¿Cómo publico mis recorridos?',
+        a: 'Crea servicios como "City tour", "Tour gastronómico" o "Aventura extremo" con la duración exacta del recorrido. Los viajeros reservan su cupo y tú organizas los grupos sabiendo cuántos asistentes tendrás.',
+      },
+      {
+        q: '¿Puedo ofrecer paquetes de varios días?',
+        a: 'Crea "Paquete turístico" con duración de 8 horas o más. Incluye en la descripción todos los detalles: transporte, alimentación, entradas. El cliente reserva una vez y recibe la confirmación con el itinerario completo.',
+      },
+      {
+        q: '¿Cómo manejo cancelaciones por mal clima?',
+        a: 'Define en la configuración de tu negocio el tiempo mínimo de cancelación. Si el clima no acompaña, el cliente puede cancelar dentro del plazo y tú quedas libre para reagendar sin penalización.',
+      },
+      {
+        q: '¿Sirve para agencias de viaje establecidas?',
+        a: 'Perfectamente. Publica diferentes destinos y paquetes como servicios independientes. Los clientes exploran tus ofertas, reservan su viaje favorito y reciben asesoría personalizada en cada paso.',
+      },
+    ],
+    diseño: [
+      {
+        q: 'Soy diseñador gráfico freelance. ¿Cómo gestiono mis proyectos?',
+        a: 'Crea servicios como "Diseño de logo", "Branding completo" o "Edición de video" con la duración que necesites. Los clientes reservan su proyecto y tú organizas tu carga de trabajo sin saturarte.',
+      },
+      {
+        q: '¿Puedo cobrar una parte por adelantado?',
+        a: 'Sí, los planes Pro y Premium permiten requerir un porcentaje de pago anticipado. Así te proteges de clientes que reservan y luego no confirman, asegurando tu tiempo de diseño.',
+      },
+      {
+        q: '¿Cómo entrego los archivos finales?',
+        a: 'AgendaYa no almacena archivos. Después de la sesión puedes compartir los entregables por WeTransfer, Google Drive o Dropbox. Incluye las instrucciones de entrega en las notas posteriores a la cita.',
+      },
+      {
+        q: '¿Sirve para agencias o estudios grandes?',
+        a: 'Con el plan Premium gestionas hasta 3 negocios (o carteras de servicios). Cada línea creativa (branding, video, web) puede tener sus propios servicios y horarios, y los clientes reservan según lo que necesiten.',
+      },
+    ],
+    jardinería: [
+      {
+        q: 'Tengo un servicio de jardinería. ¿Cómo publico mis trabajos?',
+        a: 'Crea servicios por tipo de trabajo: "Mantenimiento mensual", "Poda de árboles" o "Diseño de jardín". Cada uno con su duración estimada. Los clientes reservan y tú organizas tu ruta semanal de servicios.',
+      },
+      {
+        q: '¿Cómo manejo trabajos que requieren varios días?',
+        a: 'Para proyectos grandes como "Diseño de jardín", crea un servicio con la duración total estimada. El cliente reserva el inicio y tú coordinas el resto de las visitas internamente.',
+      },
+      {
+        q: '¿Puedo ofrecer mantenimiento recurrente?',
+        a: 'Crea "Mantenimiento mensual" como servicio. Los clientes reservan su primer servicio y luego pueden agendar las siguientes visitas desde su historial. Los recordatorios automáticos ayudan a que no olviden su próxima cita.',
+      },
+      {
+        q: '¿Qué hago si el trabajo toma más tiempo del estimado?',
+        a: 'AgendaYa bloquea el horario para otros clientes. Si necesitas más tiempo, ajusta la duración desde el panel. Entre trabajos pequeños y grandes, distribuye tu jornada sin presiones.',
+      },
+    ],
+    música: [
+      {
+        q: 'Doy clases de música. ¿Cómo publico mis servicios?',
+        a: 'Crea servicios por instrumento: "Clase de guitarra", "Clase de piano" o "Canto". Cada uno con su duración y precio. Tus estudiantes reservan su clase semanal y reciben recordatorios automáticos.',
+      },
+      {
+        q: 'Soy músico para eventos. ¿Cómo ofrezco mis presentaciones?',
+        a: 'Publica "Presentación en vivo" con duración según el evento (2-4 horas). Los clientes reservan tu show para bodas, fiestas o eventos empresariales. Incluye tu repertorio en la descripción del servicio.',
+      },
+      {
+        q: '¿Puedo ofrecer clases grupales?',
+        a: 'Crea "Taller musical" o "Clase grupal" con cupo máximo. Los estudiantes reservan su lugar y tú preparas la clase sabiendo exactamente cuántos asistentes tendrás. El sistema bloquea las reservas cuando se llena el cupo.',
+      },
+      {
+        q: '¿Sirve para reparación de instrumentos?',
+        a: 'Sí, crea "Afinación y mantenimiento" o "Reparación de instrumentos". Los músicos reservan su cita para dejar su instrumento y reciben notificación cuando está listo para recoger.',
+      },
+    ],
+    'cuidado infantil': [
+      {
+        q: 'Tengo una guardería. ¿Cómo uso AgendaYa para las citas?',
+        a: 'Crea servicios como "Jornada de cuidado", "Taller infantil" o "Apoyo escolar". Los padres reservan el servicio que necesitan y tú organizas el personal según la cantidad de niños agendados.',
+      },
+      {
+        q: '¿Puedo ofrecer actividades extracurriculares?',
+        a: 'Publica talleres específicos: "Clase de música infantil", "Pintura creativa" o "Estimulación temprana". Cada actividad con su duración y grupo de edad. Los padres eligen la actividad que más le gusta a sus hijos.',
+      },
+      {
+        q: '¿Cómo manejo la seguridad y emergencias?',
+        a: 'En la descripción de cada servicio incluye los requisitos y documentos necesarios. AgendaYa solo gestiona la agenda — los temas de seguridad se manejan directamente con los padres según tus protocolos.',
+      },
+      {
+        q: '¿Sirve para fiestas infantiles?',
+        a: 'Crea "Fiesta infantil" como servicio especial con duración de 3 horas. Los padres reservan la fecha, especifican el número de niños y tú preparas la animación y actividades. Ideal para cumpleaños y celebraciones.',
+      },
+    ],
+    profesionales: [
+      {
+        q: 'Soy profesional independiente. ¿AgendaYa me sirve?',
+        a: 'Completamente. AgendaYa está diseñado para cualquier profesional que ofrezca servicios por cita: consultores, asesores, coaches, mentores. Publica tus servicios, defines tu horario y tus clientes reservan directo.',
+      },
+      {
+        q: '¿Cómo diferencio entre consulta inicial y seguimiento?',
+        a: 'Crea servicios separados: "Consulta inicial" para nuevos clientes (más larga, menor precio) y "Sesión de seguimiento" para clientes recurrentes (más corta). Así gestionas mejor tu tiempo y tarifas.',
+      },
+      {
+        q: '¿Puedo ofrecer sesiones virtuales?',
+        a: 'Sí, publica "Consulta virtual" como servicio. El cliente reserva y tú compartes el enlace de la videollamada. AgendaYa no distingue entre modalidades, así que puedes tener servicios presenciales y virtuales al mismo tiempo.',
+      },
+      {
+        q: '¿Cómo manejo la facturación de mis servicios?',
+        a: 'AgendaYa te da el registro de todas las citas realizadas con cada cliente. Puedes usar esa información para generar tus facturas por separado según tus necesidades contables y fiscales.',
+      },
+    ],
   };
 
   return map[key] || [

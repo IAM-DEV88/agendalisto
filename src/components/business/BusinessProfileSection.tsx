@@ -1,11 +1,12 @@
 import React, { useState, useEffect } from 'react';
-import { Camera, Save, Loader2, Globe, Phone, MapPin, Mail, Tag, Info, Settings, Wand2 } from 'lucide-react';
+import { Camera, Save, Loader2, Globe, Phone, MapPin, Mail, Tag, Info, Settings, Wand2, Crosshair } from 'lucide-react';
 import { Business, updateBusiness, getBusinessCategories, BusinessCategory } from '../../lib/api';
 import { supabase } from '../../lib/supabase';
 import { generateBusinessDescription } from '../../lib/ai';
 import { toast } from 'react-hot-toast';
 import SectionHeader from '../ui/SectionHeader';
 import PhoneInput from '../ui/PhoneInput';
+import LocationPicker from '../ui/LocationPicker';
 
 interface BusinessProfileSectionProps {
   businessData: Business;
@@ -45,6 +46,8 @@ const BusinessProfileSection: React.FC<BusinessProfileSectionProps> = ({
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
   const [categories, setCategories] = useState<BusinessCategory[]>([]);
   const [generatingDesc, setGeneratingDesc] = useState(false);
+  const [mapLat, setMapLat] = useState<number | null>(businessData.lat);
+  const [mapLng, setMapLng] = useState<number | null>(businessData.lng);
 
   // Sync previewUrl when businessData.logo_url changes externally (e.g., after saving)
   useEffect(() => {
@@ -155,6 +158,10 @@ const BusinessProfileSection: React.FC<BusinessProfileSectionProps> = ({
     }
     // Step 2: save any other changes via parent handler
     await onSave(e);
+    // Step 3: save lat/lng AFTER onSave so it doesn't get overwritten
+    if (mapLat !== businessData.lat || mapLng !== businessData.lng) {
+      await updateBusiness(businessData.id, { lat: mapLat, lng: mapLng });
+    }
   };
 
   return (
@@ -343,6 +350,18 @@ const BusinessProfileSection: React.FC<BusinessProfileSectionProps> = ({
                   onChange={onChange}
                   className="w-full px-4 py-2.5 rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 focus:ring-2 focus:ring-primary-500/20 focus:border-primary-500 outline-none transition-all font-medium text-slate-900 dark:text-white"
                   placeholder="https://www.tu-web.com"
+                />
+              </div>
+
+              <div className="md:col-span-2">
+                <label className="text-sm font-bold text-slate-700 dark:text-slate-300 flex items-center gap-2 mb-2">
+                  <Crosshair className="w-4 h-4 text-slate-400" />
+                  Ubicación en el mapa
+                </label>
+                <LocationPicker
+                  lat={mapLat}
+                  lng={mapLng}
+                  onChange={(lat, lng) => { setMapLat(lat); setMapLng(lng); }}
                 />
               </div>
             </div>

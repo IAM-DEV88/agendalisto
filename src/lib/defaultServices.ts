@@ -114,14 +114,127 @@ const defaultServicesMap: Record<string, DefaultService[]> = {
     { name: 'Traslado ejecutivo', duration: 60, description: 'Transporte privado con conductor profesional' },
     { name: 'Alquiler con conductor', duration: 240, description: 'Vehículo con conductor por horas o jornada completa' },
   ],
+  'Educación': [
+    { name: 'Clase particular', duration: 60, description: 'Sesión individual de refuerzo académico' },
+    { name: 'Curso intensivo', duration: 120, description: 'Curso de preparación en tiempo reducido' },
+    { name: 'Taller grupal', duration: 90, description: 'Taller en grupo con enfoque práctico' },
+    { name: 'Asesoría personalizada', duration: 45, description: 'Acompañamiento uno a uno según tus necesidades' },
+    { name: 'Clase online', duration: 60, description: 'Sesión virtual desde cualquier lugar' },
+  ],
+  'Hotelería': [
+    { name: 'Habitación estándar', duration: 1440, description: 'Noche de alojamiento con desayuno incluido' },
+    { name: 'Habitación ejecutiva', duration: 1440, description: 'Habitación con amenities premium' },
+    { name: 'Suite', duration: 1440, description: 'Suite con jacuzzi y sala privada' },
+    { name: 'Check-in temprano', duration: 120, description: 'Ingreso anticipado a la habitación' },
+    { name: 'Late check-out', duration: 120, description: 'Salida tardía hasta las 6pm' },
+  ],
+  'Artesanía': [
+    { name: 'Taller de cerámica', duration: 120, description: 'Aprende a moldear y pintar cerámica' },
+    { name: 'Curso de tejido', duration: 90, description: 'Clase de tejido en telar o crochet' },
+    { name: 'Pieza personalizada', duration: 60, description: 'Diseño y elaboración de pieza única' },
+    { name: 'Restauración', duration: 120, description: 'Restauración de piezas artesanales dañadas' },
+    { name: 'Visita taller', duration: 60, description: 'Recorrido guiado por el taller y proceso creativo' },
+  ],
+  'Moda': [
+    { name: 'Asesoría de imagen', duration: 60, description: 'Diagnóstico de color, estilo y morfología' },
+    { name: 'Arreglo de prendas', duration: 45, description: 'Ajuste de largo, ancho o mangas' },
+    { name: 'Diseño personalizado', duration: 90, description: 'Creación de prenda a la medida' },
+    { name: 'Styling para evento', duration: 120, description: 'Selección de outfit para ocasión especial' },
+    { name: 'Closet coaching', duration: 90, description: 'Organización y renovación de guardarropa' },
+  ],
+  'Fotografía': [
+    { name: 'Sesión de retratos', duration: 60, description: 'Sesión fotográfica individual o grupal' },
+    { name: 'Sesión de productos', duration: 90, description: 'Fotografía de catálogo para tu negocio' },
+    { name: 'Cobertura de evento', duration: 240, description: 'Fotografía de bodas, cumpleaños o eventos' },
+    { name: 'Book de modelos', duration: 120, description: 'Sesión profesional con cambio de looks' },
+    { name: 'Edición y retoque', duration: 60, description: 'Corrección de color y retoque digital' },
+  ],
+  'Inmobiliaria': [
+    { name: 'Visita a propiedad', duration: 45, description: 'Recorrido guiado por el inmueble' },
+    { name: 'Asesoría de compra', duration: 60, description: 'Orientación personalizada para adquirir vivienda' },
+    { name: 'Tasación', duration: 60, description: 'Evaluación del valor comercial del inmueble' },
+    { name: 'Gestión de arriendo', duration: 30, description: 'Asesoría para arrendar tu propiedad' },
+    { name: 'Asesoría legal', duration: 45, description: 'Revisión de contratos y documentación' },
+  ],
+  'Legal': [
+    { name: 'Consulta jurídica', duration: 30, description: 'Primera asesoría sobre tu caso legal' },
+    { name: 'Revisión de contrato', duration: 45, description: 'Análisis y recomendaciones sobre documentos legales' },
+    { name: 'Trámite notarial', duration: 30, description: 'Gestión de poderes, escrituras o declaraciones' },
+    { name: 'Representación legal', duration: 60, description: 'Sesión para preparación de defensa o demanda' },
+    { name: 'Asesoría laboral', duration: 45, description: 'Consultoría en derecho laboral y seguridad social' },
+  ],
+  'Finanzas': [
+    { name: 'Asesoría financiera', duration: 60, description: 'Planificación de finanzas personales o empresariales' },
+    { name: 'Declaración de renta', duration: 90, description: 'Preparación y presentación de declaración de impuestos' },
+    { name: 'Contabilidad mensual', duration: 60, description: 'Revisión de libros contables y conciliación' },
+    { name: 'Evaluación de crédito', duration: 45, description: 'Análisis de perfil crediticio y opciones de financiamiento' },
+    { name: 'Presupuesto empresarial', duration: 60, description: 'Elaboración de presupuesto y proyecciones' },
+  ],
+  'Entretenimiento': [
+    { name: 'Entrada general', duration: 180, description: 'Acceso al evento con cupo limitado' },
+    { name: 'Reserva VIP', duration: 240, description: 'Mesa preferencial con atención personalizada' },
+    { name: 'Alquiler de equipo', duration: 120, description: 'Préstamo de equipos de gaming o realidad virtual' },
+    { name: 'Evento privado', duration: 240, description: 'Reserva exclusiva para cumpleaños o celebraciones' },
+    { name: 'Clase de baile', duration: 60, description: 'Sesión grupal de baile o ritmos latinos' },
+  ],
+  'Profesionales': [
+    { name: 'Consulta inicial', duration: 30, description: 'Primera reunión para conocer tus necesidades' },
+    { name: 'Asesoría especializada', duration: 60, description: 'Atención profesional adaptada a tu caso' },
+    { name: 'Sesión de seguimiento', duration: 30, description: 'Revisión de avances y ajustes' },
+    { name: 'Cotización sin costo', duration: 20, description: 'Evaluación y presupuesto detallado' },
+    { name: 'Consulta virtual', duration: 30, description: 'Atención remota por videollamada' },
+  ],
+  'Turismo': [
+    { name: 'City tour', duration: 180, description: 'Recorrido guiado por los principales atractivos de la ciudad' },
+    { name: 'Paquete turístico', duration: 480, description: 'Plan completo con transporte, guía y alimentación' },
+    { name: 'Aventura extremo', duration: 240, description: 'Actividades de turismo de aventura con equipo incluido' },
+    { name: 'Tour gastronómico', duration: 180, description: 'Recorrido por los mejores sabores locales' },
+    { name: 'Asesoría de viaje', duration: 60, description: 'Planificación personalizada de tu próxima aventura' },
+  ],
+  'Diseño': [
+    { name: 'Diseño de logo', duration: 120, description: 'Creación de identidad visual y logotipo profesional' },
+    { name: 'Branding completo', duration: 240, description: 'Manual de marca completo con tipografía, colores y aplicaciones' },
+    { name: 'Diseño de redes', duration: 60, description: 'Creación de piezas gráficas para redes sociales' },
+    { name: 'Edición de video', duration: 120, description: 'Edición y postproducción de material audiovisual' },
+    { name: 'Asesoría creativa', duration: 60, description: 'Consultoría de imagen y estrategia visual' },
+  ],
+  'Jardinería': [
+    { name: 'Diseño de jardín', duration: 120, description: 'Planificación y diseño de espacios verdes' },
+    { name: 'Mantenimiento mensual', duration: 120, description: 'Corte, poda y limpieza general de jardín' },
+    { name: 'Poda de árboles', duration: 60, description: 'Poda formativa y de mantenimiento de árboles' },
+    { name: 'Siembra y trasplante', duration: 90, description: 'Siembra de plantas ornamentales y árboles frutales' },
+    { name: 'Sistema de riego', duration: 120, description: 'Instalación de riego por goteo o aspersión' },
+  ],
+  'Música': [
+    { name: 'Clase de instrumento', duration: 60, description: 'Clase personalizada de guitarra, piano, batería o canto' },
+    { name: 'Presentación en vivo', duration: 120, description: 'Show musical para eventos privados y empresariales' },
+    { name: 'Afina tu instrumento', duration: 30, description: 'Afinación y mantenimiento básico de instrumentos' },
+    { name: 'Producción musical', duration: 120, description: 'Grabación, mezcla y masterización de audio' },
+    { name: 'Clase grupal', duration: 90, description: 'Taller musical en grupo para todas las edades' },
+  ],
+  'Cuidado Infantil': [
+    { name: 'Jornada de cuidado', duration: 240, description: 'Cuidado temporal de niños con actividades lúdicas' },
+    { name: 'Clase de estimulación', duration: 60, description: 'Actividades de estimulación temprana para bebés' },
+    { name: 'Taller infantil', duration: 90, description: 'Taller recreativo de pintura, música o manualidades' },
+    { name: 'Apoyo escolar', duration: 60, description: 'Acompañamiento en tareas y refuerzo académico' },
+    { name: 'Fiesta infantil', duration: 180, description: 'Animación y entretenimiento para cumpleaños infantiles' },
+  ],
 };
+
+const FALLBACK_SERVICES: DefaultService[] = [
+  { name: 'Consulta inicial', duration: 30, description: 'Primera reunión para conocer tus necesidades' },
+  { name: 'Asesoría personalizada', duration: 60, description: 'Atención uno a uno adaptada a tu caso' },
+  { name: 'Sesión de seguimiento', duration: 30, description: 'Revisión de avances y ajustes' },
+  { name: 'Cotización sin costo', duration: 20, description: 'Evaluación y presupuesto detallado' },
+  { name: 'Consulta virtual', duration: 30, description: 'Atención remota por videollamada' },
+];
 
 export function getDefaultServices(categoryName: string): DefaultService[] {
   const normalized = categoryName.trim().toLowerCase();
   const match = Object.entries(defaultServicesMap).find(
     ([key]) => key.toLowerCase() === normalized
   );
-  return match ? match[1] : [];
+  return match ? match[1] : FALLBACK_SERVICES;
 }
 
 export default defaultServicesMap;

@@ -1,36 +1,90 @@
-import React from 'react';
+import React, { useEffect, useRef } from 'react';
+import L from 'leaflet';
+import 'leaflet/dist/leaflet.css';
 import { MapPin, ExternalLink } from 'lucide-react';
+import { parseCoordinatesFromAddress } from '../../../utils/coordinates';
 
 interface BusinessLocationProps {
   address: string;
+  lat?: number | null;
+  lng?: number | null;
 }
 
-const BusinessLocation: React.FC<BusinessLocationProps> = ({ address }) => {
-  if (!address) return (
-    <p className="text-sm text-slate-400 italic text-center py-4">Dirección no disponible</p>
-  );
+const markerIcon = L.divIcon({
+  html: '<div style="width:32px;height:32px;border-radius:50%;background:#7C3AED;box-shadow:0 4px 12px rgba(124,58,237,0.4);display:flex;align-items:center;justify-content:center;color:white;font-size:18px;font-weight:700;border:3px solid white;line-height:1;">📍</div>',
+  iconSize: [32, 32],
+  iconAnchor: [16, 32],
+  className: '',
+});
 
-  const mapsUrl = `https://maps.google.com/maps?q=${encodeURIComponent(address)}&t=&z=15&ie=UTF8&iwloc=&output=embed`;
+const BusinessLocation: React.FC<BusinessLocationProps> = ({ address, lat, lng }) => {
+  const mapRef = useRef<HTMLDivElement>(null);
+  const mapInstanceRef = useRef<L.Map | null>(null);
+
+  // Try DB coords first, then parse from address
+  const coords = (lat && lng)
+    ? { lat: Number(lat), lng: Number(lng) }
+    : address
+      ? parseCoordinatesFromAddress(address)
+      : { lat: null, lng: null };
+
+  const hasCoords = coords.lat !== null && coords.lng !== null;
+
+  useEffect(() => {
+    if (!mapRef.current || !hasCoords) return;
+
+    const map = L.map(mapRef.current, { zoomControl: false, attributionControl: false }).setView([coords.lat!, coords.lng!], 15);
+
+    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', { maxZoom: 19 }).addTo(map);
+
+    L.marker([coords.lat!, coords.lng!], { icon: markerIcon }).addTo(map);
+
+    mapInstanceRef.current = map;
+
+    return () => {
+      map.remove();
+      mapInstanceRef.current = null;
+    };
+  }, [hasCoords]);
+
+  if (!address && !hasCoords) {
+    return (
+      <p className="text-sm text-slate-400 italic text-center py-4">Dirección no disponible</p>
+    );
+  }
+
+  const googleMapsUrl = hasCoords
+    ? `https://www.google.com/maps?q=${coords.lat},${coords.lng}`
+    : `https://www.google.com/maps/search/${encodeURIComponent(address)}`;
+  const displayAddress = address || `${coords.lat?.toFixed(6)}, ${coords.lng?.toFixed(6)}`;
 
   return (
     <div className="space-y-3">
-      <div className="rounded-xl overflow-hidden border border-slate-200 dark:border-slate-700 shadow-sm">
-        <iframe
-          title="Ubicación del negocio"
-          className="w-full h-44"
-          src={mapsUrl}
-          allowFullScreen
-          loading="lazy"
+      {hasCoords ? (
+        <div
+          ref={mapRef}
+          className="w-full h-44 rounded-xl overflow-hidden border border-slate-200 dark:border-slate-700"
+          style={{ isolation: 'isolate' }}
         />
-      </div>
+      ) : (
+        <div className="rounded-xl overflow-hidden border border-slate-200 dark:border-slate-700 shadow-sm">
+          <iframe
+            title="Ubicación del negocio"
+            className="w-full h-44"
+            src={`https://maps.google.com/maps?q=${encodeURIComponent(address)}&t=&z=15&ie=UTF8&iwloc=&output=embed`}
+            allowFullScreen
+            loading="lazy"
+          />
+        </div>
+      )}
       <a
-        href={`https://www.google.com/maps/search/${encodeURIComponent(address)}`}
+        href={googleMapsUrl}
         target="_blank"
         rel="noopener noreferrer"
         className="flex items-center gap-2 text-sm font-bold text-primary-600 dark:text-primary-400 hover:text-primary-500 transition-colors"
       >
         <MapPin className="w-4 h-4" />
-        <span className="truncate">{address}</span>
+        <span className="truncate">{displayAddress}</span>
         <ExternalLink className="w-3 h-3 flex-shrink-0" />
       </a>
     </div>

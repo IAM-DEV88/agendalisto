@@ -1,5 +1,5 @@
 import { Link, useNavigate } from 'react-router-dom';
-import { useAuthSession } from '../hooks/useAuthSession';
+import { useAuth } from '../hooks/useAuth';
 import { useState, useEffect } from 'react';
 import { getBusinessCategories, BusinessCategory, getTopMilestones } from '../lib/api';
 import { Swiper, SwiperSlide } from 'swiper/react';
@@ -13,7 +13,7 @@ import type { Milestone } from '../lib/api';
 import SEO from '../components/SEO';
 
 const Home = () => {
-  const { user, loading } = useAuthSession();
+  const { user, loading } = useAuth();
   const navigate = useNavigate();
   const [searchService, setSearchService] = useState('');
   const [searchLocation, setSearchLocation] = useState('');

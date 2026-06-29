@@ -1,7 +1,7 @@
 import { useState, useEffect, useMemo, useCallback, useRef, lazy, Suspense } from 'react';
 import { Link, useSearchParams } from 'react-router-dom';
 import { MapPin, ArrowRight, Heart, Store, SlidersHorizontal, Search, X, Map, List, MessageCircle, Loader2 } from 'lucide-react';
-import { getBusinesses, getBusinessCategories, getBusinessesMapData, toggleLike, checkLikedBusinesses } from '../lib/api';
+import { getBusinesses, getBusinessCategories, toggleLike, checkLikedBusinesses } from '../lib/api';
 import type { Business, BusinessCategory } from '../lib/api';
 import { supabase } from '../lib/supabase';
 import { toast } from 'react-hot-toast';
@@ -60,11 +60,12 @@ const BusinessCard = ({ business, categories, isLiked: initialLiked, currentUser
           className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500"
           onError={(e) => { e.currentTarget.src = FALLBACK_LOGO; }}
         />
-        <div className="absolute inset-0 bg-gradient-to-t from-black/50 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity flex items-end p-4">
+        <div className="absolute inset-0 bg-gradient-to-t from-black/50 via-transparent to-transparent opacity-0 group-hover:opacity-100 group-focus-within:opacity-100 transition-opacity flex items-end p-4">
           <div className="flex gap-2">
             <button
               onClick={handleToggleLike}
               disabled={isLiking}
+              aria-label={isLiked ? 'Quitar de favoritos' : 'Agregar a favoritos'}
               className={`p-2 rounded-xl backdrop-blur-md transition-all ${
                 isLiked ? 'bg-rose-500 text-white' : 'bg-white/20 hover:bg-white/40 text-white'
               }`}
@@ -82,6 +83,7 @@ const BusinessCard = ({ business, categories, isLiked: initialLiked, currentUser
             </div>
             {business.whatsapp && (
               <button
+                aria-label="Contactar por WhatsApp"
                 onClick={(e) => {
                   e.preventDefault();
                   e.stopPropagation();
@@ -181,8 +183,7 @@ const ExploreBusinesses = () => {
   const [user, setUser] = useState<any>(null);
   const [viewMode, setViewMode] = useState<'list' | 'map'>('list');
   const [likedIds, setLikedIds] = useState<Set<string>>(new Set());
-  const [mapBusinesses, setMapBusinesses] = useState<Pick<Business, 'id' | 'name' | 'slug' | 'lat' | 'lng'>[]>([]);
-  const [mapLoading, setMapLoading] = useState(false);
+  const [mapBusinesses, setMapBusinesses] = useState<Business[]>([]);
 
   const observer = useRef<IntersectionObserver | null>(null);
   const initialLoadRef = useRef(false);
@@ -269,16 +270,12 @@ const ExploreBusinesses = () => {
     }
   };
 
-  // Load map data when switching to map view
+  // Sync map businesses from list data when switching to map view
   useEffect(() => {
-    if (viewMode === 'map' && mapBusinesses.length === 0 && !mapLoading) {
-      setMapLoading(true);
-      getBusinessesMapData()
-        .then(data => setMapBusinesses(data))
-        .catch(() => {})
-        .finally(() => setMapLoading(false));
+    if (viewMode === 'map') {
+      setMapBusinesses(businesses);
     }
-  }, [viewMode, mapBusinesses.length, mapLoading]);
+  }, [viewMode, businesses]);
 
   const categoryOptions = useMemo(() => [
     { value: 'all', label: 'Todas' },
@@ -407,17 +404,9 @@ const ExploreBusinesses = () => {
             />
           </div>
         ) : viewMode === 'map' ? (
-          <div className="animate-in fade-in duration-300">
-            {mapLoading ? (
-              <div className="h-[400px] bg-slate-100 dark:bg-slate-800 rounded-2xl animate-pulse flex items-center justify-center">
-                <Loader2 className="w-8 h-8 text-primary-600 animate-spin" />
-              </div>
-            ) : (
-              <Suspense fallback={<div className="h-[400px] bg-slate-100 dark:bg-slate-800 rounded-2xl animate-pulse" />}>
-                <BusinessMap businesses={mapBusinesses as any} />
-              </Suspense>
-            )}
-          </div>
+          <Suspense fallback={<div className="h-[400px] bg-slate-100 dark:bg-slate-800 rounded-2xl animate-pulse" />}>
+            <BusinessMap businesses={mapBusinesses as any} />
+          </Suspense>
         ) : (
           <>
             <div className="grid gap-6 grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 animate-in fade-in slide-in-from-bottom-4 duration-500">

@@ -10,6 +10,7 @@ import { generateBusinessDescription } from '../lib/ai';
 import toast from 'react-hot-toast';
 import SEO from '../components/SEO';
 import PhoneInput from '../components/ui/PhoneInput';
+import LocationPicker from '../components/ui/LocationPicker';
 import {
   Store,
   Building2,
@@ -30,6 +31,7 @@ import {
   Crown,
   Wand2,
   Loader2,
+  Crosshair,
 } from 'lucide-react';
 
 type BusinessRegisterProps = {
@@ -46,6 +48,8 @@ const initialForm = {
   whatsapp: '',
   instagram: '',
   facebook: '',
+  lat: null as number | null,
+  lng: null as number | null,
 };
 
 const BusinessRegister = ({ user }: BusinessRegisterProps) => {
@@ -145,8 +149,8 @@ const BusinessRegister = ({ user }: BusinessRegisterProps) => {
         facebook: form.facebook || null,
         logo_url: null,
         website: null,
-        lat: null,
-        lng: null,
+        lat: form.lat,
+        lng: form.lng,
         showcase_only: showcaseOnly,
       };
 
@@ -378,6 +382,19 @@ const BusinessRegister = ({ user }: BusinessRegisterProps) => {
                       className="w-full pl-10"
                     />
                   </div>
+                </div>
+
+                {/* Ubicación en el mapa */}
+                <div className="sm:col-span-2">
+                  <label className="block text-sm font-bold text-slate-700 dark:text-slate-300 mb-1.5 flex items-center gap-2">
+                    <Crosshair className="w-4 h-4 text-slate-400" />
+                    Ubicación en el mapa
+                  </label>
+                  <LocationPicker
+                    lat={form.lat}
+                    lng={form.lng}
+                    onChange={(lat, lng) => setForm(prev => ({ ...prev, lat, lng }))}
+                  />
                 </div>
               </div>
             </div>
