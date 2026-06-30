@@ -83,6 +83,8 @@ const Blog = () => {
       setPosts(prev => prev.map(p =>
         p.id === id ? { ...p, likes_count: res.action === 'added' ? p.likes_count + 1 : p.likes_count - 1 } : p
       ));
+    } else {
+      toast.error(res.error || 'Error al marcar favorito');
     }
   };
 

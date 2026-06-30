@@ -588,42 +588,32 @@ export const checkIfLiked = async (userId: string, targetId: string, type: 'busi
 export const toggleLike = async (userId: string, targetId: string, type: 'business' | 'service') => {
   try {
     const isLiked = await checkIfLiked(userId, targetId, type);
-    
+    const column = type === 'business' ? 'business_id' : 'service_id';
+
     if (isLiked) {
-      // Remove like
-      const query = supabase
-        .from('agendaya_user_likes')
-        .delete()
-        .eq('user_id', userId);
-      
-      if (type === 'business') {
-        query.eq('business_id', targetId);
-      } else {
-        query.eq('service_id', targetId);
-      }
-      
-      const { error } = await query;
-      if (error) throw error;
-      return { success: true, action: 'removed' };
-    } else {
-      // Add like
-      const payload: any = { user_id: userId };
-      if (type === 'business') {
-        payload.business_id = targetId;
-      } else {
-        payload.service_id = targetId;
-      }
-      
       const { error } = await supabase
         .from('agendaya_user_likes')
-        .insert([payload]);
-      
+        .delete()
+        .eq('user_id', userId)
+        .eq(column, targetId);
+
       if (error) throw error;
-      return { success: true, action: 'added' };
+      return { success: true, action: 'removed' };
     }
-  } catch (error: any) {
-    console.error('Error toggling like:', error);
-    return { success: false, error: error.message };
+
+    const { error } = await supabase
+      .from('agendaya_user_likes')
+      .insert([{ user_id: userId, [column]: targetId }]);
+
+    if (error) {
+      if (error.code === '23505') {
+        return { success: true, action: 'added' };
+      }
+      throw error;
+    }
+    return { success: true, action: 'added' };
+  } catch (err: unknown) {
+    return { success: false, error: getErrorMessage(err) };
   }
 };
 export interface FavoriteItem {
@@ -1541,38 +1531,38 @@ export const createBlogComment = async (comment: Omit<BlogComment, 'id' | 'likes
 
 export const toggleBlogLike = async (userId: string, targetId: string, type: 'post' | 'comment'): Promise<{ success: boolean; action?: 'added' | 'removed'; error?: string }> => {
   try {
-    const query = supabase
+    const column = type === 'post' ? 'post_id' : 'comment_id';
+
+    const { data: existingLike } = await supabase
       .from('agendaya_blog_likes')
       .select('id')
-      .eq('user_id', userId);
-    
-    if (type === 'post') query.eq('post_id', targetId);
-    else query.eq('comment_id', targetId);
-
-    const { data: existingLike } = await query.maybeSingle();
+      .eq('user_id', userId)
+      .eq(column, targetId)
+      .maybeSingle();
 
     if (existingLike) {
       const { error } = await supabase
         .from('agendaya_blog_likes')
         .delete()
         .eq('id', existingLike.id);
-      
+
       if (error) throw error;
       return { success: true, action: 'removed' };
-    } else {
-      const payload: any = { user_id: userId };
-      if (type === 'post') payload.post_id = targetId;
-      else payload.comment_id = targetId;
-
-      const { error } = await supabase
-        .from('agendaya_blog_likes')
-        .insert([payload]);
-      
-      if (error) throw error;
-      return { success: true, action: 'added' };
     }
-  } catch (err: any) {
-    return { success: false, error: err.message };
+
+    const { error } = await supabase
+      .from('agendaya_blog_likes')
+      .insert([{ user_id: userId, [column]: targetId }]);
+
+    if (error) {
+      if (error.code === '23505') {
+        return { success: true, action: 'added' };
+      }
+      throw error;
+    }
+    return { success: true, action: 'added' };
+  } catch (err: unknown) {
+    return { success: false, error: getErrorMessage(err) };
   }
 };
 

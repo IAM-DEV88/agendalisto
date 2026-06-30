@@ -36,12 +36,13 @@ const BlogHomeSection = () => {
     }
     const res = await toggleBlogLike(user.id, id, type);
     if (res.success) {
-      // Refresh data or update local state
       if (latestPost?.id === id) {
         setLatestPost(prev => prev ? { ...prev, likes_count: res.action === 'added' ? prev.likes_count + 1 : prev.likes_count - 1 } : null);
       } else {
         setPopularPosts(prev => prev.map(p => p.id === id ? { ...p, likes_count: res.action === 'added' ? p.likes_count + 1 : p.likes_count - 1 } : p));
       }
+    } else {
+      toast.error(res.error || 'Error al marcar favorito');
     }
   };
 
