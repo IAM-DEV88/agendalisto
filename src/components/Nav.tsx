@@ -132,7 +132,7 @@ const Nav = ({ user }: NavProps) => {
                           : supabase.storage.from('avatars').getPublicUrl(user.avatar_url).data.publicUrl
                       }
                       alt={userName}
-                      className="h-8 w-8 rounded-full object-cover border-2 border-transparent group-hover:border-primary-500 transition-all"
+                      className="h-8 w-8 rounded-full object-contain border-2 border-transparent group-hover:border-primary-500 transition-all"
                     />
                   ) : (
                     <div className="h-8 w-8 rounded-full bg-primary-100 dark:bg-primary-900/50 flex items-center justify-center border-2 border-transparent group-hover:border-primary-500 transition-all">

@@ -10,14 +10,10 @@ export default defineConfig(({ mode }) => {
     plugins: [react()],
     server: {
       port: 3000,
-      open: true,
+      host: true,
+      allowedHosts: true,
       watch: {
         usePolling: true,
-      },
-      hmr: {
-        protocol: 'ws',
-        host: 'localhost',
-        port: 3000,
       },
       proxy: {
         '/.netlify/functions': {

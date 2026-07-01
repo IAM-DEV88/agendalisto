@@ -93,7 +93,7 @@ const UserProfileSection: React.FC<UserProfileSectionProps> = ({
                   <img
                     src={previewUrl || FALLBACK_AVATAR}
                     alt="Avatar"
-                    className="h-full w-full object-cover"
+                    className="block h-full w-full object-contain"
                   />
                   {isUploading && (
                     <div className="absolute inset-0 bg-slate-900/60 flex items-center justify-center backdrop-blur-sm rounded-full">

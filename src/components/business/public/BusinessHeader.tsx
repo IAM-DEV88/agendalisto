@@ -209,14 +209,14 @@ const BusinessHeader: React.FC<BusinessHeaderProps> = ({ businessData, averageRa
   
   return (
     <div className="card overflow-hidden">
-      <div className="h-48 md:h-72 bg-primary-100 dark:bg-primary-900/20 relative group overflow-hidden">
+      <div className="w-full h-48 md:h-72 bg-primary-100 dark:bg-primary-900/20 relative group overflow-hidden">
         {logoUrl ? (
           <>
             <img
               src={logoUrl}
               alt={businessData.name}
               loading="lazy"
-              className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
+              className="block w-full h-full object-contain transition-transform duration-500 group-hover:scale-105"
               onLoad={handleImageLoaded}
               onError={handleImageError}
             />

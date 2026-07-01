@@ -50,14 +50,14 @@ const BusinessCard = ({ business, categories, isLiked: initialLiked, currentUser
   return (
     <Link
       to={`/${business.slug}`}
-      className="group bg-white dark:bg-slate-900 rounded-2xl border border-slate-200 dark:border-slate-800 overflow-hidden hover:border-primary-300 dark:hover:border-primary-700 hover:shadow-2xl transition-all duration-300 hover:-translate-y-1 flex flex-col"
+      className="group w-full bg-white dark:bg-slate-900 rounded-2xl border border-slate-200 dark:border-slate-800 overflow-hidden hover:border-primary-300 dark:hover:border-primary-700 hover:shadow-2xl transition-all duration-300 hover:-translate-y-1 flex flex-col"
     >
-      <div className="h-48 sm:h-52 bg-slate-100 dark:bg-slate-800 relative overflow-hidden flex-shrink-0">
+      <div className="w-full h-48 sm:h-52 bg-slate-100 dark:bg-slate-800 relative overflow-hidden flex-shrink-0">
         <img
           src={business.logo_url || FALLBACK_LOGO}
           alt={business.name}
           loading="lazy"
-          className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500"
+          className="block w-full h-full object-contain group-hover:scale-110 transition-transform duration-500"
           onError={(e) => { e.currentTarget.src = FALLBACK_LOGO; }}
         />
         <div className="absolute inset-0 bg-gradient-to-t from-black/50 via-transparent to-transparent opacity-0 group-hover:opacity-100 group-focus-within:opacity-100 transition-opacity flex items-end p-4">
@@ -411,7 +411,7 @@ const ExploreBusinesses = () => {
           <>
             <div className="grid gap-6 grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 animate-in fade-in slide-in-from-bottom-4 duration-500">
               {businesses.map((business) => (
-                <div key={business.id}>
+                <div key={business.id} className="w-full">
                   <BusinessCard
                     business={business}
                     categories={categories}

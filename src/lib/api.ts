@@ -836,11 +836,12 @@ export const setBusinessHours = async (hours: Omit<BusinessHours, 'id'>[]): Prom
 };
 
 export const obtenerPerfilUsuario = async (userId: string): Promise<{ success: boolean; perfil: UserProfile | null; error: string | null; }> => {
-  try {
+  const TIMEOUT_MS = 15000;
+
+  const operation = async () => {
     if (!userId) {
       return { success: false, perfil: null, error: 'ID de usuario no proporcionado' };
     }
-
 
     const { data, error } = await supabase
       .from('agendaya_profiles')
@@ -855,7 +856,6 @@ export const obtenerPerfilUsuario = async (userId: string): Promise<{ success: b
     }
 
     if (data && !perfilNoEncontrado) {
-      // Backfill business_id from agendaya_businesses if profile has it null
       if (!data.business_id) {
         const { data: biz } = await supabase
           .from('agendaya_businesses')
@@ -870,7 +870,6 @@ export const obtenerPerfilUsuario = async (userId: string): Promise<{ success: b
       return { success: true, perfil: data, error: null };
     }
 
-    // PGRST116 o data null → Fallback: late-registration vía ensure_user_app
     try {
       const { error: rpcError } = await supabase.rpc('ensure_user_app', {
         p_user_id: userId,
@@ -890,11 +889,17 @@ export const obtenerPerfilUsuario = async (userId: string): Promise<{ success: b
         return { success: true, perfil: retryResponse.data as UserProfile, error: null };
       }
     } catch {
-      // Fallback silencioso — si no se pudo recuperar, retornar error original
+      // Fallback silencioso
     }
 
     return { success: false, perfil: null, error: 'Perfil no encontrado' };
+  };
 
+  try {
+    const timeout = new Promise<{ success: false; perfil: null; error: string }>(
+      (_, reject) => setTimeout(() => reject(new Error('Timeout al obtener perfil de usuario')), TIMEOUT_MS)
+    );
+    return await Promise.race([operation(), timeout]);
   } catch (err: unknown) {
     return { success: false, perfil: null, error: getErrorMessage(err) };
   }

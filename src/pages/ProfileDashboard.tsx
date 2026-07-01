@@ -313,7 +313,7 @@ const ProfileDashboard = ({ user }: ProfileDashboardProps) => {
                     <img
                       src={avatarUrl}
                       alt={`${username} avatar`}
-                      className="h-full w-full object-cover"
+                      className="block h-full w-full object-contain"
                     />
                   </div>
                   <div className="absolute -bottom-1 -right-1 w-5 h-5 bg-emerald-500 border-[3px] border-white dark:border-slate-900 rounded-full shadow-lg" />
