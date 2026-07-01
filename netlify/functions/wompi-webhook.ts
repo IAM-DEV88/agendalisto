@@ -1,12 +1,6 @@
-/**
- * wompi-webhook.ts — Recibe eventos de Wompi y actualiza planes/suscripciones
- *
- * Endpoint: POST /.netlify/functions/wompi-webhook
- * Configurar en dashboard Wompi → Webhooks → URL
- */
-
 import { Handler } from '@netlify/functions';
 import { createClient } from '@supabase/supabase-js';
+import { verifyWompiWebhook, PLAN_PRICES_IN_CENTS } from './_shared/wompi';
 
 const supabase = createClient(
   process.env.SUPABASE_URL!,
@@ -20,6 +14,13 @@ export const handler: Handler = async (event) => {
 
   try {
     const payload = JSON.parse(event.body || '{}');
+
+    // Verificar firma HMAC
+    if (!verifyWompiWebhook(payload)) {
+      console.error('[wompi-webhook] Invalid signature');
+      return { statusCode: 401, body: JSON.stringify({ error: 'Invalid signature' }) };
+    }
+
     const { event: eventName, data } = payload;
 
     console.log(`[wompi-webhook] Event: ${eventName}`, JSON.stringify({ transaction: data?.transaction?.id }));
@@ -36,14 +37,14 @@ export const handler: Handler = async (event) => {
     const { reference, id: wompiTransactionId, amount_in_cents } = transaction;
 
     // Extraer userId del reference: AGD-{userId}-{timestamp}
-    const refParts = reference?.split('-') || [];
-    if (refParts.length < 3 || refParts[0] !== 'AGD') {
+    // userId puede contener guiones, así que extraemos todo entre AGD- y el último segmento
+    if (!reference || !reference.startsWith('AGD-')) {
       return { statusCode: 400, body: JSON.stringify({ error: 'Reference inválido' }) };
     }
-    const userId = refParts.slice(1, -1).join('-');
+    const userId = reference.substring(4).replace(/-[^-]+$/, '');
 
-    // Determinar plan por el monto
-    const plan = amount_in_cents === 4990000 ? 'pro' : amount_in_cents === 9990000 ? 'premium' : null;
+    // Determinar plan por el monto (buscar en PLAN_PRICES_IN_CENTS)
+    const plan = Object.entries(PLAN_PRICES_IN_CENTS).find(([, price]) => price === amount_in_cents)?.[0] || null;
     if (!plan) {
       return { statusCode: 400, body: JSON.stringify({ error: `Monto no reconocido: ${amount_in_cents}` }) };
     }
@@ -52,7 +53,6 @@ export const handler: Handler = async (event) => {
     const periodEnd = new Date(now);
     periodEnd.setMonth(periodEnd.getMonth() + 1);
 
-    // Actualizar perfil
     const { error: profileError } = await supabase
       .from('agendaya_profiles')
       .update({ plan, updated_at: now.toISOString() })
@@ -63,7 +63,6 @@ export const handler: Handler = async (event) => {
       return { statusCode: 500, body: JSON.stringify({ error: 'Error al actualizar perfil' }) };
     }
 
-    // Actualizar suscripción
     const { error: subError } = await supabase
       .from('agendaya_subscriptions')
       .upsert({
@@ -87,8 +86,9 @@ export const handler: Handler = async (event) => {
       statusCode: 200,
       body: JSON.stringify({ success: true, plan, userId }),
     };
-  } catch (err: any) {
-    console.error('[wompi-webhook] Error:', err.message);
-    return { statusCode: 500, body: JSON.stringify({ error: err.message }) };
+  } catch (err: unknown) {
+    const message = err instanceof Error ? err.message : 'Unknown error';
+    console.error('[wompi-webhook] Error:', message);
+    return { statusCode: 500, body: JSON.stringify({ error: message }) };
   }
 };

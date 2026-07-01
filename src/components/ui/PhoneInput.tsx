@@ -1,5 +1,5 @@
-import { useState, useEffect, useRef } from 'react';
-import { ChevronDown } from 'lucide-react';
+import { useState, useEffect, useRef, useMemo } from 'react';
+import { ChevronDown, Search } from 'lucide-react';
 
 interface Country {
   code: string;
@@ -9,27 +9,28 @@ interface Country {
 }
 
 const countries: Country[] = [
-  { code: 'CO', dial: '+57', name: 'Colombia', flag: '🇨🇴' },
   { code: 'AR', dial: '+54', name: 'Argentina', flag: '🇦🇷' },
+  { code: 'BO', dial: '+591', name: 'Bolivia', flag: '🇧🇴' },
+  { code: 'BR', dial: '+55', name: 'Brasil', flag: '🇧🇷' },
   { code: 'CL', dial: '+56', name: 'Chile', flag: '🇨🇱' },
-  { code: 'PE', dial: '+51', name: 'Perú', flag: '🇵🇪' },
+  { code: 'CO', dial: '+57', name: 'Colombia', flag: '🇨🇴' },
+  { code: 'CR', dial: '+506', name: 'Costa Rica', flag: '🇨🇷' },
+  { code: 'CU', dial: '+53', name: 'Cuba', flag: '🇨🇺' },
   { code: 'EC', dial: '+593', name: 'Ecuador', flag: '🇪🇨' },
-  { code: 'MX', dial: '+52', name: 'México', flag: '🇲🇽' },
+  { code: 'SV', dial: '+503', name: 'El Salvador', flag: '🇸🇻' },
   { code: 'ES', dial: '+34', name: 'España', flag: '🇪🇸' },
   { code: 'US', dial: '+1', name: 'Estados Unidos', flag: '🇺🇸' },
-  { code: 'BR', dial: '+55', name: 'Brasil', flag: '🇧🇷' },
-  { code: 'VE', dial: '+58', name: 'Venezuela', flag: '🇻🇪' },
-  { code: 'UY', dial: '+598', name: 'Uruguay', flag: '🇺🇾' },
-  { code: 'PY', dial: '+595', name: 'Paraguay', flag: '🇵🇾' },
-  { code: 'BO', dial: '+591', name: 'Bolivia', flag: '🇧🇴' },
-  { code: 'CR', dial: '+506', name: 'Costa Rica', flag: '🇨🇷' },
-  { code: 'PA', dial: '+507', name: 'Panamá', flag: '🇵🇦' },
-  { code: 'DO', dial: '+1-809', name: 'República Dominicana', flag: '🇩🇴' },
-  { code: 'CU', dial: '+53', name: 'Cuba', flag: '🇨🇺' },
   { code: 'GT', dial: '+502', name: 'Guatemala', flag: '🇬🇹' },
-  { code: 'SV', dial: '+503', name: 'El Salvador', flag: '🇸🇻' },
   { code: 'HN', dial: '+504', name: 'Honduras', flag: '🇭🇳' },
+  { code: 'IT', dial: '+39', name: 'Italia', flag: '🇮🇹' },
+  { code: 'MX', dial: '+52', name: 'México', flag: '🇲🇽' },
   { code: 'NI', dial: '+505', name: 'Nicaragua', flag: '🇳🇮' },
+  { code: 'PA', dial: '+507', name: 'Panamá', flag: '🇵🇦' },
+  { code: 'PY', dial: '+595', name: 'Paraguay', flag: '🇵🇾' },
+  { code: 'PE', dial: '+51', name: 'Perú', flag: '🇵🇪' },
+  { code: 'DO', dial: '+1-809', name: 'República Dominicana', flag: '🇩🇴' },
+  { code: 'UY', dial: '+598', name: 'Uruguay', flag: '🇺🇾' },
+  { code: 'VE', dial: '+58', name: 'Venezuela', flag: '🇻🇪' },
 ];
 
 function parsePhone(value: string): { dial: string; number: string } {
@@ -63,7 +64,18 @@ export default function PhoneInput({
   const [dial, setDial] = useState(() => parsePhone(value).dial);
   const [localNumber, setLocalNumber] = useState(() => parsePhone(value).number);
   const [open, setOpen] = useState(false);
+  const [search, setSearch] = useState('');
   const ref = useRef<HTMLDivElement>(null);
+
+  const filtered = useMemo(() => {
+    if (!search) return countries;
+    const q = search.toLowerCase();
+    return countries.filter(c =>
+      c.name.toLowerCase().includes(q) ||
+      c.dial.toLowerCase().includes(q) ||
+      c.code.toLowerCase().includes(q)
+    );
+  }, [search]);
 
   useEffect(() => {
     const { dial: d, number: n } = parsePhone(value);
@@ -78,6 +90,10 @@ export default function PhoneInput({
     document.addEventListener('mousedown', handleClick);
     return () => document.removeEventListener('mousedown', handleClick);
   }, []);
+
+  useEffect(() => {
+    if (!open) setSearch('');
+  }, [open]);
 
   function handleDialSelect(d: string) {
     setDial(d);
@@ -123,26 +139,42 @@ export default function PhoneInput({
       </div>
 
       {open && (
-        <div className="absolute z-50 top-full mt-1 left-0 w-full bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl shadow-xl max-h-60 overflow-y-auto">
-          {countries.map(c => (
-            <button
-              key={c.code}
-              type="button"
-              onClick={() => handleDialSelect(c.dial)}
-              className={`w-full flex items-center gap-3 px-3 py-2.5 text-sm text-left transition-colors
-                ${c.dial === dial
-                  ? 'bg-primary-50 dark:bg-primary-500/10 text-primary-700 dark:text-primary-300 font-bold'
-                  : 'text-slate-700 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-700/50'
-                }`}
-            >
-              <span className="text-base leading-none shrink-0">{c.flag}</span>
-              <span className="font-medium shrink-0 w-16">{c.dial}</span>
-              <span className="text-slate-500 dark:text-slate-400 truncate">{c.name}</span>
-              {c.dial === dial && (
-                <span className="ml-auto text-primary-600 dark:text-primary-400 text-xs font-bold">✓</span>
-              )}
-            </button>
-          ))}
+        <div className="absolute z-50 top-full mt-1 left-0 w-full bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl shadow-xl max-h-72 overflow-y-auto">
+          <div className="sticky top-0 bg-white dark:bg-slate-800 border-b border-slate-200 dark:border-slate-700">
+            <div className="relative">
+              <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
+              <input
+                type="text"
+                value={search}
+                onChange={(e) => setSearch(e.target.value)}
+                placeholder="Buscar país..."
+                className="w-full pl-9 pr-3 py-2.5 text-sm bg-transparent text-slate-900 dark:text-slate-100 placeholder:text-slate-400 outline-none"
+              />
+            </div>
+          </div>
+          {filtered.length === 0 ? (
+            <div className="px-3 py-4 text-sm text-slate-400 text-center">Sin resultados</div>
+          ) : (
+            filtered.map(c => (
+              <button
+                key={c.code}
+                type="button"
+                onClick={() => handleDialSelect(c.dial)}
+                className={`w-full flex items-center gap-3 px-3 py-2.5 text-sm text-left transition-colors
+                  ${c.dial === dial
+                    ? 'bg-primary-50 dark:bg-primary-500/10 text-primary-700 dark:text-primary-300 font-bold'
+                    : 'text-slate-700 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-700/50'
+                  }`}
+              >
+                <span className="text-base leading-none shrink-0">{c.flag}</span>
+                <span className="font-medium shrink-0 w-16">{c.dial}</span>
+                <span className="text-slate-500 dark:text-slate-400 truncate">{c.name}</span>
+                {c.dial === dial && (
+                  <span className="ml-auto text-primary-600 dark:text-primary-400 text-xs font-bold">✓</span>
+                )}
+              </button>
+            ))
+          )}
         </div>
       )}
     </div>

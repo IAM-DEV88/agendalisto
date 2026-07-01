@@ -14,7 +14,7 @@ type AppointmentsAction =
   | { type: 'FETCH_SUCCESS'; payload: Appointment[] }
   | { type: 'FETCH_ERROR'; payload: string }
   | { type: 'UPDATE_APPOINTMENT'; payload: Appointment }
-  | { type: 'ADD_REVIEW'; payload: { appointmentId: string; review: any } };
+  | { type: 'ADD_REVIEW'; payload: { appointmentId: string; review: import('../lib/api').Review } };
 
 function appointmentsReducer(state: AppointmentsState, action: AppointmentsAction): AppointmentsState {
   switch (action.type) {

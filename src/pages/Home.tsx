@@ -1,6 +1,6 @@
 import { Link, useNavigate } from 'react-router-dom';
 import { useAuth } from '../hooks/useAuth';
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useMemo } from 'react';
 import { getBusinessCategories, BusinessCategory, getTopMilestones } from '../lib/api';
 import { Swiper, SwiperSlide } from 'swiper/react';
 import { Pagination, Autoplay } from 'swiper/modules';
@@ -11,6 +11,7 @@ import BlogHomeSection from '../components/BlogHomeSection';
 import { supabase } from '../lib/supabase';
 import type { Milestone } from '../lib/api';
 import SEO from '../components/SEO';
+import agendayaImage from '../assets/branding/AgendaYA.jpg';
 
 const Home = () => {
   const { user, loading } = useAuth();
@@ -18,22 +19,15 @@ const Home = () => {
   const [searchService, setSearchService] = useState('');
   const [searchLocation, setSearchLocation] = useState('');
 
-  let registerText = 'Registrarse GRATIS';
-  let registerLink = '/register';
-  let secondText = 'Iniciar Sesión';
-  let secondLink = '/login';
-
-  if (!loading && user) {
-    secondText = 'Mi Perfil';
-    secondLink = '/dashboard';
-    if (user.business_id) {
-      registerText = 'Mi negocio';
-      registerLink = '/business/dashboard';
-    } else {
-      registerText = 'Registrar mi negocio GRATIS';
-      registerLink = '/business/register';
+  const cta = useMemo(() => {
+    if (loading || !user) {
+      return { registerText: 'Registrarse GRATIS', registerLink: '/register', secondText: 'Iniciar Sesión', secondLink: '/login' };
     }
-  }
+    if (user.business_id) {
+      return { registerText: 'Mi negocio', registerLink: '/business/dashboard', secondText: 'Mi Perfil', secondLink: '/dashboard' };
+    }
+    return { registerText: 'Registrar mi negocio GRATIS', registerLink: '/business/register', secondText: 'Mi Perfil', secondLink: '/dashboard' };
+  }, [user, loading]);
 
   const handleSearch = (e: React.FormEvent) => {
     e.preventDefault();
@@ -92,57 +86,29 @@ const Home = () => {
                 Encuentra barberías, belleza, salud y más en un solo lugar.
               </p>
               
-              {/* Buscador Funcional */}
-              {/* Search Form - Desktop Grid Layout */}
-              <form onSubmit={handleSearch} className="max-w-3xl bg-white p-2 rounded-2xl shadow-2xl hidden md:grid md:grid-cols-6 md:gap-2">
-                <div className="col-span-3 relative">
-                  <Search className="absolute left-2 top-1/3 -translate-y-1/6 w-5 h-5 text-slate-400" />
+              {/* Buscador Funcional — diseño responsive único */}
+              <form onSubmit={handleSearch} className="max-w-3xl bg-white p-2 rounded-2xl shadow-2xl flex flex-col md:grid md:grid-cols-6 md:gap-2 gap-2">
+                <div className="md:col-span-3 relative">
+                  <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-slate-400" />
                   <input 
                     type="text" 
                     placeholder="Ej: Corte de cabello, uñas, masaje" 
                     value={searchService}
                     onChange={(e) => setSearchService(e.target.value)}
-                    className="w-full"
+                    className="w-full pl-10 pr-4 py-3 md:py-4 rounded-xl md:rounded-lg bg-slate-50 border-0 text-sm font-medium text-slate-900 placeholder-slate-400 focus:ring-2 focus:ring-primary-500 focus:outline-none"
                   />
                 </div>
-                <div className="relative col-span-1">
-                  <MapPin className="absolute left-2 top-1/3 -translate-y-1/6 w-5 h-5 text-slate-400" />
+                <div className="relative md:col-span-1">
+                  <MapPin className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-slate-400" />
                   <input 
                     type="text" 
                     placeholder="Ubicación" 
                     value={searchLocation}
                     onChange={(e) => setSearchLocation(e.target.value)}
-                    className="w-full"
+                    className="w-full pl-10 pr-4 py-3 md:py-4 rounded-xl md:rounded-lg bg-slate-50 border-0 text-sm font-medium text-slate-900 placeholder-slate-400 focus:ring-2 focus:ring-primary-500 focus:outline-none"
                   />
                 </div>
-                <button type="submit" className="col-span-2 bg-primary-600 hover:bg-primary-500 text-white px-8 py-4 rounded-xl font-black transition-all flex items-center justify-center gap-2 shadow-lg shadow-primary-500/30">
-                  <Search className="w-5 h-5" /> Buscar ahora
-                </button>
-              </form>
-
-              {/* Search Form - Mobile Row Layout */}
-              <form onSubmit={handleSearch} className="max-w-3xl bg-white p-2 rounded-2xl shadow-2xl md:hidden space-y-2">
-                <div className="relative">
-                  <Search className="absolute left-2 top-1/3 -translate-y-1/6 w-5 h-5 text-slate-400" />
-                  <input 
-                    type="text" 
-                    placeholder="Ej: Corte de cabello, uñas, masaje" 
-                    value={searchService}
-                    onChange={(e) => setSearchService(e.target.value)}
-                    className="w-full"
-                  />
-                </div>
-                <div className="relative">
-                  <MapPin className="absolute left-2 top-1/3 -translate-y-1/6 w-5 h-5 text-slate-400" />
-                  <input 
-                    type="text" 
-                    placeholder="Ubicación" 
-                    value={searchLocation}
-                    onChange={(e) => setSearchLocation(e.target.value)}
-                    className="w-full"
-                  />
-                </div>
-                <button type="submit" className="w-full bg-primary-600 hover:bg-primary-500 text-white px-8 py-4 rounded-xl font-black transition-all flex items-center justify-center gap-2 shadow-lg shadow-primary-500/30">
+                <button type="submit" className="md:col-span-2 bg-primary-600 hover:bg-primary-500 text-white px-8 py-3 md:py-4 rounded-xl font-black transition-all flex items-center justify-center gap-2 shadow-lg shadow-primary-500/30">
                   <Search className="w-5 h-5" /> Buscar ahora
                 </button>
               </form>
@@ -155,11 +121,11 @@ const Home = () => {
               
               {user ? (
                 <div className="flex flex-col gap-4">
-                  <Link to={registerLink} className="btn-primary w-full text-center">
-                    {registerText}
+                  <Link to={cta.registerLink} className="btn-primary w-full text-center">
+                    {cta.registerText}
                   </Link>
-                  <Link to={secondLink} className="btn-secondary w-full bg-white/20 border-white/30 text-white hover:bg-white/30 dark:bg-white/10 dark:text-white dark:hover:bg-white/20 text-center">
-                    {secondText}
+                  <Link to={cta.secondLink} className="btn-secondary w-full bg-white/20 border-white/30 text-white hover:bg-white/30 dark:bg-white/10 dark:text-white dark:hover:bg-white/20 text-center">
+                    {cta.secondText}
                   </Link>
                   <button 
                     onClick={() => supabase.auth.signOut()} 
@@ -269,7 +235,7 @@ const Home = () => {
             {/* Image as background */}
             <div className="absolute inset-0 z-0">
               <img 
-                src="/src/assets/branding/agendaya.jpg" 
+                src={agendayaImage} 
                 alt="AgendaYa Mascot" 
                 className="w-full h-full object-cover object-center md:object-right transition-transform duration-1000 group-hover:scale-105"
                 onError={(e) => {
@@ -291,7 +257,7 @@ const Home = () => {
                   Nuestra plataforma está diseñada para que tú y tus clientes disfruten de una experiencia rápida, segura y profesional.
                 </p>
                 <Link 
-                  to={registerLink} 
+                  to={cta.registerLink} 
                   className="inline-flex items-center px-8 py-4 bg-primary-500 hover:bg-primary-400 text-white font-black rounded-2xl transition-all shadow-xl shadow-primary-500/25 active:scale-95 group/btn"
                 >
                   Empieza ahora

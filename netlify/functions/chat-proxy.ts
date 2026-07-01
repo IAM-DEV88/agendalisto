@@ -7,18 +7,19 @@ export const handler: Handler = async (event: HandlerEvent) => {
 
   try {
     const body = JSON.parse(event.body || '{}');
-    const { messages, blogContext, businessesContext } = body;
+    const { messages, blogContext, businessesContext, systemPrompt: customPrompt, model: customModel, max_tokens: customMaxTokens, temperature: customTemperature } = body;
 
     if (!messages || !Array.isArray(messages) || messages.length === 0) {
       return { statusCode: 400, body: JSON.stringify({ error: 'messages array is required' }) };
     }
 
-    const apiKey = process.env.GROQ_API_KEY || process.env.VITE_GROQ_API_KEY;
+    // Solo usar GROQ_API_KEY del lado servidor. NUNCA VITE_GROQ_API_KEY.
+    const apiKey = process.env.GROQ_API_KEY;
     if (!apiKey) {
       return { statusCode: 500, body: JSON.stringify({ error: 'GROQ_API_KEY not configured' }) };
     }
 
-    const systemPrompt = `Eres el **Guía de AgendaYa**, un asistente cordial, profesional y entusiasta. Tu objetivo es ayudar a los usuarios a navegar y aprovechar todo el sitio. NUNCA digas que eres una IA — eres el Guía de la plataforma. NUNCA inventes slugs, rutas ni precios. Responde siempre en español neutro de Colombia.
+    const systemPrompt = customPrompt || `Eres el **Guía de AgendaYa**, un asistente cordial, profesional y entusiasta. Tu objetivo es ayudar a los usuarios a navegar y aprovechar todo el sitio. NUNCA digas que eres una IA — eres el Guía de la plataforma. NUNCA inventes slugs, rutas ni precios. Responde siempre en español neutro de Colombia.
 
 ═══ TU PERSONALIDAD ═══
 - Amigable pero profesional — como un recepcionista experto que conoce la plataforma al derecho y al revés.
@@ -75,25 +76,6 @@ Un usuario puede tener varios negocios. El plan Premium permite hasta 3 negocios
 ═══ CÓDIGOS DE REGALO ═══
 Los negocios pueden crear códigos de regalo para sus servicios. Un cliente compra un bono, lo recibe por email para regalar, y quien lo recibe lo canjea al reservar.
 
-═══ PREGUNTAS FRECUENTES (usa respuestas como estas) ═══
-Q: ¿Necesito página web para usar AgendaYa?
-A: No. Cada negocio tiene su propia página pública dentro de la plataforma con URL personalizada. No necesitas conocimientos técnicos.
-
-Q: ¿Mis clientes van a usar esto?
-A: El 68% prefiere reservar online a llamar. Quienes prefieran llamar pueden seguir haciéndolo — AgendaYa es un canal adicional.
-
-Q: ¿Es fácil de configurar?
-A: En menos de 5 minutos tienes tu negocio listo. Escribes los servicios, su duración y precio, defines tu horario, y ya estás recibiendo reservas.
-
-Q: ¿Cómo se manejan las cancelaciones?
-A: El cliente puede cancelar desde el enlace que recibe. Los recordatorios automáticos reducen las inasistencias hasta un 40% (o más si usas pago anticipado).
-
-Q: ¿Puedo tener empleados o múltiples profesionales?
-A: Sí, con el plan Premium puedes gestionar hasta 3 negocios. Cada profesional define sus propios servicios y horarios.
-
-Q: ¿Qué pasa si no tengo Instagram o Facebook?
-A: No hay problema. Tu negocio aparece en el buscador de AgendaYa independientemente de tus redes sociales. La página pública incluye WhatsApp, teléfono, email y ubicación.
-
 DIRECTORIO DE REFERENCIA DINÁMICO (usa estos enlaces EXACTOS):
 ${blogContext || 'No hay posts recientes.'}
 
@@ -112,13 +94,13 @@ REGLAS CRÍTICAS:
         'Content-Type': 'application/json',
       },
       body: JSON.stringify({
-        model: 'llama-3.3-70b-versatile',
+        model: customModel || 'llama-3.3-70b-versatile',
         messages: [
           { role: 'system', content: systemPrompt },
           ...messages,
         ],
-        temperature: 0.7,
-        max_tokens: 500,
+        temperature: customTemperature ?? 0.7,
+        max_tokens: customMaxTokens ?? 500,
       }),
     });
 
@@ -140,8 +122,9 @@ REGLAS CRÍTICAS:
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ content: assistantContent }),
     };
-  } catch (err: any) {
+  } catch (err: unknown) {
+    const message = err instanceof Error ? err.message : 'Internal error';
     console.error('[chat-proxy] Error:', err);
-    return { statusCode: 500, body: JSON.stringify({ error: err.message || 'Internal error' }) };
+    return { statusCode: 500, body: JSON.stringify({ error: message }) };
   }
 };

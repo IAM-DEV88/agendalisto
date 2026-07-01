@@ -50,8 +50,8 @@ export default function PayPalSubscribeButton({ plan, userId, disabled }: PayPal
             try { data = JSON.parse(text); } catch { data = null; }
             if (!res.ok) throw new Error(data?.error || `Error del servidor (${res.status}): ${text || 'sin respuesta'}`);
             return data.id;
-          } catch (err: any) {
-            notifyError(err.message);
+          } catch (err: unknown) {
+            notifyError(err instanceof Error ? err.message : 'Error');
             throw err;
           } finally {
             setLoading(false);
@@ -72,8 +72,8 @@ export default function PayPalSubscribeButton({ plan, userId, disabled }: PayPal
             }
             notifySuccess(`¡Plan ${PLAN_LABEL[plan]} activado!`);
             navigate('/business/dashboard');
-          } catch (err: any) {
-            notifyError(err.message);
+          } catch (err: unknown) {
+            notifyError(err instanceof Error ? err.message : 'Error');
           } finally {
             setLoading(false);
           }

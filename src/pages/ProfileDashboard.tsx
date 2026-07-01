@@ -29,14 +29,16 @@ import {
   Star,
   Settings,
   Shield,
-  LogOut,
+  Trash2,
+  AlertTriangle,
+  Loader2,
   ChevronRight,
   ListChecks,
   Plus,
   UserPlus,
 } from 'lucide-react';
 import { ROLE_LABELS, PLAN_BADGE, PLAN_LABELS, getMaxBusinesses } from '../lib/roles';
-import { updateProfileRole } from '../lib/api';
+import { updateProfileRole, deleteAccount } from '../lib/api';
 import VisitStreaks from '../components/business/VisitStreaks';
 
 const FALLBACK_AVATAR = 'https://upload.wikimedia.org/wikipedia/commons/8/89/Portrait_Placeholder.png';
@@ -144,6 +146,8 @@ const ProfileDashboard = ({ user }: ProfileDashboardProps) => {
   const [activeAppointmentTab, setActiveAppointmentTab] = useState('upcoming');
   const [activeSettingsTab, setActiveSettingsTab] = useState('profile');
   const [selectedAppointmentForCancel, setSelectedAppointmentForCancel] = useState<Appointment | null>(null);
+  const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
+  const [deleting, setDeleting] = useState(false);
 
   const confirmedAppointments = useMemo(
     () => appointments.filter(a => a.status === 'confirmed'),
@@ -188,7 +192,8 @@ const ProfileDashboard = ({ user }: ProfileDashboardProps) => {
       try {
         const response = await getUserBusinesses(user.id);
         setHasBusiness(!!(response.success && response.businesses && response.businesses.length > 0));
-      } catch {
+      } catch (err) {
+        console.error('[ProfileDashboard] Error checking user businesses:', err);
         setHasBusiness(false);
       }
     };
@@ -235,8 +240,8 @@ const ProfileDashboard = ({ user }: ProfileDashboardProps) => {
       } else {
         throw new Error(response.error || 'Error al actualizar perfil');
       }
-    } catch (error: any) {
-      const errorMsg = error.message || 'Error al actualizar perfil';
+    } catch (error: unknown) {
+      const errorMsg = error instanceof Error ? error.message : 'Error al actualizar perfil';
       setProfileMessage({ text: errorMsg, type: 'error' });
       notifyError(errorMsg);
     } finally {
@@ -698,14 +703,11 @@ const ProfileDashboard = ({ user }: ProfileDashboardProps) => {
                         </div>
 
                         <button
-                          onClick={async () => {
-                            const { error } = await supabase.auth.signOut();
-                            if (!error) navigate('/');
-                          }}
+                          onClick={() => setShowDeleteConfirm(true)}
                           className="inline-flex items-center gap-2 px-5 py-2.5 bg-red-50 hover:bg-red-100 dark:bg-red-500/10 dark:hover:bg-red-500/20 text-red-600 dark:text-red-400 text-sm font-bold rounded-xl transition-all active:scale-95"
                         >
-                          <LogOut className="w-4 h-4" />
-                          Cerrar sesión
+                          <Trash2 className="w-4 h-4" />
+                          Eliminar cuenta
                         </button>
                       </div>
                     </div>
@@ -716,6 +718,51 @@ const ProfileDashboard = ({ user }: ProfileDashboardProps) => {
 
         </div>
       </div>
+
+      {/* ─── MODAL CONFIRMACIÓN ELIMINAR CUENTA ─── */}
+      {showDeleteConfirm && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50 backdrop-blur-sm animate-in fade-in duration-200">
+          <div className="bg-white dark:bg-slate-900 rounded-2xl shadow-2xl max-w-md w-full p-6 animate-in zoom-in-95 duration-200">
+            <div className="flex items-center gap-3 mb-4">
+              <div className="p-2 bg-red-100 dark:bg-red-900/40 rounded-full">
+                <AlertTriangle className="w-6 h-6 text-red-600 dark:text-red-400" />
+              </div>
+              <h3 className="text-xl font-black text-slate-900 dark:text-white">¿Eliminar cuenta?</h3>
+            </div>
+            <p className="text-sm text-slate-600 dark:text-slate-400 leading-relaxed mb-6">
+              Esta acción eliminará permanentemente tu cuenta de AgendaYa y todos tus datos asociados
+              (negocios, citas, reseñas, favoritos). Una vez eliminada, no podrás recuperarla.
+            </p>
+            <div className="flex gap-3 justify-end">
+              <button
+                onClick={() => setShowDeleteConfirm(false)}
+                disabled={deleting}
+                className="px-5 py-2.5 text-sm font-bold text-slate-700 dark:text-slate-300 bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 rounded-xl transition-all"
+              >
+                Cancelar
+              </button>
+              <button
+                onClick={async () => {
+                  setDeleting(true);
+                  const res = await deleteAccount();
+                  if (res.success) {
+                    navigate('/');
+                  } else {
+                    notifyError(res.error || 'Error al eliminar la cuenta');
+                    setDeleting(false);
+                    setShowDeleteConfirm(false);
+                  }
+                }}
+                disabled={deleting}
+                className="inline-flex items-center gap-2 px-5 py-2.5 text-sm font-bold text-white bg-red-600 hover:bg-red-700 rounded-xl transition-all disabled:opacity-50"
+              >
+                {deleting ? <Loader2 className="w-4 h-4 animate-spin" /> : <Trash2 className="w-4 h-4" />}
+                {deleting ? 'Eliminando...' : 'Sí, eliminar'}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
 
       <CancelRescheduleModal
         isOpen={!!selectedAppointmentForCancel}

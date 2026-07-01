@@ -111,29 +111,20 @@ const BlogPostView = () => {
     setIsSubmitting(true);
     
     try {
-      // 1. Detección de contenido ofensivo usando Groq
-      const checkResponse = await fetch('https://api.groq.com/openai/v1/chat/completions', {
+      // 1. Detección de contenido ofensivo (vía proxy server-side)
+      const checkResponse = await fetch('/.netlify/functions/chat-proxy', {
         method: 'POST',
-        headers: {
-          'Authorization': `Bearer ${import.meta.env.VITE_GROQ_API_KEY}`,
-          'Content-Type': 'application/json'
-        },
+        headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
-          model: 'llama-3.3-70b-versatile',
-          messages: [
-            {
-              role: 'system',
-              content: 'Tu tarea es detectar si el siguiente mensaje es ofensivo, contiene insultos, odio o contenido inapropiado para una plataforma profesional de agendamiento llamada AgendaYa. Responde ÚNICAMENTE con la palabra "OFENSIVO" o "SEGURO".'
-            },
-            { role: 'user', content: newComment.trim() }
-          ],
+          messages: [{ role: 'user', content: newComment.trim() }],
+          systemPrompt: 'Tu tarea es detectar si el siguiente mensaje es ofensivo, contiene insultos, odio o contenido inapropiado para una plataforma profesional de agendamiento llamada AgendaYa. Responde ÚNICAMENTE con la palabra "OFENSIVO" o "SEGURO".',
           temperature: 0,
-          max_tokens: 10
-        })
+          max_tokens: 10,
+        }),
       });
 
       const checkData = await checkResponse.json();
-      const isOffensive = checkData.choices[0].message.content.includes('OFENSIVO');
+      const isOffensive = checkData.content?.includes('OFENSIVO');
 
       if (isOffensive) {
         setShowOffensiveWarning(true);
@@ -158,29 +149,20 @@ const BlogPostView = () => {
         setNewComment('');
         toast.success('Comentario publicado');
 
-        // 3. Generar respuesta del agente
-        const replyResponse = await fetch('https://api.groq.com/openai/v1/chat/completions', {
+        // 3. Generar respuesta del agente (vía proxy server-side)
+        const replyResponse = await fetch('/.netlify/functions/chat-proxy', {
           method: 'POST',
-          headers: {
-            'Authorization': `Bearer ${import.meta.env.VITE_GROQ_API_KEY}`,
-            'Content-Type': 'application/json'
-          },
+          headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({
-            model: 'llama-3.3-70b-versatile',
-            messages: [
-              {
-                role: 'system',
-                content: `Eres el Guía de AgendaYa. Tu tarea es responder a comentarios con gratitud y profesionalismo. NUNCA inventes slugs o rutas. Para recomendar otros posts, usa ÚNICAMENTE esta lista:\n${otherPostsContext || 'No hay otros posts disponibles.'}\n4. Mantén las respuestas cortas y cordiales.`
-              },
-              { role: 'user', content: `El usuario comentó en el post "${post?.title}": "${userCommentContent}". Responde como el Guía.` }
-            ],
+            messages: [{ role: 'user', content: `El usuario comentó en el post "${post?.title}": "${userCommentContent}". Responde como el Guía.` }],
+            systemPrompt: `Eres el Guía de AgendaYa. Tu tarea es responder a comentarios con gratitud y profesionalismo. NUNCA inventes slugs o rutas. Para recomendar otros posts, usa ÚNICAMENTE esta lista:\n${otherPostsContext || 'No hay otros posts disponibles.'}\n4. Mantén las respuestas cortas y cordiales.`,
             temperature: 0.7,
-            max_tokens: 200
-          })
+            max_tokens: 200,
+          }),
         });
 
         const replyData = await replyResponse.json();
-        const agentContent = replyData.choices[0].message.content;
+        const agentContent = replyData.content;
 
         // 4. Guardar respuesta del agente en la DB
         const agentRes = await createBlogComment({

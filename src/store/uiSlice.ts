@@ -1,7 +1,7 @@
 import { createSlice, PayloadAction } from '@reduxjs/toolkit';
 
 // UI slice para manejar estado de interfaz persistente (pestaña activa)
-interface UIState {
+export interface UIState {
   activeTab: 'upcoming' | 'pending' | 'past' | 'profile' | 'general';
   itemsPerPage: number;
 }
@@ -19,7 +19,7 @@ const uiSlice = createSlice({
       state.activeTab = action.payload;
     },
     setItemsPerPage(state, action: PayloadAction<number>) {
-      state.itemsPerPage = action.payload;
+      state.itemsPerPage = Math.max(1, Math.min(100, action.payload));
     }
   },
 });

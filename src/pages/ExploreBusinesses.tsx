@@ -19,7 +19,7 @@ const BusinessCard = ({ business, categories, isLiked: initialLiked, currentUser
   business: Business;
   categories: BusinessCategory[];
   isLiked: boolean;
-  currentUser: any;
+  currentUser: import('../lib/supabase').UserProfile | null;
   onToggleLike: (id: string) => void;
 }) => {
   const [isLiked, setIsLiked] = useState(initialLiked);

@@ -11,7 +11,7 @@ export const BASE_URL = import.meta.env.VITE_BASE_URL || window.location.origin;
 export const ENABLE_NOTIFICATIONS = import.meta.env.VITE_ENABLE_NOTIFICATIONS === 'true';
 
 // App settings
-export const APP_NAME = 'AppAgenda';
+export const APP_NAME = 'AgendaYa';
 export const APP_DESCRIPTION = 'Plataforma para la gestión de reservas y citas para negocios y servicios.';
 export const DEFAULT_AVATAR = 'https://via.placeholder.com/150?text=Usuario';
 export const DEFAULT_BUSINESS_LOGO = 'https://via.placeholder.com/300?text=Negocio';

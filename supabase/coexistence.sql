@@ -89,8 +89,9 @@ CREATE TABLE IF NOT EXISTS public.agendaya_profiles (
   updated_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
 );
 
-INSERT INTO public.agendaya_profiles (id, full_name, email, created_at, updated_at)
+INSERT INTO public.agendaya_profiles (id, full_name, email, phone, created_at, updated_at)
 SELECT au.id, COALESCE(au.raw_user_meta_data->>'full_name', au.email), au.email,
+       au.raw_user_meta_data->>'phone',
        COALESCE(au.created_at, NOW()), NOW()
 FROM auth.users au LEFT JOIN public.agendaya_profiles ap ON ap.id = au.id
 WHERE ap.id IS NULL
@@ -203,8 +204,8 @@ BEGIN
   VALUES (NEW.id, 'encuentrosvip', safe_role, 'active')
   ON CONFLICT (user_id, app_slug) DO NOTHING;
 
-  INSERT INTO public.agendaya_profiles (id, full_name, email, created_at, updated_at)
-  VALUES (NEW.id, COALESCE(NEW.raw_user_meta_data->>'full_name', split_part(NEW.email, '@', 1)), NEW.email, NOW(), NOW())
+  INSERT INTO public.agendaya_profiles (id, full_name, email, phone, created_at, updated_at)
+  VALUES (NEW.id, COALESCE(NEW.raw_user_meta_data->>'full_name', split_part(NEW.email, '@', 1)), NEW.email, NEW.raw_user_meta_data->>'phone', NOW(), NOW())
   ON CONFLICT (id) DO NOTHING;
   INSERT INTO public.user_apps (user_id, app_slug, role, status)
   VALUES (NEW.id, 'agendaya', 'visitor', 'active')

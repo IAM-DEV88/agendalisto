@@ -1,5 +1,7 @@
 import { Handler } from '@netlify/functions';
 import { createClient } from '@supabase/supabase-js';
+import { verifyWompiWebhook } from './_shared/wompi';
+import { executePaymentAction } from './_shared/payments';
 
 const supabase = createClient(
   process.env.SUPABASE_URL!,
@@ -13,6 +15,12 @@ export const handler: Handler = async (event) => {
 
   try {
     const payload = JSON.parse(event.body || '{}');
+
+    if (!verifyWompiWebhook(payload)) {
+      console.error('[service-payment-webhook] Invalid signature');
+      return { statusCode: 401, body: JSON.stringify({ error: 'Invalid signature' }) };
+    }
+
     const { event: eventName, data } = payload;
 
     console.log(`[service-payment-webhook] Event: ${eventName}`, JSON.stringify({ transaction: data?.transaction?.id }));
@@ -26,18 +34,16 @@ export const handler: Handler = async (event) => {
       return { statusCode: 400, body: JSON.stringify({ error: 'Sin datos de transacción' }) };
     }
 
-    const { reference, id: wompiTransactionId, amount_in_cents, status: txStatus } = transaction;
+    const { reference, id: wompiTransactionId, amount_in_cents } = transaction;
 
     if (!reference) {
       return { statusCode: 400, body: JSON.stringify({ error: 'Sin reference' }) };
     }
 
     if (!reference.startsWith('SRV-')) {
-      // No es un pago de servicio, ignorar
       return { statusCode: 200, body: JSON.stringify({ received: true, ignored: true }) };
     }
 
-    // Buscar pending payment
     const { data: pending, error: findError } = await supabase
       .from('agendaya_pending_payments')
       .select('*')
@@ -56,56 +62,19 @@ export const handler: Handler = async (event) => {
     const payloadObj = pending.payload || {};
     const action = pending.action;
 
-    let dbError;
+    const result = await executePaymentAction(supabase, action, {
+      ...payloadObj,
+      payment_provider: 'wompi',
+      payment_id: wompiTransactionId,
+      payment_amount: payloadObj.amount || amount_in_cents / 100,
+      payment_currency: payloadObj.currency || 'COP',
+    });
 
-    if (action === 'create_gift') {
-      const { code, service_id, business_id, sender_user_id, recipient_name, recipient_email, recipient_phone, message, expires_at } = payloadObj;
-      const { error } = await supabase.from('agendaya_gift_codes').insert({
-        code,
-        service_id,
-        business_id,
-        sender_user_id,
-        recipient_name,
-        recipient_email,
-        recipient_phone: recipient_phone || null,
-        message: message || null,
-        expires_at: expires_at || new Date(Date.now() + 365 * 24 * 60 * 60 * 1000).toISOString(),
-        status: 'active',
-        payment_provider: 'wompi',
-        payment_status: 'completed',
-        payment_id: wompiTransactionId,
-        payment_amount: payloadObj.amount || amount_in_cents / 100,
-        payment_currency: payloadObj.currency || 'COP',
-      });
-      dbError = error;
-    } else if (action === 'create_appointment') {
-      const { business_id, service_id, user_id, start_time, end_time, notes, guest_info } = payloadObj;
-      const { error } = await supabase.from('agendaya_appointments').insert({
-        business_id,
-        service_id,
-        user_id,
-        start_time,
-        end_time,
-        status: 'pending',
-        notes: notes || null,
-        guest_info: guest_info || null,
-        is_guest: !!guest_info,
-        payment_status: 'completed',
-        payment_provider: 'wompi',
-        payment_id: wompiTransactionId,
-        payment_amount: payloadObj.amount || amount_in_cents / 100,
-      });
-      dbError = error;
-    } else {
-      return { statusCode: 400, body: JSON.stringify({ error: `Acción desconocida: ${action}` }) };
+    if (!result.success) {
+      console.error('[service-payment-webhook] Error executing action:', result.error);
+      return { statusCode: 500, body: JSON.stringify({ error: result.error }) };
     }
 
-    if (dbError) {
-      console.error('[service-payment-webhook] Error executing action:', dbError);
-      return { statusCode: 500, body: JSON.stringify({ error: 'Error al ejecutar acción', details: dbError }) };
-    }
-
-    // Marcar pending payment como completado
     await supabase
       .from('agendaya_pending_payments')
       .update({ status: 'completed', completed_at: new Date().toISOString(), transaction_id: wompiTransactionId })
@@ -117,8 +86,9 @@ export const handler: Handler = async (event) => {
       statusCode: 200,
       body: JSON.stringify({ success: true, action, reference }),
     };
-  } catch (err: any) {
-    console.error('[service-payment-webhook] Error:', err.message);
-    return { statusCode: 500, body: JSON.stringify({ error: err.message }) };
+  } catch (err: unknown) {
+    const message = err instanceof Error ? err.message : 'Unknown error';
+    console.error('[service-payment-webhook] Error:', message);
+    return { statusCode: 500, body: JSON.stringify({ error: message }) };
   }
 };

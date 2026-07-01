@@ -1,50 +1,16 @@
 import { createClient } from '@supabase/supabase-js';
+import type { Handler } from '@netlify/functions';
+import { getPaypalAccessToken, PAYPAL_API } from './_shared/paypal';
+import { generateWompiSignature, WOMPI_API } from './_shared/wompi';
 
 const supabase = createClient(
   process.env.SUPABASE_URL!,
   process.env.SUPABASE_SERVICE_ROLE_KEY!
 );
 
-const PAYPAL_API = process.env.PAYPAL_SANDBOX === 'true'
-  ? 'https://api-m.sandbox.paypal.com'
-  : 'https://api-m.paypal.com';
-
-const WOMPI_API = process.env.WOMPI_SANDBOX === 'true'
-  ? 'https://sandbox.wompi.co/v1'
-  : 'https://production.wompi.co/v1';
-
 const WOMPI_PRIVATE_KEY = process.env.WOMPI_PRIVATE_KEY || '';
-const WOMPI_INTEGRITY_SECRET = process.env.WOMPI_INTEGRITY_SECRET || '';
 
-function generateWompiSignature(reference: string, amountInCents: number, currency: string): string {
-  const crypto = require('crypto');
-  const concat = reference + amountInCents + currency + WOMPI_INTEGRITY_SECRET;
-  return crypto.createHash('sha256').update(concat).digest('hex');
-}
-
-async function getPaypalAccessToken(): Promise<string> {
-  const clientId = process.env.PAYPAL_CLIENT_ID!;
-  const clientSecret = process.env.PAYPAL_SECRET!;
-  if (!clientId || !clientSecret) {
-    throw new Error('Faltan PAYPAL_CLIENT_ID o PAYPAL_SECRET');
-  }
-  const res = await fetch(`${PAYPAL_API}/v1/oauth2/token`, {
-    method: 'POST',
-    headers: {
-      'Accept': 'application/json',
-      'Authorization': `Basic ${Buffer.from(`${clientId}:${clientSecret}`).toString('base64')}`,
-      'Content-Type': 'application/x-www-form-urlencoded',
-    },
-    body: 'grant_type=client_credentials',
-  });
-  const data = await res.json();
-  if (!res.ok || !data.access_token) {
-    throw new Error(`PayPal auth error: ${data.error_description || data.error || res.statusText}`);
-  }
-  return data.access_token;
-}
-
-export const handler = async (event: any) => {
+export const handler: Handler = async (event) => {
   if (event.httpMethod !== 'POST') {
     return { statusCode: 405, body: 'Method Not Allowed' };
   }
@@ -59,10 +25,27 @@ export const handler = async (event: any) => {
 
     const siteUrl = process.env.URL || process.env.SITE_URL || 'https://agendaya.netlify.app';
 
-    // ─── PayPal: crear orden ──────────────────────────────────
     if (provider === 'paypal') {
       const accessToken = await getPaypalAccessToken();
-      const amountUsd = parseFloat((currency === 'COP' ? amount / 4000 : amount).toFixed(2));
+      // Obtener tasa de cambio actual desde API pública
+      let amountUsd = amount;
+      if (currency === 'COP') {
+        try {
+          const fxRes = await fetch('https://open.er-api.com/v6/latest/USD');
+          const fxData = await fxRes.json();
+          const copRate = fxData.rates?.COP;
+          if (copRate) {
+            amountUsd = parseFloat((amount / copRate).toFixed(2));
+          } else {
+            // Fallback a tasa fija si la API falla
+            amountUsd = parseFloat((amount / 4000).toFixed(2));
+          }
+        } catch {
+          amountUsd = parseFloat((amount / 4000).toFixed(2));
+        }
+      } else {
+        amountUsd = parseFloat(amount.toFixed(2));
+      }
 
       const orderRes = await fetch(`${PAYPAL_API}/v2/checkout/orders`, {
         method: 'POST',
@@ -97,13 +80,11 @@ export const handler = async (event: any) => {
       };
     }
 
-    // ─── Wompi: crear transacción + pending payment ────────────
     if (provider === 'wompi') {
       const amountInCents = Math.round(amount * 100);
       const refCurrency = currency === 'USD' ? 'USD' : 'COP';
       const reference = `SRV-${userId}-${Date.now().toString(36).toUpperCase()}`;
 
-      // Guardar pending payment
       const { error: ppError } = await supabase
         .from('agendaya_pending_payments')
         .insert({
@@ -150,7 +131,6 @@ export const handler = async (event: any) => {
       const transaction = await transactionRes.json();
 
       if (!transactionRes.ok || !transaction.data) {
-        // Limpiar pending payment si falló
         await supabase.from('agendaya_pending_payments').delete().eq('reference', reference);
         return { statusCode: 500, body: JSON.stringify({ error: 'Error al crear transacción Wompi', details: transaction }) };
       }
@@ -169,8 +149,9 @@ export const handler = async (event: any) => {
     }
 
     return { statusCode: 400, body: JSON.stringify({ error: `Proveedor no soportado: ${provider}` }) };
-  } catch (err: any) {
+  } catch (err: unknown) {
+    const message = err instanceof Error ? err.message : 'Internal error';
     console.error('[create-service-payment]', err);
-    return { statusCode: 500, body: JSON.stringify({ error: err.message || 'Internal error' }) };
+    return { statusCode: 500, body: JSON.stringify({ error: message }) };
   }
 };

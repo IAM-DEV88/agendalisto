@@ -2,14 +2,16 @@ import { Navigate } from 'react-router-dom';
 import React from 'react';
 import { ROLES, PLANS } from '../lib/roles';
 import type { Role, Plan } from '../lib/roles';
+import type { User } from '@supabase/supabase-js';
+import type { UserProfile } from '../lib/supabase';
 
 type ProtectedRouteProps = {
-  user: any;
+  user: User | null;
   children: React.ReactNode;
   requiredRole?: Role;
   requiredPlan?: Plan;
   fallbackPath?: string;
-  userProfile?: { role?: string; plan?: string } | null;
+  userProfile?: UserProfile | null;
 };
 
 const ProtectedRoute = ({ user, children, requiredRole, requiredPlan, fallbackPath = '/', userProfile }: ProtectedRouteProps) => {

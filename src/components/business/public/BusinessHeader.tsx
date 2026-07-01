@@ -216,7 +216,7 @@ const BusinessHeader: React.FC<BusinessHeaderProps> = ({ businessData, averageRa
               src={logoUrl}
               alt={businessData.name}
               loading="lazy"
-              className="w-full h-full object-cover md:object-contain transition-transform duration-500 group-hover:scale-105"
+              className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
               onLoad={handleImageLoaded}
               onError={handleImageError}
             />

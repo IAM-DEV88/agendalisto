@@ -9,7 +9,7 @@ interface ServicesListProps {
   selectedService: string | null;
   onSelectService: (serviceId: string) => void;
   showPrices: boolean;
-  currentUser: any;
+  currentUser: import('@supabase/supabase-js').User | null;
   businessOwnerId: string;
   showcaseOnly?: boolean;
 }
@@ -19,7 +19,7 @@ const ServiceCard: React.FC<{
   selectedService: string | null;
   onSelectService: (serviceId: string) => void;
   showPrices: boolean;
-  currentUser: any;
+  currentUser: import('@supabase/supabase-js').User | null;
   businessOwnerId: string;
   handlePrevImage: (e: React.MouseEvent, serviceId: string, max: number) => void;
   handleNextImage: (e: React.MouseEvent, serviceId: string, max: number) => void;

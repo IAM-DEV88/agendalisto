@@ -172,8 +172,8 @@ const BusinessRegister = ({ user }: BusinessRegisterProps) => {
         console.error('[BusinessRegister] createBusiness error:', apiError);
         throw new Error(msg);
       }
-    } catch (err: any) {
-      setError(err.message || 'Error al registrar el negocio. Por favor, intenta de nuevo.');
+    } catch (err: unknown) {
+      setError(err instanceof Error ? err.message : 'Error al registrar el negocio. Por favor, intenta de nuevo.');
     } finally {
       setLoading(false);
     }
@@ -327,8 +327,8 @@ const BusinessRegister = ({ user }: BusinessRegisterProps) => {
                           );
                           setForm(prev => ({ ...prev, description: desc.slice(0, 500) }));
                           toast.success('Descripción generada con IA');
-                        } catch (err: any) {
-                          toast.error(err.message || 'Error al generar descripción');
+                        } catch (err: unknown) {
+                          toast.error(err instanceof Error ? err.message : 'Error al generar descripción');
                         } finally {
                           setGeneratingDesc(false);
                         }

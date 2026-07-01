@@ -199,9 +199,9 @@ const BookingForm: React.FC<BookingFormProps> = ({
         setError(msg);
         notifyError(msg);
       }
-    } catch (err: any) {
+    } catch (err: unknown) {
       dismissToast(toastId);
-      const msg = err.message || 'Error al enviar la solicitud';
+      const msg = err instanceof Error ? err.message : 'Error al enviar la solicitud';
       setError(msg);
       notifyError(msg);
     } finally {
@@ -266,9 +266,9 @@ const BookingForm: React.FC<BookingFormProps> = ({
         await redeemGiftCode(giftApplied.code);
       }
       setBookingSuccess(true);
-    } catch (err: any) {
+    } catch (err: unknown) {
       dismissToast(toastId);
-      const msg = err.message || 'Error al procesar pago';
+      const msg = err instanceof Error ? err.message : 'Error al procesar pago';
       setError(msg);
       notifyError(msg);
     } finally {

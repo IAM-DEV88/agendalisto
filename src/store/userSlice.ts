@@ -9,6 +9,7 @@ interface UserState {
   businesses: Business[];
   loading: boolean;
   authInitialized: boolean;
+  error: string | null;
 }
 
 const initialState: UserState = {
@@ -17,6 +18,7 @@ const initialState: UserState = {
   businesses: [],
   loading: true,
   authInitialized: false,
+  error: null,
 };
 
 const userSlice = createSlice({
@@ -47,8 +49,11 @@ const userSlice = createSlice({
     setAuthInitialized(state, action: PayloadAction<boolean>) {
       state.authInitialized = action.payload;
     },
+    setError(state, action: PayloadAction<string | null>) {
+      state.error = action.payload;
+    },
   },
 });
 
-export const { setUser, setUserProfile, setBusinesses, updateBusinessInStore, setActiveBusinessId, setLoading, setAuthInitialized } = userSlice.actions;
+export const { setUser, setUserProfile, setBusinesses, updateBusinessInStore, setActiveBusinessId, setLoading, setAuthInitialized, setError } = userSlice.actions;
 export default userSlice.reducer; 

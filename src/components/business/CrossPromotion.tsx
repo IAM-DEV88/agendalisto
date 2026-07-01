@@ -55,7 +55,9 @@ export default function CrossPromotion({ businessId, businessAddress, excludeId 
       }
 
       setNearby(sorted.slice(0, 2));
-    }).catch(() => {});
+    }).catch((err) => {
+      console.error('[CrossPromotion] Error fetching nearby businesses:', err);
+    });
   }, [businessId, businessAddress, excludeId]);
 
   if (!nearby.length) return null;

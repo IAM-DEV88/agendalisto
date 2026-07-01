@@ -6,7 +6,7 @@ import SectionHeader from '../ui/SectionHeader';
 
 interface BusinessHistorySectionProps {
   businessId: string;
-  appointments: any[];
+  appointments: import('../../lib/api').Appointment[];
   loading: boolean;
   currentPage: number;
   itemsPerPage: number;

@@ -72,7 +72,7 @@ CREATE INDEX IF NOT EXISTS idx_agendaya_user_likes_business_id
   ON public.agendaya_user_likes(business_id);
 
 CREATE INDEX IF NOT EXISTS idx_agendaya_businesses_search_order
-  ON public.agendaya_businesses(likes_count DESC, plan_score DESC, created_at DESC);
+  ON public.agendaya_businesses(plan_score DESC, likes_count DESC, created_at DESC);
 
 -- ════════════════════════════════════════════════════════════
 -- 4. RPC optimizado (usa likes_count column en vez de subquery)
@@ -104,8 +104,8 @@ BEGIN
     AND (p_category_id IS NULL OR b.category_id = v_category_id)
     AND (p_location IS NULL OR b.address ILIKE '%' || p_location || '%')
   ORDER BY
-    b.likes_count DESC,
     b.plan_score DESC,
+    b.likes_count DESC,
     b.created_at DESC
   LIMIT p_limit
   OFFSET p_offset;

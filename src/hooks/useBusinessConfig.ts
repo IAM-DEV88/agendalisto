@@ -8,7 +8,7 @@ export interface UseBusinessConfigResult {
   loading: boolean;
   saving: boolean;
   message: { text: string; type: 'success' | 'error' } | null;
-  updateConfig: (field: keyof BusinessConfig, value: any) => void;
+  updateConfig: (field: keyof BusinessConfig, value: string | boolean | number) => void;
   saveConfig: (e: React.FormEvent) => Promise<boolean>;
 }
 
@@ -42,7 +42,7 @@ export const useBusinessConfig = (businessId: string | undefined): UseBusinessCo
     loadConfig();
   }, [businessId]);
 
-  const updateConfig = (field: keyof BusinessConfig, value: any) => {
+  const updateConfig = (field: keyof BusinessConfig, value: string | boolean | number) => {
     setConfig(prev => ({
       ...prev,
       [field]: value

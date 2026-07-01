@@ -96,16 +96,19 @@ export const BusinessDashboard: React.FC = () => {
         if (servicesResponse.success && servicesResponse.data) {
           setTotalServices(servicesResponse.data.length);
         }
-        getBusinessStats(response.data.id).then(setBusinessStats).catch(() => {});
+        getBusinessStats(response.data.id).then(setBusinessStats).catch((err) => {
+          console.error('[BusinessDashboard] Error fetching business stats:', err);
+        });
       } else {
         setBusinessMessage({
           text: response.error || 'No se encontró información de tu negocio',
           type: 'error',
         });
       }
-    } catch (err: any) {
-      setBusinessMessage({ text: err.message || 'Error al cargar los datos del negocio', type: 'error' });
-      notifyError(err.message || 'Error al cargar los datos del negocio');
+    } catch (err: unknown) {
+      const msg = err instanceof Error ? err.message : 'Error al cargar los datos del negocio';
+      setBusinessMessage({ text: msg, type: 'error' });
+      notifyError(msg);
     }
   }, [user?.id, userProfile?.business_id]);
 
@@ -190,8 +193,8 @@ export const BusinessDashboard: React.FC = () => {
       } else {
         notifyError(response.error || 'Error al actualizar el estado de la cita');
       }
-    } catch (err: any) {
-      notifyError(err.message || 'Error al actualizar el estado de la cita');
+    } catch (err: unknown) {
+      notifyError(err instanceof Error ? err.message : 'Error al actualizar el estado de la cita');
     }
   };
 
@@ -226,9 +229,10 @@ export const BusinessDashboard: React.FC = () => {
       dispatch(updateBusinessInStore(response));
       setBusinessMessage({ text: 'Datos del negocio actualizados', type: 'success' });
       notifySuccess('Datos del negocio actualizados');
-    } catch (err: any) {
-      setBusinessMessage({ text: err.message || 'Error al actualizar', type: 'error' });
-      notifyError(err.message || 'Error al actualizar');
+    } catch (err: unknown) {
+      const msg = err instanceof Error ? err.message : 'Error al actualizar';
+      setBusinessMessage({ text: msg, type: 'error' });
+      notifyError(msg);
     } finally {
       setSavingBusiness(false);
     }
@@ -330,7 +334,7 @@ export const BusinessDashboard: React.FC = () => {
                         <img
                           src={businessData.logo_url || 'https://upload.wikimedia.org/wikipedia/commons/8/89/Portrait_Placeholder.png'}
                           alt={`${businessData.name} logo`}
-                          className="h-full w-full object-cover"
+                          className="h-full w-full object-contain"
                         />
                       </div>
                       <div className="absolute -bottom-1 -right-1 w-5 h-5 bg-emerald-500 border-[3px] border-white dark:border-slate-900 rounded-full shadow-lg" />

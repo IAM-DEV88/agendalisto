@@ -17,7 +17,7 @@ export function getErrorMessage(err: unknown): string {
 
 export function handleApiError<T>(err: unknown, context?: string): ApiResult<T> {
   const message = context ? `${context}: ${getErrorMessage(err)}` : getErrorMessage(err);
-  if (process.env.NODE_ENV === 'development') {
+  if (import.meta.env.DEV) {
     console.error(`[API] ${context || 'Error'}:`, err);
   }
   return { success: false, error: message };

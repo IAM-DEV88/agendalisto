@@ -205,7 +205,7 @@ function App() {
     if (!authInitialized || !user || !userProfile) return;
     const channel = supabase
       .channel('public:agendaya_appointments')
-      .on('postgres_changes', { event: 'INSERT', schema: 'public', table: 'agendaya_appointments' }, ({ new: appt }: any) => {
+      .on('postgres_changes', { event: 'INSERT', schema: 'public', table: 'agendaya_appointments' }, ({ new: appt }: { new: Record<string, unknown> }) => {
         // Notificar al negocio de una nueva reserva
         if (userProfile.business_id === appt.business_id) {
           notifySuccess('Nueva reserva recibida');
@@ -214,7 +214,7 @@ function App() {
           notifySuccess('Tu reserva ha sido solicitada');
         }
       })
-      .on('postgres_changes', { event: 'UPDATE', schema: 'public', table: 'agendaya_appointments' }, ({ new: appt }: any) => {
+      .on('postgres_changes', { event: 'UPDATE', schema: 'public', table: 'agendaya_appointments' }, ({ new: appt }: { new: Record<string, unknown> }) => {
         // Estatus de cita modificado
         if (user.id === appt.user_id) {
           let msg = '';
@@ -243,7 +243,7 @@ function App() {
     <Router>
       <ScrollToTop />
       <div className="min-h-screen flex flex-col bg-gray-50 dark:bg-gray-900 text-gray-900 dark:text-gray-100">
-        <Nav key={userProfile ? `${userProfile.id}-${userProfile.role}` : 'no-user'} user={userProfile} />
+          <Nav user={userProfile} />
         <main className="flex-grow pt-14 bg-gray-50 dark:bg-gray-800 shadow-md">
           <Routes>
             <Route path="/" element={<Home />} />
@@ -305,8 +305,16 @@ function App() {
             } />
             <Route path="/ciudades/:city" element={<SEOLandingPage />} />
             <Route path="/categorias/:category" element={<SEOLandingPage />} />
-            <Route path="/review/:appointmentId" element={<ReviewPage />} />
-            <Route path="/:slug/book/:serviceId" element={<BookingPage />} />
+            <Route path="/review/:appointmentId" element={
+              <ProtectedRoute user={user} userProfile={userProfile} requiredRole="client">
+                <ReviewPage />
+              </ProtectedRoute>
+            } />
+            <Route path="/:slug/book/:serviceId" element={
+              <ProtectedRoute user={user} userProfile={userProfile} requiredRole="client">
+                <BookingPage />
+              </ProtectedRoute>
+            } />
             <Route path="/:slug" element={<BusinessPublicPage />} />
             <Route path="*" element={<NotFound />} />
           </Routes>

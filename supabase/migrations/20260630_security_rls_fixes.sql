@@ -229,8 +229,8 @@ BEGIN
 
   -- AgendaYa
   BEGIN
-    INSERT INTO public.agendaya_profiles (id, full_name, email, created_at, updated_at)
-    VALUES (NEW.id, v_display_name, NEW.email, NOW(), NOW())
+    INSERT INTO public.agendaya_profiles (id, full_name, email, phone, created_at, updated_at)
+    VALUES (NEW.id, v_display_name, NEW.email, NEW.raw_user_meta_data->>'phone', NOW(), NOW())
     ON CONFLICT (id) DO NOTHING;
   EXCEPTION WHEN OTHERS THEN
     RAISE WARNING 'handle_new_user: agendaya_profiles insert failed for user %: %', NEW.id, SQLERRM;

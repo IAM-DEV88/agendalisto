@@ -150,8 +150,8 @@ export const getBusinessServices = async (businessId: string) => {
 
     if (error) throw error;
     return { success: true, data: data as Service[] };
-  } catch (err: any) {
-    return { success: false, error: err.message };
+  } catch (err: unknown) {
+    return { success: false, error: getErrorMessage(err) };
   }
 };
 
@@ -166,8 +166,8 @@ export async function getBusinessById(id: string): Promise<{ success: boolean; d
       .single();
     if (error) throw error;
     return { success: true, data: data as Business };
-  } catch (err: any) {
-    return { success: false, error: err.message || 'Error fetching business' };
+  } catch (err: unknown) {
+    return { success: false, error: getErrorMessage(err) || 'Error fetching business' };
   }
 }
 
@@ -179,8 +179,8 @@ export async function setActiveBusiness(userId: string, businessId: string): Pro
     });
     if (error) throw error;
     return { success: true };
-  } catch (err: any) {
-    return { success: false, error: err.message || 'Error switching business' };
+  } catch (err: unknown) {
+    return { success: false, error: getErrorMessage(err) || 'Error switching business' };
   }
 }
 
@@ -192,8 +192,8 @@ export async function saveItemsPerPage(userId: string, itemsPerPage: number): Pr
       .eq('id', userId);
     if (error) throw error;
     return { success: true };
-  } catch (err: any) {
-    return { success: false, error: err.message || 'Error saving items per page' };
+  } catch (err: unknown) {
+    return { success: false, error: getErrorMessage(err) || 'Error saving items per page' };
   }
 }
 
@@ -206,8 +206,8 @@ export const getBusinessHours = async (businessId: string) => {
       .eq('business_id', businessId);
     if (error) throw error;
     return data as BusinessHours[];
-  } catch (error: any) {
-    throw new Error(error.message || 'Error al cargar horarios del negocio');
+  } catch (error: unknown) {
+    throw new Error(getErrorMessage(error) || 'Error al cargar horarios del negocio');
   }
 };
 
@@ -243,8 +243,8 @@ export async function getUserAppointments(userId: string) {
       .order('start_time', { ascending: true });
     if (error) throw error;
     return { success: true, data: data as Appointment[], error: null };
-  } catch (err: any) {
-    return { success: false, data: null, error: err.message || 'Error al cargar citas' };
+  } catch (err: unknown) {
+    return { success: false, data: null, error: getErrorMessage(err) || 'Error al cargar citas' };
   }
 }
 
@@ -284,9 +284,9 @@ export async function getBusinessAppointments(businessId: string) {
     }));
 
     return { success: true, data: enriched as Appointment[], error: null };
-  } catch (err: any) {
+  } catch (err: unknown) {
     console.error('[getBusinessAppointments] Error:', err);
-    return { success: false, data: null, error: err.message || 'Error al cargar citas del negocio' };
+    return { success: false, data: null, error: getErrorMessage(err) || 'Error al cargar citas del negocio' };
   }
 }
 
@@ -329,8 +329,8 @@ export const checkPendingPayment = async (reference: string): Promise<{
     if (error) throw error;
     if (!data) return { success: false, error: 'Referencia no encontrada' };
     return { success: true, status: data.status, data };
-  } catch (err: any) {
-    return { success: false, error: err.message };
+  } catch (err: unknown) {
+    return { success: false, error: getErrorMessage(err) };
   }
 };
 
@@ -371,8 +371,8 @@ export const createGiftCode = async (gift: {
       }]);
     if (error) throw error;
     return { success: true };
-  } catch (err: any) {
-    return { success: false, error: err.message };
+  } catch (err: unknown) {
+    return { success: false, error: getErrorMessage(err) };
   }
 };
 
@@ -398,8 +398,19 @@ export const validateGiftCode = async (code: string, serviceId: string, business
     }
 
     return { success: true, gift };
-  } catch (err: any) {
-    return { success: false, error: err.message || 'Error al validar código' };
+  } catch (err: unknown) {
+    return { success: false, error: getErrorMessage(err) };
+  }
+};
+
+export const deleteAccount = async (): Promise<{ success: boolean; error?: string }> => {
+  try {
+    const { error } = await supabase.rpc('delete_agendaya_account');
+    if (error) throw error;
+    await supabase.auth.signOut();
+    return { success: true };
+  } catch (err: unknown) {
+    return { success: false, error: getErrorMessage(err) };
   }
 };
 
@@ -411,8 +422,8 @@ export const redeemGiftCode = async (code: string): Promise<{ success: boolean; 
       .eq('code', code);
     if (error) throw error;
     return { success: true };
-  } catch (err: any) {
-    return { success: false, error: err.message };
+  } catch (err: unknown) {
+    return { success: false, error: getErrorMessage(err) };
   }
 };
 
@@ -438,8 +449,8 @@ export const updateAppointmentStatus = async (id: string, status: AppointmentSta
 
     if (error) throw error;
     return { success: true, data };
-  } catch (error: any) {
-    return { success: false, error: error.message };
+  } catch (error: unknown) {
+    return { success: false, error: getErrorMessage(error) };
   }
 };
 
@@ -451,8 +462,8 @@ export const cancelAppointment = async (id: string, reason?: string): Promise<{ 
       .eq('id', id);
     if (error) throw error;
     return { success: true };
-  } catch (err: any) {
-    return { success: false, error: err.message };
+  } catch (err: unknown) {
+    return { success: false, error: getErrorMessage(err) };
   }
 };
 
@@ -464,8 +475,8 @@ export const rescheduleAppointment = async (id: string, startTime: string, endTi
       .eq('id', id);
     if (error) throw error;
     return { success: true };
-  } catch (err: any) {
-    return { success: false, error: err.message };
+  } catch (err: unknown) {
+    return { success: false, error: getErrorMessage(err) };
   }
 };
 
@@ -490,8 +501,8 @@ export async function getBusinessClients(businessId: string): Promise<{ success:
       .in('id', userIds);
     if (profilesError) throw profilesError;
     return { success: true, data: profiles as UserProfile[], error: null };
-  } catch (err: any) {
-    return { success: false, data: null, error: err.message || 'Error al obtener clientes del negocio' };
+  } catch (err: unknown) {
+    return { success: false, data: null, error: getErrorMessage(err) || 'Error al obtener clientes del negocio' };
   }
 }
 
@@ -542,9 +553,9 @@ export const deleteBusiness = async (id: string): Promise<{ success: boolean; er
 
     if (error) throw error;
     return { success: true };
-  } catch (error: any) {
+  } catch (error: unknown) {
     console.error('Error al eliminar negocio:', error);
-    return { success: false, error: error.message || 'Error al eliminar negocio' };
+    return { success: false, error: getErrorMessage(error) || 'Error al eliminar negocio' };
   }
 };
 
@@ -670,9 +681,9 @@ export const getUserFavorites = async (userId: string) => {
         category_id: item.businesses.category_id,
       }));
     return { success: true, data: favorites };
-  } catch (error: any) {
+  } catch (error: unknown) {
     console.error('[getUserFavorites] Error:', error);
-    return { success: false, error: error.message };
+    return { success: false, error: getErrorMessage(error) };
   }
 };
 // --- End Likes Functions ---
@@ -744,9 +755,9 @@ export const getUserFavoriteServices = async (userId: string) => {
         likes_count: item.services.likes_count,
       }));
     return { success: true, data: favorites };
-  } catch (error: any) {
+  } catch (error: unknown) {
     console.error('[getUserFavoriteServices] Error:', error);
-    return { success: false, error: error.message };
+    return { success: false, error: getErrorMessage(error) };
   }
 };
 
@@ -783,31 +794,45 @@ export const getUserFavoriteBlogPosts = async (userId: string) => {
         created_at: item.posts.created_at,
       }));
     return { success: true, data: favorites };
-  } catch (error: any) {
+  } catch (error: unknown) {
     console.error('[getUserFavoriteBlogPosts] Error:', error);
-    return { success: false, error: error.message };
+    return { success: false, error: getErrorMessage(error) };
   }
 };
 
 // API functions for business hours
-export const setBusinessHours = async (hours: Omit<BusinessHours, 'id'>[]) => {
-  // First remove any existing hours for this business
+export const setBusinessHours = async (hours: Omit<BusinessHours, 'id'>[]): Promise<BusinessHours[]> => {
   const businessId = hours[0]?.business_id;
   if (!businessId) throw new Error('Business ID is required');
-  
-  await supabase
-    .from('agendaya_business_hours')
-    .delete()
-    .eq('business_id', businessId);
-  
-  // Then insert the new hours
+
+  // Usar upsert para evitar race condition (delete+insert no atómico)
+  // Si el horario ya existe (mismo business_id + day_of_week), lo actualiza
+  const hoursWithDefaults = hours.map(h => ({
+    ...h,
+    id: undefined, // dejar que Supabase asigne UUID
+  }));
+
   const { data, error } = await supabase
     .from('agendaya_business_hours')
-    .insert(hours)
+    .upsert(hoursWithDefaults, {
+      onConflict: 'business_id,day_of_week',
+      ignoreDuplicates: false,
+    })
     .select();
-  
+
   if (error) throw error;
-  return data;
+
+  // Eliminar horarios que ya no están en la lista
+  const keptDays = hours.map(h => h.day_of_week);
+  if (keptDays.length > 0) {
+    await supabase
+      .from('agendaya_business_hours')
+      .delete()
+      .eq('business_id', businessId)
+      .not('day_of_week', 'in', `(${keptDays.join(',')})`);
+  }
+
+  return data as BusinessHours[];
 };
 
 export const obtenerPerfilUsuario = async (userId: string): Promise<{ success: boolean; perfil: UserProfile | null; error: string | null; }> => {
@@ -899,8 +924,8 @@ export async function getUserBusinesses(userId: string) {
       .order('created_at', { ascending: false });
     if (error) throw error;
     return { success: true, businesses: (data || []) as Business[] };
-  } catch (err: any) {
-    return { success: false, error: err.message || 'Error desconocido' };
+  } catch (err: unknown) {
+    return { success: false, error: getErrorMessage(err) || 'Error desconocido' };
   }
 }
 
@@ -918,8 +943,8 @@ export async function getUserBusiness(userId: string) {
       return { success: true, business: null };
     }
     return { success: true, business: data as Business };
-  } catch (err: any) {
-    return { success: false, error: err.message || 'Error desconocido' };
+  } catch (err: unknown) {
+    return { success: false, error: getErrorMessage(err) || 'Error desconocido' };
   }
 }
 
@@ -937,12 +962,12 @@ export async function getBusinessConfig(businessId: string): Promise<{ success: 
         return { success: true, config: DEFAULT_BUSINESS_CONFIG };
       }
       // Other errors
-      return { success: false, error: error.message };
+      return { success: false, error: getErrorMessage(error) };
     }
     // Single row returned
     return { success: true, config: data as BusinessConfig };
-  } catch (err: any) {
-    return { success: false, error: err.message };
+  } catch (err: unknown) {
+    return { success: false, error: getErrorMessage(err) };
   }
 }
 
@@ -958,12 +983,12 @@ export async function updateBusinessConfig(businessId: string, config: BusinessC
       });
 
     if (error) {
-      return { success: false, error: error.message };
+      return { success: false, error: getErrorMessage(error) };
     }
 
     return { success: true };
-  } catch (error: any) {
-    return { success: false, error: error.message };
+  } catch (error: unknown) {
+    return { success: false, error: getErrorMessage(error) };
   }
 }
 
@@ -983,8 +1008,8 @@ export const createBusinessService = async (service: Omit<Service, 'id' | 'likes
 
     if (error) throw error;
     return { success: true, service: data as Service };
-  } catch (err: any) {
-    return { success: false, error: err.message || 'Error al crear el servicio' };
+  } catch (err: unknown) {
+    return { success: false, error: getErrorMessage(err) || 'Error al crear el servicio' };
   }
 };
 
@@ -1002,8 +1027,8 @@ export const updateBusinessService = async (id: string, updates: Partial<Service
 
     if (error) throw error;
     return { success: true, service: data as Service };
-  } catch (err: any) {
-    return { success: false, error: err.message || 'Error al actualizar el servicio' };
+  } catch (err: unknown) {
+    return { success: false, error: getErrorMessage(err) || 'Error al actualizar el servicio' };
   }
 };
 
@@ -1016,9 +1041,9 @@ export const deleteBusinessService = async (id: string): Promise<{ success: bool
 
     if (error) throw error;
     return { success: true };
-  } catch (error: any) {
+  } catch (error: unknown) {
     console.error('Error al eliminar servicio:', error);
-    return { success: false, error: error.message || 'Error al eliminar servicio' };
+    return { success: false, error: getErrorMessage(error) || 'Error al eliminar servicio' };
   }
 };
 
@@ -1044,8 +1069,8 @@ export async function getBusinessBySlug(slug: string) {
     }
     
     return { success: true, business };
-  } catch (error: any) {
-    return { success: false, error: error.message };
+  } catch (error: unknown) {
+    return { success: false, error: getErrorMessage(error) };
   }
 }
 
@@ -1059,8 +1084,8 @@ export async function getService(serviceId: string): Promise<{ success: boolean;
 
     if (error) throw error;
     return { success: true, data: data as Service };
-  } catch (err: any) {
-    return { success: false, error: err.message || 'Error al obtener el servicio' };
+  } catch (err: unknown) {
+    return { success: false, error: getErrorMessage(err) || 'Error al obtener el servicio' };
   }
 }
 
@@ -1075,8 +1100,8 @@ export async function getBusinessReviews(businessId: string): Promise<{ success:
       .order('created_at', { ascending: false });
     if (error) throw error;
     return { success: true, data: data as Review[] };
-  } catch (err: any) {
-    return { success: false, data: [], error: err.message };
+  } catch (err: unknown) {
+    return { success: false, data: [], error: getErrorMessage(err) };
   }
 }
 
@@ -1118,8 +1143,8 @@ export async function createBusinessReview(
       .single();
     if (error) throw error;
     return { success: true, data: data as Review };
-  } catch (err: any) {
-    return { success: false, error: err.message };
+  } catch (err: unknown) {
+    return { success: false, error: getErrorMessage(err) };
   }
 }
 
@@ -1149,19 +1174,23 @@ export async function getPendingReviews(): Promise<{ success: boolean; data: (Re
         : { data: [] },
     ]);
 
-    const profileMap = new Map((profilesRes.data || []).map((p: any) => [p.id, p]));
-    const businessMap = new Map((businessesRes.data || []).map((b: any) => [b.id, b]));
+    const profileMap = new Map((profilesRes.data || []).map(p => [p.id, p]));
+    const businessMap = new Map((businessesRes.data || []).map(b => [b.id, b]));
 
-    const enriched = reviews.map(r => ({
-      ...r,
-      profiles: profileMap.get(r.user_id) || null,
-      businesses: businessMap.get(r.business_id) || null,
-    }));
+    const enriched = reviews.map(r => {
+      const profile = profileMap.get(r.user_id);
+      const business = businessMap.get(r.business_id);
+      return {
+        ...r,
+        profiles: profile ? { full_name: profile.full_name } : undefined,
+        businesses: business ? { name: business.name } : undefined,
+      };
+    });
 
-    return { success: true, data: enriched as any[] };
-  } catch (err: any) {
+    return { success: true, data: enriched as (Review & { profiles?: { full_name: string }; businesses?: { name: string } })[] };
+  } catch (err: unknown) {
     console.error('[getPendingReviews] Error:', err);
-    return { success: false, data: [], error: err.message };
+    return { success: false, data: [], error: getErrorMessage(err) };
   }
 }
 
@@ -1173,8 +1202,8 @@ export async function approveReview(reviewId: string): Promise<{ success: boolea
       .eq('id', reviewId);
     if (error) throw error;
     return { success: true };
-  } catch (err: any) {
-    return { success: false, error: err.message };
+  } catch (err: unknown) {
+    return { success: false, error: getErrorMessage(err) };
   }
 }
 
@@ -1186,8 +1215,8 @@ export async function rejectReview(reviewId: string): Promise<{ success: boolean
       .eq('id', reviewId);
     if (error) throw error;
     return { success: true };
-  } catch (err: any) {
-    return { success: false, error: err.message };
+  } catch (err: unknown) {
+    return { success: false, error: getErrorMessage(err) };
   }
 }
 
@@ -1197,16 +1226,16 @@ export async function getReviewStats(): Promise<{ success: boolean; data?: { pen
       .from('agendaya_reviews')
       .select('status');
     if (error) throw error;
-    const counts = { pending: 0, approved: 0, rejected: 0, total: 0 };
-    (data as any[] || []).forEach(r => {
-      counts.total++;
+    const reviews = data || [];
+    const counts = { pending: 0, approved: 0, rejected: 0, total: reviews.length };
+    for (const r of reviews) {
       if (r.status === 'pending') counts.pending++;
       else if (r.status === 'approved') counts.approved++;
       else if (r.status === 'rejected') counts.rejected++;
-    });
+    }
     return { success: true, data: counts };
-  } catch (err: any) {
-    return { success: false, error: err.message };
+  } catch (err: unknown) {
+    return { success: false, error: getErrorMessage(err) };
   }
 }
 
@@ -1238,8 +1267,8 @@ export async function getAdminStats(): Promise<{
         totalComments: commentsRes.count ?? 0,
       },
     };
-  } catch (err: any) {
-    return { success: false, error: err.message };
+  } catch (err: unknown) {
+    return { success: false, error: getErrorMessage(err) };
   }
 }
 
@@ -1266,8 +1295,8 @@ export async function getModeratorStats(): Promise<{
         totalComments: commentsRes.count ?? 0,
       },
     };
-  } catch (err: any) {
-    return { success: false, error: err.message };
+  } catch (err: unknown) {
+    return { success: false, error: getErrorMessage(err) };
   }
 }
 
@@ -1288,8 +1317,8 @@ export async function getBusinessCategories(): Promise<{ success: boolean; data:
       .select('*');
     if (error) throw error;
     return { success: true, data: data as BusinessCategory[], error: null };
-  } catch (err: any) {
-    return { success: false, data: null, error: err.message || 'Error fetching categories' };
+  } catch (err: unknown) {
+    return { success: false, data: null, error: getErrorMessage(err) || 'Error fetching categories' };
   }
 }
 
@@ -1310,8 +1339,8 @@ export const getMilestones = async (): Promise<{ success: boolean; data?: Milest
     const { data, error } = await supabase.from('agendaya_milestones').select('*');
     if (error) throw error;
     return { success: true, data: (data as Milestone[]) || [] };
-  } catch (err: any) {
-    return { success: false, error: err.message };
+  } catch (err: unknown) {
+    return { success: false, error: getErrorMessage(err) };
   }
 };
 
@@ -1358,8 +1387,8 @@ export const getLatestBlogPost = async (): Promise<{ success: boolean; data?: Bl
     };
     
     return { success: true, data: post as BlogPost };
-  } catch (err: any) {
-    return { success: false, error: err.message };
+  } catch (err: unknown) {
+    return { success: false, error: getErrorMessage(err) };
   }
 };
 
@@ -1379,8 +1408,8 @@ export const getPopularPosts = async (limit = 4): Promise<{ success: boolean; da
     }));
     
     return { success: true, data: posts as BlogPost[] };
-  } catch (err: any) {
-    return { success: false, error: err.message };
+  } catch (err: unknown) {
+    return { success: false, error: getErrorMessage(err) };
   }
 };
 
@@ -1412,8 +1441,8 @@ export const getBlogPosts = async (page = 0, limit = 6, search?: string): Promis
       data: posts as BlogPost[],
       hasMore: count ? (from + posts.length) < count : false
     };
-  } catch (err: any) {
-    return { success: false, error: err.message };
+  } catch (err: unknown) {
+    return { success: false, error: getErrorMessage(err) };
   }
 };
 
@@ -1433,8 +1462,8 @@ export const getBlogPost = async (id: string): Promise<{ success: boolean; data?
     };
     
     return { success: true, data: post as BlogPost };
-  } catch (err: any) {
-    return { success: false, error: err.message };
+  } catch (err: unknown) {
+    return { success: false, error: getErrorMessage(err) };
   }
 };
 
@@ -1452,8 +1481,8 @@ export const adminGetAllPosts = async (): Promise<{ success: boolean; data?: Blo
       comment_count: p.blog_comments?.[0]?.count || 0
     }));
     return { success: true, data: posts as BlogPost[] };
-  } catch (err: any) {
-    return { success: false, error: err.message };
+  } catch (err: unknown) {
+    return { success: false, error: getErrorMessage(err) };
   }
 };
 
@@ -1466,8 +1495,8 @@ export const createBlogPost = async (post: Omit<BlogPost, 'id' | 'likes_count' |
       .single();
     if (error) throw error;
     return { success: true, data: data as BlogPost };
-  } catch (err: any) {
-    return { success: false, error: err.message };
+  } catch (err: unknown) {
+    return { success: false, error: getErrorMessage(err) };
   }
 };
 
@@ -1479,8 +1508,8 @@ export const updateBlogPost = async (id: string, updates: Partial<Pick<BlogPost,
       .eq('id', id);
     if (error) throw error;
     return { success: true };
-  } catch (err: any) {
-    return { success: false, error: err.message };
+  } catch (err: unknown) {
+    return { success: false, error: getErrorMessage(err) };
   }
 };
 
@@ -1492,8 +1521,8 @@ export const deleteBlogPost = async (id: string): Promise<{ success: boolean; er
       .eq('id', id);
     if (error) throw error;
     return { success: true };
-  } catch (err: any) {
-    return { success: false, error: err.message };
+  } catch (err: unknown) {
+    return { success: false, error: getErrorMessage(err) };
   }
 };
 
@@ -1509,8 +1538,8 @@ export const getBlogComments = async (postId: string): Promise<{ success: boolea
     
     if (error) throw error;
     return { success: true, data: data as BlogComment[] };
-  } catch (err: any) {
-    return { success: false, error: err.message };
+  } catch (err: unknown) {
+    return { success: false, error: getErrorMessage(err) };
   }
 };
 
@@ -1524,8 +1553,8 @@ export const createBlogComment = async (comment: Omit<BlogComment, 'id' | 'likes
     
     if (error) throw error;
     return { success: true, data: data as BlogComment };
-  } catch (err: any) {
-    return { success: false, error: err.message };
+  } catch (err: unknown) {
+    return { success: false, error: getErrorMessage(err) };
   }
 };
 
@@ -1585,8 +1614,8 @@ export const saveChatMessage = async (message: Omit<ChatMessage, 'id' | 'created
     
     if (error) throw error;
     return { success: true };
-  } catch (err: any) {
-    return { success: false, error: err.message };
+  } catch (err: unknown) {
+    return { success: false, error: getErrorMessage(err) };
   }
 };
 
@@ -1606,8 +1635,8 @@ export const getChatHistory = async (sessionId: string, userId?: string): Promis
     const { data, error } = await query;
     if (error) throw error;
     return { success: true, data: data as ChatMessage[] };
-  } catch (err: any) {
-    return { success: false, error: err.message };
+  } catch (err: unknown) {
+    return { success: false, error: getErrorMessage(err) };
   }
 };
 
@@ -1616,8 +1645,8 @@ export const getTopMilestones = async (limit = 3): Promise<{ success: boolean; d
     const { data, error } = await supabase.from('agendaya_milestones').select('*').order('current_amount', { ascending: false }).limit(limit);
     if (error) throw error;
     return { success: true, data: (data as Milestone[]) || [] };
-  } catch (err: any) {
-    return { success: false, error: err.message };
+  } catch (err: unknown) {
+    return { success: false, error: getErrorMessage(err) };
   }
 };
 
@@ -1634,8 +1663,8 @@ export const updateProfileRole = async (
     });
     if (error) throw error;
     return { success: true };
-  } catch (err: any) {
-    return { success: false, error: err.message };
+  } catch (err: unknown) {
+    return { success: false, error: getErrorMessage(err) };
   }
 };
 
@@ -1650,8 +1679,8 @@ export const updateBusinessPlan = async (
     });
     if (error) throw error;
     return { success: true };
-  } catch (err: any) {
-    return { success: false, error: err.message };
+  } catch (err: unknown) {
+    return { success: false, error: getErrorMessage(err) };
   }
 };
 
@@ -1689,8 +1718,8 @@ export async function getUsersList(params: {
 
     if (error) throw error;
     return { success: true, data: data as UserProfile[], total: count ?? 0 };
-  } catch (err: any) {
-    return { success: false, data: [], total: 0, error: err.message };
+  } catch (err: unknown) {
+    return { success: false, data: [], total: 0, error: getErrorMessage(err) };
   }
 }
 
@@ -1706,8 +1735,8 @@ export async function adminUpdateUser(
     });
     if (error) throw error;
     return { success: true };
-  } catch (err: any) {
-    return { success: false, error: err.message };
+  } catch (err: unknown) {
+    return { success: false, error: getErrorMessage(err) };
   }
 }
 
@@ -1736,8 +1765,8 @@ export async function getAdminDashboardMetrics(): Promise<{ success: boolean; da
     const { data, error } = await supabase.rpc('get_admin_dashboard_metrics');
     if (error) throw error;
     return { success: true, data: data as DashboardMetrics };
-  } catch (err: any) {
-    return { success: false, error: err.message };
+  } catch (err: unknown) {
+    return { success: false, error: getErrorMessage(err) };
   }
 }
 
@@ -1791,8 +1820,8 @@ export async function getBusinessesList(params: {
     }));
 
     return { success: true, data: mapped, total: count ?? 0 };
-  } catch (err: any) {
-    return { success: false, data: [], total: 0, error: err.message };
+  } catch (err: unknown) {
+    return { success: false, data: [], total: 0, error: getErrorMessage(err) };
   }
 }
 
@@ -1829,22 +1858,34 @@ export async function adminUpdateBusiness(
     });
     if (error) throw error;
     return { success: true };
-  } catch (err: any) {
-    return { success: false, error: err.message };
+  } catch (err: unknown) {
+    return { success: false, error: getErrorMessage(err) };
   }
 }
 
 export const contributeToMilestone = async (id: string, amount: number): Promise<{ success: boolean; data?: Milestone; error?: string }> => {
   try {
-    // Get existing current_amount
-    const { data: existing, error: fetchError } = await supabase.from('agendaya_milestones').select('current_amount').eq('id', id).single();
-    if (fetchError || !existing) throw fetchError || new Error('Milestone not found');
-    const newAmount = Number((existing as any).current_amount) + amount;
-    const { data, error } = await supabase.from('agendaya_milestones').update({ current_amount: newAmount }).eq('id', id).single();
-    if (error) throw error;
-    return { success: true, data: data as Milestone };
-  } catch (err: any) {
-    return { success: false, error: err.message };
+    const { error } = await supabase
+      .rpc('contribute_to_milestone', { p_milestone_id: id, p_amount: amount });
+
+    if (error) {
+      // Fallback: read-then-write (RPC aún no desplegado)
+      const { data: existing, error: fetchError } = await supabase
+        .from('agendaya_milestones').select('current_amount').eq('id', id).single();
+      if (fetchError || !existing) throw fetchError || new Error('Milestone not found');
+      const newAmount = Number(existing.current_amount) + amount;
+      const { data, error: updateError } = await supabase
+        .from('agendaya_milestones').update({ current_amount: newAmount }).eq('id', id).select().single();
+      if (updateError) throw updateError;
+      return { success: true, data: data as Milestone };
+    }
+
+    const { data: milestone, error: fetchMilestoneError } = await supabase
+      .from('agendaya_milestones').select('*').eq('id', id).single();
+    if (fetchMilestoneError) throw fetchMilestoneError;
+    return { success: true, data: milestone as Milestone };
+  } catch (err: unknown) {
+    return { success: false, error: getErrorMessage(err) };
   }
 };
 
@@ -1860,8 +1901,8 @@ export const subscribeToNewsletter = async (email: string): Promise<{ success: b
     }
     if (error) throw error;
     return { success: true };
-  } catch (err: any) {
-    return { success: false, error: err.message };
+  } catch (err: unknown) {
+    return { success: false, error: getErrorMessage(err) };
   }
 };
 
@@ -1898,8 +1939,8 @@ export const applyReferralCode = async (newUserId: string, referralCode: string)
       .eq('id', newUserId);
     if (error) throw error;
     return { success: true };
-  } catch (err: any) {
-    return { success: false, error: err.message };
+  } catch (err: unknown) {
+    return { success: false, error: getErrorMessage(err) };
   }
 };
 
@@ -1911,8 +1952,8 @@ export const getReferralCount = async (userId: string): Promise<{ success: boole
       .eq('referred_by', userId);
     if (error) throw error;
     return { success: true, count: count || 0 };
-  } catch (err: any) {
-    return { success: false, error: err.message };
+  } catch (err: unknown) {
+    return { success: false, error: getErrorMessage(err) };
   }
 };
 
@@ -1926,12 +1967,23 @@ export const getNewsletterSubscribers = async (): Promise<{ success: boolean; da
       .order('subscribed_at', { ascending: false });
     if (error) throw error;
     return { success: true, data: data as { email: string; subscribed_at: string }[] };
-  } catch (err: any) {
-    return { success: false, error: err.message };
+  } catch (err: unknown) {
+    return { success: false, error: getErrorMessage(err) };
   }
 };
 
-export const getGiftCodes = async (): Promise<{ success: boolean; data?: any[]; error?: string }> => {
+export type GiftCodeWithRelations = Record<string, unknown> & {
+  id: string;
+  code: string;
+  service_id: string;
+  business_id: string;
+  status: string;
+  created_at: string;
+  agendaya_services?: { name: string } | null;
+  agendaya_businesses?: { name: string } | null;
+};
+
+export const getGiftCodes = async (): Promise<{ success: boolean; data?: GiftCodeWithRelations[]; error?: string }> => {
   try {
     const { data, error } = await supabase
       .from('agendaya_gift_codes')
@@ -1939,9 +1991,9 @@ export const getGiftCodes = async (): Promise<{ success: boolean; data?: any[]; 
       .order('created_at', { ascending: false })
       .limit(100);
     if (error) throw error;
-    return { success: true, data: data as any[] };
-  } catch (err: any) {
-    return { success: false, error: err.message };
+    return { success: true, data: data as GiftCodeWithRelations[] };
+  } catch (err: unknown) {
+    return { success: false, error: getErrorMessage(err) };
   }
 };
 
@@ -1962,8 +2014,8 @@ export const getAdminLoyaltyStats = async (): Promise<{ success: boolean; data?:
         regular_count: rows.filter(r => r.loyalty_level === 'regular').length,
       },
     };
-  } catch (err: any) {
-    return { success: false, error: err.message };
+  } catch (err: unknown) {
+    return { success: false, error: getErrorMessage(err) };
   }
 };
 
@@ -1985,8 +2037,8 @@ export const getReferredUsers = async (userId: string): Promise<{ success: boole
       .order('created_at', { ascending: false });
     if (error) throw error;
     return { success: true, data: data as ReferredUser[] };
-  } catch (err: any) {
-    return { success: false, error: err.message };
+  } catch (err: unknown) {
+    return { success: false, error: getErrorMessage(err) };
   }
 };
 
@@ -2000,62 +2052,24 @@ export type ReferralStat = {
 export const getTopReferrers = async (limit = 10): Promise<{ success: boolean; data?: ReferralStat[]; error?: string }> => {
   try {
     const { data, error } = await supabase
-      .from('agendaya_profiles')
-      .select('referred_by')
-      .not('referred_by', 'is', null);
+      .rpc('get_top_referrers', { p_limit: limit });
+
     if (error) throw error;
-
-    const countMap = new Map<string, number>();
-    (data as { referred_by: string }[]).forEach(row => {
-      countMap.set(row.referred_by, (countMap.get(row.referred_by) || 0) + 1);
-    });
-
-    const referrerIds = Array.from(countMap.keys());
-    if (referrerIds.length === 0) return { success: true, data: [] };
-
-    const { data: profiles, error: profilesError } = await supabase
-      .from('agendaya_profiles')
-      .select('id, full_name, email')
-      .in('id', referrerIds);
-    if (profilesError) throw profilesError;
-
-    const profileMap = new Map((profiles as { id: string; full_name: string | null; email: string | null }[]).map(p => [p.id, p]));
-
-    const stats: ReferralStat[] = referrerIds
-      .map(id => ({
-        referrer_id: id,
-        referrer_name: profileMap.get(id)?.full_name || null,
-        referrer_email: profileMap.get(id)?.email || null,
-        count: countMap.get(id) || 0,
-      }))
-      .sort((a, b) => b.count - a.count)
-      .slice(0, limit);
-
-    return { success: true, data: stats };
-  } catch (err: any) {
-    return { success: false, error: err.message };
+    return { success: true, data: data as ReferralStat[] };
+  } catch (err: unknown) {
+    return { success: false, error: getErrorMessage(err) };
   }
 };
 
 export const getAdminReferralStats = async (): Promise<{ success: boolean; data?: { total_referrals: number; unique_referrers: number }; error?: string }> => {
   try {
     const { data, error } = await supabase
-      .from('agendaya_profiles')
-      .select('referred_by')
-      .not('referred_by', 'is', null);
+      .rpc('get_admin_referral_stats');
+
     if (error) throw error;
-
-    const referrals = data as { referred_by: string }[];
-    const uniqueReferrers = new Set(referrals.map(r => r.referred_by));
-
-    return {
-      success: true,
-      data: {
-        total_referrals: referrals.length,
-        unique_referrers: uniqueReferrers.size,
-      },
-    };
-  } catch (err: any) {
-    return { success: false, error: err.message };
+    const stats = (data as { total_referrals: number; unique_referrers: number }[])?.[0];
+    return { success: true, data: stats || { total_referrals: 0, unique_referrers: 0 } };
+  } catch (err: unknown) {
+    return { success: false, error: getErrorMessage(err) };
   }
 };

@@ -162,7 +162,7 @@ Definidos en `src/lib/roles.ts:3`. El frontend compara por índice (`ROLES.index
 - `canManageBusiness()` → `business_owner`, `admin`
 - `canBook()` → `client`, `business_owner`, `moderator`, `admin`
 
-**Protección DB:** Trigger `trg_protect_agendaya_profile` (mig `006_roles_plans.sql:53`) evita auto-asignación de `admin`/`moderator`. Sincronización a `user_apps` vía `trg_sync_agendaya_profile_role`.
+**Protección DB:** Trigger `trg_protect_agendaya_profile` (mig `20240301_006_roles_plans.sql:53`) evita auto-asignación de `admin`/`moderator`. Sincronización a `user_apps` vía `trg_sync_agendaya_profile_role`.
 
 ### Planes (3 niveles)
 
@@ -176,7 +176,7 @@ Definidos en `src/lib/roles.ts:16-92`. Pricing en COP mensual.
 
 **`plan_score`** se replica de `agendaya_profiles.plan` → `agendaya_businesses.plan_score` vía triggers (`trg_compute_agendaya_plan_score`, `trg_recompute_agendaya_business_plan_score`). Búsquedas ordenan por `plan_score DESC`.
 
-**Pago:** PayPal vía Netlify Functions (`create-paypal-order.ts`, `capture-paypal-order.ts`). Persiste en `agendaya_subscriptions` (mig `008_agendaya_subscriptions.sql`).
+**Pago:** PayPal vía Netlify Functions (`create-paypal-order.ts`, `capture-paypal-order.ts`). Persiste en `agendaya_subscriptions` (mig `20240301_008_agendaya_subscriptions.sql`).
 
 ### Flujo de usuario
 

@@ -7,7 +7,7 @@ export interface UseBusinessHoursResult {
   loading: boolean;
   saving: boolean;
   message: { text: string; type: 'success' | 'error' } | null;
-  updateHour: (index: number, field: keyof Omit<BusinessHours, 'id'>, value: any) => void;
+  updateHour: (index: number, field: keyof Omit<BusinessHours, 'id'>, value: string | boolean | number) => void;
   saveHours: (e: React.FormEvent) => Promise<boolean>;
 }
 
@@ -60,10 +60,10 @@ export const useBusinessHours = (businessId: string | undefined): UseBusinessHou
     loadHours();
   }, [businessId]);
 
-  const updateHour = (index: number, field: keyof Omit<BusinessHours, 'id'>, value: any) => {
+  const updateHour = (index: number, field: keyof Omit<BusinessHours, 'id'>, value: string | boolean | number) => {
     setBusinessHoursState(prev => {
       const newHours = [...prev];
-      (newHours[index] as any)[field] = value;
+      (newHours[index] as Record<string, unknown>)[field] = value;
       return newHours;
     });
   };

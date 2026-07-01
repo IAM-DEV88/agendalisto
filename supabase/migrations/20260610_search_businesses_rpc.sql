@@ -31,8 +31,8 @@ BEGIN
     AND (p_category_id IS NULL OR b.category_id = v_category_id)
     AND (p_location IS NULL OR b.address ILIKE '%' || p_location || '%')
   ORDER BY
-    (SELECT COUNT(*) FROM public.agendaya_user_likes l WHERE l.business_id = b.id) DESC,
     b.plan_score DESC,
+    (SELECT COUNT(*) FROM public.agendaya_user_likes l WHERE l.business_id = b.id) DESC,
     b.created_at DESC;
 END;
 $$;

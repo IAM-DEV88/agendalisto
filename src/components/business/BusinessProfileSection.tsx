@@ -131,7 +131,7 @@ const BusinessProfileSection: React.FC<BusinessProfileSectionProps> = ({
       // Retornar la URL pública para actualizar el modelo
       return urlData.publicUrl;
     } catch (error: any) {
-      // Error en la subida del logo
+      console.error('[BusinessProfileSection] Logo upload error:', error);
       return null;
     } finally {
       setIsUploading(false);
@@ -153,6 +153,7 @@ const BusinessProfileSection: React.FC<BusinessProfileSectionProps> = ({
         try {
           await updateBusiness(businessData.id, { logo_url: logoUrl });
         } catch (err: any) {
+          console.error('[BusinessProfileSection] Error saving logo_url after upload:', err);
         }
       }
     }
@@ -181,7 +182,7 @@ const BusinessProfileSection: React.FC<BusinessProfileSectionProps> = ({
                   <img
                     src={previewUrl || FALLBACK_LOGO}
                     alt="Logo del negocio"
-                    className="w-full h-full object-cover"
+                    className="w-full h-full object-contain"
                     onError={(e) => { e.currentTarget.src = FALLBACK_LOGO; }}
                   />
                   {isUploading && (

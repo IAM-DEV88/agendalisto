@@ -1,4 +1,4 @@
-const BASE_URL = import.meta.env.VITE_BASE_URL || 'https://agendaya.com';
+const BASE_URL = import.meta.env.VITE_BASE_URL || window.location.origin;
 
 function inviteEmailHtml(businessName: string): string {
   return `<!DOCTYPE html>

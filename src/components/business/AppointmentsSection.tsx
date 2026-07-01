@@ -3,7 +3,7 @@ import { Calendar, User, Clock, Loader2, CheckCircle2, XCircle, PlayCircle, Info
 import SectionHeader from '../ui/SectionHeader';
 
 interface AppointmentsSectionProps {
-  appointments: any[];
+  appointments: import('../../lib/api').Appointment[];
   loading: boolean;
   onUpdateStatus: (id: string, status: 'pending' | 'confirmed' | 'completed' | 'cancelled') => Promise<void>;
 }

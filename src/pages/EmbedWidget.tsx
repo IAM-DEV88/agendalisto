@@ -1,17 +1,17 @@
 import { useState, useEffect } from 'react';
 import { useParams } from 'react-router-dom';
-import { getBusinessBySlug, getBusinessServices } from '../lib/api';
+import { getBusinessBySlug, getBusinessServices, Business, Service } from '../lib/api';
 
 export default function EmbedWidget() {
   const { slug } = useParams<{ slug: string }>();
-  const [business, setBusiness] = useState<any>(null);
-  const [services, setServices] = useState<any[]>([]);
+  const [business, setBusiness] = useState<Business | null>(null);
+  const [services, setServices] = useState<Service[]>([]);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     if (!slug) return;
     Promise.all([
-      getBusinessBySlug(slug).then(r => { if (r.success) setBusiness(r.business); }),
+      getBusinessBySlug(slug).then(r => { if (r.success && r.business) setBusiness(r.business); }),
       getBusinessServices(slug).then(r => { if (r.success && r.data) setServices(r.data); }),
     ]).finally(() => setLoading(false));
   }, [slug]);

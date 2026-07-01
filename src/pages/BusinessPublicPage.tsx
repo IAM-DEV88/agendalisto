@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { useParams, Link, useNavigate, useLocation } from 'react-router-dom';
-import { getBusinessBySlug, getBusinessServices, getBusinessHours, getBusinessReviews, recordBusinessVisit, Service, BusinessHours, Review } from '../lib/api';
+import { getBusinessBySlug, getBusinessServices, getBusinessHours, getBusinessReviews, recordBusinessVisit, Service, BusinessHours, Review, Business } from '../lib/api';
 import { supabase } from '../lib/supabase';
 import {
   BusinessHeader,
@@ -41,14 +41,14 @@ function BusinessPublicPage() {
   const { slug } = useParams();
   const navigate = useNavigate();
   const location = useLocation();
-  const [businessData, setBusinessData] = useState<any>(null);
+  const [businessData, setBusinessData] = useState<Business | null>(null);
   const [services, setServices] = useState<Service[]>([]);
   const [businessHours, setBusinessHours] = useState<BusinessHours[]>([]);
   const [loading, setLoading] = useState(true);
   const [selectedService, setSelectedService] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [activeTab, setActiveTab] = useState('services');
-  const [user, setUser] = useState<any>(null);
+  const [user, setUser] = useState<import('@supabase/supabase-js').User | null>(null);
   const [reviews, setReviews] = useState<Review[]>([]);
   const [averageRating, setAverageRating] = useState<number>(0);
 
@@ -69,7 +69,9 @@ function BusinessPublicPage() {
         const { success: sS, data: sD } = await getBusinessServices(business.id);
         if (sS && sD) { setServices(sD); if (sD.length > 0) setSelectedService(sD[0].id); }
 
-        try { setBusinessHours(await getBusinessHours(business.id)); } catch {}
+        try { setBusinessHours(await getBusinessHours(business.id)); } catch (err) {
+          console.error('Error loading business hours:', err);
+        }
 
         try {
           const { success: rS, data: rD } = await getBusinessReviews(business.id);
@@ -77,8 +79,8 @@ function BusinessPublicPage() {
             setReviews(rD);
             setAverageRating(rD.length > 0 ? rD.reduce((sum, r) => sum + r.rating, 0) / rD.length : 0);
           }
-        } catch {}
-      } catch { setError('Error al cargar la información del negocio'); }
+        } catch (err) { console.error('Error loading reviews:', err); }
+      } catch (err) { console.error('Error loading business:', err); setError('Error al cargar la información del negocio'); }
       finally { setLoading(false); }
     };
     fetchBusinessData();
@@ -209,142 +211,100 @@ function BusinessPublicPage() {
           </div>
         )}
 
-        {/* Mobile Tabs */}
-        <div className="mt-8 bg-white dark:bg-slate-900 rounded-2xl border border-slate-200 dark:border-slate-800 overflow-hidden md:hidden">
-          <div className="flex border-b border-slate-200 dark:border-slate-700">
-            {[
-              { id: 'services', label: 'Servicios' },
-              { id: 'hours', label: 'Horarios' },
-              { id: 'location', label: 'Ubicación' },
-            ].map(tab => (
-              <button
-                key={tab.id}
-                onClick={() => setActiveTab(tab.id)}
-                className={`flex-1 py-4 text-center text-sm font-bold transition-all ${
-                  activeTab === tab.id
-                    ? 'text-primary-600 dark:text-primary-400 border-b-2 border-primary-600 dark:border-primary-400 bg-white dark:bg-slate-900'
-                    : 'text-slate-500 hover:text-slate-700 dark:hover:text-slate-300'
-                }`}
-              >
-                {tab.label}
-              </button>
-            ))}
+        {/* Content — responsive: single layout, mobile tabs, desktop grid */}
+        <div className="mt-8">
+          {/* Mobile tab navigation */}
+          <div className="md:hidden bg-white dark:bg-slate-900 rounded-2xl border border-slate-200 dark:border-slate-800 overflow-hidden mb-8">
+            <div className="flex border-b border-slate-200 dark:border-slate-700">
+              {[
+                { id: 'services', label: 'Servicios' },
+                { id: 'hours', label: 'Horarios' },
+                { id: 'location', label: 'Ubicación' },
+              ].map(tab => (
+                <button
+                  key={tab.id}
+                  onClick={() => setActiveTab(tab.id)}
+                  className={`flex-1 py-4 text-center text-sm font-bold transition-all ${
+                    activeTab === tab.id
+                      ? 'text-primary-600 dark:text-primary-400 border-b-2 border-primary-600 dark:border-primary-400 bg-white dark:bg-slate-900'
+                      : 'text-slate-500 hover:text-slate-700 dark:hover:text-slate-300'
+                  }`}
+                >
+                  {tab.label}
+                </button>
+              ))}
+            </div>
           </div>
-          <div className="p-5 animate-in fade-in duration-300">
-            {activeTab === 'services' && (
-              <div>
+
+          {/* Grid layout: 2-col main + 1-col sidebar */}
+          <div className="md:grid md:grid-cols-3 md:gap-8">
+            {/* Main column */}
+            <div className="md:col-span-2 space-y-8">
+              {/* Services — always on desktop, tab-controlled on mobile */}
+              <div className={`bg-white dark:bg-slate-900 rounded-2xl border border-slate-200 dark:border-slate-800 p-6 sm:p-8 ${activeTab !== 'services' ? 'hidden' : ''} md:block`}>
+                <h2 className="text-xl font-black text-slate-900 dark:text-white mb-6">Servicios Disponibles</h2>
                 <ServicesList
                   services={services}
                   selectedService={selectedService}
                   onSelectService={handleServiceSelection}
-                  showPrices={businessData?.config?.mostrar_precios}
+                  showPrices={!!businessData?.config?.mostrar_precios}
                   currentUser={user}
                   businessOwnerId={businessData?.owner_id}
                   showcaseOnly={!!businessData?.showcase_only}
                 />
                 {user && user.id === businessData?.owner_id && (
-                  <Link to="/business/dashboard?tab=services" className="mt-6 inline-flex items-center gap-2 px-5 py-2.5 bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300 text-sm font-bold rounded-xl hover:bg-slate-200 dark:hover:bg-slate-700 transition-all w-full justify-center">
+                  <Link to="/business/dashboard?tab=services" className="mt-6 inline-flex items-center gap-2 px-5 py-2.5 bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300 text-sm font-bold rounded-xl hover:bg-slate-200 dark:hover:bg-slate-700 transition-all md:w-auto w-full justify-center">
                     Gestionar Servicios
                   </Link>
                 )}
               </div>
-            )}
-            {activeTab === 'hours' && (
-              <div>
-                <h3 className="text-lg font-black text-slate-900 dark:text-white mb-4">Horarios de Atención</h3>
+
+              {/* Reviews — always visible on desktop, hidden on mobile (no tab for this) */}
+              <div className="hidden md:block">
+                <ReviewsSection businessId={businessData.id} />
+              </div>
+            </div>
+
+            {/* Sidebar — always on desktop, tab-controlled on mobile */}
+            <div className="space-y-6 mt-8 md:mt-0">
+              {/* Hours */}
+              <div className={`bg-white dark:bg-slate-900 rounded-2xl border border-slate-200 dark:border-slate-800 p-6 ${activeTab !== 'hours' ? 'hidden' : ''} md:block`}>
+                <h2 className="text-lg font-black text-slate-900 dark:text-white mb-4 flex items-center gap-2">
+                  <Clock className="w-4 h-4 text-primary-500" />
+                  Horarios
+                </h2>
                 <BusinessHoursList businessHours={businessHours} />
                 {user && user.id === businessData?.owner_id && (
-                  <Link to="/business/dashboard?tab=availability" className="mt-6 inline-flex items-center gap-2 px-5 py-2.5 bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300 text-sm font-bold rounded-xl hover:bg-slate-200 dark:hover:bg-slate-700 transition-all w-full justify-center">
+                  <Link to="/business/dashboard?tab=availability" className="mt-4 inline-flex items-center gap-2 px-4 py-2 bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300 text-xs font-bold rounded-xl hover:bg-slate-200 dark:hover:bg-slate-700 transition-all w-full justify-center">
                     Editar Horarios
                   </Link>
                 )}
               </div>
-            )}
-            {activeTab === 'location' && businessData?.config?.mostrar_direccion && (
-              <div>
-                <h3 className="text-lg font-black text-slate-900 dark:text-white mb-4">Ubicación</h3>
-                <BusinessLocation address={businessData.address} lat={businessData.lat} lng={businessData.lng} />
-                {user && user.id === businessData?.owner_id && (
-                  <Link to="/business/dashboard?tab=profile" className="mt-6 inline-flex items-center gap-2 px-5 py-2.5 bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300 text-sm font-bold rounded-xl hover:bg-slate-200 dark:hover:bg-slate-700 transition-all w-full justify-center">
-                    Editar Perfil
-                  </Link>
-                )}
-              </div>
-            )}
-          </div>
-        </div>
 
-        {/* Mobile Reviews */}
-        <div className="mt-8 md:hidden">
-          <div className="bg-white dark:bg-slate-900 rounded-2xl border border-slate-200 dark:border-slate-800 p-5">
-            <ReviewsSection businessId={businessData.id} />
-          </div>
-        </div>
+              {/* Location */}
+              {businessData?.config?.mostrar_direccion && (
+                <div className={`bg-white dark:bg-slate-900 rounded-2xl border border-slate-200 dark:border-slate-800 p-6 ${activeTab !== 'location' ? 'hidden' : ''} md:block`}>
+                  <h2 className="text-lg font-black text-slate-900 dark:text-white mb-4 flex items-center gap-2">
+                    <MapPin className="w-4 h-4 text-primary-500" />
+                    Ubicación
+                  </h2>
+                  <BusinessLocation address={businessData.address} lat={businessData.lat} lng={businessData.lng} />
+                  {user && user.id === businessData?.owner_id && (
+                    <Link to="/business/dashboard?tab=profile" className="mt-4 inline-flex items-center gap-2 px-4 py-2 bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300 text-xs font-bold rounded-xl hover:bg-slate-200 dark:hover:bg-slate-700 transition-all w-full justify-center">
+                      Editar Perfil
+                    </Link>
+                  )}
+                </div>
+              )}
 
-        {/* Desktop Layout */}
-        <div className="mt-8 hidden md:grid md:grid-cols-3 gap-8">
-          {/* Main */}
-          <div className="md:col-span-2 space-y-8">
-            <div className="bg-white dark:bg-slate-900 rounded-2xl border border-slate-200 dark:border-slate-800 p-6 sm:p-8">
-              <h2 className="text-xl font-black text-slate-900 dark:text-white mb-6">Servicios Disponibles</h2>
-              <ServicesList
-                services={services}
-                selectedService={selectedService}
-                onSelectService={handleServiceSelection}
-                showPrices={businessData?.config?.mostrar_precios}
-                currentUser={user}
-                businessOwnerId={businessData?.owner_id}
-                showcaseOnly={!!businessData?.showcase_only}
-              />
-              {user && user.id === businessData?.owner_id && (
-                <Link to="/business/dashboard?tab=services" className="mt-6 inline-flex items-center gap-2 px-5 py-2.5 bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300 text-sm font-bold rounded-xl hover:bg-slate-200 dark:hover:bg-slate-700 transition-all">
-                  Gestionar Servicios
-                </Link>
+              {!user && (
+                <div className="bg-amber-50 dark:bg-amber-900/10 rounded-2xl border border-amber-200 dark:border-amber-800 p-5 text-center">
+                  <p className="text-sm font-bold text-amber-800 dark:text-amber-400">
+                    <Link to="/login" className="underline decoration-amber-500/50 hover:text-amber-600 transition-colors">Inicia sesión</Link> para reservar servicios.
+                  </p>
+                </div>
               )}
             </div>
-
-            <ReviewsSection businessId={businessData.id} />
-          </div>
-
-          {/* Sidebar */}
-          <div className="space-y-6">
-            {/* Hours */}
-            <div className="bg-white dark:bg-slate-900 rounded-2xl border border-slate-200 dark:border-slate-800 p-6">
-              <h2 className="text-lg font-black text-slate-900 dark:text-white mb-4 flex items-center gap-2">
-                <Clock className="w-4 h-4 text-primary-500" />
-                Horarios
-              </h2>
-              <BusinessHoursList businessHours={businessHours} />
-              {user && user.id === businessData?.owner_id && (
-                <Link to="/business/dashboard?tab=availability" className="mt-4 inline-flex items-center gap-2 px-4 py-2 bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300 text-xs font-bold rounded-xl hover:bg-slate-200 dark:hover:bg-slate-700 transition-all w-full justify-center">
-                  Editar Horarios
-                </Link>
-              )}
-            </div>
-
-            {/* Location */}
-            {businessData?.config?.mostrar_direccion && (
-              <div className="bg-white dark:bg-slate-900 rounded-2xl border border-slate-200 dark:border-slate-800 p-6">
-                <h2 className="text-lg font-black text-slate-900 dark:text-white mb-4 flex items-center gap-2">
-                  <MapPin className="w-4 h-4 text-primary-500" />
-                  Ubicación
-                </h2>
-                <BusinessLocation address={businessData.address} lat={businessData.lat} lng={businessData.lng} />
-                {user && user.id === businessData?.owner_id && (
-                  <Link to="/business/dashboard?tab=profile" className="mt-4 inline-flex items-center gap-2 px-4 py-2 bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300 text-xs font-bold rounded-xl hover:bg-slate-200 dark:hover:bg-slate-700 transition-all w-full justify-center">
-                    Editar Perfil
-                  </Link>
-                )}
-              </div>
-            )}
-
-            {!user && (
-              <div className="bg-amber-50 dark:bg-amber-900/10 rounded-2xl border border-amber-200 dark:border-amber-800 p-5 text-center">
-                <p className="text-sm font-bold text-amber-800 dark:text-amber-400">
-                  <Link to="/login" className="underline decoration-amber-500/50 hover:text-amber-600 transition-colors">Inicia sesión</Link> para reservar servicios.
-                </p>
-              </div>
-            )}
           </div>
         </div>
       </div>

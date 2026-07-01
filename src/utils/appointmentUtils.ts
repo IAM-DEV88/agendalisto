@@ -15,7 +15,7 @@ export const getStatusText = (status: AppointmentStatus): string => {
   }
 };
 
-export const filterAppointments = (appointments: any[], status: AppointmentStatus | AppointmentStatus[]) => {
+export const filterAppointments = (appointments: import('../types/appointment').Appointment[], status: AppointmentStatus | AppointmentStatus[]) => {
   const statusArray = Array.isArray(status) ? status : [status];
   return appointments.filter(a => statusArray.includes(a.status));
 }; 
