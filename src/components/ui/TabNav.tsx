@@ -111,7 +111,7 @@ export const TabNav: React.FC<TabNavProps> = ({
             stuck ? 'opacity-0 pointer-events-none' : 'opacity-100'
           }`}
         >
-          {pillNav}
+          <div className="py-2.5">{pillNav}</div>
         </div>
         <div
           className={`fixed left-0 right-0 z-30 transition-all duration-200 ease-out ${
@@ -166,10 +166,10 @@ export const TabNav: React.FC<TabNavProps> = ({
     return (
       <div data-underline-nav className={`sticky top-16 z-40 transition-colors duration-150 ${
         stuck
-          ? 'bg-white/80 dark:bg-slate-900/80 backdrop-blur-md shadow-sm border-b border-slate-200/50 dark:border-slate-800/50 -mx-4 sm:-mx-6 lg:-mx-8 px-4 sm:px-6 lg:px-8'
-          : 'bg-transparent border-b border-slate-200/50 dark:border-slate-800/50 px-4 sm:px-0'
+          ? 'bg-white/80 dark:bg-slate-900/80 backdrop-blur-md shadow-sm border-b border-slate-200/50 dark:border-slate-800/50 sm:-mx-6 lg:-mx-8 sm:px-6 lg:px-8'
+          : 'bg-transparent border-b border-slate-200/50 dark:border-slate-800/50'
       }`}>
-        {nav}
+        <div className="px-4 sm:px-0">{nav}</div>
       </div>
     );
   }
