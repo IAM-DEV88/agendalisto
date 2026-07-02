@@ -31,7 +31,7 @@ export default function FavoritesSection({ user }: FavoritesSectionProps) {
           title="Mis Favoritos"
           description="Negocios, servicios y publicaciones que has guardado"
         />
-        <TabNav tabs={FAVORITE_TABS} activeTabId={activeTab} onTabChange={setActiveTab} variant="pill" />
+        <TabNav tabs={FAVORITE_TABS} activeTabId={activeTab} onTabChange={setActiveTab} variant="pill" sticky />
       </div>
 
       <div className="animate-in fade-in zoom-in-95 duration-300">

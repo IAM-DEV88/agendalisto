@@ -436,6 +436,7 @@ const ProfileDashboard = ({ user }: ProfileDashboardProps) => {
                     activeTabId={activeAppointmentTab}
                     onTabChange={setActiveAppointmentTab}
                     variant="pill"
+                    sticky
                   />
                 </div>
 
@@ -629,6 +630,7 @@ const ProfileDashboard = ({ user }: ProfileDashboardProps) => {
                     activeTabId={activeSettingsTab}
                     onTabChange={setActiveSettingsTab}
                     variant="pill"
+                    sticky
                   />
                 </div>
 
