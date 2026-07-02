@@ -23,18 +23,49 @@ export const TabNav: React.FC<TabNavProps> = ({
 }) => {
   const sentinelRef = useRef<HTMLDivElement>(null);
   const [stuck, setStuck] = useState(false);
-  const pillBarTop = 108;
+  const [pillPosition, setPillPosition] = useState(108);
 
   useEffect(() => {
+    if (!sticky) return;
+
+    if (variant === 'underline') {
+      const barEl = document.querySelector('[data-underline-nav]');
+      if (!barEl) return;
+      const update = () => setStuck(barEl.getBoundingClientRect().top < 65);
+      update();
+      window.addEventListener('scroll', update, { passive: true });
+      window.addEventListener('resize', update);
+      return () => {
+        window.removeEventListener('scroll', update);
+        window.removeEventListener('resize', update);
+      };
+    }
+
     const el = sentinelRef.current;
-    if (!el || !sticky) return;
+    if (!el) return;
+    const underlineBar = document.querySelector('[data-underline-nav]');
+    if (underlineBar) {
+      const update = () => {
+        const bottom = underlineBar.getBoundingClientRect().bottom;
+        setPillPosition(bottom);
+        setStuck(el.getBoundingClientRect().top <= bottom);
+      };
+      update();
+      window.addEventListener('scroll', update, { passive: true });
+      window.addEventListener('resize', update);
+      return () => {
+        window.removeEventListener('scroll', update);
+        window.removeEventListener('resize', update);
+      };
+    }
+
     const observer = new IntersectionObserver(
       ([entry]) => setStuck(!entry.isIntersecting),
       { threshold: 0, rootMargin: '-1px 0px 0px 0px' }
     );
     observer.observe(el);
     return () => observer.disconnect();
-  }, [sticky]);
+  }, [sticky, variant]);
 
   useEffect(() => {
     const btn = document.getElementById(`tab-${activeTabId}`);
@@ -88,7 +119,7 @@ export const TabNav: React.FC<TabNavProps> = ({
               ? 'translate-y-0 opacity-100'
               : '-translate-y-2 opacity-0 pointer-events-none'
           }`}
-          style={{ top: `${pillBarTop}px` }}
+          style={{ top: `${pillPosition}px` }}
         >
           <div className="bg-white/80 dark:bg-slate-900/80 backdrop-blur-md shadow-sm border-b border-slate-200/50 dark:border-slate-800/50">
             <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-2.5 flex justify-start">
@@ -133,16 +164,13 @@ export const TabNav: React.FC<TabNavProps> = ({
 
   if (sticky) {
     return (
-      <>
-        <div ref={sentinelRef} className="h-px" />
-        <div className={`sticky top-16 z-40 transition-all duration-300 ${
-          stuck
-            ? 'bg-white/80 dark:bg-slate-900/80 backdrop-blur-md shadow-sm border-b border-slate-200/50 dark:border-slate-800/50 -mx-4 sm:-mx-6 lg:-mx-8 px-4 sm:px-6 lg:px-8'
-            : 'bg-transparent border-b border-slate-200/50 dark:border-slate-800/50 px-4 sm:px-0'
-        }`}>
-          {nav}
-        </div>
-      </>
+      <div data-underline-nav className={`sticky top-16 z-40 transition-colors duration-150 ${
+        stuck
+          ? 'bg-white/80 dark:bg-slate-900/80 backdrop-blur-md shadow-sm border-b border-slate-200/50 dark:border-slate-800/50 -mx-4 sm:-mx-6 lg:-mx-8 px-4 sm:px-6 lg:px-8'
+          : 'bg-transparent border-b border-slate-200/50 dark:border-slate-800/50 px-4 sm:px-0'
+      }`}>
+        {nav}
+      </div>
     );
   }
 
