@@ -264,7 +264,7 @@ function App() {
             <Route path="/blog" element={<Blog />} />
             <Route path="/blog/:id" element={<BlogPostView />} />
             <Route path="/dashboard" element={
-              <ProtectedRoute user={user} userProfile={userProfile} requiredRole="client">
+              <ProtectedRoute user={user} userProfile={userProfile}>
                 <ProfileDashboard user={userProfile} />
               </ProtectedRoute>
             } />
