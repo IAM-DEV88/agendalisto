@@ -380,7 +380,7 @@ const ProfileDashboard = ({ user }: ProfileDashboardProps) => {
                         </Link>
                       )}
                     </>
-                  ) : (
+                  ) : !isVisitor ? (
                     <Link
                       to="/business/register"
                       className="inline-flex items-center gap-1.5 px-4 py-2 bg-white dark:bg-slate-900 text-primary-600 dark:text-primary-400 text-xs font-bold rounded-xl border border-primary-200 dark:border-primary-800 hover:bg-primary-50 dark:hover:bg-primary-900/20 active:scale-95 transition-all shadow-sm"
@@ -389,7 +389,7 @@ const ProfileDashboard = ({ user }: ProfileDashboardProps) => {
                       <span className="hidden sm:inline">Registrar mi negocio</span>
                       <span className="sm:hidden">Registrar</span>
                     </Link>
-                  )}
+                  ) : null}
                 </div>
               </div>
             </div>
@@ -404,7 +404,7 @@ const ProfileDashboard = ({ user }: ProfileDashboardProps) => {
                     Activa tu cuenta de cliente
                   </h3>
                   <p className="text-xs text-emerald-600 dark:text-emerald-400 mt-0.5">
-                    Agenda citas, reseñas, favoritos y mucho más. Es gratis.
+                    Agenda citas, escribe reseñas, guarda favoritos y registra tu negocio. Es gratis.
                   </p>
                 </div>
                 <button
