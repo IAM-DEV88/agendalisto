@@ -22,8 +22,8 @@ export const TabNav: React.FC<TabNavProps> = ({
   variant = 'underline',
 }) => {
   // ─── Scroll trigger & sticky bar offsets ───
-  const PILL_BAR_TOP = 108;
-  const PILL_TRIGGER_OFFSET = 108;
+  const PILL_BAR_TOP = 100;
+  const PILL_TRIGGER_OFFSET = 100;
   const UNDERLINE_TRIGGER_OFFSET = 65;
   // ─────────────────────────────────────────────
 
@@ -96,7 +96,7 @@ export const TabNav: React.FC<TabNavProps> = ({
           }`}
           style={{ top: `${PILL_BAR_TOP}px` }}
         >
-          <div className="bg-white/80 dark:bg-slate-900/80 backdrop-blur-md shadow-sm border-b border-slate-200/50 dark:border-slate-800/50">
+          <div className="bg-white/80 dark:bg-slate-900/80 backdrop-blur-md">
             <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-2.5 flex justify-start">
               {pillNav}
             </div>
