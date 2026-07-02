@@ -13,7 +13,7 @@ import { setBusinesses, updateBusinessInStore } from '../store/userSlice';
 import { useBusinessConfig } from '../hooks/useBusinessConfig';
 import { useBusinessHours } from '../hooks/useBusinessHours';
 import { useBusinessClients } from '../hooks/useBusinessClients';
-import { canAccessAnalytics, PLAN_BADGE, PLAN_LABELS } from '../lib/roles';
+import { canAccessAnalytics, PLAN_BADGE } from '../lib/roles';
 import type { RootState } from '../store';
 
 import TabNav, { Tab } from '../components/ui/TabNav';
@@ -321,66 +321,71 @@ export const BusinessDashboard: React.FC = () => {
     <div className="min-h-screen bg-gradient-to-b from-slate-50 to-white dark:from-slate-950 dark:to-slate-900 transition-colors duration-200">
       <SEO title={businessData?.name ? `${businessData.name} — Panel` : 'Panel del negocio'} />
       <div className="max-w-7xl mx-auto sm:px-6 lg:px-8">
-        <div className="px-4 sm:px-0 pt-6 space-y-8">
+        <div className="px-4 sm:px-0 pt-4 sm:pt-6 space-y-5 sm:space-y-6">
 
           {/* ═══ HEADER ═══ */}
           <div className="animate-in fade-in slide-in-from-top-4 duration-500">
-            <div className="flex flex-col md:flex-row md:items-center justify-between gap-6">
-              <div className="flex items-center gap-5 group">
-                {businessData ? (
-                  <Link to={`/${businessData.slug}`} className="flex items-center gap-5 group">
-                    <div className="relative">
-                      <div className="h-16 w-16 rounded-2xl overflow-hidden ring-2 ring-white dark:ring-slate-800 shadow-xl transition-transform duration-300 group-hover:scale-105">
-                        <img
-                          src={businessData.logo_url || 'https://upload.wikimedia.org/wikipedia/commons/8/89/Portrait_Placeholder.png'}
-                          alt={`${businessData.name} logo`}
-                          className="h-full w-full object-contain"
-                        />
+            <div className="bg-white dark:bg-slate-900 rounded-2xl border border-slate-200 dark:border-slate-800 shadow-sm p-4 sm:p-5">
+              <div className="flex flex-col sm:flex-row sm:items-center gap-3 sm:gap-4">
+                {/* Left: Business Info */}
+                <div className="flex items-center gap-3 min-w-0 flex-1">
+                  {businessData ? (
+                    <Link to={`/${businessData.slug}`} className="flex items-center gap-3 group min-w-0 flex-1">
+                      <div className="relative shrink-0">
+                        <div className="h-12 w-12 sm:h-14 sm:w-14 rounded-xl overflow-hidden ring-2 ring-white dark:ring-slate-800 shadow-lg transition-transform duration-300 group-hover:scale-105">
+                          <img
+                            src={businessData.logo_url || 'https://upload.wikimedia.org/wikipedia/commons/8/89/Portrait_Placeholder.png'}
+                            alt={`${businessData.name} logo`}
+                            className="h-full w-full object-contain"
+                          />
+                        </div>
+                        <div className="absolute -bottom-0.5 -right-0.5 w-3.5 h-3.5 bg-emerald-500 border-[3px] border-white dark:border-slate-900 rounded-full shadow" />
                       </div>
-                      <div className="absolute -bottom-1 -right-1 w-5 h-5 bg-emerald-500 border-[3px] border-white dark:border-slate-900 rounded-full shadow-lg" />
-                    </div>
-                    <div>
-                      <div className="flex items-center gap-2">
-                        <h1 className="text-2xl font-black text-slate-900 dark:text-white tracking-tight group-hover:text-primary-600 dark:group-hover:text-primary-400 transition-colors">
-                          {businessData.name}
-                        </h1>
-                        {planBadge && (
-                          <span className={`px-2.5 py-0.5 text-[10px] font-bold rounded-full uppercase tracking-wider ${planBadge.className}`}>
-                            {planBadge.text}
-                          </span>
-                        )}
+                      <div className="min-w-0">
+                        <div className="flex items-center gap-1.5 flex-wrap">
+                          <h1 className="text-lg sm:text-xl font-black text-slate-900 dark:text-white tracking-tight truncate group-hover:text-primary-600 dark:group-hover:text-primary-400 transition-colors">
+                            {businessData.name}
+                          </h1>
+                          {planBadge && (
+                            <span className={`px-2 py-0.5 text-[10px] font-bold rounded-full uppercase tracking-wider shrink-0 ${planBadge.className}`}>
+                              {planBadge.text}
+                            </span>
+                          )}
+                        </div>
+                        <p className="text-xs sm:text-sm font-medium text-slate-500 dark:text-slate-400 flex items-center gap-1.5 mt-0.5 truncate">
+                          <Store className="w-3.5 h-3.5 shrink-0" />
+                          Panel de Administración
+                        </p>
                       </div>
-                      <p className="text-sm font-medium text-slate-500 dark:text-slate-400 flex items-center gap-1.5">
-                        <Store className="w-3.5 h-3.5" />
-                        Panel de Administración — Plan {PLAN_LABELS[plan]}
-                      </p>
+                    </Link>
+                  ) : (
+                    <div className="flex items-center gap-3">
+                      <div className="h-12 w-12 sm:h-14 sm:w-14 rounded-xl bg-slate-200 dark:bg-slate-800 animate-pulse" />
+                      <div className="space-y-2">
+                        <div className="h-5 bg-slate-200 dark:bg-slate-800 rounded-lg w-40 animate-pulse" />
+                        <div className="h-3 bg-slate-200 dark:bg-slate-800 rounded-lg w-28 animate-pulse" />
+                      </div>
                     </div>
-                  </Link>
-                ) : (
-                  <div className="flex items-center gap-5">
-                    <div className="h-16 w-16 rounded-2xl bg-slate-200 dark:bg-slate-800 animate-pulse" />
-                    <div className="space-y-2">
-                      <div className="h-6 bg-slate-200 dark:bg-slate-800 rounded-lg w-48 animate-pulse" />
-                      <div className="h-4 bg-slate-200 dark:bg-slate-800 rounded-lg w-32 animate-pulse" />
-                    </div>
-                  </div>
-                )}
-              </div>
+                  )}
+                </div>
 
-              <div className="flex items-center gap-3">
-                {businesses.length > 0 && (
-                  <BusinessSwitcher currentBusiness={businessData} onSwitch={handleBusinessSwitch} />
-                )}
-                {businessData && (
-                  <BusinessQrCode businessSlug={businessData.slug!} businessName={businessData.name} />
-                )}
-                <Link
-                  to="/dashboard"
-                  className="inline-flex items-center gap-2 px-5 py-2.5 bg-white dark:bg-slate-900 text-slate-700 dark:text-slate-300 text-sm font-bold rounded-xl border border-slate-200 dark:border-slate-800 hover:bg-slate-50 dark:hover:bg-slate-800 hover:border-slate-300 dark:hover:border-slate-700 transition-all shadow-sm hover:-translate-y-0.5 active:translate-y-0"
-                >
-                  <ArrowLeft className="w-4 h-4" />
-                  Mi Perfil
-                </Link>
+                {/* Right: Actions */}
+                <div className="flex items-center gap-2 shrink-0">
+                  {businesses.length > 0 && (
+                    <BusinessSwitcher currentBusiness={businessData} onSwitch={handleBusinessSwitch} />
+                  )}
+                  {businessData && (
+                    <BusinessQrCode businessSlug={businessData.slug!} businessName={businessData.name} />
+                  )}
+                  <Link
+                    to="/dashboard"
+                    className="inline-flex items-center gap-1.5 px-4 py-2 bg-white dark:bg-slate-900 text-slate-700 dark:text-slate-300 text-xs font-bold rounded-xl border border-slate-200 dark:border-slate-800 hover:bg-slate-50 dark:hover:bg-slate-800 active:scale-95 transition-all shadow-sm"
+                  >
+                    <ArrowLeft className="w-3.5 h-3.5" />
+                    <span className="hidden sm:inline">Mi Perfil</span>
+                    <span className="sm:hidden">Perfil</span>
+                  </Link>
+                </div>
               </div>
             </div>
           </div>
@@ -393,18 +398,16 @@ export const BusinessDashboard: React.FC = () => {
           {/* ═══ TABS ═══ (outside space-y-8 to couple with Nav on scroll) */}
         </div>
         <TabNav tabs={tabs} activeTabId={activeTab} onTabChange={setActiveTab} sticky />
-        <div className="px-4 sm:px-0 pt-4 pb-20 space-y-8">
+        <div className="px-4 sm:px-0 pt-4 pb-16 space-y-6">
 
           {/* ═══ CONTENT ═══ */}
 
             {/* ─── CITAS ─── */}
             {activeTab === 'appointments' && (
-              <div className="space-y-6">
-                <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+              <div className="space-y-5">
+                <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pb-3 border-b border-slate-100 dark:border-slate-800">
                   <SectionHeader title="Gestión de Citas" description="Administra tus reservas activas" />
-                  <div className="bg-white dark:bg-slate-900 p-1 rounded-2xl border border-slate-200 dark:border-slate-800 shadow-sm self-start">
-                    <TabNav tabs={appointmentTabs} activeTabId={activeAppointmentTab} onTabChange={setActiveAppointmentTab} />
-                  </div>
+                  <TabNav tabs={appointmentTabs} activeTabId={activeAppointmentTab} onTabChange={setActiveAppointmentTab} variant="pill" />
                 </div>
 
                 <div className="animate-in fade-in zoom-in-95 duration-300">
@@ -553,12 +556,10 @@ export const BusinessDashboard: React.FC = () => {
 
             {/* ─── CONFIGURACIÓN ─── */}
             {activeTab === 'settings' && businessData && (
-              <div className="space-y-6">
-                <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+              <div className="space-y-5">
+                <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pb-3 border-b border-slate-100 dark:border-slate-800">
                   <SectionHeader title="Configuración" description="Perfil, horarios y comportamiento del negocio" />
-                  <div className="bg-white dark:bg-slate-900 p-1 rounded-2xl border border-slate-200 dark:border-slate-800 shadow-sm self-start">
-                    <TabNav tabs={settingsTabs} activeTabId={activeSettingsTab} onTabChange={setActiveSettingsTab} />
-                  </div>
+                  <TabNav tabs={settingsTabs} activeTabId={activeSettingsTab} onTabChange={setActiveSettingsTab} variant="pill" />
                 </div>
 
                 <div className="animate-in fade-in zoom-in-95 duration-300">

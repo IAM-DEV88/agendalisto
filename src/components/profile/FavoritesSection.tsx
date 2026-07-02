@@ -25,15 +25,13 @@ interface FavoritesSectionProps {
 export default function FavoritesSection({ user }: FavoritesSectionProps) {
   const [activeTab, setActiveTab] = useState('businesses');
   return (
-    <div className="space-y-6">
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+    <div className="space-y-5">
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pb-3 border-b border-slate-100 dark:border-slate-800">
         <SectionHeader
           title="Mis Favoritos"
           description="Negocios, servicios y publicaciones que has guardado"
         />
-        <div className="bg-white dark:bg-slate-900 p-1 rounded-2xl border border-slate-200 dark:border-slate-800 shadow-sm self-start">
-          <TabNav tabs={FAVORITE_TABS} activeTabId={activeTab} onTabChange={setActiveTab} />
-        </div>
+        <TabNav tabs={FAVORITE_TABS} activeTabId={activeTab} onTabChange={setActiveTab} variant="pill" />
       </div>
 
       <div className="animate-in fade-in zoom-in-95 duration-300">

@@ -32,7 +32,7 @@ import {
   Trash2,
   AlertTriangle,
   Loader2,
-  ChevronRight,
+
   ListChecks,
   Plus,
   UserPlus,
@@ -302,111 +302,116 @@ const ProfileDashboard = ({ user }: ProfileDashboardProps) => {
   return (
     <div className="min-h-screen bg-gradient-to-b from-slate-50 to-white dark:from-slate-950 dark:to-slate-900 transition-colors duration-200">
       <div className="max-w-7xl mx-auto sm:px-6 lg:px-8">
-        <div className="px-4 sm:px-0 pt-6 space-y-8">
+        <div className="px-4 sm:px-0 pt-4 sm:pt-6 space-y-5 sm:space-y-6">
 
           {/* ─── HEADER ─── */}
           <div className="animate-in fade-in slide-in-from-top-4 duration-500">
-            <div className="flex flex-col md:flex-row md:items-center justify-between gap-6">
-              <div className="flex items-center gap-5 group">
-                <div className="relative">
-                  <div className="h-16 w-16 rounded-2xl overflow-hidden ring-2 ring-white dark:ring-slate-800 shadow-xl transition-transform duration-300 group-hover:scale-105">
-                    <img
-                      src={avatarUrl}
-                      alt={`${username} avatar`}
-                      className="block h-full w-full object-contain"
-                    />
+            <div className="bg-white dark:bg-slate-900 rounded-2xl border border-slate-200 dark:border-slate-800 shadow-sm p-4 sm:p-5">
+              <div className="flex flex-col sm:flex-row sm:items-center gap-3 sm:gap-4">
+                {/* Left: Avatar + Info */}
+                <div className="flex items-center gap-3 min-w-0 flex-1">
+                  <div className="relative shrink-0">
+                    <div className="h-12 w-12 sm:h-14 sm:w-14 rounded-xl overflow-hidden ring-2 ring-white dark:ring-slate-800 shadow-lg transition-transform duration-300 hover:scale-105">
+                      <img
+                        src={avatarUrl}
+                        alt={`${username} avatar`}
+                        className="block h-full w-full object-contain"
+                      />
+                    </div>
+                    <div className="absolute -bottom-0.5 -right-0.5 w-3.5 h-3.5 bg-emerald-500 border-[3px] border-white dark:border-slate-900 rounded-full shadow" />
                   </div>
-                  <div className="absolute -bottom-1 -right-1 w-5 h-5 bg-emerald-500 border-[3px] border-white dark:border-slate-900 rounded-full shadow-lg" />
-                </div>
-                <div>
-                  <div className="flex items-center gap-2">
-                    <h1 className="text-2xl font-black text-slate-900 dark:text-white tracking-tight">
-                      {greeting}, {username}
-                    </h1>
-                    <span className="text-lg">{greeting.includes('noches') ? '🌙' : greeting.includes('tardes') ? '☀️' : '🌅'}</span>
-                    {user?.role && user.role !== 'visitor' && (
-                      <span className="px-2.5 py-0.5 text-xs font-bold rounded-full bg-primary-100 text-primary-700 dark:bg-primary-900/30 dark:text-primary-400">
-                        {ROLE_LABELS[user.role as keyof typeof ROLE_LABELS] || user.role}
-                      </span>
-                    )}
-                    {user?.plan && (() => {
-                      const p = user.plan as 'starter' | 'pro' | 'premium';
-                      const badge = PLAN_BADGE[p];
-                      return badge ? (
-                        <span className={`px-2.5 py-0.5 text-[10px] font-bold rounded-full uppercase tracking-wider ${badge.className}`}>
-                          {PLAN_LABELS[p]}
+                  <div className="min-w-0">
+                    <div className="flex items-center gap-1.5 flex-wrap">
+                      <h1 className="text-lg sm:text-xl font-black text-slate-900 dark:text-white tracking-tight truncate">
+                        {greeting}, {username}
+                      </h1>
+                      {user?.role && user.role !== 'visitor' && (
+                        <span className="px-2 py-0.5 text-[11px] font-bold rounded-full bg-primary-100 text-primary-700 dark:bg-primary-900/30 dark:text-primary-400 shrink-0">
+                          {ROLE_LABELS[user.role as keyof typeof ROLE_LABELS] || user.role}
                         </span>
-                      ) : null;
-                    })()}
+                      )}
+                      {user?.plan && (() => {
+                        const p = user.plan as 'starter' | 'pro' | 'premium';
+                        const badge = PLAN_BADGE[p];
+                        return badge ? (
+                          <span className={`px-2 py-0.5 text-[10px] font-bold rounded-full uppercase tracking-wider shrink-0 ${badge.className}`}>
+                            {PLAN_LABELS[p]}
+                          </span>
+                        ) : null;
+                      })()}
+                    </div>
+                    <p className="text-xs sm:text-sm font-medium text-slate-500 dark:text-slate-400 mt-0.5 truncate">
+                      {activeAppointmentsCount > 0
+                        ? `Tienes ${activeAppointmentsCount} ${activeAppointmentsCount === 1 ? 'cita activa' : 'citas activas'}`
+                        : 'Gestiona tus citas y configura tu perfil'}
+                    </p>
                   </div>
-                  <p className="text-sm font-medium text-slate-500 dark:text-slate-400 mt-0.5">
-                    {activeAppointmentsCount > 0
-                      ? `Tienes ${activeAppointmentsCount} ${activeAppointmentsCount === 1 ? 'cita activa' : 'citas activas'} hoy`
-                      : 'Gestiona tus citas y configura tu perfil'}
-                  </p>
                 </div>
-              </div>
 
-              <div className="flex items-center gap-3">
-                {isVisitor ? (
-                  <button
-                    onClick={handleActivateClient}
-                    className="inline-flex items-center gap-2 px-5 py-2.5 bg-emerald-600 hover:bg-emerald-700 text-white text-sm font-bold rounded-xl transition-all shadow-lg shadow-emerald-500/25 hover:-translate-y-0.5 active:translate-y-0"
-                  >
-                    <UserPlus className="w-4 h-4" />
-                    Activar cuenta de cliente
-                  </button>
-                ) : null}
-                {hasBusiness ? (
-                  <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-2">
-                    <Link
-                      to="/business/dashboard"
-                      className="inline-flex items-center justify-center gap-2 px-5 py-2.5 bg-primary-600 hover:bg-primary-700 text-white text-sm font-bold rounded-xl transition-all shadow-lg shadow-primary-500/25 hover:-translate-y-0.5 active:translate-y-0"
+                {/* Right: Actions */}
+                <div className="flex items-center gap-2 shrink-0">
+                  {isVisitor ? (
+                    <button
+                      onClick={handleActivateClient}
+                      className="inline-flex items-center gap-1.5 px-4 py-2 bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-bold rounded-xl transition-all shadow-lg shadow-emerald-500/25 active:scale-95"
                     >
-                      <Store className="w-4 h-4" />
-                      Mi Negocio
-                      <ChevronRight className="w-4 h-4" />
-                    </Link>
-                    {canCreateMore && (
+                      <UserPlus className="w-3.5 h-3.5" />
+                      <span className="hidden sm:inline">Activar cuenta</span>
+                      <span className="sm:hidden">Activar</span>
+                    </button>
+                  ) : null}
+                  {hasBusiness ? (
+                    <>
                       <Link
-                        to="/business/register"
-                        className="inline-flex items-center justify-center gap-2 px-5 py-2.5 bg-white dark:bg-slate-900 text-primary-600 dark:text-primary-400 text-sm font-bold rounded-xl border border-primary-200 dark:border-primary-800 hover:bg-primary-50 dark:hover:bg-primary-900/20 hover:border-primary-300 dark:hover:border-primary-700 transition-all shadow-sm hover:-translate-y-0.5 active:translate-y-0"
+                        to="/business/dashboard"
+                        className="inline-flex items-center gap-1.5 px-4 py-2 bg-primary-600 hover:bg-primary-700 text-white text-xs font-bold rounded-xl transition-all shadow-lg shadow-primary-500/25 active:scale-95"
                       >
-                        <Plus className="w-4 h-4" />
-                        Crear otro negocio
+                        <Store className="w-3.5 h-3.5" />
+                        <span className="hidden sm:inline">Mi Negocio</span>
+                        <span className="sm:hidden">Negocio</span>
                       </Link>
-                    )}
-                  </div>
-                ) : (
-                  <Link
-                    to="/business/register"
-                    className="inline-flex items-center gap-2 px-5 py-2.5 bg-white dark:bg-slate-900 text-primary-600 dark:text-primary-400 text-sm font-bold rounded-xl border border-primary-200 dark:border-primary-800 hover:bg-primary-50 dark:hover:bg-primary-900/20 hover:border-primary-300 dark:hover:border-primary-700 transition-all shadow-sm hover:-translate-y-0.5 active:translate-y-0"
-                  >
-                    <Store className="w-4 h-4" />
-                    Registrar mi negocio
-                  </Link>
-                )}
+                      {canCreateMore && (
+                        <Link
+                          to="/business/register"
+                          className="inline-flex items-center gap-1.5 px-4 py-2 bg-white dark:bg-slate-900 text-primary-600 dark:text-primary-400 text-xs font-bold rounded-xl border border-primary-200 dark:border-primary-800 hover:bg-primary-50 dark:hover:bg-primary-900/20 active:scale-95 transition-all shadow-sm"
+                        >
+                          <Plus className="w-3.5 h-3.5" />
+                          <span className="hidden sm:inline">Crear otro</span>
+                        </Link>
+                      )}
+                    </>
+                  ) : (
+                    <Link
+                      to="/business/register"
+                      className="inline-flex items-center gap-1.5 px-4 py-2 bg-white dark:bg-slate-900 text-primary-600 dark:text-primary-400 text-xs font-bold rounded-xl border border-primary-200 dark:border-primary-800 hover:bg-primary-50 dark:hover:bg-primary-900/20 active:scale-95 transition-all shadow-sm"
+                    >
+                      <Store className="w-3.5 h-3.5" />
+                      <span className="hidden sm:inline">Registrar mi negocio</span>
+                      <span className="sm:hidden">Registrar</span>
+                    </Link>
+                  )}
+                </div>
               </div>
             </div>
           </div>
 
           {/* ─── VISITOR UPGRADE BANNER ─── */}
           {isVisitor && (
-            <div className="bg-gradient-to-r from-emerald-50 to-teal-50 dark:from-emerald-950/30 dark:to-teal-950/30 border border-emerald-200 dark:border-emerald-800 rounded-2xl p-5 animate-in fade-in slide-in-from-bottom-4 duration-500 delay-75">
-              <div className="flex flex-col sm:flex-row items-start sm:items-center gap-4">
+            <div className="bg-gradient-to-r from-emerald-50 to-teal-50 dark:from-emerald-950/30 dark:to-teal-950/30 border border-emerald-200 dark:border-emerald-800 rounded-2xl p-4 animate-in fade-in slide-in-from-bottom-4 duration-500 delay-75">
+              <div className="flex flex-col sm:flex-row items-start sm:items-center gap-3">
                 <div className="flex-1">
-                  <h3 className="font-bold text-emerald-800 dark:text-emerald-300 text-base">
+                  <h3 className="font-bold text-emerald-800 dark:text-emerald-300 text-sm">
                     Activa tu cuenta de cliente
                   </h3>
-                  <p className="text-sm text-emerald-600 dark:text-emerald-400 mt-1">
-                    Agenda citas, escribe reseñas, guarda tus favoritos y mucho más. Es gratis.
+                  <p className="text-xs text-emerald-600 dark:text-emerald-400 mt-0.5">
+                    Agenda citas, reseñas, favoritos y mucho más. Es gratis.
                   </p>
                 </div>
                 <button
                   onClick={handleActivateClient}
-                  className="inline-flex items-center gap-2 px-5 py-2.5 bg-emerald-600 hover:bg-emerald-700 text-white text-sm font-bold rounded-xl transition-all shadow-lg shadow-emerald-500/25 hover:-translate-y-0.5 active:translate-y-0 flex-shrink-0"
+                  className="inline-flex items-center gap-1.5 px-4 py-2 bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-bold rounded-xl transition-all shadow-lg shadow-emerald-500/25 active:scale-95 flex-shrink-0"
                 >
-                  <UserPlus className="w-4 h-4" />
+                  <UserPlus className="w-3.5 h-3.5" />
                   Activar ahora
                 </button>
               </div>
@@ -416,23 +421,22 @@ const ProfileDashboard = ({ user }: ProfileDashboardProps) => {
           {/* ─── MAIN TABS ─── (outside space-y-8 to couple with Nav) */}
         </div>
         <TabNav tabs={tabs} activeTabId={activeTab} onTabChange={(tab) => setActiveTab(tab as 'appointments' | 'favorites' | 'stats' | 'settings' | 'referrals')} sticky />
-        <div className="px-4 sm:px-0 pt-4 pb-20 space-y-8">
+        <div className="px-4 sm:px-0 pt-4 pb-16 space-y-6">
 
           {/* ═══ CITAS TAB ═══ */}
             {activeTab === 'appointments' && (
-              <div className="space-y-6">
-                <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+              <div className="space-y-5">
+                <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pb-3 border-b border-slate-100 dark:border-slate-800">
                   <SectionHeader
                     title="Mis Reservas"
                     description="Gestiona tus citas y revisa tu historial"
                   />
-                  <div className="bg-white dark:bg-slate-900 p-1 rounded-2xl border border-slate-200 dark:border-slate-800 shadow-sm self-start">
-                    <TabNav
-                      tabs={appointmentTabs}
-                      activeTabId={activeAppointmentTab}
-                      onTabChange={setActiveAppointmentTab}
-                    />
-                  </div>
+                  <TabNav
+                    tabs={appointmentTabs}
+                    activeTabId={activeAppointmentTab}
+                    onTabChange={setActiveAppointmentTab}
+                    variant="pill"
+                  />
                 </div>
 
                 <div className="animate-in fade-in zoom-in-95 duration-300">
@@ -546,18 +550,18 @@ const ProfileDashboard = ({ user }: ProfileDashboardProps) => {
 
             {/* ═══ STATS TAB ═══ */}
             {activeTab === 'stats' && (
-              <div className="animate-in fade-in zoom-in-95 duration-300 space-y-6">
+              <div className="animate-in fade-in zoom-in-95 duration-300 space-y-5">
                 {user && appointments.length > 0 && (
                   <VisitStreaks userId={user.id} businessId={appointments.filter(a => a.businesses?.name).reduce((acc, a) => {
                     if (!acc.find(x => x.id === a.business_id)) acc.push({ id: a.business_id, name: a.businesses?.name || '' });
                     return acc;
                   }, [] as { id: string; name: string }[])[0]?.id || ''} />
                 )}
-                <div>
-                  <h2 className="text-xl font-black text-slate-900 dark:text-white">Estadísticas de tus citas</h2>
-                  <p className="text-sm font-medium text-slate-500 dark:text-slate-400 mt-0.5">
-                    Resumen de tu actividad como cliente
-                  </p>
+                <div className="pb-3 border-b border-slate-100 dark:border-slate-800">
+                  <SectionHeader
+                    title="Estadísticas de tus citas"
+                    description="Resumen de tu actividad como cliente"
+                  />
                 </div>
 
                 <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 sm:gap-4">
@@ -614,19 +618,18 @@ const ProfileDashboard = ({ user }: ProfileDashboardProps) => {
 
             {/* ═══ SETTINGS TAB ═══ */}
             {activeTab === 'settings' && (
-              <div className="space-y-6">
-                <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+              <div className="space-y-5">
+                <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pb-3 border-b border-slate-100 dark:border-slate-800">
                   <SectionHeader
                     title="Configuración"
                     description="Actualiza tu perfil y preferencias"
                   />
-                  <div className="bg-white dark:bg-slate-900 p-1 rounded-2xl border border-slate-200 dark:border-slate-800 shadow-sm self-start">
-                    <TabNav
-                      tabs={settingsTabs}
-                      activeTabId={activeSettingsTab}
-                      onTabChange={setActiveSettingsTab}
-                    />
-                  </div>
+                  <TabNav
+                    tabs={settingsTabs}
+                    activeTabId={activeSettingsTab}
+                    onTabChange={setActiveSettingsTab}
+                    variant="pill"
+                  />
                 </div>
 
                 <div className="animate-in fade-in zoom-in-95 duration-300">

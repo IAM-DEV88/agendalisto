@@ -1,9 +1,8 @@
 import { useState, useEffect } from 'react';
-import {
-  Gift, UserPlus, Check, Copy, Share2, Link as LinkIcon, User, Mail, Calendar
-} from 'lucide-react';
+import { UserPlus, Check, Copy, Share2, Link as LinkIcon, User, Mail, Calendar } from 'lucide-react';
 import { notifySuccess, notifyError } from '../../lib/toast';
 import { getReferralLink, getReferralCount, getReferredUsers, type ReferredUser } from '../../lib/api';
+import SectionHeader from '../ui/SectionHeader';
 
 const REFERRAL_MILESTONES = [
   { goal: 3, reward: 'Badge "Bronce" + mención en comunidad' },
@@ -57,14 +56,12 @@ export default function ReferralSection({ userId }: { userId: string }) {
   };
 
   return (
-    <div className="animate-in fade-in zoom-in-95 duration-300 space-y-6">
-      <div>
-        <h2 className="text-xl font-black text-slate-900 dark:text-white flex items-center gap-2">
-          <Gift className="w-6 h-6 text-primary-600" /> Invita y gana
-        </h2>
-        <p className="text-sm font-medium text-slate-500 dark:text-slate-400 mt-0.5">
-          Comparte tu enlace con amigos y haz crecer la comunidad AgendaYa.
-        </p>
+    <div className="animate-in fade-in zoom-in-95 duration-300 space-y-5">
+      <div className="pb-3 border-b border-slate-100 dark:border-slate-800">
+        <SectionHeader
+          title="Invita y gana"
+          description="Comparte tu enlace con amigos y haz crecer la comunidad AgendaYa."
+        />
       </div>
 
       <div className="bg-gradient-to-br from-primary-600 to-primary-800 dark:from-primary-700 dark:to-primary-900 rounded-2xl p-6 shadow-xl shadow-primary-500/20">
