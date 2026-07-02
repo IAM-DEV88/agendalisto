@@ -425,7 +425,7 @@ const ProfileDashboard = ({ user }: ProfileDashboardProps) => {
 
           {/* ═══ CITAS TAB ═══ */}
             {activeTab === 'appointments' && (
-              <div className="space-y-5">
+              <div className="space-y-5 p-2 md:p-4">
                 <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pb-3 border-b border-slate-100 dark:border-slate-800">
                   <SectionHeader
                     title="Mis Reservas"
@@ -618,7 +618,7 @@ const ProfileDashboard = ({ user }: ProfileDashboardProps) => {
 
             {/* ═══ SETTINGS TAB ═══ */}
             {activeTab === 'settings' && (
-              <div className="space-y-5">
+              <div className="space-y-5 p-2 md:p-4">
                 <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pb-3 border-b border-slate-100 dark:border-slate-800">
                   <SectionHeader
                     title="Configuración"

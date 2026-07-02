@@ -164,7 +164,7 @@ export default function BlogManagementSection() {
 
             <h3 className="text-xl font-black text-slate-900 dark:text-white mb-6">{editing ? 'Editar publicación' : 'Nueva publicación'}</h3>
 
-            <div className="space-y-5">
+            <div className="space-y-5 p-2 md:p-4">
               <div>
                 <label className="block text-sm font-bold text-slate-700 dark:text-slate-300 mb-1.5">Título</label>
                 <input type="text" value={form.title} onChange={e => setForm({ ...form, title: e.target.value })} placeholder="Título del artículo" className="w-full" />
