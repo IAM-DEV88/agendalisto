@@ -21,26 +21,20 @@ export const TabNav: React.FC<TabNavProps> = ({
   sticky,
   variant = 'underline',
 }) => {
-  // ─── Scroll trigger & sticky bar offsets ───
-  const PILL_BAR_TOP = 100;
-  const PILL_TRIGGER_OFFSET = 100;
-  const UNDERLINE_TRIGGER_OFFSET = 65;
-  // ─────────────────────────────────────────────
-
   const sentinelRef = useRef<HTMLDivElement>(null);
   const [stuck, setStuck] = useState(false);
+  const pillBarTop = 108;
 
   useEffect(() => {
     const el = sentinelRef.current;
     if (!el || !sticky) return;
-    const offset = variant === 'pill' ? PILL_TRIGGER_OFFSET : UNDERLINE_TRIGGER_OFFSET;
     const observer = new IntersectionObserver(
       ([entry]) => setStuck(!entry.isIntersecting),
-      { threshold: 0, rootMargin: `-${offset}px 0px 0px 0px` }
+      { threshold: 0, rootMargin: '-1px 0px 0px 0px' }
     );
     observer.observe(el);
     return () => observer.disconnect();
-  }, [sticky, variant]);
+  }, [sticky]);
 
   useEffect(() => {
     const btn = document.getElementById(`tab-${activeTabId}`);
@@ -94,9 +88,9 @@ export const TabNav: React.FC<TabNavProps> = ({
               ? 'translate-y-0 opacity-100'
               : '-translate-y-2 opacity-0 pointer-events-none'
           }`}
-          style={{ top: `${PILL_BAR_TOP}px` }}
+          style={{ top: `${pillBarTop}px` }}
         >
-          <div className="bg-white/80 dark:bg-slate-900/80 backdrop-blur-md">
+          <div className="bg-white/80 dark:bg-slate-900/80 backdrop-blur-md shadow-sm border-b border-slate-200/50 dark:border-slate-800/50">
             <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-2.5 flex justify-start">
               {pillNav}
             </div>
@@ -140,27 +134,13 @@ export const TabNav: React.FC<TabNavProps> = ({
   if (sticky) {
     return (
       <>
-        <div
-          ref={sentinelRef}
-          className={`transition-all duration-300 border-b border-slate-200/50 dark:border-slate-800/50 ${
-            stuck ? 'opacity-0 pointer-events-none' : ''
-          }`}
-        >
+        <div ref={sentinelRef} className="h-px" />
+        <div className={`sticky top-16 z-40 transition-all duration-300 ${
+          stuck
+            ? 'bg-white/80 dark:bg-slate-900/80 backdrop-blur-md shadow-sm border-b border-slate-200/50 dark:border-slate-800/50 -mx-4 sm:-mx-6 lg:-mx-8 px-4 sm:px-6 lg:px-8'
+            : 'bg-transparent border-b border-slate-200/50 dark:border-slate-800/50 px-4 sm:px-0'
+        }`}>
           {nav}
-        </div>
-        <div
-          className={`fixed left-0 right-0 z-40 transition-all duration-300 ${
-            stuck
-              ? 'translate-y-0 opacity-100'
-              : '-translate-y-2 opacity-0 pointer-events-none'
-          }`}
-          style={{ top: '4rem' }}
-        >
-          <div className="bg-white/80 dark:bg-slate-900/80 backdrop-blur-md shadow-sm">
-            <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-              {nav}
-            </div>
-          </div>
         </div>
       </>
     );
