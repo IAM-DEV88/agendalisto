@@ -105,7 +105,7 @@ BEGIN
     AND (p_location IS NULL OR b.address ILIKE '%' || p_location || '%')
   ORDER BY
     b.plan_score DESC,
-    b.likes_count DESC,
+    b.likes_count DESC NULLS LAST,
     b.created_at DESC
   LIMIT p_limit
   OFFSET p_offset;

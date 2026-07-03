@@ -509,13 +509,23 @@ export async function getBusinessClients(businessId: string): Promise<{ success:
 // API functions for business management
 export const createBusiness = async (business: Omit<Business, 'id' | 'plan' | 'plan_score' | 'likes_count' | 'created_at' | 'updated_at'>) => {
   try {
+    // Obtener el plan real del dueño
+    const { data: profile } = await supabase
+      .from('agendaya_profiles')
+      .select('plan')
+      .eq('id', business.owner_id)
+      .single();
+
+    const ownerPlan = (profile?.plan as string) || 'starter';
+    const planScore = ownerPlan === 'premium' ? 3 : ownerPlan === 'pro' ? 2 : 0;
+
     const { data, error } = await supabase
       .from('agendaya_businesses')
       .insert([{
         ...business,
-        plan: undefined,
-        plan_score: undefined,
-        likes_count: undefined,
+        plan: ownerPlan,
+        plan_score: planScore,
+        likes_count: 0,
         updated_at: new Date().toISOString()
       }])
       .select()

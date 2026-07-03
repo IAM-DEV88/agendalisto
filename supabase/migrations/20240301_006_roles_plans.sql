@@ -92,6 +92,10 @@ BEGIN
   FROM public.agendaya_profiles
   WHERE id = NEW.owner_id;
 
+  IF owner_plan IS NULL THEN
+    owner_plan := 'starter';
+  END IF;
+
   NEW.plan := owner_plan;
   NEW.plan_score := CASE owner_plan
     WHEN 'premium' THEN 3
