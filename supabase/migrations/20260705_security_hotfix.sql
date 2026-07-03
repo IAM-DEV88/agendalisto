@@ -142,7 +142,7 @@ SET user_id = CASE
   WHEN reference LIKE 'SRV-%' THEN SPLIT_PART(reference, '-', 2)::UUID
   WHEN reference LIKE 'AGD-%' THEN
     -- userId puede contener guiones, extraer entre AGD- y último segmento
-    SUBSTRING(reference FROM 5 FOR LENGTH(reference) - 5 - POSITION('-' IN REVERSE(reference)))
+    SUBSTRING(reference FROM 5 FOR LENGTH(reference) - 5 - POSITION('-' IN REVERSE(reference)))::UUID
   ELSE NULL
 END::UUID
 WHERE user_id IS NULL;
@@ -223,7 +223,7 @@ BEGIN
     p.email::TEXT AS referrer_email,
     COUNT(r.id)::BIGINT AS count
   FROM public.agendaya_profiles p
-  INNER JOIN public.agendaya_profiles r ON r.referred_by = p.id::TEXT
+  INNER JOIN public.agendaya_profiles r ON r.referred_by::TEXT = p.id::TEXT
   GROUP BY p.id, p.full_name, p.email
   ORDER BY count DESC
   LIMIT p_limit;
