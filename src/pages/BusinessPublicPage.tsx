@@ -232,7 +232,7 @@ function BusinessPublicPage() {
           <div className="md:hidden bg-white dark:bg-slate-900 rounded-2xl border border-slate-200 dark:border-slate-800 overflow-hidden mb-8">
             <div className="flex border-b border-slate-200 dark:border-slate-700">
               {[
-                { id: 'services', label: 'Servicios' },
+                ...(!businessData?.showcase_only ? [{ id: 'services', label: 'Servicios' }] : []),
                 { id: 'hours', label: 'Horarios' },
                 { id: 'location', label: 'Ubicación' },
               ].map(tab => (
@@ -251,9 +251,10 @@ function BusinessPublicPage() {
             </div>
           </div>
 
-          {/* Grid layout: 2-col main + 1-col sidebar */}
-          <div className="md:grid md:grid-cols-3 md:gap-8">
+          {/* Grid layout */}
+          <div className={`md:grid md:gap-8 ${businessData?.showcase_only ? 'md:grid-cols-2' : 'md:grid-cols-3'}`}>
             {/* Main column */}
+            {!businessData?.showcase_only && (
             <div className="md:col-span-2 space-y-8">
               {/* Services — always on desktop, tab-controlled on mobile */}
               <div className={`bg-white dark:bg-slate-900 rounded-2xl border border-slate-200 dark:border-slate-800 p-6 sm:p-8 ${activeTab !== 'services' ? 'hidden' : ''} md:block`}>
@@ -279,8 +280,39 @@ function BusinessPublicPage() {
                 <ReviewsSection businessId={businessData.id} />
               </div>
             </div>
+            )}
 
-            {/* Sidebar — always on desktop, tab-controlled on mobile */}
+            {/* Sidebar or showcase grid items */}
+            {businessData?.showcase_only ? (
+              <>
+                <div className={`bg-white dark:bg-slate-900 rounded-2xl border border-slate-200 dark:border-slate-800 p-6 ${activeTab !== 'hours' ? 'hidden' : ''} md:block`}>
+                  <h2 className="text-lg font-black text-slate-900 dark:text-white mb-4 flex items-center gap-2">
+                    <Clock className="w-4 h-4 text-primary-500" />
+                    Horarios
+                  </h2>
+                  <BusinessHoursList businessHours={businessHours} />
+                  {user && user.id === businessData?.owner_id && (
+                    <Link to="/business/dashboard?tab=availability" className="mt-4 inline-flex items-center gap-2 px-4 py-2 bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300 text-xs font-bold rounded-xl hover:bg-slate-200 dark:hover:bg-slate-700 transition-all w-full justify-center">
+                      Editar Horarios
+                    </Link>
+                  )}
+                </div>
+                {businessData?.config?.mostrar_direccion && (
+                  <div className={`bg-white dark:bg-slate-900 rounded-2xl border border-slate-200 dark:border-slate-800 p-6 ${activeTab !== 'location' ? 'hidden' : ''} md:block`}>
+                    <h2 className="text-lg font-black text-slate-900 dark:text-white mb-4 flex items-center gap-2">
+                      <MapPin className="w-4 h-4 text-primary-500" />
+                      Ubicación
+                    </h2>
+                    <BusinessLocation address={businessData.address} lat={businessData.lat} lng={businessData.lng} />
+                    {user && user.id === businessData?.owner_id && (
+                      <Link to="/business/dashboard?tab=profile" className="mt-4 inline-flex items-center gap-2 px-4 py-2 bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300 text-xs font-bold rounded-xl hover:bg-slate-200 dark:hover:bg-slate-700 transition-all w-full justify-center">
+                        Editar Perfil
+                      </Link>
+                    )}
+                  </div>
+                )}
+              </>
+            ) : (
             <div className="space-y-6 mt-8 md:mt-0">
               {/* Hours */}
               <div className={`bg-white dark:bg-slate-900 rounded-2xl border border-slate-200 dark:border-slate-800 p-6 ${activeTab !== 'hours' ? 'hidden' : ''} md:block`}>
@@ -320,6 +352,7 @@ function BusinessPublicPage() {
                 </div>
               )}
             </div>
+            )}
           </div>
         </div>
       </div>

@@ -385,7 +385,7 @@ const BusinessProfileSection: React.FC<BusinessProfileSectionProps> = ({
                 Solo mostrar información (escaparate)
               </label>
               <p className="text-xs text-amber-600/70 dark:text-amber-400/70 mt-0.5">
-                El negocio aparecerá en los resultados de búsqueda pero los clientos no podrán reservar online.
+                El negocio aparecerá en resultados de búsqueda sin sección de servicios ni reservas online.
               </p>
             </div>
           </div>
