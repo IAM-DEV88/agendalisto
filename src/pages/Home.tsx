@@ -26,7 +26,10 @@ const Home = () => {
     if (user.business_id) {
       return { registerText: 'Mi negocio', registerLink: '/business/dashboard', secondText: 'Mi Perfil', secondLink: '/dashboard' };
     }
-    return { registerText: 'Registrar mi negocio GRATIS', registerLink: '/business/register', secondText: 'Mi Perfil', secondLink: '/dashboard' };
+    if (user.role === 'visitor') {
+      return { registerText: 'Activar cuenta', registerLink: '/dashboard', secondText: 'Mi Perfil', secondLink: '/dashboard' };
+    }
+    return { registerText: 'Registrar mi negocio', registerLink: '/business/register', secondText: 'Mi Perfil', secondLink: '/dashboard' };
   }, [user, loading]);
 
   const handleSearch = (e: React.FormEvent) => {
