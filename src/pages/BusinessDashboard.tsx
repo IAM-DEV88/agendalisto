@@ -124,12 +124,11 @@ export const BusinessDashboard: React.FC = () => {
     const tabParam = searchParams.get('tab');
     if (tabParam === 'services') {
       setActiveTab('services');
+    } else if (tabParam === 'hours' || tabParam === 'availability') {
+      setActiveTab('hours');
     } else if (tabParam === 'profile') {
       setActiveTab('settings');
       setActiveSettingsTab('profile');
-    } else if (tabParam === 'availability') {
-      setActiveTab('settings');
-      setActiveSettingsTab('hours');
     }
   }, [searchParams]);
 
@@ -300,6 +299,7 @@ export const BusinessDashboard: React.FC = () => {
   const tabs: Tab[] = [
     { id: 'appointments', label: 'Citas', count: activeAppointmentsCount },
     { id: 'services', label: 'Servicios', count: totalServices },
+    { id: 'hours', label: 'Horarios' },
     { id: 'clients', label: 'Clientes', count: businessClients.length },
     ...(canStats ? [{ id: 'stats' as const, label: 'Estadísticas' }] : []),
     { id: 'settings', label: 'Configuración' },
@@ -313,7 +313,6 @@ export const BusinessDashboard: React.FC = () => {
 
   const settingsTabs: Tab[] = [
     { id: 'profile', label: 'Perfil' },
-    { id: 'hours', label: 'Horarios' },
     { id: 'config', label: 'Ajustes' },
   ];
 
@@ -502,6 +501,21 @@ export const BusinessDashboard: React.FC = () => {
               </div>
             )}
 
+            {/* ─── HORARIOS ─── */}
+            {activeTab === 'hours' && businessData && (
+              <div className="animate-in fade-in zoom-in-95 duration-300 p-2 md:p-4">
+                <BusinessHoursSection
+                  businessHours={businessHours}
+                  loading={loadingBusinessHours}
+                  saving={savingBusinessHours}
+                  message={hoursMessage}
+                  onSave={handleHoursSubmit}
+                  onHoursChange={handleHoursChange}
+                  days={days}
+                />
+              </div>
+            )}
+
             {/* ─── CLIENTES ─── */}
             {activeTab === 'clients' && (
               <div className="animate-in fade-in zoom-in-95 duration-300">
@@ -570,18 +584,6 @@ export const BusinessDashboard: React.FC = () => {
                       onChange={handleBusinessChange}
                       saving={savingBusiness}
                       message={businessMessage}
-                    />
-                  )}
-
-                  {activeSettingsTab === 'hours' && (
-                    <BusinessHoursSection
-                      businessHours={businessHours}
-                      loading={loadingBusinessHours}
-                      saving={savingBusinessHours}
-                      message={hoursMessage}
-                      onSave={handleHoursSubmit}
-                      onHoursChange={handleHoursChange}
-                      days={days}
                     />
                   )}
 
