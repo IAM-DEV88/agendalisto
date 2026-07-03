@@ -805,33 +805,21 @@ export const setBusinessHours = async (hours: Omit<BusinessHours, 'id'>[]): Prom
   const businessId = hours[0]?.business_id;
   if (!businessId) throw new Error('Business ID is required');
 
-  // Usar upsert para evitar race condition (delete+insert no atómico)
-  // Si el horario ya existe (mismo business_id + day_of_week), lo actualiza
-  const hoursWithDefaults = hours.map(h => ({
-    ...h,
-    id: undefined, // dejar que Supabase asigne UUID
-  }));
+  const { error: delError } = await supabase
+    .from('agendaya_business_hours')
+    .delete()
+    .eq('business_id', businessId);
+
+  if (delError) throw delError;
+
+  if (hours.length === 0) return [];
 
   const { data, error } = await supabase
     .from('agendaya_business_hours')
-    .upsert(hoursWithDefaults, {
-      onConflict: 'business_id,day_of_week',
-      ignoreDuplicates: false,
-    })
+    .insert(hours)
     .select();
 
   if (error) throw error;
-
-  // Eliminar horarios que ya no están en la lista
-  const keptDays = hours.map(h => h.day_of_week);
-  if (keptDays.length > 0) {
-    await supabase
-      .from('agendaya_business_hours')
-      .delete()
-      .eq('business_id', businessId)
-      .not('day_of_week', 'in', `(${keptDays.join(',')})`);
-  }
-
   return data as BusinessHours[];
 };
 
