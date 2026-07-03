@@ -525,7 +525,18 @@ export const createBusiness = async (business: Omit<Business, 'id' | 'plan' | 'p
       console.error('[createBusiness] Supabase error:', error);
       throw error;
     }
-    return { success: true, business: data as Business };
+
+    const newBusiness = data as Business;
+
+    // Crear fila de configuración por defecto
+    await supabase
+      .from('agendaya_business_config')
+      .insert({ business_id: newBusiness.id })
+      .then(({ error: cfgError }) => {
+        if (cfgError) console.error('[createBusiness] Error creating config:', cfgError);
+      });
+
+    return { success: true, business: newBusiness };
   } catch (error) {
     console.error('[createBusiness] Caught:', error);
     return { success: false, error };
