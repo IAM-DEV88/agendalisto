@@ -1971,6 +1971,27 @@ export const getReferralCount = async (userId: string): Promise<{ success: boole
   }
 };
 
+/**
+ * Obtiene el conteo de referidos para una lista de dueños de negocio.
+ * Usa RPC SECURITY DEFINER para evitar bloqueo de RLS.
+ */
+export const getReferralCounts = async (ownerIds: string[]): Promise<Record<string, number>> => {
+  const ids = [...new Set(ownerIds.filter(Boolean))];
+  if (ids.length === 0) return {};
+  try {
+    const { data, error } = await supabase.rpc('get_referral_badges', { p_owner_ids: ids });
+    if (error) throw error;
+    const map: Record<string, number> = {};
+    for (const id of ids) map[id] = 0;
+    for (const row of data as { owner_id: string; count: number }[]) {
+      map[row.owner_id] = Number(row.count);
+    }
+    return map;
+  } catch {
+    return {};
+  }
+};
+
 // --- Admin: Marketing Tools ---
 
 export const getNewsletterSubscribers = async (): Promise<{ success: boolean; data?: { email: string; subscribed_at: string }[]; error?: string }> => {

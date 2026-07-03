@@ -1,7 +1,7 @@
 import { useState, useEffect, useMemo, useCallback, useRef, lazy, Suspense } from 'react';
 import { Link, useSearchParams } from 'react-router-dom';
 import { MapPin, ArrowRight, Heart, Store, SlidersHorizontal, Search, X, Map, List, MessageCircle, Loader2 } from 'lucide-react';
-import { getBusinesses, getBusinessCategories, toggleLike, checkLikedBusinesses } from '../lib/api';
+import { getBusinesses, getBusinessCategories, toggleLike, checkLikedBusinesses, getReferralCounts } from '../lib/api';
 import type { Business, BusinessCategory } from '../lib/api';
 import { supabase } from '../lib/supabase';
 import { toast } from 'react-hot-toast';
@@ -9,18 +9,20 @@ import SEO from '../components/SEO';
 import EmptyState from '../components/ui/EmptyState';
 import SelectMenu from '../components/ui/SelectMenu';
 import ShareButton from '../components/ui/ShareButton';
+import ReferralBadge from '../components/ui/ReferralBadge';
 
 const BusinessMap = lazy(() => import('../components/ui/BusinessMap'));
 
 const FALLBACK_LOGO = 'https://upload.wikimedia.org/wikipedia/commons/8/89/Portrait_Placeholder.png';
 const PAGE_SIZE = 12;
 
-const BusinessCard = ({ business, categories, isLiked: initialLiked, currentUser, onToggleLike }: {
+const BusinessCard = ({ business, categories, isLiked: initialLiked, currentUser, onToggleLike, referralCount }: {
   business: Business;
   categories: BusinessCategory[];
   isLiked: boolean;
   currentUser: import('../lib/supabase').UserProfile | null;
   onToggleLike: (id: string) => void;
+  referralCount?: number;
 }) => {
   const [isLiked, setIsLiked] = useState(initialLiked);
   const [likesCount, setLikesCount] = useState(business.likes_count || 0);
@@ -130,6 +132,12 @@ const BusinessCard = ({ business, categories, isLiked: initialLiked, currentUser
           </div>
         </div>
 
+        {referralCount !== undefined && referralCount >= 3 && (
+          <div className="mb-2">
+            <ReferralBadge count={referralCount} size="sm" />
+          </div>
+        )}
+
         {business.address && (
           <div className="flex items-start text-slate-500 dark:text-slate-400 mb-2">
             <MapPin className="h-3.5 w-3.5 mr-1.5 mt-0.5 flex-shrink-0 text-primary-500" />
@@ -183,6 +191,7 @@ const ExploreBusinesses = () => {
   const [user, setUser] = useState<any>(null);
   const [viewMode, setViewMode] = useState<'list' | 'map'>('list');
   const [likedIds, setLikedIds] = useState<Set<string>>(new Set());
+  const [referralCounts, setReferralCounts] = useState<Record<string, number>>({});
   const [mapBusinesses, setMapBusinesses] = useState<Business[]>([]);
 
   const observer = useRef<IntersectionObserver | null>(null);
@@ -260,6 +269,13 @@ const ExploreBusinesses = () => {
         const ids = data.map(b => b.id);
         const liked = await checkLikedBusinesses(user.id, ids);
         setLikedIds(prev => new Set([...prev, ...liked]));
+      }
+
+      // Batch fetch referral badges
+      const ownerIds = data.map(b => b.owner_id).filter(Boolean);
+      if (ownerIds.length > 0) {
+        const counts = await getReferralCounts(ownerIds);
+        setReferralCounts(prev => ({ ...prev, ...counts }));
       }
     } catch {
       setError('Error al cargar los negocios. Intenta de nuevo.');
@@ -418,6 +434,7 @@ const ExploreBusinesses = () => {
                     isLiked={likedIds.has(business.id)}
                     currentUser={user}
                     onToggleLike={handleToggleLike}
+                    referralCount={referralCounts[business.owner_id]}
                   />
                 </div>
               ))}

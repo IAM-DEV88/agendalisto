@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { useParams, Link, useNavigate, useLocation } from 'react-router-dom';
-import { getBusinessBySlug, getBusinessServices, getBusinessHours, getBusinessReviews, recordBusinessVisit, Service, BusinessHours, Review, Business } from '../lib/api';
+import { getBusinessBySlug, getBusinessServices, getBusinessHours, getBusinessReviews, recordBusinessVisit, getReferralCounts, Service, BusinessHours, Review, Business } from '../lib/api';
 import { supabase } from '../lib/supabase';
 import {
   BusinessHeader,
@@ -12,6 +12,7 @@ import {
 import SEO from '../components/SEO';
 import Breadcrumbs from '../components/ui/Breadcrumbs';
 import EmptyState from '../components/ui/EmptyState';
+import ReferralBadge from '../components/ui/ReferralBadge';
 import { Store, Clock, MapPin } from 'lucide-react';
 
 function SkeletonHeader() {
@@ -51,6 +52,7 @@ function BusinessPublicPage() {
   const [user, setUser] = useState<import('@supabase/supabase-js').User | null>(null);
   const [reviews, setReviews] = useState<Review[]>([]);
   const [averageRating, setAverageRating] = useState<number>(0);
+  const [referralCount, setReferralCount] = useState<number>(0);
 
   useEffect(() => {
     supabase.auth.getUser().then(({ data: { user } }) => setUser(user));
@@ -80,6 +82,12 @@ function BusinessPublicPage() {
             setAverageRating(rD.length > 0 ? rD.reduce((sum, r) => sum + r.rating, 0) / rD.length : 0);
           }
         } catch (err) { console.error('Error loading reviews:', err); }
+
+        // Fetch referral badge
+        if (business.owner_id) {
+          const counts = await getReferralCounts([business.owner_id]);
+          setReferralCount(counts[business.owner_id] || 0);
+        }
       } catch (err) { console.error('Error loading business:', err); setError('Error al cargar la información del negocio'); }
       finally { setLoading(false); }
     };
@@ -195,6 +203,13 @@ function BusinessPublicPage() {
 
         {/* Business Header */}
         <BusinessHeader businessData={businessData} averageRating={averageRating} reviewsCount={reviews.length} />
+
+        {/* Referral badge */}
+        {referralCount >= 3 && (
+          <div className="mt-4 flex justify-start">
+            <ReferralBadge count={referralCount} size="md" />
+          </div>
+        )}
 
         {/* Showcase Banner */}
         {businessData?.showcase_only && (

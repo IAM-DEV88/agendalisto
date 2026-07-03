@@ -3,12 +3,13 @@ import { UserPlus, Check, Copy, Share2, Link as LinkIcon, User, Mail, Calendar }
 import { notifySuccess, notifyError } from '../../lib/toast';
 import { getReferralLink, getReferralCount, getReferredUsers, type ReferredUser } from '../../lib/api';
 import SectionHeader from '../ui/SectionHeader';
+import ReferralBadge from '../ui/ReferralBadge';
 
 const REFERRAL_MILESTONES = [
-  { goal: 3, reward: 'Badge "Bronce" + mención en comunidad' },
-  { goal: 10, reward: '1 mes gratis de plan Pro' },
-  { goal: 25, reward: 'Badge "Platino" + 3 meses Pro gratis' },
-  { goal: 50, reward: 'Plan Premium gratis por 1 año' },
+  { goal: 3, reward: 'Badge Bronce — reconocimiento en la comunidad' },
+  { goal: 10, reward: 'Badge Plata — 1 mes de plan Pro gratis' },
+  { goal: 25, reward: 'Badge Platino — 3 meses de plan Pro gratis' },
+  { goal: 50, reward: 'Badge Diamante — Plan Premium gratis por 1 año' },
 ];
 
 export default function ReferralSection({ userId }: { userId: string }) {
@@ -74,6 +75,12 @@ export default function ReferralSection({ userId }: { userId: string }) {
                 ? `Último: ${new Date(referredUsers[0].created_at).toLocaleDateString('es', { day: 'numeric', month: 'short', year: 'numeric' })}`
                 : 'Aún no has referido a nadie'}
             </p>
+            {referralCount > 0 && (
+              <div className="mt-2 flex items-center gap-2">
+                <span className="text-primary-200/60 text-[10px] font-bold uppercase tracking-widest">Rango</span>
+                <ReferralBadge count={referralCount} size="md" />
+              </div>
+            )}
           </div>
           <div className="w-14 h-14 bg-white/10 rounded-2xl flex items-center justify-center backdrop-blur-sm">
             <UserPlus className="w-7 h-7 text-white" />
