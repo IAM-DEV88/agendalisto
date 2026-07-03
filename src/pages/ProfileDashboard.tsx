@@ -404,7 +404,7 @@ const ProfileDashboard = ({ user }: ProfileDashboardProps) => {
                     Activa tu cuenta de cliente
                   </h3>
                   <p className="text-xs text-emerald-600 dark:text-emerald-400 mt-0.5">
-                    Agenda citas, escribe reseñas, guarda favoritos y registra tu negocio. Es gratis.
+                    Agenda citas, escribe reseñas y registra tu negocio. Es gratis.
                   </p>
                 </div>
                 <button
