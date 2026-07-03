@@ -166,7 +166,7 @@ export const TabNav: React.FC<TabNavProps> = ({
     return (
       <div data-underline-nav className={`sticky top-16 z-40 transition-colors duration-150 ${
         stuck
-          ? 'bg-white/80 dark:bg-slate-900/80 backdrop-blur-md shadow-sm border-b border-slate-200/50 dark:border-slate-800/50 sm:-mx-6 lg:-mx-8 sm:px-6 lg:px-8'
+          ? 'bg-white/80 dark:bg-slate-900/80 backdrop-blur-md shadow-sm border-b border-slate-200/50 dark:border-slate-800/50 sm:w-[100vw] sm:ml-[calc(-50vw+50%)] sm:pl-[calc(50vw-50%)] sm:pr-[calc(50vw-50%)]'
           : 'bg-transparent border-b border-slate-200/50 dark:border-slate-800/50'
       }`}>
         <div className="px-4 sm:px-0">{nav}</div>
