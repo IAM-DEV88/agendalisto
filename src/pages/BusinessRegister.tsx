@@ -158,8 +158,13 @@ const BusinessRegister = ({ user }: BusinessRegisterProps) => {
 
       if (success && business) {
         await updateUserProfile(user.id, { is_business: true, business_id: business.id });
-        await updateProfileRole(user.id, 'business_owner');
-        dispatch(setUserProfile({ ...userProfile!, role: 'business_owner', business_id: business.id }));
+        const currentRole = userProfile?.role;
+        if (currentRole !== 'moderator' && currentRole !== 'admin') {
+          await updateProfileRole(user.id, 'business_owner');
+          dispatch(setUserProfile({ ...userProfile!, role: 'business_owner', business_id: business.id }));
+        } else {
+          dispatch(setUserProfile({ ...userProfile!, business_id: business.id }));
+        }
         const bizRes = await getUserBusinesses(user.id);
         if (bizRes.success && bizRes.businesses) dispatch(setBusinesses(bizRes.businesses));
         setSubmitted(true);
