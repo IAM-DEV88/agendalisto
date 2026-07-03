@@ -91,7 +91,7 @@ export default function LocationPicker({ lat, lng, onChange }: LocationPickerPro
     if (!searchQuery.trim()) return;
     setSearching(true);
     try {
-      const res = await fetch(`${NOMINATIM}?format=json&q=${encodeURIComponent(searchQuery)}&limit=5&countrycodes=co`);
+      const res = await fetch(`${NOMINATIM}?format=json&q=${encodeURIComponent(searchQuery)}&limit=5`);
       const data = await res.json();
       if (data.length > 0) {
         const { lat: slat, lon: slon } = data[0];
