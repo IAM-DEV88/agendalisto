@@ -1,11 +1,11 @@
 import React, { useState, useEffect } from 'react';
-import { Camera, Save, Loader2, Globe, Phone, MapPin, Mail, Tag, Info, Settings, Wand2, Crosshair } from 'lucide-react';
+import { Camera, Save, Loader2, Globe, Phone, MapPin, Mail, Tag, Info, Settings, Wand2, Crosshair, MessageCircle, Instagram, Facebook } from 'lucide-react';
 import { Business, updateBusiness, getBusinessCategories, BusinessCategory } from '../../lib/api';
 import { supabase } from '../../lib/supabase';
 import { generateBusinessDescription } from '../../lib/ai';
+import PhoneInput from '../ui/PhoneInput';
 import { toast } from 'react-hot-toast';
 import SectionHeader from '../ui/SectionHeader';
-import PhoneInput from '../ui/PhoneInput';
 import LocationPicker from '../ui/LocationPicker';
 
 interface BusinessProfileSectionProps {
@@ -352,6 +352,57 @@ const BusinessProfileSection: React.FC<BusinessProfileSectionProps> = ({
                   className="w-full px-4 py-2.5 rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 focus:ring-2 focus:ring-primary-500/20 focus:border-primary-500 outline-none transition-all font-medium text-slate-900 dark:text-white"
                   placeholder="https://www.tu-web.com"
                 />
+              </div>
+
+              <div className="space-y-2">
+                <label htmlFor="whatsapp" className="text-sm font-bold text-slate-700 dark:text-slate-300 flex items-center gap-2">
+                  <MessageCircle className="w-4 h-4 text-emerald-500" />
+                  WhatsApp <span className="text-slate-400 font-normal">(opcional)</span>
+                </label>
+                <PhoneInput
+                  id="whatsapp"
+                  value={businessData.whatsapp || ''}
+                  onChange={(v) => onChange({ target: { name: 'whatsapp', value: v } } as React.ChangeEvent<HTMLInputElement>)}
+                  placeholder="Número de WhatsApp"
+                />
+              </div>
+
+              <div className="space-y-2">
+                <label htmlFor="instagram" className="text-sm font-bold text-slate-700 dark:text-slate-300 flex items-center gap-2">
+                  <Instagram className="w-4 h-4 text-pink-500" />
+                  Instagram <span className="text-slate-400 font-normal">(opcional)</span>
+                </label>
+                <div className="relative">
+                  <Instagram className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-pink-500" />
+                  <input
+                    type="text"
+                    name="instagram"
+                    id="instagram"
+                    value={businessData.instagram || ''}
+                    onChange={onChange}
+                    placeholder="@usuario"
+                    className="w-full pl-10 pr-4 py-2.5 rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 focus:ring-2 focus:ring-primary-500/20 focus:border-primary-500 outline-none transition-all font-medium text-slate-900 dark:text-white"
+                  />
+                </div>
+              </div>
+
+              <div className="space-y-2">
+                <label htmlFor="facebook" className="text-sm font-bold text-slate-700 dark:text-slate-300 flex items-center gap-2">
+                  <Facebook className="w-4 h-4 text-blue-500" />
+                  Facebook <span className="text-slate-400 font-normal">(opcional)</span>
+                </label>
+                <div className="relative">
+                  <Facebook className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-blue-500" />
+                  <input
+                    type="text"
+                    name="facebook"
+                    id="facebook"
+                    value={businessData.facebook || ''}
+                    onChange={onChange}
+                    placeholder="https://facebook.com/tunegocio"
+                    className="w-full pl-10 pr-4 py-2.5 rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 focus:ring-2 focus:ring-primary-500/20 focus:border-primary-500 outline-none transition-all font-medium text-slate-900 dark:text-white"
+                  />
+                </div>
               </div>
 
               <div className="md:col-span-2">

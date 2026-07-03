@@ -572,7 +572,7 @@ export const BusinessDashboard: React.FC = () => {
             {activeTab === 'settings' && businessData && (
               <div className="space-y-5 p-2 md:p-4">
                 <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pb-3 border-b border-slate-100 dark:border-slate-800">
-                  <SectionHeader title="Configuración" description="Perfil, horarios y comportamiento del negocio" />
+                  <SectionHeader title="Configuración" description="Perfil y comportamiento de la página" />
                   <TabNav tabs={settingsTabs} activeTabId={activeSettingsTab} onTabChange={setActiveSettingsTab} variant="pill" sticky />
                 </div>
 
