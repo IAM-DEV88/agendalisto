@@ -22,6 +22,7 @@ import TabNav from '../components/ui/TabNav';
 import SectionHeader from '../components/ui/SectionHeader';
 import Pagination from '../components/ui/Pagination';
 import EmptyState from '../components/ui/EmptyState';
+import { useSwipeable } from 'react-swipeable';
 import {
   CalendarCheck,
   CalendarClock,
@@ -303,6 +304,34 @@ const ProfileDashboard = ({ user }: ProfileDashboardProps) => {
     { id: 'history', label: 'Historial', count: pastCount },
   ];
 
+  const tabSwipe = useSwipeable({
+    onSwipedLeft: () => {
+      const idx = tabs.findIndex(t => t.id === activeTab);
+      if (idx < tabs.length - 1) setActiveTab(tabs[idx + 1].id as typeof activeTab);
+    },
+    onSwipedRight: () => {
+      const idx = tabs.findIndex(t => t.id === activeTab);
+      if (idx > 0) setActiveTab(tabs[idx - 1].id as typeof activeTab);
+    },
+    trackMouse: true,
+    delta: 50,
+    preventScrollOnSwipe: false,
+  });
+
+  const appointmentSwipe = useSwipeable({
+    onSwipedLeft: () => {
+      const idx = appointmentTabs.findIndex(t => t.id === activeAppointmentTab);
+      if (idx < appointmentTabs.length - 1) setActiveAppointmentTab(appointmentTabs[idx + 1].id);
+    },
+    onSwipedRight: () => {
+      const idx = appointmentTabs.findIndex(t => t.id === activeAppointmentTab);
+      if (idx > 0) setActiveAppointmentTab(appointmentTabs[idx - 1].id);
+    },
+    trackMouse: true,
+    delta: 50,
+    preventScrollOnSwipe: false,
+  });
+
   const settingsTabs = [
     { id: 'profile', label: 'Perfil' },
     { id: 'general', label: 'Ajustes' },
@@ -433,11 +462,11 @@ const ProfileDashboard = ({ user }: ProfileDashboardProps) => {
           {/* ─── MAIN TABS ─── (outside space-y-8 to couple with Nav) */}
         </div>
         <TabNav tabs={tabs} activeTabId={activeTab} onTabChange={(tab) => setActiveTab(tab as 'appointments' | 'favorites' | 'stats' | 'settings' | 'referrals')} sticky />
-        <div className="px-4 sm:px-0 pt-4 pb-16 space-y-6">
+        <div className="px-4 sm:px-0 pt-4 pb-16 space-y-6" {...tabSwipe}>
 
           {/* ═══ CITAS TAB ═══ */}
             {activeTab === 'appointments' && (
-              <div className="space-y-5 p-2 md:p-4">
+              <div className="space-y-5 p-2 md:p-4" {...appointmentSwipe}>
                 <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pb-3 border-b border-slate-100 dark:border-slate-800">
                   <SectionHeader
                     title="Mis Reservas"

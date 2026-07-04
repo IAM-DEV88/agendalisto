@@ -15,6 +15,7 @@ import { useBusinessHours } from '../hooks/useBusinessHours';
 import { useBusinessClients } from '../hooks/useBusinessClients';
 import { canAccessAnalytics, PLAN_BADGE } from '../lib/roles';
 import type { RootState } from '../store';
+import { useSwipeable } from 'react-swipeable';
 
 import TabNav, { Tab } from '../components/ui/TabNav';
 import SectionHeader from '../components/ui/SectionHeader';
@@ -308,6 +309,34 @@ export const BusinessDashboard: React.FC = () => {
   const canStats = canAccessAnalytics(plan);
   const planBadge = PLAN_BADGE[plan];
 
+  const tabSwipe = useSwipeable({
+    onSwipedLeft: () => {
+      const idx = tabs.findIndex(t => t.id === activeTab);
+      if (idx < tabs.length - 1) setActiveTab(tabs[idx + 1].id);
+    },
+    onSwipedRight: () => {
+      const idx = tabs.findIndex(t => t.id === activeTab);
+      if (idx > 0) setActiveTab(tabs[idx - 1].id);
+    },
+    trackMouse: true,
+    delta: 50,
+    preventScrollOnSwipe: false,
+  });
+
+  const appointmentSwipe = useSwipeable({
+    onSwipedLeft: () => {
+      const idx = appointmentTabs.findIndex(t => t.id === activeAppointmentTab);
+      if (idx < appointmentTabs.length - 1) setActiveAppointmentTab(appointmentTabs[idx + 1].id);
+    },
+    onSwipedRight: () => {
+      const idx = appointmentTabs.findIndex(t => t.id === activeAppointmentTab);
+      if (idx > 0) setActiveAppointmentTab(appointmentTabs[idx - 1].id);
+    },
+    trackMouse: true,
+    delta: 50,
+    preventScrollOnSwipe: false,
+  });
+
   const tabs: Tab[] = [
     { id: 'appointments', label: 'Citas', count: activeAppointmentsCount },
     { id: 'services', label: 'Servicios', count: totalServices },
@@ -410,13 +439,13 @@ export const BusinessDashboard: React.FC = () => {
           {/* ═══ TABS ═══ (outside space-y-8 to couple with Nav on scroll) */}
         </div>
         <TabNav tabs={tabs} activeTabId={activeTab} onTabChange={setActiveTab} sticky />
-        <div className="px-4 sm:px-0 pt-4 pb-16 space-y-6">
+        <div className="px-4 sm:px-0 pt-4 pb-16 space-y-6" {...tabSwipe}>
 
           {/* ═══ CONTENT ═══ */}
 
             {/* ─── CITAS ─── */}
             {activeTab === 'appointments' && (
-              <div className="space-y-5 p-2 md:p-4">
+              <div className="space-y-5 p-2 md:p-4" {...appointmentSwipe}>
                 <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pb-3 border-b border-slate-100 dark:border-slate-800">
                   <SectionHeader title="Gestión de Citas" description="Administra tus reservas activas" />
                   <TabNav tabs={appointmentTabs} activeTabId={activeAppointmentTab} onTabChange={setActiveAppointmentTab} variant="pill" sticky />
