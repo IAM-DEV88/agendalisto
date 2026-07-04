@@ -73,30 +73,32 @@ export const TabNav: React.FC<TabNavProps> = ({
   }, [activeTabId]);
 
   const pillNav = (
-    <div className="bg-slate-100 dark:bg-slate-800/80 p-0.5 rounded-xl inline-flex items-center gap-0.5">
-      {tabs.map((tab) => (
-        <button
-          key={tab.id}
-          id={`tab-${tab.id}`}
-          onClick={() => onTabChange(tab.id)}
-          className={`inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-bold rounded-lg transition-all whitespace-nowrap ${
-            activeTabId === tab.id
-              ? 'bg-white dark:bg-slate-900 shadow-sm text-primary-600 dark:text-primary-400'
-              : 'text-slate-500 hover:text-slate-700 dark:text-slate-400 dark:hover:text-slate-300'
-          }`}
-        >
-          <span>{tab.label}</span>
-          {tab.count !== undefined && tab.count > 0 && (
-            <span className={`inline-flex items-center justify-center min-w-[18px] h-[18px] px-1 rounded-md text-[10px] font-black transition-colors ${
+    <div className="overflow-x-auto no-scrollbar rounded-xl">
+      <div className="bg-slate-100 dark:bg-slate-800/80 p-0.5 inline-flex items-center gap-0.5 w-max">
+        {tabs.map((tab) => (
+          <button
+            key={tab.id}
+            id={`tab-${tab.id}`}
+            onClick={() => onTabChange(tab.id)}
+            className={`inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-bold rounded-lg transition-all whitespace-nowrap ${
               activeTabId === tab.id
-                ? 'bg-primary-600 text-white'
-                : 'bg-slate-200 dark:bg-slate-700 text-slate-600 dark:text-slate-400'
-            }`}>
-              {tab.count}
-            </span>
-          )}
-        </button>
-      ))}
+                ? 'bg-white dark:bg-slate-900 shadow-sm text-primary-600 dark:text-primary-400'
+                : 'text-slate-500 hover:text-slate-700 dark:text-slate-400 dark:hover:text-slate-300'
+            }`}
+          >
+            <span>{tab.label}</span>
+            {tab.count !== undefined && tab.count > 0 && (
+              <span className={`inline-flex items-center justify-center min-w-[18px] h-[18px] px-1 rounded-md text-[10px] font-black transition-colors ${
+                activeTabId === tab.id
+                  ? 'bg-primary-600 text-white'
+                  : 'bg-slate-200 dark:bg-slate-700 text-slate-600 dark:text-slate-400'
+              }`}>
+                {tab.count}
+              </span>
+            )}
+          </button>
+        ))}
+      </div>
     </div>
   );
 
