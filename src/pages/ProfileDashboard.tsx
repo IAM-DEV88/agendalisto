@@ -314,8 +314,8 @@ const ProfileDashboard = ({ user }: ProfileDashboardProps) => {
       if (idx > 0) setActiveTab(tabs[idx - 1].id as typeof activeTab);
     },
     trackMouse: true,
-    delta: 50,
-    preventScrollOnSwipe: false,
+    delta: 10,
+    rotationAngle: 30,
   });
 
   const appointmentSwipe = useSwipeable({
@@ -328,8 +328,8 @@ const ProfileDashboard = ({ user }: ProfileDashboardProps) => {
       if (idx > 0) setActiveAppointmentTab(appointmentTabs[idx - 1].id);
     },
     trackMouse: true,
-    delta: 50,
-    preventScrollOnSwipe: false,
+    delta: 10,
+    rotationAngle: 30,
   });
 
   const settingsTabs = [
@@ -466,7 +466,7 @@ const ProfileDashboard = ({ user }: ProfileDashboardProps) => {
 
           {/* ═══ CITAS TAB ═══ */}
             {activeTab === 'appointments' && (
-              <div className="space-y-5 p-2 md:p-4" {...appointmentSwipe}>
+              <div className="space-y-5 p-2 md:p-4">
                 <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pb-3 border-b border-slate-100 dark:border-slate-800">
                   <SectionHeader
                     title="Mis Reservas"
@@ -481,7 +481,7 @@ const ProfileDashboard = ({ user }: ProfileDashboardProps) => {
                   />
                 </div>
 
-                <div className="animate-in fade-in zoom-in-95 duration-300">
+                <div className="animate-in fade-in zoom-in-95 duration-300" {...appointmentSwipe}>
                   {/* Calendario */}
                   {activeAppointmentTab === 'calendar' && (
                     <AppointmentCalendar

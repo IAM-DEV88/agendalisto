@@ -319,8 +319,8 @@ export const BusinessDashboard: React.FC = () => {
       if (idx > 0) setActiveTab(tabs[idx - 1].id);
     },
     trackMouse: true,
-    delta: 50,
-    preventScrollOnSwipe: false,
+    delta: 10,
+    rotationAngle: 30,
   });
 
   const appointmentSwipe = useSwipeable({
@@ -333,8 +333,8 @@ export const BusinessDashboard: React.FC = () => {
       if (idx > 0) setActiveAppointmentTab(appointmentTabs[idx - 1].id);
     },
     trackMouse: true,
-    delta: 50,
-    preventScrollOnSwipe: false,
+    delta: 10,
+    rotationAngle: 30,
   });
 
   const tabs: Tab[] = [
@@ -445,13 +445,13 @@ export const BusinessDashboard: React.FC = () => {
 
             {/* ─── CITAS ─── */}
             {activeTab === 'appointments' && (
-              <div className="space-y-5 p-2 md:p-4" {...appointmentSwipe}>
+              <div className="space-y-5 p-2 md:p-4">
                 <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pb-3 border-b border-slate-100 dark:border-slate-800">
                   <SectionHeader title="Gestión de Citas" description="Administra tus reservas activas" />
                   <TabNav tabs={appointmentTabs} activeTabId={activeAppointmentTab} onTabChange={setActiveAppointmentTab} variant="pill" sticky />
                 </div>
 
-                <div className="animate-in fade-in zoom-in-95 duration-300">
+                <div className="animate-in fade-in zoom-in-95 duration-300" {...appointmentSwipe}>
                   {activeAppointmentTab === 'pending' && (
                     pendingAppointments.length === 0 ? (
                       <EmptyState
