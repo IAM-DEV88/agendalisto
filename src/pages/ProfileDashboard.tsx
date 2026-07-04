@@ -471,7 +471,7 @@ const ProfileDashboard = ({ user }: ProfileDashboardProps) => {
                   />
                 </div>
 
-                <div className="animate-in fade-in zoom-in-95 duration-300" {...tabSwipe}>
+                <div className="animate-in fade-in zoom-in-95 duration-300">
                   {/* Calendario */}
                   {activeAppointmentTab === 'calendar' && (
                     <AppointmentCalendar

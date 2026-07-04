@@ -441,7 +441,7 @@ export const BusinessDashboard: React.FC = () => {
                   <TabNav tabs={appointmentTabs} activeTabId={activeAppointmentTab} onTabChange={setActiveAppointmentTab} variant="pill" sticky />
                 </div>
 
-                <div className="animate-in fade-in zoom-in-95 duration-300" {...tabSwipe}>
+                <div className="animate-in fade-in zoom-in-95 duration-300">
                   {activeAppointmentTab === 'pending' && (
                     pendingAppointments.length === 0 ? (
                       <EmptyState
