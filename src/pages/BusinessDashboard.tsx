@@ -323,20 +323,6 @@ export const BusinessDashboard: React.FC = () => {
     rotationAngle: 30,
   });
 
-  const appointmentSwipe = useSwipeable({
-    onSwipedLeft: () => {
-      const idx = appointmentTabs.findIndex(t => t.id === activeAppointmentTab);
-      if (idx < appointmentTabs.length - 1) setActiveAppointmentTab(appointmentTabs[idx + 1].id);
-    },
-    onSwipedRight: () => {
-      const idx = appointmentTabs.findIndex(t => t.id === activeAppointmentTab);
-      if (idx > 0) setActiveAppointmentTab(appointmentTabs[idx - 1].id);
-    },
-    trackMouse: true,
-    delta: 10,
-    rotationAngle: 30,
-  });
-
   const tabs: Tab[] = [
     { id: 'appointments', label: 'Citas', count: activeAppointmentsCount },
     { id: 'services', label: 'Servicios', count: totalServices },
@@ -446,12 +432,16 @@ export const BusinessDashboard: React.FC = () => {
             {/* ─── CITAS ─── */}
             {activeTab === 'appointments' && (
               <div className="space-y-5 p-2 md:p-4">
-                <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pb-3 border-b border-slate-100 dark:border-slate-800">
+                <div
+                  className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pb-3 border-b border-slate-100 dark:border-slate-800"
+                  onTouchStart={(e) => e.stopPropagation()}
+                  onMouseDown={(e) => e.stopPropagation()}
+                >
                   <SectionHeader title="Gestión de Citas" description="Administra tus reservas activas" />
                   <TabNav tabs={appointmentTabs} activeTabId={activeAppointmentTab} onTabChange={setActiveAppointmentTab} variant="pill" sticky />
                 </div>
 
-                <div className="animate-in fade-in zoom-in-95 duration-300" {...appointmentSwipe}>
+                <div className="animate-in fade-in zoom-in-95 duration-300" {...tabSwipe}>
                   {activeAppointmentTab === 'pending' && (
                     pendingAppointments.length === 0 ? (
                       <EmptyState
