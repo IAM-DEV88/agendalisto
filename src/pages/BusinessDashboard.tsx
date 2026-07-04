@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect, useCallback, useRef } from 'react';
 import { Link, useSearchParams } from 'react-router-dom';
 import { useSelector } from 'react-redux';
 import { Business, getBusinessStats, getBusinessById, getBusinessServices, getUserBusinesses, updateAppointmentStatus, rescheduleAppointment, updateBusiness, deleteBusinessService, BusinessStats } from '../lib/api';
@@ -15,7 +15,7 @@ import { useBusinessHours } from '../hooks/useBusinessHours';
 import { useBusinessClients } from '../hooks/useBusinessClients';
 import { canAccessAnalytics, PLAN_BADGE } from '../lib/roles';
 import type { RootState } from '../store';
-import { useSwipeable } from 'react-swipeable';
+import { useSwipeable } from '../hooks/useSwipeable';
 
 import TabNav, { Tab } from '../components/ui/TabNav';
 import SectionHeader from '../components/ui/SectionHeader';
@@ -86,6 +86,7 @@ export const BusinessDashboard: React.FC = () => {
   const [activeTab, setActiveTab] = useState('appointments');
   const [activeAppointmentTab, setActiveAppointmentTab] = useState('calendar');
   const [activeSettingsTab, setActiveSettingsTab] = useState('profile');
+  const contentRef = useRef<HTMLDivElement>(null);
 
   const loadBusinessData = useCallback(async (businessId?: string) => {
     const id = businessId || userProfile?.business_id;
@@ -309,18 +310,15 @@ export const BusinessDashboard: React.FC = () => {
   const canStats = canAccessAnalytics(plan);
   const planBadge = PLAN_BADGE[plan];
 
-  const tabSwipe = useSwipeable({
-    onSwipedLeft: () => {
+  useSwipeable(contentRef, {
+    onSwipeLeft: () => {
       const idx = tabs.findIndex(t => t.id === activeTab);
       if (idx < tabs.length - 1) setActiveTab(tabs[idx + 1].id);
     },
-    onSwipedRight: () => {
+    onSwipeRight: () => {
       const idx = tabs.findIndex(t => t.id === activeTab);
       if (idx > 0) setActiveTab(tabs[idx - 1].id);
     },
-    trackMouse: true,
-    delta: 10,
-    rotationAngle: 30,
   });
 
   const tabs: Tab[] = [
@@ -425,13 +423,13 @@ export const BusinessDashboard: React.FC = () => {
           {/* ═══ TABS ═══ (outside space-y-8 to couple with Nav on scroll) */}
         </div>
         <TabNav tabs={tabs} activeTabId={activeTab} onTabChange={setActiveTab} sticky />
-        <div className="px-4 sm:px-0 pt-4 pb-16 space-y-6" {...tabSwipe}>
+        <div ref={contentRef} className="px-4 sm:px-0 pt-4 pb-16 space-y-6">
 
           {/* ═══ CONTENT ═══ */}
 
             {/* ─── CITAS ─── */}
             {activeTab === 'appointments' && (
-              <div className="space-y-5 p-2 md:p-4">
+              <div className="space-y-5">
                 <div
                   className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pb-3 border-b border-slate-100 dark:border-slate-800"
                   onTouchStart={(e) => e.stopPropagation()}
@@ -543,7 +541,7 @@ export const BusinessDashboard: React.FC = () => {
 
             {/* ─── HORARIOS ─── */}
             {activeTab === 'hours' && businessData && (
-              <div className="animate-in fade-in zoom-in-95 duration-300 p-2 md:p-4">
+              <div className="animate-in fade-in zoom-in-95 duration-300">
                 <BusinessHoursSection
                   businessHours={businessHours}
                   loading={loadingBusinessHours}
@@ -610,7 +608,7 @@ export const BusinessDashboard: React.FC = () => {
 
             {/* ─── CONFIGURACIÓN ─── */}
             {activeTab === 'settings' && businessData && (
-              <div className="space-y-5 p-2 md:p-4">
+              <div className="space-y-5">
                 <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pb-3 border-b border-slate-100 dark:border-slate-800">
                   <SectionHeader title="Configuración" description="Perfil y comportamiento de la página" />
                   <TabNav tabs={settingsTabs} activeTabId={activeSettingsTab} onTabChange={setActiveSettingsTab} variant="pill" sticky />

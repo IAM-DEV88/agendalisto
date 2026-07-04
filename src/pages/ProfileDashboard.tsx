@@ -1,4 +1,4 @@
-import { useState, useEffect, useMemo, useCallback } from 'react';
+import { useState, useEffect, useMemo, useCallback, useRef } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { useSelector } from 'react-redux';
 import { supabase } from '../lib/supabase';
@@ -22,7 +22,7 @@ import TabNav from '../components/ui/TabNav';
 import SectionHeader from '../components/ui/SectionHeader';
 import Pagination from '../components/ui/Pagination';
 import EmptyState from '../components/ui/EmptyState';
-import { useSwipeable } from 'react-swipeable';
+import { useSwipeable } from '../hooks/useSwipeable';
 import {
   CalendarCheck,
   CalendarClock,
@@ -147,6 +147,7 @@ const ProfileDashboard = ({ user }: ProfileDashboardProps) => {
   const [activeTab, setActiveTab] = useState<'appointments' | 'favorites' | 'stats' | 'settings' | 'referrals'>('appointments');
   const [activeAppointmentTab, setActiveAppointmentTab] = useState('calendar');
   const [activeSettingsTab, setActiveSettingsTab] = useState('profile');
+  const contentRef = useRef<HTMLDivElement>(null);
   const [selectedAppointmentForCancel, setSelectedAppointmentForCancel] = useState<Appointment | null>(null);
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
   const [deleting, setDeleting] = useState(false);
@@ -304,18 +305,15 @@ const ProfileDashboard = ({ user }: ProfileDashboardProps) => {
     { id: 'history', label: 'Historial', count: pastCount },
   ];
 
-  const tabSwipe = useSwipeable({
-    onSwipedLeft: () => {
+  useSwipeable(contentRef, {
+    onSwipeLeft: () => {
       const idx = tabs.findIndex(t => t.id === activeTab);
       if (idx < tabs.length - 1) setActiveTab(tabs[idx + 1].id as typeof activeTab);
     },
-    onSwipedRight: () => {
+    onSwipeRight: () => {
       const idx = tabs.findIndex(t => t.id === activeTab);
       if (idx > 0) setActiveTab(tabs[idx - 1].id as typeof activeTab);
     },
-    trackMouse: true,
-    delta: 10,
-    rotationAngle: 30,
   });
 
   const settingsTabs = [
@@ -448,11 +446,11 @@ const ProfileDashboard = ({ user }: ProfileDashboardProps) => {
           {/* ─── MAIN TABS ─── (outside space-y-8 to couple with Nav) */}
         </div>
         <TabNav tabs={tabs} activeTabId={activeTab} onTabChange={(tab) => setActiveTab(tab as 'appointments' | 'favorites' | 'stats' | 'settings' | 'referrals')} sticky />
-        <div className="px-4 sm:px-0 pt-4 pb-16 space-y-6" {...tabSwipe}>
+        <div ref={contentRef} className="px-4 sm:px-0 pt-4 pb-16 space-y-6">
 
           {/* ═══ CITAS TAB ═══ */}
             {activeTab === 'appointments' && (
-              <div className="space-y-5 p-2 md:p-4">
+              <div className="space-y-5">
                 <div
                   className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pb-3 border-b border-slate-100 dark:border-slate-800"
                   onTouchStart={(e) => e.stopPropagation()}
@@ -658,7 +656,7 @@ const ProfileDashboard = ({ user }: ProfileDashboardProps) => {
 
             {/* ═══ SETTINGS TAB ═══ */}
             {activeTab === 'settings' && (
-              <div className="space-y-5 p-2 md:p-4">
+              <div className="space-y-5">
                 <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pb-3 border-b border-slate-100 dark:border-slate-800">
                   <SectionHeader
                     title="Configuración"
