@@ -1,7 +1,7 @@
 import { useState, useEffect, useCallback } from 'react';
 import { Link, useSearchParams } from 'react-router-dom';
 import { useSelector } from 'react-redux';
-import { Business, getBusinessStats, getBusinessById, getBusinessServices, getUserBusinesses, updateAppointmentStatus, updateBusiness, deleteBusinessService, BusinessStats } from '../lib/api';
+import { Business, getBusinessStats, getBusinessById, getBusinessServices, getUserBusinesses, updateAppointmentStatus, rescheduleAppointment, updateBusiness, deleteBusinessService, BusinessStats } from '../lib/api';
 import { supabase } from '../lib/supabase';
 import { AppointmentStatus } from '../types/appointment';
 import { useBusinessAppointments } from '../hooks/useBusinessAppointments';
@@ -28,6 +28,7 @@ import BusinessSwitcher from '../components/business/BusinessSwitcher';
 import BusinessProgressSection from '../components/business/BusinessProgressSection';
 import BusinessQrCode from '../components/business/BusinessQrCode';
 import BusinessAppointmentList from '../components/appointments/BusinessAppointmentList';
+import AppointmentCalendar from '../components/appointments/AppointmentCalendar';
 import Pagination from '../components/ui/Pagination';
 import EmptyState from '../components/ui/EmptyState';
 
@@ -82,7 +83,7 @@ export const BusinessDashboard: React.FC = () => {
     appointments.filter(a => a.status === 'confirmed').length;
 
   const [activeTab, setActiveTab] = useState('appointments');
-  const [activeAppointmentTab, setActiveAppointmentTab] = useState('pending');
+  const [activeAppointmentTab, setActiveAppointmentTab] = useState('calendar');
   const [activeSettingsTab, setActiveSettingsTab] = useState('profile');
 
   const loadBusinessData = useCallback(async (businessId?: string) => {
@@ -197,6 +198,17 @@ export const BusinessDashboard: React.FC = () => {
     }
   };
 
+  const handleReschedule = async (id: string, startTime: string, endTime: string) => {
+    const result = await rescheduleAppointment(id, startTime, endTime);
+    if (result.success) {
+      notifySuccess('Cita reprogramada correctamente');
+      await refreshAppointments();
+    } else {
+      notifyError(result.error || 'Error al reprogramar la cita');
+    }
+    return result;
+  };
+
   const handleBusinessChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
     const { name, value, type } = e.target;
     const val = type === 'checkbox' ? (e.target as HTMLInputElement).checked : value;
@@ -306,6 +318,7 @@ export const BusinessDashboard: React.FC = () => {
   ];
 
   const appointmentTabs: Tab[] = [
+    { id: 'calendar', label: 'Calendario' },
     { id: 'pending', label: 'Pendientes', count: pendingAppointments.length },
     { id: 'confirmed', label: 'Confirmadas', count: confirmedAppointments.length },
     { id: 'history', label: 'Historial', count: pastAppointments.length },
@@ -458,6 +471,14 @@ export const BusinessDashboard: React.FC = () => {
                         )}
                       </div>
                     )
+                  )}
+
+                  {activeAppointmentTab === 'calendar' && (
+                    <AppointmentCalendar
+                      appointments={appointments}
+                      onStatusChange={handleUpdateAppointmentStatus}
+                      onReschedule={handleReschedule}
+                    />
                   )}
 
                   {activeAppointmentTab === 'history' && (

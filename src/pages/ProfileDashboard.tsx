@@ -9,10 +9,11 @@ import { setUserProfile } from '../store/userSlice';
 import { useAppointments } from '../hooks/useAppointments';
 import type { UserProfile } from '../lib/supabase';
 import type { RootState } from '../store';
-import { getUserBusinesses, updateUserProfile } from '../lib/api';
+import { getUserBusinesses, updateUserProfile, rescheduleAppointment } from '../lib/api';
 import { notifySuccess, notifyError } from '../lib/toast';
 import { useUIConfig } from '../hooks/useUIConfig';
 import UserAppointmentList from '../components/appointments/UserAppointmentList';
+import AppointmentCalendar from '../components/appointments/AppointmentCalendar';
 import FavoritesSection from '../components/profile/FavoritesSection';
 import ReferralSection from '../components/profile/ReferralSection';
 import type { Appointment } from '../types/appointment';
@@ -143,7 +144,7 @@ const ProfileDashboard = ({ user }: ProfileDashboardProps) => {
   };
 
   const [activeTab, setActiveTab] = useState<'appointments' | 'favorites' | 'stats' | 'settings' | 'referrals'>('appointments');
-  const [activeAppointmentTab, setActiveAppointmentTab] = useState('upcoming');
+  const [activeAppointmentTab, setActiveAppointmentTab] = useState('calendar');
   const [activeSettingsTab, setActiveSettingsTab] = useState('profile');
   const [selectedAppointmentForCancel, setSelectedAppointmentForCancel] = useState<Appointment | null>(null);
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
@@ -261,6 +262,16 @@ const ProfileDashboard = ({ user }: ProfileDashboardProps) => {
     navigate(`/review/${appointment.id}`);
   }, [navigate]);
 
+  const handleDirectReschedule = async (id: string, startTime: string, endTime: string) => {
+    const result = await rescheduleAppointment(id, startTime, endTime);
+    if (result.success) {
+      notifySuccess('Cita reprogramada correctamente');
+    } else {
+      notifyError(result.error || 'Error al reprogramar la cita');
+    }
+    return result;
+  };
+
   const handleItemsPerPageChange = useCallback((value: number) => {
     if (value >= 1 && value <= 50) {
       dispatch({ type: 'ui/setItemsPerPage', payload: value });
@@ -286,6 +297,7 @@ const ProfileDashboard = ({ user }: ProfileDashboardProps) => {
   ];
 
   const appointmentTabs = [
+    { id: 'calendar', label: 'Calendario' },
     { id: 'upcoming', label: 'Próximas', count: upcomingCount },
     { id: 'pending', label: 'Pendientes', count: pendingCount },
     { id: 'history', label: 'Historial', count: pastCount },
@@ -441,6 +453,14 @@ const ProfileDashboard = ({ user }: ProfileDashboardProps) => {
                 </div>
 
                 <div className="animate-in fade-in zoom-in-95 duration-300">
+                  {/* Calendario */}
+                  {activeAppointmentTab === 'calendar' && (
+                    <AppointmentCalendar
+                      appointments={appointments}
+                      onReschedule={handleDirectReschedule}
+                    />
+                  )}
+
                   {/* Próximas */}
                   {activeAppointmentTab === 'upcoming' && (
                     appointmentsLoading ? (
