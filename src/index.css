@@ -245,7 +245,16 @@
     @apply text-gray-900 dark:text-white font-medium;
   }
 
-  /* ------------------------------ Timeline -------------------------------- */
+  /* -------------------------------- Utils --------------------------------- */
+.no-scrollbar {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+}
+.no-scrollbar::-webkit-scrollbar {
+  display: none;
+}
+
+/* ------------------------------ Timeline -------------------------------- */
   .timeline {
     @apply space-y-4 ml-4 border-l border-gray-200 dark:border-gray-700;
   }
