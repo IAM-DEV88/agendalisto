@@ -423,7 +423,7 @@ export const BusinessDashboard: React.FC = () => {
           {/* ═══ TABS ═══ (outside space-y-8 to couple with Nav on scroll) */}
         </div>
         <TabNav tabs={tabs} activeTabId={activeTab} onTabChange={setActiveTab} sticky />
-        <div ref={contentRef} className="px-4 sm:px-0 pt-4 pb-16 space-y-6">
+        <div ref={contentRef} className="px-4 md:p-4 md:pt-8 pt-8 pb-16 space-y-6">
 
           {/* ═══ CONTENT ═══ */}
 

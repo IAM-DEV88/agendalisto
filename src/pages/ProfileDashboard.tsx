@@ -446,7 +446,7 @@ const ProfileDashboard = ({ user }: ProfileDashboardProps) => {
           {/* ─── MAIN TABS ─── (outside space-y-8 to couple with Nav) */}
         </div>
         <TabNav tabs={tabs} activeTabId={activeTab} onTabChange={(tab) => setActiveTab(tab as 'appointments' | 'favorites' | 'stats' | 'settings' | 'referrals')} sticky />
-        <div ref={contentRef} className="px-4 sm:px-0 pt-4 pb-16 space-y-6">
+        <div ref={contentRef} className="px-4 md:p-4 md:pt-8 pt-8 pb-16 space-y-6">
 
           {/* ═══ CITAS TAB ═══ */}
             {activeTab === 'appointments' && (
@@ -583,7 +583,9 @@ const ProfileDashboard = ({ user }: ProfileDashboardProps) => {
 
             {/* ═══ REFERRALS TAB ═══ */}
             {activeTab === 'referrals' && user && (
-              <ReferralSection userId={user.id} />
+              <div className="animate-in fade-in zoom-in-95 duration-300">
+                <ReferralSection userId={user.id} />
+              </div>
             )}
 
             {/* ═══ STATS TAB ═══ */}
