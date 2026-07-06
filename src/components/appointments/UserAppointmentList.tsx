@@ -103,12 +103,12 @@ const UserAppointmentList: React.FC<UserAppointmentListProps> = ({
                   </div>
 
                   {/* Service name */}
-                  <div className="flex items-center gap-2">
+                  <div className="flex items-start gap-2">
                     <div className="w-8 h-8 rounded-lg bg-primary-50 dark:bg-primary-500/10 flex items-center justify-center flex-shrink-0">
                       <ChevronRight className="w-4 h-4 text-primary-500 dark:text-primary-400" />
                     </div>
                     <div>
-                      <p className="text-sm font-bold text-primary-600 dark:text-primary-400">
+                      <p className="text-sm font-bold text-primary-600 dark:text-primary-400 mb-0">
                         {appointment.services?.name}
                       </p>
                       <div className="flex items-center gap-3 text-xs font-medium text-slate-400 dark:text-slate-500">

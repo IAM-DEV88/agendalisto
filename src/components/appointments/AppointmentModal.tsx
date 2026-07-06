@@ -60,9 +60,9 @@ const AppointmentModal: React.FC<AppointmentModalProps> = ({
   const isSameDay = startDate.toDateString() === endDate.toDateString();
 
   return (
-    <div className="fixed inset-0 z-50 flex items-end sm:items-center justify-center p-0 sm:p-4 bg-black/50 backdrop-blur-sm animate-in fade-in duration-200" onClick={onClose}>
+    <div className="fixed inset-0 z-50 flex items-start sm:items-center justify-center px-2 pt-16 sm:pt-0 sm:p-4 bg-black/50 backdrop-blur-sm animate-in fade-in duration-200 !mt-0" onClick={onClose}>
       <div
-        className="relative w-full sm:max-w-lg max-h-[92dvh] sm:max-h-[85vh] bg-white dark:bg-slate-900 rounded-t-3xl sm:rounded-3xl shadow-2xl overflow-hidden animate-in slide-in-from-bottom sm:zoom-in-95 duration-300"
+        className="relative w-full sm:max-w-lg max-h-[calc(100dvh-5rem)] sm:max-h-[85vh] bg-white dark:bg-slate-900 rounded-3xl shadow-2xl overflow-hidden animate-in sm:zoom-in-95 duration-300"
         onClick={e => e.stopPropagation()}
       >
         {/* Drag handle (mobile) */}
@@ -76,10 +76,10 @@ const AppointmentModal: React.FC<AppointmentModalProps> = ({
             <div className="flex items-center gap-2.5 min-w-0">
               <div className={`w-2.5 h-2.5 rounded-full flex-shrink-0 ${cfg.dot}`} />
               <div className="min-w-0">
-                <h2 className="text-sm font-bold text-slate-900 dark:text-white truncate">
+                <h2 className="text-sm font-bold text-slate-900 dark:text-white truncate mb-0">
                   {appointment.services?.name || 'Cita'}
                 </h2>
-                <p className="text-[11px] font-medium text-slate-400 truncate">
+                <p className="text-[11px] font-medium text-slate-400 truncate mb-0">
                   {appointment.businesses?.name || 'Detalles de la cita'}
                 </p>
               </div>
@@ -94,7 +94,7 @@ const AppointmentModal: React.FC<AppointmentModalProps> = ({
         </div>
 
         <div className="overflow-y-auto" style={{ maxHeight: 'calc(92dvh - 60px)' }}>
-          <div className="px-4 sm:px-5 py-4 space-y-4">
+          <div className="px-4 sm:px-5 py-4 space-y-3">
 
             {/* Status badge + client name row */}
             <div className="flex items-center justify-between gap-3">
@@ -103,10 +103,10 @@ const AppointmentModal: React.FC<AppointmentModalProps> = ({
                   <User className="w-4 h-4 text-primary-500" />
                 </div>
                 <div className="min-w-0">
-                  <p className="text-sm font-bold text-slate-900 dark:text-white truncate">
+                  <p className="text-sm font-bold text-slate-900 dark:text-white truncate mb-0">
                     {appointment.profiles?.full_name || appointment.guest_info?.name || 'Desconocido'}
                   </p>
-                  <p className="text-[11px] font-medium text-slate-400">
+                  <p className="text-[11px] font-medium text-slate-400 mb-0">
                     {appointment.is_guest ? 'Reserva sin cuenta' : 'Cliente'}
                   </p>
                 </div>
@@ -118,11 +118,11 @@ const AppointmentModal: React.FC<AppointmentModalProps> = ({
             </div>
 
             {/* Info cards grid */}
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
-              <div className="flex items-center gap-2.5 p-3 bg-slate-50 dark:bg-slate-800/50 rounded-xl border border-slate-100 dark:border-slate-800">
-                <Calendar className="w-4 h-4 text-primary-400 flex-shrink-0" />
+            <div className="grid grid-cols-2 gap-2">
+              <div className="flex items-center gap-2 p-2.5 bg-slate-50 dark:bg-slate-800/50 rounded-xl border border-slate-100 dark:border-slate-800">
+                <Calendar className="w-3.5 h-3.5 text-primary-400 flex-shrink-0" />
                 <div className="min-w-0">
-                  <p className="text-[10px] font-bold uppercase tracking-wider text-slate-400">Fecha</p>
+                  <p className="text-[10px] font-bold uppercase tracking-wider text-slate-400 mb-0">Fecha</p>
                   <p className="text-xs font-bold text-slate-900 dark:text-white truncate">
                     {format(startDate, "EEE d MMM", { locale: es })}
                     {!isSameDay && ` - ${format(endDate, "EEE d MMM", { locale: es })}`}
@@ -130,10 +130,10 @@ const AppointmentModal: React.FC<AppointmentModalProps> = ({
                 </div>
               </div>
 
-              <div className="flex items-center gap-2.5 p-3 bg-slate-50 dark:bg-slate-800/50 rounded-xl border border-slate-100 dark:border-slate-800">
-                <Clock className="w-4 h-4 text-primary-400 flex-shrink-0" />
+              <div className="flex items-center gap-2 p-2.5 bg-slate-50 dark:bg-slate-800/50 rounded-xl border border-slate-100 dark:border-slate-800">
+                <Clock className="w-3.5 h-3.5 text-primary-400 flex-shrink-0" />
                 <div className="min-w-0">
-                  <p className="text-[10px] font-bold uppercase tracking-wider text-slate-400">Horario</p>
+                  <p className="text-[10px] font-bold uppercase tracking-wider text-slate-400 mb-0">Horario</p>
                   <p className="text-xs font-bold text-slate-900 dark:text-white">
                     {format(startDate, "HH:mm", { locale: es })} - {format(endDate, "HH:mm", { locale: es })} hs
                   </p>
@@ -141,22 +141,22 @@ const AppointmentModal: React.FC<AppointmentModalProps> = ({
               </div>
 
               {appointment.services?.duration && (
-                <div className="flex items-center gap-2.5 p-3 bg-slate-50 dark:bg-slate-800/50 rounded-xl border border-slate-100 dark:border-slate-800">
-                  <Clock className="w-4 h-4 text-primary-400 flex-shrink-0" />
+                <div className="flex items-center gap-2 p-2.5 bg-slate-50 dark:bg-slate-800/50 rounded-xl border border-slate-100 dark:border-slate-800">
+                  <Clock className="w-3.5 h-3.5 text-primary-400 flex-shrink-0" />
                   <div className="min-w-0">
-                    <p className="text-[10px] font-bold uppercase tracking-wider text-slate-400">Duración</p>
+                    <p className="text-[10px] font-bold uppercase tracking-wider text-slate-400 mb-0">Duración</p>
                     <p className="text-xs font-bold text-slate-900 dark:text-white">{appointment.services.duration} min</p>
                   </div>
                 </div>
               )}
 
               {appointment.services?.price !== undefined && appointment.services.price > 0 && (
-                <div className="flex items-center gap-2.5 p-3 bg-slate-50 dark:bg-slate-800/50 rounded-xl border border-slate-100 dark:border-slate-800">
-                  <div className="flex-shrink-0 w-4 h-4 flex items-center justify-center">
+                <div className="flex items-center gap-2 p-2.5 bg-slate-50 dark:bg-slate-800/50 rounded-xl border border-slate-100 dark:border-slate-800">
+                  <div className="flex-shrink-0 w-3.5 h-3.5 flex items-center justify-center">
                     <span className="text-xs font-black text-primary-400">$</span>
                   </div>
                   <div className="min-w-0">
-                    <p className="text-[10px] font-bold uppercase tracking-wider text-slate-400">Precio</p>
+                    <p className="text-[10px] font-bold uppercase tracking-wider text-slate-400 mb-0">Precio</p>
                     <p className="text-xs font-bold text-slate-900 dark:text-white">
                       ${appointment.services.price.toLocaleString()}
                     </p>
@@ -167,24 +167,24 @@ const AppointmentModal: React.FC<AppointmentModalProps> = ({
 
             {/* Guest/Client contact */}
             {(appointment.is_guest && appointment.guest_info) ? (
-              <div className="p-3 bg-amber-50/50 dark:bg-amber-500/5 rounded-xl border border-amber-200/50 dark:border-amber-800/30">
-                <p className="text-[10px] font-bold uppercase tracking-wider text-amber-600 dark:text-amber-400 mb-2">Información de contacto</p>
-                <div className="space-y-1.5">
+              <div className="p-2.5 bg-amber-50/50 dark:bg-amber-500/5 rounded-xl border border-amber-200/50 dark:border-amber-800/30">
+                <p className="text-[10px] font-bold uppercase tracking-wider text-amber-600 dark:text-amber-400 mb-1.5">Información de contacto</p>
+                <div className="space-y-1">
                   <div className="flex items-center gap-2 text-xs text-amber-800 dark:text-amber-300">
-                    <Mail className="w-3.5 h-3.5 flex-shrink-0" />
+                    <Mail className="w-3 h-3 flex-shrink-0" />
                     <span className="font-medium">{appointment.guest_info.email}</span>
                   </div>
                   {appointment.guest_info.phone && (
                     <div className="flex items-center gap-2 text-xs text-amber-800 dark:text-amber-300">
-                      <Phone className="w-3.5 h-3.5 flex-shrink-0" />
+                      <Phone className="w-3 h-3 flex-shrink-0" />
                       <span className="font-medium">{appointment.guest_info.phone}</span>
                     </div>
                   )}
                 </div>
               </div>
             ) : appointment.profiles?.email && (
-              <div className="flex items-center gap-2 px-1">
-                <Mail className="w-3.5 h-3.5 text-slate-400 flex-shrink-0" />
+              <div className="flex items-center gap-2">
+                <Mail className="w-3 h-3 text-slate-400 flex-shrink-0" />
                 <span className="text-xs font-medium text-slate-500 dark:text-slate-400 truncate">
                   {appointment.profiles.email}
                 </span>
@@ -193,11 +193,11 @@ const AppointmentModal: React.FC<AppointmentModalProps> = ({
 
             {/* Notes */}
             <div>
-              <div className="flex items-center gap-1.5 mb-1.5">
-                <MessageSquareText className="w-3.5 h-3.5 text-slate-400" />
+              <div className="flex items-center gap-1.5 mb-1">
+                <MessageSquareText className="w-3 h-3 text-slate-400" />
                 <span className="text-[10px] font-bold uppercase tracking-wider text-slate-400">Notas</span>
               </div>
-              <div className="p-3 bg-slate-50 dark:bg-slate-800/50 rounded-xl border border-slate-100 dark:border-slate-800">
+              <div className="p-2.5 bg-slate-50 dark:bg-slate-800/50 rounded-xl border border-slate-100 dark:border-slate-800">
                 <p className="text-xs text-slate-600 dark:text-slate-400 leading-relaxed">
                   {appointment.notes || (
                     <span className="italic text-slate-400">Sin notas adicionales</span>
@@ -209,11 +209,11 @@ const AppointmentModal: React.FC<AppointmentModalProps> = ({
             {/* Review */}
             {showReviewSection && appointment.review && (
               <div>
-                <div className="flex items-center gap-1.5 mb-1.5">
-                  <Star className="w-3.5 h-3.5 text-amber-500" />
+                <div className="flex items-center gap-1.5 mb-1">
+                  <Star className="w-3 h-3 text-amber-500" />
                   <span className="text-[10px] font-bold uppercase tracking-wider text-slate-400">Reseña</span>
                 </div>
-                <div className="p-3 bg-amber-50/50 dark:bg-amber-500/5 rounded-xl border border-amber-200/50 dark:border-amber-800/30 space-y-1.5">
+                <div className="p-2.5 bg-amber-50/50 dark:bg-amber-500/5 rounded-xl border border-amber-200/50 dark:border-amber-800/30 space-y-1">
                   <div className="flex items-center gap-1">
                     {[1, 2, 3, 4, 5].map(i => (
                       <Star
@@ -236,9 +236,9 @@ const AppointmentModal: React.FC<AppointmentModalProps> = ({
 
             {/* Cancel reason */}
             {appointment.status === 'cancelled' && appointment.cancel_reason && (
-              <div className="p-3 bg-red-50/50 dark:bg-red-500/5 rounded-xl border border-red-200/50 dark:border-red-800/30">
+              <div className="p-2.5 bg-red-50/50 dark:bg-red-500/5 rounded-xl border border-red-200/50 dark:border-red-800/30">
                 <div className="flex items-center gap-1.5 mb-1">
-                  <XCircle className="w-3.5 h-3.5 text-red-400" />
+                  <XCircle className="w-3 h-3 text-red-400" />
                   <span className="text-[10px] font-bold uppercase tracking-wider text-red-500">Motivo de cancelación</span>
                 </div>
                 <p className="text-xs text-red-700 dark:text-red-400">{appointment.cancel_reason}</p>

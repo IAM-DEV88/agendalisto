@@ -68,6 +68,12 @@
     margin-bottom: 0.75em;
   }
 
+  @media (max-width: 639px) {
+    h1, h2, h3, h4, h5, h6 {
+      margin-bottom: 0.5em;
+    }
+  }
+
   h1 { font-size: 2.25rem; line-height: 2.5rem; }
   h2 { font-size: 1.875rem; line-height: 2.25rem; }
   h3 { font-size: 1.5rem; line-height: 2rem; }
@@ -79,6 +85,12 @@
     color: var(--color-text);
     line-height: 1.6;
     margin-bottom: 1rem;
+  }
+
+  @media (max-width: 639px) {
+    p {
+      margin-bottom: 0.75rem;
+    }
   }
 
   a:not(.btn) {

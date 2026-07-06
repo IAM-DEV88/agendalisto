@@ -90,15 +90,15 @@ const BusinessAppointmentList: React.FC<BusinessAppointmentListProps> = ({
                     </div>
 
                     {/* Client */}
-                    <div className="flex items-center gap-2">
+                    <div className="flex items-start gap-2">
                       <div className="w-8 h-8 rounded-lg bg-primary-50 dark:bg-primary-500/10 flex items-center justify-center flex-shrink-0">
                         <User className="w-4 h-4 text-primary-500 dark:text-primary-400" />
                       </div>
                       <div>
-                        <p className="text-sm font-bold text-primary-600 dark:text-primary-400">
+                        <p className="text-sm font-bold text-primary-600 dark:text-primary-400 mb-0">
                           {appointment.profiles?.full_name || 'Cliente'}
                         </p>
-                        <p className="text-xs font-medium text-slate-400">
+                        <p className="text-xs font-medium text-slate-400 mb-0">
                           {appointment.services?.duration && `${appointment.services.duration} min`}
                           {appointment.services?.duration && appointment.services?.price !== undefined && appointment.services.price > 0 && (
                             <> · ${appointment.services.price.toLocaleString()}</>

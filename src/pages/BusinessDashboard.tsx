@@ -346,11 +346,11 @@ export const BusinessDashboard: React.FC = () => {
     <div className="min-h-screen bg-gradient-to-b from-slate-50 to-white dark:from-slate-950 dark:to-slate-900 transition-colors duration-200">
       <SEO title={businessData?.name ? `${businessData.name} — Panel` : 'Panel del negocio'} />
       <div className="max-w-7xl mx-auto sm:px-6 lg:px-8">
-        <div className="px-4 sm:px-0 pt-4 sm:pt-6 space-y-5 sm:space-y-6">
+        <div className="p-4 space-y-5 sm:space-y-6">
 
           {/* ═══ HEADER ═══ */}
           <div className="animate-in fade-in slide-in-from-top-4 duration-500">
-            <div className="bg-white dark:bg-slate-900 rounded-2xl border border-slate-200 dark:border-slate-800 shadow-sm p-4 sm:p-5">
+            <div className="bg-white dark:bg-slate-900 rounded-2xl border border-slate-200 dark:border-slate-800 shadow-sm p-4">
               <div className="flex flex-col sm:flex-row sm:items-center gap-3 sm:gap-4">
                 {/* Left: Business Info */}
                 <div className="flex items-center gap-3 min-w-0 flex-1">

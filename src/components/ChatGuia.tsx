@@ -328,7 +328,7 @@ const ChatGuia = () => {
   };
 
   return (
-    <div className="fixed bottom-6 right-6 z-[100]">
+    <div className="fixed bottom-4 right-4 z-[100]">
       {/* Floating Button */}
       <button
         onClick={() => setIsOpen(!isOpen)}
