@@ -38,6 +38,7 @@ import {
   ListChecks,
   Plus,
   UserPlus,
+  ListOrdered,
 } from 'lucide-react';
 import { ROLE_LABELS, PLAN_BADGE, PLAN_LABELS, getMaxBusinesses } from '../lib/roles';
 import { updateProfileRole, deleteAccount } from '../lib/api';
@@ -703,14 +704,17 @@ const ProfileDashboard = ({ user }: ProfileDashboardProps) => {
                             Registros por página
                           </label>
                           <div className="flex items-center gap-3">
-                            <input
-                              type="number"
-                              min="1"
-                              max="50"
-                              value={itemsPerPage}
-                              onChange={(e) => handleItemsPerPageChange(parseInt(e.target.value) || 1)}
-                              className="w-24 px-4 py-2.5 rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 focus:ring-2 focus:ring-primary-500/20 focus:border-primary-500 outline-none transition-all font-bold text-center"
-                            />
+                            <div className="relative">
+                              <ListOrdered className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400 pointer-events-none" />
+                              <input
+                                type="number"
+                                min="1"
+                                max="50"
+                                value={itemsPerPage}
+                                onChange={(e) => handleItemsPerPageChange(parseInt(e.target.value) || 1)}
+                                className="w-24 pl-10 pr-4 py-2.5 rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 focus:ring-2 focus:ring-primary-500/20 focus:border-primary-500 outline-none transition-all font-bold text-center"
+                              />
+                            </div>
                             <button
                               onClick={handleSaveItemsPerPage}
                               className="px-6 py-2.5 bg-primary-600 hover:bg-primary-700 text-white text-sm font-bold rounded-xl transition-all shadow-lg shadow-primary-500/25 active:scale-95"

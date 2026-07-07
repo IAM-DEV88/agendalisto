@@ -143,25 +143,31 @@ export default function LocationPicker({ lat, lng, onChange }: LocationPickerPro
       <div className="flex gap-3">
         <div className="flex-1">
           <label className="block text-xs font-bold text-slate-500 dark:text-slate-400 mb-1">Latitud</label>
-          <input
-            type="text"
-            value={latInput}
-            onChange={e => setLatInput(e.target.value)}
-            onBlur={handleLatLngInput}
-            placeholder="-90 a 90"
-            className="w-full px-3 py-2 rounded-lg border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 text-sm font-mono focus:ring-2 focus:ring-primary-500/20 focus:border-primary-500 outline-none transition-all"
-          />
+          <div className="relative">
+            <MapPin className="absolute left-3 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-slate-400 pointer-events-none" />
+            <input
+              type="text"
+              value={latInput}
+              onChange={e => setLatInput(e.target.value)}
+              onBlur={handleLatLngInput}
+              placeholder="-90 a 90"
+              className="w-full pl-8 pr-3 py-2 rounded-lg border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 text-sm font-mono focus:ring-2 focus:ring-primary-500/20 focus:border-primary-500 outline-none transition-all"
+            />
+          </div>
         </div>
         <div className="flex-1">
           <label className="block text-xs font-bold text-slate-500 dark:text-slate-400 mb-1">Longitud</label>
-          <input
-            type="text"
-            value={lngInput}
-            onChange={e => setLngInput(e.target.value)}
-            onBlur={handleLatLngInput}
-            placeholder="-180 a 180"
-            className="w-full px-3 py-2 rounded-lg border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 text-sm font-mono focus:ring-2 focus:ring-primary-500/20 focus:border-primary-500 outline-none transition-all"
-          />
+          <div className="relative">
+            <MapPin className="absolute left-3 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-slate-400 pointer-events-none" />
+            <input
+              type="text"
+              value={lngInput}
+              onChange={e => setLngInput(e.target.value)}
+              onBlur={handleLatLngInput}
+              placeholder="-180 a 180"
+              className="w-full pl-8 pr-3 py-2 rounded-lg border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 text-sm font-mono focus:ring-2 focus:ring-primary-500/20 focus:border-primary-500 outline-none transition-all"
+            />
+          </div>
         </div>
       </div>
 

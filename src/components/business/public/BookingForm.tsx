@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useMemo } from 'react';
-import { Clock, Calendar, CheckCircle, ArrowLeft, Send, AlertCircle, Gift, Check, X, Lock } from 'lucide-react';
+import { Clock, Calendar, CheckCircle, ArrowLeft, Send, AlertCircle, Gift, Check, X, Lock, FileText } from 'lucide-react';
 import CrossPromotion from '../CrossPromotion';
 import { createAppointment, Service, getBusinessHours, getBusinessAppointments, BusinessHours, Appointment, validateGiftCode, redeemGiftCode } from '../../../lib/api';
 import type { GuestInfo, GiftCode } from '../../../lib/api';
@@ -436,13 +436,16 @@ const BookingForm: React.FC<BookingFormProps> = ({
           </div>
         ) : (
           <div className="flex gap-2">
-            <input
-              type="text"
-              value={giftCodeInput}
-              onChange={e => setGiftCodeInput(e.target.value.toUpperCase())}
-              placeholder="Ej: GIFT-ABC123"
-              className="flex-1 px-3 py-2 text-sm rounded-xl border border-rose-200 dark:border-rose-800 bg-white dark:bg-slate-800 focus:ring-2 focus:ring-rose-500/20 focus:border-rose-500 outline-none"
-            />
+            <div className="relative flex-1">
+              <Gift className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-rose-400 pointer-events-none" />
+              <input
+                type="text"
+                value={giftCodeInput}
+                onChange={e => setGiftCodeInput(e.target.value.toUpperCase())}
+                placeholder="Ej: GIFT-ABC123"
+                className="w-full pl-10 pr-3 py-2 text-sm rounded-xl border border-rose-200 dark:border-rose-800 bg-white dark:bg-slate-800 focus:ring-2 focus:ring-rose-500/20 focus:border-rose-500 outline-none"
+              />
+            </div>
             <button
               onClick={async () => {
                 if (!giftCodeInput.trim()) return;
@@ -543,14 +546,17 @@ const BookingForm: React.FC<BookingFormProps> = ({
           <label htmlFor="notes" className="block text-sm font-bold text-slate-700 dark:text-slate-300 mb-2">
             Notas <span className="text-slate-400 font-normal">(opcional)</span>
           </label>
-          <textarea
-            id="notes"
-            value={formData.notes}
-            onChange={(e) => setFormData({ ...formData, notes: e.target.value })}
-            className="w-full px-4 py-3 rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 focus:ring-2 focus:ring-primary-500/20 focus:border-primary-500 outline-none transition-all text-sm"
-            rows={3}
-            placeholder="Algún detalle que debamos saber..."
-          />
+          <div className="relative">
+            <FileText className="absolute top-3.5 left-3.5 w-4 h-4 text-slate-400 pointer-events-none" />
+            <textarea
+              id="notes"
+              value={formData.notes}
+              onChange={(e) => setFormData({ ...formData, notes: e.target.value })}
+              className="w-full pl-10 pr-4 py-3 rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 focus:ring-2 focus:ring-primary-500/20 focus:border-primary-500 outline-none transition-all text-sm"
+              rows={3}
+              placeholder="Algún detalle que debamos saber..."
+            />
+          </div>
         </div>
 
         {/* Confirmation checkbox */}

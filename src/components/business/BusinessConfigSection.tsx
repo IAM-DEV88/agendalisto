@@ -238,15 +238,18 @@ export const BusinessConfigSection: React.FC<BusinessConfigSectionProps> = ({
                 <label htmlFor="items_per_page" className="block text-sm font-bold text-slate-700 dark:text-slate-300">
                   Registros por página
                 </label>
-                <input
-                  type="number"
-                  id="items_per_page"
-                  min="1"
-                  max="50"
-                  value={itemsPerPage}
-                  onChange={(e) => setItemsPerPageValue(Math.max(1, Math.min(50, parseInt(e.target.value) || 1)))}
-                  className="w-full px-4 py-2.5 rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 focus:ring-2 focus:ring-primary-500/20 focus:border-primary-500 outline-none transition-all text-sm font-bold"
-                />
+                <div className="relative">
+                  <ListOrdered className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400 pointer-events-none" />
+                  <input
+                    type="number"
+                    id="items_per_page"
+                    min="1"
+                    max="50"
+                    value={itemsPerPage}
+                    onChange={(e) => setItemsPerPageValue(Math.max(1, Math.min(50, parseInt(e.target.value) || 1)))}
+                    className="w-full pl-10 pr-4 py-2.5 rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 focus:ring-2 focus:ring-primary-500/20 focus:border-primary-500 outline-none transition-all text-sm font-bold"
+                  />
+                </div>
                 <p className="text-xs text-slate-500 dark:text-slate-400 italic">
                   Número de elementos que se mostrarán en tablas y listados.
                 </p>

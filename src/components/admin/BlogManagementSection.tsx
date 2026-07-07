@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import { adminGetAllPosts, createBlogPost, updateBlogPost, deleteBlogPost, BlogPost } from '../../lib/api';
 import { toast } from 'react-hot-toast';
-import { Plus, Edit2, Trash2, Eye, X, Loader2, Save } from 'lucide-react';
+import { Plus, Edit2, Trash2, Eye, X, Loader2, Save, FileText, User, MessageSquare } from 'lucide-react';
 import EmptyState from '../ui/EmptyState';
 import ImageUpload from '../ui/ImageUpload';
 import { supabase } from '../../lib/supabase';
@@ -167,16 +167,25 @@ export default function BlogManagementSection() {
             <div className="space-y-5 p-2 md:p-4">
               <div>
                 <label className="block text-sm font-bold text-slate-700 dark:text-slate-300 mb-1.5">Título</label>
-                <input type="text" value={form.title} onChange={e => setForm({ ...form, title: e.target.value })} placeholder="Título del artículo" className="w-full" />
+                <div className="relative">
+                  <FileText className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400 pointer-events-none" />
+                  <input type="text" value={form.title} onChange={e => setForm({ ...form, title: e.target.value })} placeholder="Título del artículo" className="w-full pl-10" />
+                </div>
               </div>
               <div className="grid grid-cols-2 gap-4">
                 <div>
                   <label className="block text-sm font-bold text-slate-700 dark:text-slate-300 mb-1.5">Autor</label>
-                  <input type="text" value={form.author_name} onChange={e => setForm({ ...form, author_name: e.target.value })} placeholder="Nombre del autor" className="w-full" />
+                  <div className="relative">
+                    <User className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400 pointer-events-none" />
+                    <input type="text" value={form.author_name} onChange={e => setForm({ ...form, author_name: e.target.value })} placeholder="Nombre del autor" className="w-full pl-10" />
+                  </div>
                 </div>
                 <div>
                   <label className="block text-sm font-bold text-slate-700 dark:text-slate-300 mb-1.5">Extracto</label>
-                  <input type="text" value={form.excerpt} onChange={e => setForm({ ...form, excerpt: e.target.value })} placeholder="Resumen breve" className="w-full" />
+                  <div className="relative">
+                    <FileText className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400 pointer-events-none" />
+                    <input type="text" value={form.excerpt} onChange={e => setForm({ ...form, excerpt: e.target.value })} placeholder="Resumen breve" className="w-full pl-10" />
+                  </div>
                 </div>
               </div>
               <div>
@@ -185,12 +194,15 @@ export default function BlogManagementSection() {
               </div>
               <div>
                 <label className="block text-sm font-bold text-slate-700 dark:text-slate-300 mb-1.5">Contenido</label>
-                <textarea
-                  value={form.content}
-                  onChange={e => setForm({ ...form, content: e.target.value })}
-                  placeholder="Escribe el contenido aquí... Puedes usar **negritas** con markdown"
-                  className="w-full h-64 resize-none font-mono text-sm leading-relaxed"
-                />
+                <div className="relative">
+                  <MessageSquare className="absolute top-3.5 left-3.5 w-4 h-4 text-slate-400 pointer-events-none" />
+                  <textarea
+                    value={form.content}
+                    onChange={e => setForm({ ...form, content: e.target.value })}
+                    placeholder="Escribe el contenido aquí... Puedes usar **negritas** con markdown"
+                    className="w-full pl-10 pr-4 py-2.5 h-64 resize-none font-mono text-sm leading-relaxed rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 focus:ring-2 focus:ring-primary-500/20 focus:border-primary-500 outline-none transition-all"
+                  />
+                </div>
                 <p className="text-xs text-slate-400 mt-1">Soporta **negritas** y [enlaces](url)</p>
               </div>
 

@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { Link } from 'react-router-dom';
 import SEO from '../components/SEO';
-import { Gift, Users, DollarSign, TrendingUp, CheckCircle, ArrowRight } from 'lucide-react';
+import { Gift, Users, DollarSign, TrendingUp, CheckCircle, ArrowRight, User, Mail, Phone, MapPin } from 'lucide-react';
 
 export default function Embajadores() {
   const [form, setForm] = useState({ name: '', email: '', phone: '', city: '' });
@@ -61,19 +61,31 @@ Ciudad: ${form.city}`;
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                   <div>
                     <label className="block text-sm font-bold text-slate-700 dark:text-slate-300 mb-1">Nombre completo</label>
-                    <input type="text" value={form.name} onChange={e => setForm({ ...form, name: e.target.value })} placeholder="Tu nombre" className="w-full" required />
+                    <div className="relative">
+                      <User className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400 pointer-events-none" />
+                      <input type="text" value={form.name} onChange={e => setForm({ ...form, name: e.target.value })} placeholder="Tu nombre" className="w-full pl-10" required />
+                    </div>
                   </div>
                   <div>
                     <label className="block text-sm font-bold text-slate-700 dark:text-slate-300 mb-1">Email</label>
-                    <input type="email" value={form.email} onChange={e => setForm({ ...form, email: e.target.value })} placeholder="tu@email.com" className="w-full" required />
+                    <div className="relative">
+                      <Mail className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400 pointer-events-none" />
+                      <input type="email" value={form.email} onChange={e => setForm({ ...form, email: e.target.value })} placeholder="tu@email.com" className="w-full pl-10" required />
+                    </div>
                   </div>
                   <div>
                     <label className="block text-sm font-bold text-slate-700 dark:text-slate-300 mb-1">Teléfono</label>
-                    <input type="tel" value={form.phone} onChange={e => setForm({ ...form, phone: e.target.value })} placeholder="+57 300..." className="w-full" required />
+                    <div className="relative">
+                      <Phone className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400 pointer-events-none" />
+                      <input type="tel" value={form.phone} onChange={e => setForm({ ...form, phone: e.target.value })} placeholder="+57 300..." className="w-full pl-10" required />
+                    </div>
                   </div>
                   <div>
                     <label className="block text-sm font-bold text-slate-700 dark:text-slate-300 mb-1">Ciudad</label>
-                    <input type="text" value={form.city} onChange={e => setForm({ ...form, city: e.target.value })} placeholder="Tu ciudad" className="w-full" />
+                    <div className="relative">
+                      <MapPin className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400 pointer-events-none" />
+                      <input type="text" value={form.city} onChange={e => setForm({ ...form, city: e.target.value })} placeholder="Tu ciudad" className="w-full pl-10" />
+                    </div>
                   </div>
                 </div>
                 <button type="submit" className="w-full py-3.5 bg-amber-500 hover:bg-amber-600 text-white font-bold rounded-xl transition-all shadow-lg shadow-amber-500/25">

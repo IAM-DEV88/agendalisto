@@ -1,7 +1,8 @@
 import React, { type FormEvent, type ChangeEvent, useState, useEffect } from 'react';
 import { supabase } from '../../lib/supabase';
-import { Camera, Check } from 'lucide-react';
+import { Camera, Check, User, Mail } from 'lucide-react';
 import PhoneInput from '../../components/ui/PhoneInput';
+import FormInput from '../../components/ui/FormInput';
 
 interface UserProfileSectionProps {
   profileData: {
@@ -125,33 +126,29 @@ const UserProfileSection: React.FC<UserProfileSectionProps> = ({
             {/* Form */}
             <div className="flex-1 grid grid-cols-1 sm:grid-cols-2 gap-5 w-full">
               <div className="sm:col-span-2">
-                <label htmlFor="full_name" className="block text-sm font-bold text-slate-700 dark:text-slate-300 mb-1.5">
-                  Nombre completo
-                </label>
-                <input
+                <FormInput
+                  label="Nombre completo"
+                  icon={User}
                   type="text"
                   name="full_name"
                   id="full_name"
                   value={profileData.full_name}
                   onChange={onChange}
                   placeholder="Tu nombre real"
-                  className="w-full"
                 />
               </div>
 
               <div>
-                <label htmlFor="email" className="block text-sm font-bold text-slate-700 dark:text-slate-300 mb-1.5">
-                  Correo electrónico
-                </label>
-                <input
+                <FormInput
+                  label="Correo electrónico"
+                  icon={Mail}
                   type="email"
                   name="email"
                   id="email"
                   value={profileData.email}
                   disabled
-                  className="w-full bg-slate-100 dark:bg-slate-800/50 cursor-not-allowed opacity-70"
+                  helpText="El correo no se puede modificar"
                 />
-                <p className="mt-1.5 text-xs text-slate-400 font-medium">El correo no se puede modificar</p>
               </div>
 
               <div>

@@ -111,7 +111,7 @@ export default function PhoneInput({
 
   return (
     <div ref={ref} className="relative">
-      <div className="flex rounded-xl border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-100 focus-within:ring-2 focus-within:ring-primary-500/20 focus-within:border-primary-500 transition-all overflow-hidden">
+      <div className="flex rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 focus-within:ring-2 focus-within:ring-primary-500/20 focus-within:border-primary-500 transition-all overflow-hidden">
         <button
           type="button"
           onClick={() => setOpen(!open)}
@@ -134,7 +134,7 @@ export default function PhoneInput({
           required={required}
           inputMode="numeric"
           autoComplete="tel-national"
-          className="flex-1 !bg-transparent !border-0 !outline-none !pl-3 !rounded-none text-slate-900 dark:text-gray-900 font-medium placeholder:text-slate-400 text-sm"
+          className="flex-1 !bg-transparent !border-0 !outline-none !pl-3 !rounded-none text-slate-900 dark:text-white font-medium placeholder:text-slate-400 text-sm"
         />
       </div>
 

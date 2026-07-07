@@ -10,7 +10,7 @@ import type { RootState } from '../store';
 import {
   ArrowLeft, ChevronLeft, ChevronRight, X, Store,
   Clock, User, Loader2, Image as ImageIcon, Plus,
-  CheckCircle, XCircle, Sparkles, Save
+  CheckCircle, XCircle, Sparkles, Save, Tag, FileText, DollarSign
 } from 'lucide-react';
 
 const ALLOWED_IMAGE_TYPES = ['image/jpeg', 'image/png', 'image/webp', 'image/gif'];
@@ -432,27 +432,33 @@ export default function ServiceFormPage() {
                       <label htmlFor="name" className="text-sm font-bold text-slate-700 dark:text-slate-300">
                         Nombre del servicio <span className="text-red-500">*</span>
                       </label>
-                      <input
-                        type="text" id="name" required
-                        value={formData.name}
-                        onChange={e => setFormData({ ...formData, name: e.target.value })}
-                        className="w-full px-4 py-3 rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 focus:ring-2 focus:ring-primary-500/20 focus:border-primary-500 outline-none transition-all font-medium"
-                        placeholder="Ej: Corte de Cabello"
-                      />
+                      <div className="relative">
+                        <Tag className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400 pointer-events-none" />
+                        <input
+                          type="text" id="name" required
+                          value={formData.name}
+                          onChange={e => setFormData({ ...formData, name: e.target.value })}
+                          className="w-full pl-10 pr-4 py-3 rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 focus:ring-2 focus:ring-primary-500/20 focus:border-primary-500 outline-none transition-all font-medium"
+                          placeholder="Ej: Corte de Cabello"
+                        />
+                      </div>
                     </div>
 
                     <div className="space-y-1">
                       <label htmlFor="description" className="text-sm font-bold text-slate-700 dark:text-slate-300">
                         Descripción <span className="text-red-500">*</span>
                       </label>
-                      <textarea
-                        id="description" required
-                        value={formData.description}
-                        onChange={e => setFormData({ ...formData, description: e.target.value })}
-                        rows={4}
-                        className="w-full px-4 py-3 rounded-xl border border-slate-200 dark:border-slate-700 bg-white text-slate-900 focus:ring-2 focus:ring-primary-500/20 focus:border-primary-500 outline-none transition-all resize-none font-medium dark:text-gray-900"
-                        placeholder="Describe brevemente el servicio..."
-                      />
+                      <div className="relative">
+                        <FileText className="absolute top-3.5 left-3.5 w-4 h-4 text-slate-400 pointer-events-none" />
+                        <textarea
+                          id="description" required
+                          value={formData.description}
+                          onChange={e => setFormData({ ...formData, description: e.target.value })}
+                          rows={4}
+                          className="w-full pl-10 pr-4 py-3 rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 text-slate-900 dark:text-white focus:ring-2 focus:ring-primary-500/20 focus:border-primary-500 outline-none transition-all resize-none font-medium"
+                          placeholder="Describe brevemente el servicio..."
+                        />
+                      </div>
                     </div>
 
                     <div className="grid grid-cols-2 gap-4">
@@ -460,23 +466,29 @@ export default function ServiceFormPage() {
                         <label htmlFor="duration" className="text-sm font-bold text-slate-700 dark:text-slate-300">
                           Duración (min) <span className="text-red-500">*</span>
                         </label>
-                        <input
-                          type="number" id="duration" required min="5"
-                          value={formData.duration}
-                          onChange={e => setFormData({ ...formData, duration: e.target.value })}
-                          className="w-full px-4 py-3 rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 focus:ring-2 focus:ring-primary-500/20 focus:border-primary-500 outline-none transition-all font-medium"
-                        />
+                        <div className="relative">
+                          <Clock className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400 pointer-events-none" />
+                          <input
+                            type="number" id="duration" required min="5"
+                            value={formData.duration}
+                            onChange={e => setFormData({ ...formData, duration: e.target.value })}
+                            className="w-full pl-10 pr-4 py-3 rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 focus:ring-2 focus:ring-primary-500/20 focus:border-primary-500 outline-none transition-all font-medium"
+                          />
+                        </div>
                       </div>
                       <div className="space-y-1">
                         <label htmlFor="price" className="text-sm font-bold text-slate-700 dark:text-slate-300">
                           Precio ($) <span className="text-red-500">*</span>
                         </label>
-                        <input
-                          type="number" id="price" required min="0" step="0.01"
-                          value={formData.price}
-                          onChange={e => setFormData({ ...formData, price: e.target.value })}
-                          className="w-full px-4 py-3 rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 focus:ring-2 focus:ring-primary-500/20 focus:border-primary-500 outline-none transition-all font-medium"
-                        />
+                        <div className="relative">
+                          <DollarSign className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400 pointer-events-none" />
+                          <input
+                            type="number" id="price" required min="0" step="0.01"
+                            value={formData.price}
+                            onChange={e => setFormData({ ...formData, price: e.target.value })}
+                            className="w-full pl-10 pr-4 py-3 rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 focus:ring-2 focus:ring-primary-500/20 focus:border-primary-500 outline-none transition-all font-medium"
+                          />
+                        </div>
                       </div>
                     </div>
 
@@ -484,13 +496,16 @@ export default function ServiceFormPage() {
                       <label htmlFor="provider" className="text-sm font-bold text-slate-700 dark:text-slate-300">
                         Proveedor <span className="text-slate-400 font-normal">(opcional)</span>
                       </label>
-                      <input
-                        type="text" id="provider"
-                        value={formData.provider}
-                        onChange={e => setFormData({ ...formData, provider: e.target.value })}
-                        className="w-full px-4 py-3 rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 focus:ring-2 focus:ring-primary-500/20 focus:border-primary-500 outline-none transition-all font-medium"
-                        placeholder="Nombre del profesional"
-                      />
+                      <div className="relative">
+                        <User className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400 pointer-events-none" />
+                        <input
+                          type="text" id="provider"
+                          value={formData.provider}
+                          onChange={e => setFormData({ ...formData, provider: e.target.value })}
+                          className="w-full pl-10 pr-4 py-3 rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 focus:ring-2 focus:ring-primary-500/20 focus:border-primary-500 outline-none transition-all font-medium"
+                          placeholder="Nombre del profesional"
+                        />
+                      </div>
                     </div>
                   </div>
                 </div>

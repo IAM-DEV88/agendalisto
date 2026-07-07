@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Camera, Save, Loader2, Globe, Phone, MapPin, Mail, Tag, Info, Settings, Wand2, Crosshair, MessageCircle, Instagram, Facebook } from 'lucide-react';
+import { Camera, Save, Loader2, Globe, Phone, MapPin, Mail, Tag, Info, Wand2, Crosshair, MessageCircle, Instagram, Facebook, Store } from 'lucide-react';
 import { Business, updateBusiness, getBusinessCategories, BusinessCategory } from '../../lib/api';
 import { supabase } from '../../lib/supabase';
 import { generateBusinessDescription } from '../../lib/ai';
@@ -7,6 +7,9 @@ import PhoneInput from '../ui/PhoneInput';
 import { toast } from 'react-hot-toast';
 import SectionHeader from '../ui/SectionHeader';
 import LocationPicker from '../ui/LocationPicker';
+import FormInput from '../ui/FormInput';
+import FormTextarea from '../ui/FormTextarea';
+import FormSelect from '../ui/FormSelect';
 
 interface BusinessProfileSectionProps {
   businessData: Business;
@@ -202,46 +205,39 @@ const BusinessProfileSection: React.FC<BusinessProfileSectionProps> = ({
             {/* Form Fields */}
             <div className="flex-grow grid grid-cols-1 md:grid-cols-2 gap-6 w-full">
               <div className="space-y-2">
-                <label htmlFor="name" className="text-sm font-bold text-slate-700 dark:text-slate-300 flex items-center gap-2">
-                  <Tag className="w-4 h-4 text-slate-400" />
-                  Nombre del Negocio
-                </label>
-                <input
+                <FormInput
+                  label="Nombre del Negocio"
+                  icon={Store}
                   type="text"
                   name="name"
                   id="name"
                   value={businessData.name}
                   onChange={onChange}
-                  className="w-full px-4 py-2.5 rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 focus:ring-2 focus:ring-primary-500/20 focus:border-primary-500 outline-none transition-all font-medium text-slate-900 dark:text-white"
                   placeholder="Ej: Barbería Estilo"
                   required
                 />
               </div>
 
               <div className="space-y-2">
-                <label htmlFor="category_id" className="text-sm font-bold text-slate-700 dark:text-slate-300 flex items-center gap-2">
-                  <Settings className="w-4 h-4 text-slate-400" />
-                  Categoría
-                </label>
-                <select
+                <FormSelect
+                  label="Categoría"
+                  icon={Tag}
                   name="category_id"
                   id="category_id"
                   value={businessData.category_id || ''}
                   onChange={onChange}
-                  className="w-full rounded-xl border border-slate-200 dark:border-slate-700 focus:ring-2 focus:ring-primary-500/20 focus:border-primary-500 outline-none transition-all"
                   required
                 >
                   <option value="" disabled>Selecciona una categoría</option>
                   {categories.map(cat => (
                     <option key={cat.id} value={cat.id}>{cat.name}</option>
                   ))}
-                </select>
+                </FormSelect>
               </div>
 
               <div className="space-y-2 md:col-span-2">
                 <div className="flex items-center justify-between">
-                  <label htmlFor="description" className="text-sm font-bold text-slate-700 dark:text-slate-300 flex items-center gap-2">
-                    <Info className="w-4 h-4 text-slate-400" />
+                  <label htmlFor="description" className="text-sm font-bold text-slate-700 dark:text-slate-300">
                     Descripción
                   </label>
                   <button
@@ -279,15 +275,15 @@ const BusinessProfileSection: React.FC<BusinessProfileSectionProps> = ({
                     {generatingDesc ? 'Generando...' : 'Generar con IA'}
                   </button>
                 </div>
-                <textarea
+                <FormTextarea
+                  icon={Info}
                   name="description"
                   id="description"
                   value={businessData.description}
                   onChange={onChange}
                   rows={3}
-                  className="w-full rounded-xl border border-slate-200 dark:border-slate-700 focus:ring-2 focus:ring-primary-500/20 focus:border-primary-500 outline-none transition-all resize-none"
                   placeholder="Describe los servicios y valores de tu negocio..."
-                ></textarea>
+                />
               </div>
 
               <div className="space-y-2">
@@ -305,51 +301,42 @@ const BusinessProfileSection: React.FC<BusinessProfileSectionProps> = ({
               </div>
 
               <div className="space-y-2">
-                <label htmlFor="email" className="text-sm font-bold text-slate-700 dark:text-slate-300 flex items-center gap-2">
-                  <Mail className="w-4 h-4 text-slate-400" />
-                  Correo Electrónico
-                </label>
-                <input
+                <FormInput
+                  label="Correo Electrónico"
+                  icon={Mail}
                   type="email"
                   name="email"
                   id="email"
                   value={businessData.email}
                   onChange={onChange}
-                  className="w-full px-4 py-2.5 rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 focus:ring-2 focus:ring-primary-500/20 focus:border-primary-500 outline-none transition-all font-medium text-slate-900 dark:text-white"
                   placeholder="contacto@negocio.com"
                   required
                 />
               </div>
 
               <div className="space-y-2">
-                <label htmlFor="address" className="text-sm font-bold text-slate-700 dark:text-slate-300 flex items-center gap-2">
-                  <MapPin className="w-4 h-4 text-slate-400" />
-                  Dirección
-                </label>
-                <input
+                <FormInput
+                  label="Dirección"
+                  icon={MapPin}
                   type="text"
                   name="address"
                   id="address"
                   value={businessData.address}
                   onChange={onChange}
-                  className="w-full px-4 py-2.5 rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 focus:ring-2 focus:ring-primary-500/20 focus:border-primary-500 outline-none transition-all font-medium text-slate-900 dark:text-white"
                   placeholder="Calle Ficticia 123, Ciudad"
                   required
                 />
               </div>
 
               <div className="space-y-2">
-                <label htmlFor="website" className="text-sm font-bold text-slate-700 dark:text-slate-300 flex items-center gap-2">
-                  <Globe className="w-4 h-4 text-slate-400" />
-                  Sitio Web (opcional)
-                </label>
-                <input
+                <FormInput
+                  label="Sitio Web"
+                  icon={Globe}
                   type="text"
                   name="website"
                   id="website"
                   value={businessData.website || ''}
                   onChange={onChange}
-                  className="w-full px-4 py-2.5 rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 focus:ring-2 focus:ring-primary-500/20 focus:border-primary-500 outline-none transition-all font-medium text-slate-900 dark:text-white"
                   placeholder="https://www.tu-web.com"
                 />
               </div>

@@ -98,7 +98,7 @@ const Home = () => {
                     placeholder="Ej: Corte de cabello, uñas, masaje" 
                     value={searchService}
                     onChange={(e) => setSearchService(e.target.value)}
-                    className="w-full pl-10 pr-4 py-3 md:py-4 rounded-xl md:rounded-lg bg-slate-50 border-0 text-sm font-medium text-slate-900 placeholder-slate-400 focus:ring-2 focus:ring-primary-500 focus:outline-none"
+                    className="w-full pl-10 pr-4 py-3 md:py-4 rounded-xl md:rounded-lg bg-slate-50 dark:!bg-slate-50 border-0 text-sm font-medium text-slate-900 dark:!text-slate-900 placeholder-slate-400 focus:ring-2 focus:ring-primary-500 focus:outline-none"
                   />
                 </div>
                 <div className="relative md:col-span-1">
@@ -108,7 +108,7 @@ const Home = () => {
                     placeholder="Ubicación" 
                     value={searchLocation}
                     onChange={(e) => setSearchLocation(e.target.value)}
-                    className="w-full pl-10 pr-4 py-3 md:py-4 rounded-xl md:rounded-lg bg-slate-50 border-0 text-sm font-medium text-slate-900 placeholder-slate-400 focus:ring-2 focus:ring-primary-500 focus:outline-none"
+                    className="w-full pl-10 pr-4 py-3 md:py-4 rounded-xl md:rounded-lg bg-slate-50 dark:!bg-slate-50 border-0 text-sm font-medium text-slate-900 dark:!text-slate-900 placeholder-slate-400 focus:ring-2 focus:ring-primary-500 focus:outline-none"
                   />
                 </div>
                 <button type="submit" className="md:col-span-2 bg-primary-600 hover:bg-primary-500 text-white px-8 py-3 md:py-4 rounded-xl font-black transition-all flex items-center justify-center gap-2 shadow-lg shadow-primary-500/30">
