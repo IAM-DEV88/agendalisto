@@ -4,6 +4,7 @@ import { supabase } from '../lib/supabase';
 import { saveChatMessage, getChatHistory, ChatMessage, getBlogPosts, getPopularPosts, getBusinessCategories } from '../lib/api';
 import { toast } from 'react-hot-toast';
 import { Link } from 'react-router-dom';
+import { getCityConfig } from '../lib/cities';
 
 // Función para parsear el contenido del mensaje y detectar enlaces en formato Markdown y negritas
 const MessageContent = ({ content }: { content: string }) => {
@@ -58,7 +59,44 @@ const MessageContent = ({ content }: { content: string }) => {
   );
 };
 
-function buildSystemPrompt(blogContext: string, businessesContext: string) {
+function getCityContext(): string {
+  const match = window.location.pathname.match(/^\/ciudades\/([^/]+)/);
+  if (!match) return '';
+  const city = getCityConfig(match[1]);
+  if (!city) return '';
+
+  return `
+═══ CONTEXTO: PÁGINA DE ${city.name.toUpperCase()} ═══
+El usuario está viendo la página de **${city.name}**, ${city.department}, Colombia.
+
+Categorías prioritarias en ${city.name}:
+${city.priorityCategories.map(c => `- ${c}`).join('\n')}
+
+${city.hasAgriculture ? `🌱 *Sector agrícola activo*: Productores de café, aguacate, pitaya pueden publicar sus fincas/bodegas.` : ''}
+
+📌 *¿Qué puede hacer el usuario aquí?*
+- Explorar negocios registrados en ${city.name}
+- **Registrar su negocio gratis** llenando el formulario en la misma página
+- Si hay sector agrícola: publicar finca/bodega para recibir cotizaciones
+
+🎯 *Captura de leads — ASISTENTE PERSONAL*
+Cuando un usuario quiera registrar su negocio en ${city.name}:
+1. ✅ Pídele amablemente: **nombre**, **nombre del negocio**, **WhatsApp** y **categoría**.
+2. ✅ Una vez tengas los datos, confírmale que quedaron listos.
+3. ✅ Dile que el equipo de AgendaYa lo contactará pronto y que mientras tanto puede explorar la plataforma.
+4. ✅ IMPORTANTE: Guíalo siempre al formulario que está en la misma página (sección "Publica tu negocio gratis") para que complete el registro formal.
+
+📌 *Información útil sobre ${city.name}:*
+- Categorías prioritarias: ${city.priorityCategories.join(', ')}.
+${city.hasAgriculture ? `- 🌱 Sector agrícola: productores de café, aguacate y pitaya pueden publicar sus fincas gratis.` : ''}
+
+🎯 *Reglas para captura de leads:*
+- Sé conversacional y natural — no parezcas un bot de formulario.
+- Si el usuario comparte sus datos, responde con entusiasmo y dale la bienvenida.
+- NUNCA inventes datos de la ciudad — si no sabes algo, dirígelo al formulario en la página.`;
+}
+
+function buildSystemPrompt(blogContext: string, businessesContext: string, cityContext?: string) {
   return `Eres el **Guía de AgendaYa**, un asistente cordial, profesional y entusiasta. Tu objetivo es ayudar a los usuarios a navegar y aprovechar todo el sitio. NUNCA digas que eres una IA — eres el Guía de la plataforma. NUNCA inventes slugs, rutas ni precios. Responde siempre en español neutro de Colombia.
 
 ═══ TU PERSONALIDAD ═══
@@ -144,7 +182,9 @@ REGLAS CRÍTICAS:
 1. Usa SIEMPRE los enlaces de "RUTAS VÁLIDAS" o del directorio dinámico. NUNCA inventes rutas.
 2. Al recomendar un negocio o post, usa EL FORMATO EXACTO del directorio: [Nombre](/slug).
 3. Si el usuario pregunta por algo que no está en el directorio, sugiere ir a [/explore](/explore) o [/blog](/blog).
-4. Si preguntan por precios, usa los de "PLANES Y PRECIOS". Si preguntan por costos de servicios individuales, redirige a la página del negocio.`;
+4. Si preguntan por precios, usa los de "PLANES Y PRECIOS". Si preguntan por costos de servicios individuales, redirige a la página del negocio.
+
+${cityContext || ''}`;
 }
 
 const ChatGuia = () => {
@@ -154,6 +194,8 @@ const ChatGuia = () => {
   const [isLoading, setIsLoading] = useState(false);
   const [blogContext, setBlogContext] = useState<string>('');
   const [businessesContext, setBusinessContext] = useState<string>('');
+  const [cityContext, setCityContext] = useState<string>('');
+  const hasProactiveGreeting = useRef(false);
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const sessionId = useRef(localStorage.getItem('chat_session_id') || Math.random().toString(36).substring(7));
 
@@ -161,7 +203,27 @@ const ChatGuia = () => {
     localStorage.setItem('chat_session_id', sessionId.current);
     fetchHistory();
     fetchSiteContext();
+    setCityContext(getCityContext());
   }, []);
+
+  useEffect(() => {
+    if (isOpen && cityContext && !hasProactiveGreeting.current && messages.length === 0) {
+      hasProactiveGreeting.current = true;
+      const citySlug = window.location.pathname.match(/^\/ciudades\/([^/]+)/)?.[1];
+      const city = citySlug ? getCityConfig(citySlug) : null;
+      if (city) {
+        const msg = `¡Hola! 👋 Veo que estás explorando **${city.name}**. ¿Tienes un negocio aquí o estás buscando algún servicio en particular? Puedo ayudarte a registrar tu negocio gratis en menos de 5 minutos.`;
+        const tempAssistantMsg: ChatMessage = {
+          id: 'proactive-' + Date.now(),
+          role: 'assistant',
+          content: msg,
+          session_id: sessionId.current,
+          created_at: new Date().toISOString()
+        };
+        setMessages([tempAssistantMsg]);
+      }
+    }
+  }, [isOpen, cityContext]);
 
   const fetchSiteContext = async () => {
     try {
@@ -276,7 +338,7 @@ const ChatGuia = () => {
         const groqKey = import.meta.env.VITE_GROQ_API_KEY;
         if (!groqKey) throw new Error('VITE_GROQ_API_KEY no configurada en .env');
 
-        const systemPrompt = buildSystemPrompt(blogContext, businessesContext);
+        const systemPrompt = buildSystemPrompt(blogContext, businessesContext, cityContext);
         const groqRes = await fetch('https://api.groq.com/openai/v1/chat/completions', {
           method: 'POST',
           headers: { 'Authorization': `Bearer ${groqKey}`, 'Content-Type': 'application/json' },
@@ -295,7 +357,7 @@ const ChatGuia = () => {
         const response = await fetch('/.netlify/functions/chat-proxy', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ messages: convMessages, blogContext, businessesContext }),
+          body: JSON.stringify({ messages: convMessages, blogContext, businessesContext, cityContext }),
         });
         if (!response.ok) throw new Error('Error del servidor');
         assistantContent = (await response.json()).content;
@@ -358,7 +420,7 @@ const ChatGuia = () => {
 
           {/* Messages Area */}
           <div className="flex-1 overflow-y-auto p-4 space-y-4 bg-slate-50 dark:bg-slate-950">
-            {messages.length === 0 && (
+            {messages.length === 0 && !cityContext && (
               <div className="text-center py-8">
                 <div className="w-16 h-16 bg-primary-100 dark:bg-primary-900/30 rounded-full flex items-center justify-center mx-auto mb-4">
                   <Bot className="w-8 h-8 text-primary-600" />
@@ -367,6 +429,20 @@ const ChatGuia = () => {
                 <p className="text-sm text-slate-500 dark:text-slate-400">
                   Soy tu Guía en AgendaYa. ¿En qué puedo ayudarte hoy?
                 </p>
+              </div>
+            )}
+            {cityContext && (
+              <div className="text-center pb-2">
+                <button
+                  onClick={() => {
+                    const form = document.getElementById('business-lead-form');
+                    if (form) form.scrollIntoView({ behavior: 'smooth', block: 'start' });
+                    setIsOpen(false);
+                  }}
+                  className="inline-flex items-center gap-2 px-4 py-2 bg-primary-600 hover:bg-primary-500 text-white text-sm font-bold rounded-xl transition-all shadow-lg shadow-primary-500/25"
+                >
+                  📝 Registrar mi negocio
+                </button>
               </div>
             )}
             {messages.map((msg) => (

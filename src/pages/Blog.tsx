@@ -131,6 +131,16 @@ const Blog = () => {
           </div>
         </div>
 
+        {/* Business CTA Banner */}
+        <div className="max-w-xl mx-auto mb-8 animate-in fade-in slide-in-from-bottom-4 duration-500 delay-200">
+          <Link
+            to="/register"
+            className="flex items-center justify-center gap-2 px-5 py-3 bg-primary-50 dark:bg-primary-900/20 text-primary-700 dark:text-primary-300 font-bold text-sm rounded-xl border border-primary-200 dark:border-primary-800 hover:bg-primary-100 dark:hover:bg-primary-900/40 transition-all"
+          >
+            🌐 ¿Tienes un negocio? Crea tu página web gratis →
+          </Link>
+        </div>
+
         {/* Content */}
         {loading && posts.length === 0 ? (
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 animate-in fade-in duration-300">

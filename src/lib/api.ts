@@ -2,6 +2,7 @@ import { supabase, UserProfile } from './supabase';
 import type { Appointment, AppointmentStatus, Review, GuestInfo } from '../types/appointment';
 import { DEFAULT_BUSINESS_CONFIG } from './defaults';
 import { getErrorMessage } from './api-helpers';
+import { WHATSAPP_API_URL } from './config';
 
 // Re-export types from appointment.ts
 export type { Appointment, AppointmentStatus, Review, GuestInfo };
@@ -28,6 +29,7 @@ export type Business = {
   plan_score: number;
   likes_count: number;
   showcase_only?: boolean;
+  referral_code?: string | null;
   created_at: string;
   updated_at: string;
   /** Business configuration settings */
@@ -538,6 +540,13 @@ export const createBusiness = async (business: Omit<Business, 'id' | 'plan' | 'p
 
     const newBusiness = data as Business;
 
+    // Generar código de referido vinculado al negocio
+    const bizCode = 'AGB' + btoa(newBusiness.id).replace(/=/g, '').replace(/\//g, '_');
+    await supabase
+      .from('agendaya_businesses')
+      .update({ referral_code: bizCode })
+      .eq('id', newBusiness.id);
+
     // Crear fila de configuración por defecto
     await supabase
       .from('agendaya_business_config')
@@ -546,7 +555,7 @@ export const createBusiness = async (business: Omit<Business, 'id' | 'plan' | 'p
         if (cfgError) console.error('[createBusiness] Error creating config:', cfgError);
       });
 
-    return { success: true, business: newBusiness };
+    return { success: true, business: { ...newBusiness, referral_code: bizCode } };
   } catch (error) {
     console.error('[createBusiness] Caught:', error);
     return { success: false, error };
@@ -1923,6 +1932,7 @@ export const subscribeToNewsletter = async (email: string): Promise<{ success: b
 // --- Referral System ---
 
 const REFERRAL_PREFIX = 'AG';
+const BUSINESS_REFERRAL_PREFIX = 'AGB';
 
 export const generateReferralCode = (userId: string): string => {
   return REFERRAL_PREFIX + btoa(userId).replace(/=/g, '');
@@ -1938,6 +1948,25 @@ export const decodeReferralCode = (code: string): string | null => {
   }
 };
 
+export const generateBusinessReferralCode = (businessId: string): string => {
+  return BUSINESS_REFERRAL_PREFIX + btoa(businessId).replace(/=/g, '').replace(/\//g, '_');
+};
+
+export const decodeBusinessReferralCode = (code: string): string | null => {
+  if (!code.startsWith(BUSINESS_REFERRAL_PREFIX)) return null;
+  try {
+    const encoded = code.slice(BUSINESS_REFERRAL_PREFIX.length);
+    return atob(encoded);
+  } catch {
+    return null;
+  }
+};
+
+export const getBusinessReferralLink = (businessId: string, businessReferralCode?: string | null): string => {
+  const code = businessReferralCode || generateBusinessReferralCode(businessId);
+  return `${window.location.origin}/register?ref=${code}`;
+};
+
 export const getReferralLink = (userId: string): string => {
   const code = generateReferralCode(userId);
   return `${window.location.origin}/register?ref=${code}`;
@@ -1945,7 +1974,22 @@ export const getReferralLink = (userId: string): string => {
 
 export const applyReferralCode = async (newUserId: string, referralCode: string): Promise<{ success: boolean; error?: string }> => {
   try {
-    const referrerId = decodeReferralCode(referralCode);
+    let referrerId: string | null = null;
+
+    // Intentar decodificar como código de negocio (AGB...)
+    const businessId = decodeBusinessReferralCode(referralCode);
+    if (businessId) {
+      const { data: biz } = await supabase
+        .from('agendaya_businesses')
+        .select('owner_id')
+        .eq('id', businessId)
+        .maybeSingle();
+      if (biz) referrerId = biz.owner_id;
+    } else {
+      // Decodificar como código de usuario (AG...)
+      referrerId = decodeReferralCode(referralCode);
+    }
+
     if (!referrerId) return { success: false, error: 'Código de referido inválido' };
     const { error } = await supabase
       .from('agendaya_profiles')
@@ -2095,6 +2139,60 @@ export const getTopReferrers = async (limit = 10): Promise<{ success: boolean; d
     return { success: false, error: getErrorMessage(err) };
   }
 };
+
+export type LandingLeadType = 'business' | 'customer';
+
+export type LandingLead = {
+  type: LandingLeadType;
+  city_slug: string;
+  name: string;
+  business_name?: string;
+  whatsapp?: string;
+  category?: string;
+  message?: string;
+};
+
+export async function insertLandingLead(lead: LandingLead): Promise<{ success: boolean; error?: string }> {
+  try {
+    const { error } = await supabase.from('agendaya_landing_leads').insert([lead]);
+    if (error) throw error;
+
+    // Fire-and-forget: notify via WhatsApp (Netlify Function)
+    if (lead.type === 'business') {
+      const cityName = lead.city_slug.charAt(0).toUpperCase() + lead.city_slug.slice(1);
+      notifyLeadWhatsApp({
+        name: lead.name,
+        businessName: lead.business_name || '',
+        whatsapp: lead.whatsapp,
+        category: lead.category,
+        cityName,
+      });
+    }
+
+    return { success: true };
+  } catch (err: unknown) {
+    return { success: false, error: getErrorMessage(err) || 'Error al guardar contacto' };
+  }
+}
+
+async function notifyLeadWhatsApp(payload: {
+  name: string;
+  businessName: string;
+  whatsapp?: string;
+  category?: string;
+  cityName: string;
+}): Promise<void> {
+  try {
+    await fetch(WHATSAPP_API_URL, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(payload),
+    });
+  } catch {
+    // Silent — the lead was already saved.
+    // WhatsApp notification is best-effort.
+  }
+}
 
 export const getAdminReferralStats = async (): Promise<{ success: boolean; data?: { total_referrals: number; unique_referrers: number }; error?: string }> => {
   try {

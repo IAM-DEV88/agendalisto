@@ -63,6 +63,11 @@ const Footer = () => {
               <li>
                 <Link to="/login" className="text-sm text-slate-500 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white transition-colors">Iniciar sesión</Link>
               </li>
+              <li>
+                <Link to="/register" className="text-sm font-bold text-primary-600 dark:text-primary-400 hover:text-primary-700 dark:hover:text-primary-300 transition-colors flex items-center gap-1.5">
+                  🌐 Obtén tu web gratis
+                </Link>
+              </li>
             </ul>
           </div>
 

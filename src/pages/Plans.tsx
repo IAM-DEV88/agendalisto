@@ -57,7 +57,7 @@ function PlansContent() {
             Planes para tu negocio
           </h1>
           <p className="text-lg text-slate-500 dark:text-slate-400 max-w-2xl mx-auto">
-            Empieza gratis y escala a medida que creces. Todos los planes incluyen gestión de citas y perfil público.
+            Empieza gratis y escala a medida que creces. Todos los planes incluyen tu propia página web profesional con gestión de citas.
           </p>
         </div>
 

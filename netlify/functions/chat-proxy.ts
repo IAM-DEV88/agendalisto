@@ -7,7 +7,7 @@ export const handler: Handler = async (event: HandlerEvent) => {
 
   try {
     const body = JSON.parse(event.body || '{}');
-    const { messages, blogContext, businessesContext, systemPrompt: customPrompt, model: customModel, max_tokens: customMaxTokens, temperature: customTemperature } = body;
+    const { messages, blogContext, businessesContext, cityContext, systemPrompt: customPrompt, model: customModel, max_tokens: customMaxTokens, temperature: customTemperature } = body;
 
     if (!messages || !Array.isArray(messages) || messages.length === 0) {
       return { statusCode: 400, body: JSON.stringify({ error: 'messages array is required' }) };
@@ -85,7 +85,9 @@ REGLAS CRÍTICAS:
 1. Usa SIEMPRE los enlaces de "RUTAS VÁLIDAS" o del directorio dinámico. NUNCA inventes rutas.
 2. Al recomendar un negocio o post, usa EL FORMATO EXACTO del directorio: [Nombre](/slug).
 3. Si el usuario pregunta por algo que no está en el directorio, sugiere ir a [/explore](/explore) o [/blog](/blog).
-4. Si preguntan por precios, usa los de "PLANES Y PRECIOS". Si preguntan por costos de servicios individuales, redirige a la página del negocio.`;
+4. Si preguntan por precios, usa los de "PLANES Y PRECIOS". Si preguntan por costos de servicios individuales, redirige a la página del negocio.
+
+${cityContext || ''}`;
 
     const response = await fetch('https://api.groq.com/openai/v1/chat/completions', {
       method: 'POST',

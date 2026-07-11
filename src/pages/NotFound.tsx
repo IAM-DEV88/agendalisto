@@ -17,6 +17,12 @@ export default function NotFound() {
         >
           Volver al inicio
         </Link>
+        <p className="mt-6 text-sm text-slate-400">
+          🌐 ¿Buscas una página web para tu negocio?{' '}
+          <Link to="/register" className="text-primary-600 dark:text-primary-400 font-bold hover:underline">
+            Crea la tuya gratis
+          </Link>
+        </p>
       </div>
     </div>
   );

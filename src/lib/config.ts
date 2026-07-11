@@ -20,6 +20,10 @@ export const DEFAULT_BUSINESS_LOGO = 'https://via.placeholder.com/300?text=Negoc
 export const MIN_PASSWORD_LENGTH = 8;
 export const PHONE_REGEX = /^\+?[0-9]{8,15}$/; // Simple phone validation regex
 
+// WhatsApp
+export const AGENDAYA_WHATSAPP = import.meta.env.VITE_AGENDAYA_WHATSAPP || '573178684451';
+export const WHATSAPP_API_URL = import.meta.env.VITE_WHATSAPP_API_URL || '/.netlify/functions/whatsapp-leads';
+
 export default {
   SUPABASE_URL,
   SUPABASE_ANON_KEY,

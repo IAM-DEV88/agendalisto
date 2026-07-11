@@ -338,6 +338,16 @@ const BlogPostView = () => {
           </div>
         </article>
 
+        {/* Business CTA */}
+        <div className="mb-8 text-center animate-in fade-in slide-in-from-bottom-4 duration-500">
+          <Link
+            to="/register"
+            className="inline-flex items-center gap-2 px-6 py-3 bg-primary-600 hover:bg-primary-700 text-white font-bold rounded-xl transition-all shadow-lg shadow-primary-500/25 hover:-translate-y-0.5 active:translate-y-0"
+          >
+            🌐 ¿Tienes un negocio? Crea tu página web gratis →
+          </Link>
+        </div>
+
         {/* Comments Section */}
         <section className="space-y-8">
           <h2 className="text-2xl font-black text-slate-900 dark:text-white flex items-center gap-3">

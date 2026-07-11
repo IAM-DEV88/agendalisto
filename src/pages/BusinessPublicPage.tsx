@@ -345,10 +345,20 @@ function BusinessPublicPage() {
               )}
 
               {!user && (
-                <div className="bg-amber-50 dark:bg-amber-900/10 rounded-2xl border border-amber-200 dark:border-amber-800 p-5 text-center">
-                  <p className="text-sm font-bold text-amber-800 dark:text-amber-400">
-                    <Link to="/login" className="underline decoration-amber-500/50 hover:text-amber-600 transition-colors">Inicia sesión</Link> para reservar servicios.
-                  </p>
+                <div className="space-y-3">
+                  <div className="bg-amber-50 dark:bg-amber-900/10 rounded-2xl border border-amber-200 dark:border-amber-800 p-5 text-center">
+                    <p className="text-sm font-bold text-amber-800 dark:text-amber-400">
+                      <Link to="/login" className="underline decoration-amber-500/50 hover:text-amber-600 transition-colors">Inicia sesión</Link> para reservar servicios.
+                    </p>
+                  </div>
+                  <div className="bg-primary-50 dark:bg-primary-900/10 rounded-2xl border border-primary-200 dark:border-primary-800 p-5 text-center">
+                    <p className="text-sm font-bold text-primary-800 dark:text-primary-300">
+                      🌐 ¿Tienes un negocio como este?{' '}
+                      <Link to="/register" className="underline decoration-primary-500/50 hover:text-primary-600 transition-colors">
+                        Crea tu web gratis
+                      </Link>
+                    </p>
+                  </div>
                 </div>
               )}
             </div>

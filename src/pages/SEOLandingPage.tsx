@@ -95,7 +95,17 @@ export default function SEOLandingPage() {
         </div>
 
         {businesses.length === 0 ? (
-          <EmptyState icon={<Store className="w-8 h-8" />} title="No encontramos resultados" description="Intenta buscar en otra ciudad o categoría." action={{ label: 'Explorar todos', to: '/explore' }} />
+          <>
+            <EmptyState icon={<Store className="w-8 h-8" />} title="No encontramos resultados" description="Intenta buscar en otra ciudad o categoría." action={{ label: 'Explorar todos', to: '/explore' }} />
+            <div className="mt-6 text-center">
+              <Link
+                to="/register"
+                className="inline-flex items-center gap-2 px-5 py-3 bg-primary-50 dark:bg-primary-900/20 text-primary-700 dark:text-primary-300 font-bold text-sm rounded-xl border border-primary-200 dark:border-primary-800 hover:bg-primary-100 dark:hover:bg-primary-900/40 transition-all"
+              >
+                🌐 ¿Tienes un negocio? Crea tu web gratis y aparece aquí →
+              </Link>
+            </div>
+          </>
         ) : (
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 animate-in fade-in slide-in-from-bottom-4 duration-500">
             {businesses.map(business => (

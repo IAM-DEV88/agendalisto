@@ -219,6 +219,34 @@ const defaultServicesMap: Record<string, DefaultService[]> = {
     { name: 'Apoyo escolar', duration: 60, description: 'Acompañamiento en tareas y refuerzo académico' },
     { name: 'Fiesta infantil', duration: 180, description: 'Animación y entretenimiento para cumpleaños infantiles' },
   ],
+  'Agroindustria': [
+    { name: 'Asesoría técnica', duration: 60, description: 'Consultoría para productores agrícolas' },
+    { name: 'Visita a finca', duration: 120, description: 'Inspección y recomendaciones en campo' },
+    { name: 'Análisis de suelo', duration: 30, description: 'Toma de muestras para análisis' },
+    { name: 'Capacitación', duration: 90, description: 'Entrenamiento en buenas prácticas agrícolas' },
+    { name: 'Comercialización', duration: 60, description: 'Asesoría para venta de cosecha' },
+  ],
+  'Comercio Exterior': [
+    { name: 'Asesoría de exportación', duration: 60, description: 'Orientación sobre procesos de exportación' },
+    { name: 'Clasificación arancelaria', duration: 45, description: 'Determinación de partida arancelaria' },
+    { name: 'Documentación', duration: 60, description: 'Revisión de documentos de embarque' },
+    { name: 'Consultoría de mercados', duration: 90, description: 'Análisis de oportunidades en el exterior' },
+    { name: 'Logística internacional', duration: 60, description: 'Cotización y planeación de envíos' },
+  ],
+  'Logística': [
+    { name: 'Almacenamiento', duration: 1440, description: 'Bodegaje por día para mercancía' },
+    { name: 'Alistamiento de pedidos', duration: 60, description: 'Preparación de pedidos para despacho' },
+    { name: 'Transporte local', duration: 120, description: 'Distribución de mercancía en la ciudad' },
+    { name: 'Inventario', duration: 60, description: 'Toma y actualización de inventario' },
+    { name: 'Cotización de flete', duration: 30, description: 'Presupuesto detallado de transporte' },
+  ],
+  'Grandes Superficies': [
+    { name: 'Cotización mayorista', duration: 30, description: 'Presupuesto para compras por volumen' },
+    { name: 'Visita comercial', duration: 60, description: 'Reunión para presentación de productos' },
+    { name: 'Alquiler de espacio', duration: 60, description: 'Consultar disponibilidad de punto de venta' },
+    { name: 'Evento en tienda', duration: 180, description: 'Activación o degustación en sucursal' },
+    { name: 'Pedido especial', duration: 20, description: 'Solicitud de productos no disponibles' },
+  ],
 };
 
 const FALLBACK_SERVICES: DefaultService[] = [

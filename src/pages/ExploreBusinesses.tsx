@@ -418,6 +418,16 @@ const ExploreBusinesses = () => {
               description="Intenta ajustar tus filtros o buscar con otros términos."
               action={hasFilters ? { label: 'Limpiar filtros', to: '/explore' } : undefined}
             />
+            {!hasFilters && (
+              <div className="mt-6 text-center animate-in fade-in zoom-in-95 duration-500 delay-200">
+                <Link
+                  to="/register"
+                  className="inline-flex items-center gap-2 px-5 py-3 bg-primary-50 dark:bg-primary-900/20 text-primary-700 dark:text-primary-300 font-bold text-sm rounded-xl border border-primary-200 dark:border-primary-800 hover:bg-primary-100 dark:hover:bg-primary-900/40 transition-all"
+                >
+                  🌐 ¿Tienes un negocio? Crea tu web gratis y aparece aquí →
+                </Link>
+              </div>
+            )}
           </div>
         ) : viewMode === 'map' ? (
           <Suspense fallback={<div className="h-[400px] bg-slate-100 dark:bg-slate-800 rounded-2xl animate-pulse" />}>

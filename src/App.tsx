@@ -14,6 +14,7 @@ import ModeratorDashboard from './pages/ModeratorDashboard';
 import BusinessPublicPage from './pages/BusinessPublicPage';
 import BusinessOnboarding from './pages/BusinessOnboarding';
 import SEOLandingPage from './pages/SEOLandingPage';
+import CityLandingPage from './pages/CityLandingPage';
 import ForgotPassword from './pages/ForgotPassword';
 import ExploreBusinesses from './pages/ExploreBusinesses';
 import Crowdfunding from './pages/Crowdfunding';
@@ -303,7 +304,7 @@ function App() {
                 <AdminDashboard user={userProfile} />
               </ProtectedRoute>
             } />
-            <Route path="/ciudades/:city" element={<SEOLandingPage />} />
+            <Route path="/ciudades/:city" element={<CityLandingPage />} />
             <Route path="/categorias/:category" element={<SEOLandingPage />} />
             <Route path="/review/:appointmentId" element={
               <ProtectedRoute user={user} userProfile={userProfile} requiredRole="client">

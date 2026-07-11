@@ -112,7 +112,7 @@ const Nav = ({ user }: NavProps) => {
                   Entrar
                 </Link>
                 <Link to="/register" className="px-5 py-2 text-sm font-bold text-white bg-primary-600 hover:bg-primary-500 rounded-xl shadow-md shadow-primary-500/20 transition-all hover:-translate-y-0.5">
-                  Unirme
+                  🌐 Mi web gratis
                 </Link>
               </div>
             )}
@@ -240,7 +240,7 @@ const Nav = ({ user }: NavProps) => {
                     Entrar
                   </Link>
                   <Link to="/register" onClick={closeMenus} className="flex items-center justify-center px-4 py-3 text-base font-bold text-white rounded-xl bg-primary-600">
-                    Unirme
+                    🌐 Mi web gratis
                   </Link>
                 </div>
               ) : (

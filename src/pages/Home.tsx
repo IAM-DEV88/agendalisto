@@ -5,6 +5,7 @@ import { getBusinessCategories, BusinessCategory, getTopMilestones } from '../li
 import { Swiper, SwiperSlide } from 'swiper/react';
 import { Pagination, Autoplay } from 'swiper/modules';
 import { Search, MapPin, CheckCircle2, ArrowRight } from 'lucide-react';
+import { getCategoryIcon } from '../lib/categoryIcons';
 import 'swiper/css';
 import 'swiper/css/pagination';
 import BlogHomeSection from '../components/BlogHomeSection';
@@ -156,6 +157,11 @@ const Home = () => {
                   <Link to="/explore" className="btn-primary w-full bg-white text-primary-700 hover:bg-primary-50 flex items-center justify-center gap-2 text-lg">
                     Explorar servicios <ArrowRight className="w-5 h-5" />
                   </Link>
+                  <div className="pt-4 border-t border-white/20">
+                    <Link to="/register" className="block text-center text-primary-200 hover:text-white text-sm font-bold transition-colors">
+                      🌐 ¿Tienes un negocio? Crea tu web gratis →
+                    </Link>
+                  </div>
                 </div>
               )}
             </div>
@@ -195,11 +201,9 @@ const Home = () => {
                 <SwiperSlide key={cat.id}>
                   <Link to={`/explore?category=${cat.id}`} className="group block h-full">
                     <div className="card h-full p-6 flex flex-col hover:border-primary-400 group-hover:shadow-xl transition-all duration-300">
-                      <div className="w-12 h-12 bg-primary-100 dark:bg-primary-900/30 rounded-xl flex items-center justify-center mb-4 group-hover:scale-110 transition-transform">
-                        <span className="text-primary-600 dark:text-primary-400 text-xl font-bold">
-                          {cat.name.charAt(0)}
-                        </span>
-                      </div>
+                      <span className="text-4xl block mb-4 group-hover:scale-110 transition-transform">
+                        {getCategoryIcon(cat.name)}
+                      </span>
                       <h3 className="text-xl font-bold text-slate-900 dark:text-white mb-2 group-hover:text-primary-600 dark:group-hover:text-primary-400 transition-colors">
                         {cat.name}
                       </h3>
@@ -263,7 +267,7 @@ const Home = () => {
                   to={cta.registerLink} 
                   className="inline-flex items-center px-8 py-4 bg-primary-500 hover:bg-primary-400 text-white font-black rounded-2xl transition-all shadow-xl shadow-primary-500/25 active:scale-95 group/btn"
                 >
-                  Empieza ahora
+                  Tu web gratis
                   <svg className="ml-3 w-5 h-5 group-hover:translate-x-1 transition-transform" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={3} d="M14 5l7 7-7 7" />
                   </svg>

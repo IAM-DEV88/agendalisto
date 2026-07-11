@@ -52,7 +52,7 @@ export default function FAQ() {
               className="inline-flex items-center gap-2 px-6 py-3 bg-primary-600 hover:bg-primary-700 text-white font-bold rounded-xl transition-all shadow-lg shadow-primary-500/25 active:scale-[0.98]"
             >
               <Store className="w-4 h-4" />
-              Registrar mi negocio gratis
+              🌐 Mi web gratis
             </Link>
             <Link
               to="/explore"
@@ -168,7 +168,7 @@ export default function FAQ() {
               className="inline-flex items-center gap-2 px-8 py-3.5 bg-white text-primary-700 font-black rounded-xl hover:bg-primary-50 transition-all shadow-xl active:scale-[0.98]"
             >
               <Store className="w-4 h-4" />
-              Registrarme gratis
+              🌐 Mi web gratis
               <ArrowRight className="w-4 h-4" />
             </Link>
             <Link

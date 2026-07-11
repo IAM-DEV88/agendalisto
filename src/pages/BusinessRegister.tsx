@@ -218,10 +218,10 @@ const BusinessRegister = ({ user }: BusinessRegisterProps) => {
             <Store className="w-8 h-8 text-primary-600 dark:text-primary-400" />
           </div>
           <h1 className="text-3xl sm:text-4xl font-black text-slate-900 dark:text-white tracking-tight mb-3">
-            Registrar mi negocio
+            🌐 Tu página web gratis
           </h1>
           <p className="text-base sm:text-lg text-slate-500 dark:text-slate-400 font-medium max-w-xl mx-auto">
-            Completa la información para recibir reservas profesionales de tus clientes.
+            Crea tu página web profesional y comienza a recibir reservas online de tus clientes.
           </p>
         </div>
 
