@@ -28,6 +28,7 @@ interface AppointmentCalendarProps {
   appointments: Appointment[];
   onStatusChange?: (id: string, status: AppointmentStatus) => void;
   onReschedule?: (id: string, startTime: string, endTime: string) => Promise<{ success: boolean; error?: string }>;
+  onCancel?: (appointment: Appointment) => void;
 }
 
 const statusDot: Record<string, string> = {
@@ -48,6 +49,7 @@ const AppointmentCalendar: React.FC<AppointmentCalendarProps> = ({
   appointments,
   onStatusChange,
   onReschedule,
+  onCancel,
 }) => {
   const [currentMonth, setCurrentMonth] = useState(new Date());
   const [selectedDate, setSelectedDate] = useState<Date | null>(null);
@@ -373,12 +375,13 @@ const AppointmentCalendar: React.FC<AppointmentCalendarProps> = ({
         isOpen={!!selectedAppointment}
         onClose={() => setSelectedAppointment(null)}
         appointment={selectedAppointment}
-        onStatusChange={(status) => {
-          if (selectedAppointment && onStatusChange) {
+        onStatusChange={onStatusChange ? (status) => {
+          if (selectedAppointment) {
             onStatusChange(selectedAppointment.id, status);
           }
           setSelectedAppointment(null);
-        }}
+        } : undefined}
+        onCancel={onCancel}
         showReviewSection={true}
       />
 

@@ -476,6 +476,7 @@ const ProfileDashboard = ({ user }: ProfileDashboardProps) => {
                     <AppointmentCalendar
                       appointments={appointments}
                       onReschedule={handleDirectReschedule}
+                      onCancel={(appt) => setSelectedAppointmentForCancel(appt)}
                     />
                   )}
 

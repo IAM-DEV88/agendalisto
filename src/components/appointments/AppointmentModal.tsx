@@ -13,6 +13,7 @@ interface AppointmentModalProps {
   onClose: () => void;
   appointment: Appointment | null;
   onStatusChange?: (status: AppointmentStatus) => void;
+  onCancel?: (appointment: Appointment) => void;
   showReviewSection?: boolean;
 }
 
@@ -44,6 +45,7 @@ const AppointmentModal: React.FC<AppointmentModalProps> = ({
   onClose,
   appointment,
   onStatusChange,
+  onCancel,
   showReviewSection = false,
 }) => {
   if (!isOpen || !appointment) return null;
@@ -270,44 +272,56 @@ const AppointmentModal: React.FC<AppointmentModalProps> = ({
           </div>
 
           {/* Actions footer */}
-          {onStatusChange && ['pending', 'confirmed'].includes(appointment.status) && (
+          {['pending', 'confirmed'].includes(appointment.status) && (
             <div className="sticky bottom-0 bg-white/80 dark:bg-slate-900/80 backdrop-blur-xl border-t border-slate-100 dark:border-slate-800 px-4 sm:px-5 py-3">
-              {appointment.status === 'pending' && (
-                <div className="flex gap-2">
-                  <button
-                    onClick={() => handleStatusChange('cancelled')}
-                    className="flex-1 inline-flex items-center justify-center gap-1.5 px-4 py-2.5 bg-red-50 hover:bg-red-100 dark:bg-red-500/10 dark:hover:bg-red-500/20 text-red-600 dark:text-red-400 text-sm font-bold rounded-xl transition-all active:scale-[0.97]"
-                  >
-                    <XCircle className="w-4 h-4" />
-                    Rechazar
-                  </button>
-                  <button
-                    onClick={() => handleStatusChange('confirmed')}
-                    className="flex-1 inline-flex items-center justify-center gap-1.5 px-4 py-2.5 bg-primary-600 hover:bg-primary-700 text-white text-sm font-bold rounded-xl shadow-lg shadow-primary-500/20 transition-all active:scale-[0.97]"
-                  >
-                    <CheckCircle className="w-4 h-4" />
-                    Confirmar
-                  </button>
-                </div>
-              )}
-              {appointment.status === 'confirmed' && (
-                <div className="flex gap-2">
-                  <button
-                    onClick={() => handleStatusChange('cancelled')}
-                    className="flex-1 inline-flex items-center justify-center gap-1.5 px-4 py-2.5 bg-red-50 hover:bg-red-100 dark:bg-red-500/10 dark:hover:bg-red-500/20 text-red-600 dark:text-red-400 text-sm font-bold rounded-xl transition-all active:scale-[0.97]"
-                  >
-                    <XCircle className="w-4 h-4" />
-                    Cancelar
-                  </button>
-                  <button
-                    onClick={() => handleStatusChange('completed')}
-                    className="flex-1 inline-flex items-center justify-center gap-1.5 px-4 py-2.5 bg-emerald-600 hover:bg-emerald-700 text-white text-sm font-bold rounded-xl shadow-lg shadow-emerald-500/20 transition-all active:scale-[0.97]"
-                  >
-                    <CheckCircle className="w-4 h-4" />
-                    Completar
-                  </button>
-                </div>
-              )}
+              {onStatusChange ? (
+                <>
+                  {appointment.status === 'pending' && (
+                    <div className="flex gap-2">
+                      <button
+                        onClick={() => handleStatusChange('cancelled')}
+                        className="flex-1 inline-flex items-center justify-center gap-1.5 px-4 py-2.5 bg-red-50 hover:bg-red-100 dark:bg-red-500/10 dark:hover:bg-red-500/20 text-red-600 dark:text-red-400 text-sm font-bold rounded-xl transition-all active:scale-[0.97]"
+                      >
+                        <XCircle className="w-4 h-4" />
+                        Rechazar
+                      </button>
+                      <button
+                        onClick={() => handleStatusChange('confirmed')}
+                        className="flex-1 inline-flex items-center justify-center gap-1.5 px-4 py-2.5 bg-primary-600 hover:bg-primary-700 text-white text-sm font-bold rounded-xl shadow-lg shadow-primary-500/20 transition-all active:scale-[0.97]"
+                      >
+                        <CheckCircle className="w-4 h-4" />
+                        Confirmar
+                      </button>
+                    </div>
+                  )}
+                  {appointment.status === 'confirmed' && (
+                    <div className="flex gap-2">
+                      <button
+                        onClick={() => handleStatusChange('cancelled')}
+                        className="flex-1 inline-flex items-center justify-center gap-1.5 px-4 py-2.5 bg-red-50 hover:bg-red-100 dark:bg-red-500/10 dark:hover:bg-red-500/20 text-red-600 dark:text-red-400 text-sm font-bold rounded-xl transition-all active:scale-[0.97]"
+                      >
+                        <XCircle className="w-4 h-4" />
+                        Cancelar
+                      </button>
+                      <button
+                        onClick={() => handleStatusChange('completed')}
+                        className="flex-1 inline-flex items-center justify-center gap-1.5 px-4 py-2.5 bg-emerald-600 hover:bg-emerald-700 text-white text-sm font-bold rounded-xl shadow-lg shadow-emerald-500/20 transition-all active:scale-[0.97]"
+                      >
+                        <CheckCircle className="w-4 h-4" />
+                        Completar
+                      </button>
+                    </div>
+                  )}
+                </>
+              ) : onCancel ? (
+                <button
+                  onClick={() => { onCancel(appointment); onClose(); }}
+                  className="w-full inline-flex items-center justify-center gap-1.5 px-4 py-2.5 bg-red-50 hover:bg-red-100 dark:bg-red-500/10 dark:hover:bg-red-500/20 text-red-600 dark:text-red-400 text-sm font-bold rounded-xl transition-all active:scale-[0.97]"
+                >
+                  <XCircle className="w-4 h-4" />
+                  Cancelar cita
+                </button>
+              ) : null}
             </div>
           )}
         </div>
