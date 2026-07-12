@@ -348,7 +348,7 @@ const ProfileDashboard = ({ user }: ProfileDashboardProps) => {
                   </div>
                   <div className="min-w-0">
                     <div className="flex items-center gap-1.5 flex-wrap">
-                      <h1 className="text-lg sm:text-xl font-black text-slate-900 dark:text-white tracking-tight truncate">
+                      <h1 className="text-lg sm:text-xl font-black text-slate-900 dark:text-white tracking-tight truncate mb-0">
                         {greeting}, {username}
                       </h1>
                       {user?.role && user.role !== 'visitor' && (
@@ -366,7 +366,7 @@ const ProfileDashboard = ({ user }: ProfileDashboardProps) => {
                         ) : null;
                       })()}
                     </div>
-                    <p className="text-xs sm:text-sm font-medium text-slate-500 dark:text-slate-400 mt-0.5 truncate">
+                    <p className="text-xs sm:text-sm font-medium text-slate-500 dark:text-slate-400 truncate mb-0">
                       {activeAppointmentsCount > 0
                         ? `Tienes ${activeAppointmentsCount} ${activeAppointmentsCount === 1 ? 'cita activa' : 'citas activas'}`
                         : 'Gestiona tus citas y configura tu perfil'}

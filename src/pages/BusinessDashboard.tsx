@@ -368,7 +368,7 @@ export const BusinessDashboard: React.FC = () => {
                       </div>
                       <div className="min-w-0">
                         <div className="flex items-center gap-1.5 flex-wrap">
-                          <h1 className="text-lg sm:text-xl font-black text-slate-900 dark:text-white tracking-tight truncate group-hover:text-primary-600 dark:group-hover:text-primary-400 transition-colors">
+                          <h1 className="text-lg sm:text-xl font-black text-slate-900 dark:text-white tracking-tight truncate group-hover:text-primary-600 dark:group-hover:text-primary-400 transition-colors mb-0">
                             {businessData.name}
                           </h1>
                           {planBadge && (
@@ -377,7 +377,7 @@ export const BusinessDashboard: React.FC = () => {
                             </span>
                           )}
                         </div>
-                        <p className="text-xs sm:text-sm font-medium text-slate-500 dark:text-slate-400 flex items-center gap-1.5 mt-0.5 truncate">
+                        <p className="text-xs sm:text-sm font-medium text-slate-500 dark:text-slate-400 flex items-center gap-1.5 truncate mb-0">
                           <Store className="w-3.5 h-3.5 shrink-0" />
                           Panel de Administración
                         </p>

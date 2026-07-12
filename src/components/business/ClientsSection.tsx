@@ -25,8 +25,8 @@ const ClientsSection: React.FC<ClientsSectionProps> = ({ clients, loading, messa
   return (
     <div className="space-y-6">
       <div>
-        <h2 className="text-xl font-black text-slate-900 dark:text-white">Mis Clientes</h2>
-        <p className="text-sm font-medium text-slate-500 dark:text-slate-400 mt-0.5">
+        <h2 className="text-xl font-black text-slate-900 dark:text-white mb-0">Mis Clientes</h2>
+        <p className="text-sm font-medium text-slate-500 dark:text-slate-400 mt-0.5 mb-0">
           Personas que han reservado en tu negocio
         </p>
       </div>

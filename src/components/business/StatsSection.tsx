@@ -163,8 +163,8 @@ const StatsSection: React.FC<StatsSectionProps> = ({
   return (
     <div className="space-y-6">
       <div>
-        <h2 className="text-xl font-black text-slate-900 dark:text-white">Estadísticas del negocio</h2>
-        <p className="text-sm font-medium text-slate-500 dark:text-slate-400 mt-0.5">
+        <h2 className="text-xl font-black text-slate-900 dark:text-white mb-0">Estadísticas del negocio</h2>
+        <p className="text-sm font-medium text-slate-500 dark:text-slate-400 mt-0.5 mb-0">
           {hasAdvanced ? 'Resumen de rendimiento y métricas clave' : 'Métricas básicas de tu negocio'}
           {!hasAdvanced && (
             <span className="text-amber-600 dark:text-amber-400"> — Actualiza a Premium para ver analytics avanzados.</span>

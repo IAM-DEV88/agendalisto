@@ -167,7 +167,7 @@ const AppointmentCalendar: React.FC<AppointmentCalendarProps> = ({
             >
               <ChevronLeft className="w-5 h-5" />
             </button>
-            <h3 className="text-lg font-black text-slate-900 dark:text-white">
+            <h3 className="text-lg font-black text-slate-900 dark:text-white mb-0">
               {format(currentMonth, "MMMM yyyy", { locale: es })}
             </h3>
             <button
@@ -280,17 +280,17 @@ const AppointmentCalendar: React.FC<AppointmentCalendarProps> = ({
         {/* ─── Right Column: Selected Day ─── */}
         <div className="md:col-span-1">
           {selectedDate && (
-            <div className="animate-in fade-in slide-in-from-bottom-2 duration-300 md:sticky md:top-24 pt-6 md:pt-0">
+            <div className="animate-in fade-in slide-in-from-bottom-2 duration-300 md:sticky md:top-44 pt-6 md:pt-0">
               {/* Day header */}
-              <div className="flex items-center gap-2 mb-4">
+              <div className="flex items-center gap-2 mb-3">
                 <div className="w-8 h-8 rounded-xl bg-primary-50 dark:bg-primary-500/10 flex items-center justify-center shrink-0">
                   <CalendarIcon className="w-4 h-4 text-primary-600 dark:text-primary-400" />
                 </div>
                 <div className="min-w-0">
-                  <h4 className="text-sm font-black text-slate-800 dark:text-slate-200 truncate">
+                  <h4 className="text-sm font-black text-slate-800 dark:text-slate-200 truncate mb-0">
                     {format(selectedDate, "EEEE, d 'de' MMMM", { locale: es })}
                   </h4>
-                  <p className="text-[11px] font-bold text-slate-400">
+                  <p className="text-[11px] font-bold text-slate-400 mb-0">
                     {selectedDayAppts.length} cita{selectedDayAppts.length !== 1 ? 's' : ''}
                   </p>
                 </div>
@@ -324,7 +324,7 @@ const AppointmentCalendar: React.FC<AppointmentCalendarProps> = ({
 
                         <div className="flex-1 min-w-0">
                           <div className="flex items-start justify-between gap-2">
-                            <p className="text-sm font-bold text-slate-900 dark:text-white truncate">
+                            <p className="text-sm font-bold text-slate-900 dark:text-white truncate mb-0">
                               {appt.services?.name || 'Servicio'}
                             </p>
                             <span className={`shrink-0 px-2 py-0.5 text-[10px] font-bold rounded-full border ${statusChipBg[appt.status] || ''}`}>
