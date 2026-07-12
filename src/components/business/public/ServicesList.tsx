@@ -61,13 +61,16 @@ const ServiceCard: React.FC<{
   }
 
   const hasImages = images.length > 0;
-  const canReserve = !showcaseOnly && currentUser && currentUser.id !== businessOwnerId;
+  const canReserve = !showcaseOnly && !!currentUser;
+  const isOwner = currentUser && currentUser.id === businessOwnerId;
 
   return (
     <div
       onClick={() => canReserve && onSelectService(service.id)}
       className={`relative flex flex-col rounded-2xl border transition-all overflow-hidden ${
         canReserve ? 'cursor-pointer group' : ''
+      } ${
+        isOwner ? 'ring-1 ring-primary-300 dark:ring-primary-700' : ''
       } ${
         selectedService === service.id
           ? 'border-primary-500 bg-primary-50/30 dark:bg-primary-900/20 shadow-xl shadow-primary-500/10'
@@ -181,9 +184,9 @@ const ServiceCard: React.FC<{
           </div>
         ) : null}
 
-        {currentUser && currentUser.id === businessOwnerId && (
+        {isOwner && (
           <div className="mt-3 pt-3 border-t border-slate-100 dark:border-slate-800 text-center text-[10px] font-black uppercase tracking-widest text-primary-500">
-            Tu negocio
+            Tu negocio — Vista previa
           </div>
         )}
       </div>

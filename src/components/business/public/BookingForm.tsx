@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useMemo } from 'react';
-import { Clock, Calendar, CheckCircle, ArrowLeft, Send, AlertCircle, Gift, Check, X, Lock, FileText } from 'lucide-react';
+import { Clock, Calendar, CheckCircle, ArrowLeft, Send, AlertCircle, Gift, Check, X, Lock, FileText, Eye } from 'lucide-react';
 import CrossPromotion from '../CrossPromotion';
 import { createAppointment, Service, getBusinessHours, getBusinessAppointments, BusinessHours, Appointment, validateGiftCode, redeemGiftCode } from '../../../lib/api';
 import type { GuestInfo, GiftCode } from '../../../lib/api';
@@ -22,6 +22,7 @@ interface BookingFormProps {
   notifyWhatsapp?: boolean;
   minCancellationHours?: number;
   guestInfo?: GuestInfo;
+  isOwnerPreview?: boolean;
 }
 
 const BookingForm: React.FC<BookingFormProps> = ({
@@ -38,6 +39,7 @@ const BookingForm: React.FC<BookingFormProps> = ({
   notifyWhatsapp = false,
   minCancellationHours = 0,
   guestInfo,
+  isOwnerPreview = false,
 }) => {
   const [confirmationChecked, setConfirmationChecked] = useState(!requireConfirmation);
   const [formData, setFormData] = useState({ date: '', time: '', notes: '' });
@@ -153,6 +155,10 @@ const BookingForm: React.FC<BookingFormProps> = ({
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    if (isOwnerPreview) {
+      setError('No puedes agendar citas en tu propio negocio.');
+      return;
+    }
     if (requireConfirmation && !confirmationChecked) {
       setError(`Debes aceptar las condiciones de cancelación (${minCancellationHours}h de antelación)`);
       return;
@@ -616,13 +622,18 @@ const BookingForm: React.FC<BookingFormProps> = ({
               </button>
               <button
                 type="submit"
-                disabled={!formData.date || !formData.time || submitting}
+                disabled={!formData.date || !formData.time || submitting || isOwnerPreview}
                 className="flex-[2] inline-flex items-center justify-center gap-2 px-6 py-3.5 bg-primary-600 hover:bg-primary-700 text-white font-bold rounded-xl shadow-lg shadow-primary-500/25 transition-all hover:-translate-y-0.5 active:translate-y-0 disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:-translate-y-0"
               >
                 {submitting ? (
                   <>
                     <div className="animate-spin rounded-full h-4 w-4 border-2 border-white border-t-transparent" />
                     Procesando...
+                  </>
+                ) : isOwnerPreview ? (
+                  <>
+                    <Eye className="w-4 h-4" />
+                    Vista previa
                   </>
                 ) : (
                   <>

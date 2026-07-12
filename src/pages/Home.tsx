@@ -201,7 +201,7 @@ const Home = () => {
                 <SwiperSlide key={cat.id}>
                   <Link to={`/explore?category=${cat.id}`} className="group block h-full">
                     <div className="card h-full p-6 flex flex-col hover:border-primary-400 group-hover:shadow-xl transition-all duration-300">
-                      <span className="text-4xl block mb-4 group-hover:scale-110 transition-transform">
+                      <span className="text-4xl block mb-4">
                         {getCategoryIcon(cat.name)}
                       </span>
                       <h3 className="text-xl font-bold text-slate-900 dark:text-white mb-2 group-hover:text-primary-600 dark:group-hover:text-primary-400 transition-colors">

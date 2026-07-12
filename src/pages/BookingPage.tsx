@@ -8,7 +8,7 @@ import {
 } from '../lib/api';
 import { supabase } from '../lib/supabase';
 import { BookingForm } from '../components/business/public';
-import { ArrowLeft, ChevronLeft, ChevronRight, X, Store, Calendar, Clock, Mail, User, Phone } from 'lucide-react';
+import { ArrowLeft, ChevronLeft, ChevronRight, X, Store, Calendar, Clock, Mail, User, Phone, Eye } from 'lucide-react';
 import EmptyState from '../components/ui/EmptyState';
 import SEO from '../components/SEO';
 
@@ -55,6 +55,8 @@ function BookingPage() {
   const [activeImageIndex, setActiveImageIndex] = useState(0);
   const [fullscreenImage, setFullscreenImage] = useState<string | null>(null);
 
+  const isOwner = !!user && !!businessData && user.id === businessData.owner_id;
+
   useEffect(() => {
     const fetchData = async () => {
       if (!slug || !serviceId) { setError('URL inválida'); return; }
@@ -66,7 +68,7 @@ function BookingPage() {
 
         const { success: bS, business, error: bE } = await getBusinessBySlug(slug);
         if (!bS || !business) { setError(bE || 'Negocio no encontrado'); return; }
-        if (business.showcase_only) { setError('Este negocio no acepta reservas online'); navigate(`/${slug}`); return; }
+        if (business.showcase_only && (!user || user.id !== business.owner_id)) { setError('Este negocio no acepta reservas online'); navigate(`/${slug}`); return; }
         setBusinessData(business);
 
         const { success: sS, data: sD, error: sE } = await getService(serviceId);
@@ -171,7 +173,7 @@ function BookingPage() {
                   <Clock className="w-4 h-4 text-primary-500" />
                   <span className="font-bold text-slate-700 dark:text-slate-300">{service.duration} min</span>
                 </div>
-                {service.price > 0 && (
+                {(businessData.config?.mostrar_precios ?? true) && service.price > 0 && (
                   <div className="text-xl font-black text-primary-600 dark:text-primary-400">
                     ${service.price.toLocaleString()}
                   </div>
@@ -182,6 +184,17 @@ function BookingPage() {
 
           {/* ─── RIGHT: Booking Form ─── */}
           <div className="lg:col-span-3 space-y-4">
+            {isOwner && (
+              <div className="bg-primary-50 dark:bg-primary-900/20 rounded-2xl p-4 border border-primary-200 dark:border-primary-800/50 flex items-start gap-3">
+                <Eye className="w-5 h-5 text-primary-600 dark:text-primary-400 flex-shrink-0 mt-0.5" />
+                <div>
+                  <p className="text-sm font-bold text-primary-800 dark:text-primary-300">Vista previa — Tu negocio</p>
+                  <p className="text-xs text-primary-600 dark:text-primary-400 mt-0.5">
+                    Esta es la vista pública de tu servicio. No puedes agendar citas en tu propio negocio.
+                  </p>
+                </div>
+              </div>
+            )}
             {guestMode && (
               <div className="bg-amber-50 dark:bg-amber-900/10 rounded-2xl p-5 border border-amber-200 dark:border-amber-800/50">
                 <p className="text-sm font-bold text-amber-800 dark:text-amber-300 mb-3">
@@ -236,6 +249,7 @@ function BookingPage() {
                 notifyWhatsapp={businessData.config?.notificaciones_whatsapp}
                 minCancellationHours={businessData.config?.tiempo_minimo_cancelacion}
                 guestInfo={guestMode ? guestInfo : undefined}
+                isOwnerPreview={isOwner}
               />
               {guestMode && (
                 <p className="text-xs text-slate-400 text-center mt-4">
