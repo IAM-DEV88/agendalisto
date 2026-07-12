@@ -326,7 +326,7 @@ const ProfileDashboard = ({ user }: ProfileDashboardProps) => {
   const greeting = getGreeting();
 
   return (
-    <div className="min-h-screen bg-gradient-to-b from-slate-50 to-white dark:from-slate-950 dark:to-slate-900 transition-colors duration-200">
+    <div className="min-h-screen bg-gradient-to-b from-slate-50 to-white dark:from-slate-950 dark:to-slate-900 transition-colors duration-200 overflow-x-clip">
       <div className="max-w-7xl mx-auto sm:px-6 lg:px-8">
         <div className="p-4 space-y-5 sm:space-y-6">
 
