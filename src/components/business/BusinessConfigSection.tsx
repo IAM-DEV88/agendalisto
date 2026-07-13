@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useDispatch, useSelector } from 'react-redux';
-import { Settings, Eye, Bell, ListOrdered, Save, Loader2, CheckCircle2, AlertCircle, ChevronDown, Link as LinkIcon, Copy, Check, ExternalLink, Trash2, AlertTriangle } from 'lucide-react';
+import { Settings, Eye, Bell, ListOrdered, Save, Loader2, CheckCircle2, AlertCircle, ChevronDown, Link as LinkIcon, Copy, Check, ExternalLink, Trash2, AlertTriangle, Clock, Timer, CalendarClock } from 'lucide-react';
 import { BusinessConfig, deleteBusiness } from '../../lib/api';
 import { useAuth } from '../../hooks/useAuth';
 import { useUIConfig } from '../../hooks/useUIConfig';
@@ -127,6 +127,90 @@ export const BusinessConfigSection: React.FC<BusinessConfigSectionProps> = ({
                 />
               </div>
 
+            </div>
+
+            {/* Configuración de Horarios */}
+            <div className="card p-6 space-y-6">
+              <div className="flex items-center gap-3 pb-4 border-b border-slate-100 dark:border-slate-800">
+                <div className="p-2 bg-amber-50 text-amber-600 dark:bg-amber-500/10 dark:text-amber-400 rounded-lg">
+                  <Clock className="w-5 h-5" />
+                </div>
+                <h3 className="text-lg font-black text-slate-900 dark:text-white tracking-tight">Horarios de Reserva</h3>
+              </div>
+
+              <div className="space-y-4">
+                <div>
+                  <label htmlFor="slot_interval_minutes" className="block text-sm font-bold text-slate-700 dark:text-slate-200 mb-1.5">
+                    Intervalo de slots
+                  </label>
+                  <div className="flex items-center gap-2">
+                    <Timer className="w-4 h-4 text-slate-400" />
+                    <select
+                      id="slot_interval_minutes"
+                      value={config.slot_interval_minutes ?? 30}
+                      onChange={(e) => onConfigChange('slot_interval_minutes', parseInt(e.target.value))}
+                      className="flex-1 px-3 py-2 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl text-sm font-bold text-slate-900 dark:text-white focus:ring-2 focus:ring-primary-500 focus:border-primary-500"
+                    >
+                      <option value={15}>15 minutos</option>
+                      <option value={30}>30 minutos</option>
+                      <option value={60}>1 hora</option>
+                    </select>
+                  </div>
+                  <p className="text-xs text-slate-500 dark:text-slate-400 mt-1">
+                    Cada cuánto tiempo se muestran los horarios disponibles.
+                  </p>
+                </div>
+
+                <div>
+                  <label htmlFor="buffer_minutes" className="block text-sm font-bold text-slate-700 dark:text-slate-200 mb-1.5">
+                    Tiempo de buffer
+                  </label>
+                  <div className="flex items-center gap-2">
+                    <Clock className="w-4 h-4 text-slate-400" />
+                    <select
+                      id="buffer_minutes"
+                      value={config.buffer_minutes ?? 0}
+                      onChange={(e) => onConfigChange('buffer_minutes', parseInt(e.target.value))}
+                      className="flex-1 px-3 py-2 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl text-sm font-bold text-slate-900 dark:text-white focus:ring-2 focus:ring-primary-500 focus:border-primary-500"
+                    >
+                      <option value={0}>Sin buffer</option>
+                      <option value={5}>5 minutos</option>
+                      <option value={10}>10 minutos</option>
+                      <option value={15}>15 minutos</option>
+                      <option value={30}>30 minutos</option>
+                    </select>
+                  </div>
+                  <p className="text-xs text-slate-500 dark:text-slate-400 mt-1">
+                    Tiempo libre entre citas para preparación.
+                  </p>
+                </div>
+
+                <div>
+                  <label htmlFor="max_advance_booking_days" className="block text-sm font-bold text-slate-700 dark:text-slate-200 mb-1.5">
+                    Reservar con anticipación
+                  </label>
+                  <div className="flex items-center gap-2">
+                    <CalendarClock className="w-4 h-4 text-slate-400" />
+                    <select
+                      id="max_advance_booking_days"
+                      value={config.max_advance_booking_days ?? 90}
+                      onChange={(e) => onConfigChange('max_advance_booking_days', parseInt(e.target.value))}
+                      className="flex-1 px-3 py-2 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl text-sm font-bold text-slate-900 dark:text-white focus:ring-2 focus:ring-primary-500 focus:border-primary-500"
+                    >
+                      <option value={7}>7 días</option>
+                      <option value={14}>14 días</option>
+                      <option value={30}>30 días</option>
+                      <option value={60}>60 días</option>
+                      <option value={90}>90 días</option>
+                      <option value={180}>180 días</option>
+                      <option value={365}>1 año</option>
+                    </select>
+                  </div>
+                  <p className="text-xs text-slate-500 dark:text-slate-400 mt-1">
+                    Cuántos días adelante los clientes pueden reservar.
+                  </p>
+                </div>
+              </div>
             </div>
 
             {/* Información Visible */}

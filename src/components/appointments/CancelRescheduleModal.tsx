@@ -1,7 +1,7 @@
 import { useState, useEffect, useMemo } from 'react';
 import { X, AlertCircle, Calendar, ChevronLeft, Clock } from 'lucide-react';
 import { Appointment } from '../../types/appointment';
-import { cancelAppointment, rescheduleAppointment, getBusinessHours, getBusinessAppointments, BusinessHours, Appointment as ApiAppointment } from '../../lib/api';
+import { cancelAppointment, rescheduleAppointment, getBusinessHours, getBusinessAppointments, getBusinessConfig, BusinessHours, Appointment as ApiAppointment } from '../../lib/api';
 import { toast } from 'react-hot-toast';
 import { format } from 'date-fns';
 import { es } from 'date-fns/locale';
@@ -21,6 +21,8 @@ export default function CancelRescheduleModal({ isOpen, onClose, appointment }: 
   const [businessHours, setBusinessHours] = useState<BusinessHours[]>([]);
   const [appointments, setAppointments] = useState<ApiAppointment[]>([]);
   const [loadingSlots, setLoadingSlots] = useState(true);
+  const [slotInterval, setSlotInterval] = useState(30);
+  const [bufferMinutes, setBufferMinutes] = useState(0);
 
   const minCancellationHours = appointment?.services?.min_cancellation_hours ?? 48;
 
@@ -31,6 +33,7 @@ export default function CancelRescheduleModal({ isOpen, onClose, appointment }: 
         setLoadingSlots(true);
         const hours = await getBusinessHours(appointment.business_id);
         const apptsRes = await getBusinessAppointments(appointment.business_id);
+        const configRes = await getBusinessConfig(appointment.business_id);
         const fullWeek = Array.from({ length: 7 }, (_, idx) => {
           const found = hours.find(h => h.day_of_week === idx);
           return found || {
@@ -44,6 +47,10 @@ export default function CancelRescheduleModal({ isOpen, onClose, appointment }: 
         });
         setBusinessHours(fullWeek);
         setAppointments(apptsRes.success && apptsRes.data ? apptsRes.data.filter(a => a.id !== appointment.id) : []);
+        if (configRes.success && configRes.config) {
+          setSlotInterval(configRes.config.slot_interval_minutes ?? 30);
+          setBufferMinutes(configRes.config.buffer_minutes ?? 0);
+        }
       } catch { /* ignore */ }
       finally { setLoadingSlots(false); }
     };
@@ -66,7 +73,7 @@ export default function CancelRescheduleModal({ isOpen, onClose, appointment }: 
     if (businessEnd <= businessStart) businessEnd += 24 * 60;
 
     const slots: string[] = [];
-    for (let mins = businessStart; mins + serviceDuration <= businessEnd; mins += 30) {
+    for (let mins = businessStart; mins + serviceDuration <= businessEnd; mins += slotInterval) {
       const h = Math.floor(mins / 60);
       const m = mins % 60;
       slots.push(`${String(h).padStart(2, '0')}:${String(m).padStart(2, '0')}`);
@@ -75,15 +82,16 @@ export default function CancelRescheduleModal({ isOpen, onClose, appointment }: 
     return slots.filter(slot => {
       const slotTime = new Date(`${newDate}T${slot}`).getTime();
       const slotEnd = slotTime + serviceDuration * 60000;
+      const slotEndWithBuffer = slotEnd + bufferMinutes * 60000;
       return !appointments.some(appt => {
         const apptDate = (appt as any).start_time?.split?.('T')[0];
         if (apptDate !== newDate || appt.status === 'cancelled') return false;
         const aStart = new Date(appt.start_time).getTime();
         const aEnd = new Date(appt.end_time).getTime();
-        return slotTime < aEnd && slotEnd > aStart;
+        return slotTime < aEnd && slotEndWithBuffer > aStart;
       });
     });
-  }, [newDate, loadingSlots, businessHours, appointments, appointment, serviceDuration]);
+  }, [newDate, loadingSlots, businessHours, appointments, appointment, serviceDuration, slotInterval, bufferMinutes]);
 
   if (!isOpen || !appointment) return null;
 

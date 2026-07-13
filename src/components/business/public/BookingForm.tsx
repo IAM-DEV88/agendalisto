@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useMemo } from 'react';
-import { Clock, CheckCircle, ArrowLeft, Send, AlertCircle, Gift, Check, X, Lock, FileText, Eye, CalendarDays, Info } from 'lucide-react';
+import { Clock, CheckCircle, ArrowLeft, Send, AlertCircle, Gift, Check, X, Lock, FileText, Eye, CalendarDays, Info, Download } from 'lucide-react';
 import CrossPromotion from '../CrossPromotion';
 import AvailabilityCalendar from './AvailabilityCalendar';
 import { createAppointment, Service, getBusinessHours, getBusinessAppointments, BusinessHours, Appointment, validateGiftCode, redeemGiftCode } from '../../../lib/api';
@@ -9,6 +9,7 @@ import { toast } from 'react-hot-toast';
 import { Link } from 'react-router-dom';
 import PaymentMethodSelector from '../../PaymentMethodSelector';
 import { trackEvent } from '../../../lib/analytics';
+import { downloadIcs } from '../../../utils/icsUtils';
 
 interface BookingFormProps {
   businessId: string;
@@ -400,6 +401,24 @@ const BookingForm: React.FC<BookingFormProps> = ({
             </p>
           )}
         </div>
+        <button
+          onClick={() => {
+            if (!formData.date || !formData.time || !service) return;
+            const start = new Date(`${formData.date}T${formData.time}:00`);
+            const end = new Date(start.getTime() + (service.duration || 60) * 60000);
+            downloadIcs({
+              summary: `${service.name} — ${businessName}`,
+              description: service.description || `Cita en ${businessName}`,
+              location: businessAddress || businessName,
+              startTime: start,
+              endTime: end,
+            }, `${service.name.replace(/\s+/g, '_')}.ics`);
+          }}
+          className="inline-flex items-center gap-2 px-5 py-2.5 bg-emerald-50 hover:bg-emerald-100 dark:bg-emerald-500/10 dark:hover:bg-emerald-500/20 text-emerald-700 dark:text-emerald-400 font-bold text-sm rounded-xl transition-all active:scale-[0.97] border border-emerald-200 dark:border-emerald-800/50"
+        >
+          <Download className="w-4 h-4" />
+          Agregar a mi calendario
+        </button>
         {!userId && (
           <div className="mt-4 p-4 bg-primary-50 dark:bg-primary-900/20 rounded-2xl border border-primary-200 dark:border-primary-800/50">
             <p className="text-sm font-bold text-primary-800 dark:text-primary-300 mb-1">

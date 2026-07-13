@@ -102,6 +102,7 @@ const AppointmentCalendar: React.FC<AppointmentCalendarProps> = ({
   };
 
   const handleDragEnd = (e: React.DragEvent) => {
+    dragDataRef.current = null;
     const el = e.currentTarget as HTMLElement;
     el.classList.remove('opacity-40');
     setDragOverDate(null);

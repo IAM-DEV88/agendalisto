@@ -1,14 +1,20 @@
 import type { Appointment } from '../types/appointment';
 
-function formatIcsDate(iso: string): string {
-  return new Date(iso).toISOString().replace(/[-:]/g, '').replace(/\.\d{3}/, '');
+export interface IcsEventData {
+  summary: string;
+  description?: string;
+  location?: string;
+  startTime: Date;
+  endTime: Date;
+  uid?: string;
 }
 
-export function generateIcsFile(appointment: Appointment): string {
-  const summary = `${appointment.services?.name || 'Cita'} - ${appointment.businesses?.name || ''}`;
-  const location = appointment.businesses?.address || '';
-  const description = appointment.notes || '';
-  const now = formatIcsDate(new Date().toISOString());
+function formatIcsDate(date: Date): string {
+  return date.toISOString().replace(/[-:]/g, '').replace(/\.\d{3}/, '');
+}
+
+export function generateIcsFile(data: IcsEventData): string {
+  const now = formatIcsDate(new Date());
 
   return [
     'BEGIN:VCALENDAR',
@@ -16,27 +22,38 @@ export function generateIcsFile(appointment: Appointment): string {
     'PRODID:-//AgendaYa//Cita//ES',
     'CALSCALE:GREGORIAN',
     'BEGIN:VEVENT',
-    `DTSTART:${formatIcsDate(appointment.start_time)}`,
-    `DTEND:${formatIcsDate(appointment.end_time)}`,
+    `DTSTART:${formatIcsDate(data.startTime)}`,
+    `DTEND:${formatIcsDate(data.endTime)}`,
     `DTSTAMP:${now}`,
-    `SUMMARY:${summary}`,
-    location ? `LOCATION:${location}` : '',
-    description ? `DESCRIPTION:${description}` : '',
-    `UID:${appointment.id}@agendaya.com`,
+    `SUMMARY:${data.summary}`,
+    data.location ? `LOCATION:${data.location}` : '',
+    data.description ? `DESCRIPTION:${data.description}` : '',
+    `UID:${data.uid || `${Date.now()}@agendaya.com`}`,
     'END:VEVENT',
     'END:VCALENDAR',
   ].filter(Boolean).join('\r\n');
 }
 
-export function downloadIcs(appointment: Appointment) {
-  const icsContent = generateIcsFile(appointment);
+export function downloadIcs(data: IcsEventData, filename?: string) {
+  const icsContent = generateIcsFile(data);
   const blob = new Blob([icsContent], { type: 'text/calendar;charset=utf-8' });
   const url = URL.createObjectURL(blob);
   const link = document.createElement('a');
   link.href = url;
-  link.download = `cita-${appointment.services?.name || 'agendaya'}.ics`;
+  link.download = filename || `cita-${data.summary.replace(/\s+/g, '_')}.ics`;
   document.body.appendChild(link);
   link.click();
   document.body.removeChild(link);
   URL.revokeObjectURL(url);
+}
+
+export function generateIcsFromAppointment(appointment: Appointment): string {
+  return generateIcsFile({
+    summary: `${appointment.services?.name || 'Cita'} - ${appointment.businesses?.name || ''}`,
+    description: appointment.notes || '',
+    location: appointment.businesses?.address || '',
+    startTime: new Date(appointment.start_time),
+    endTime: new Date(appointment.end_time),
+    uid: appointment.id,
+  });
 }
