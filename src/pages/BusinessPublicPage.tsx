@@ -328,6 +328,21 @@ function BusinessPublicPage() {
                 )}
               </div>
 
+              {/* Confirmation required */}
+              {businessData?.config?.requiere_confirmacion && (
+                <div className="bg-amber-50/50 dark:bg-amber-500/5 rounded-2xl border border-amber-200/50 dark:border-amber-800/30 p-5">
+                  <div className="flex items-start gap-3">
+                    <Clock className="w-4 h-4 text-amber-500 flex-shrink-0 mt-0.5" />
+                    <div>
+                      <p className="text-sm font-bold text-amber-800 dark:text-amber-300">Confirmación manual</p>
+                      <p className="text-xs text-amber-600/80 dark:text-amber-400/80 mt-0.5">
+                        Las reservas requieren confirmación del negocio antes de ser agendadas.
+                      </p>
+                    </div>
+                  </div>
+                </div>
+              )}
+
               {/* Location */}
               {businessData?.config?.mostrar_direccion && (
                 <div className={`bg-white dark:bg-slate-900 rounded-2xl border border-slate-200 dark:border-slate-800 p-6 ${activeTab !== 'location' ? 'hidden' : ''} md:block`}>

@@ -59,14 +59,14 @@ INSERT INTO agendaya_businesses (id, owner_id, category_id, name, slug, descript
 ('18a5f9bd-cdc2-45cc-b95e-6554899996d8', '18a5f9bd-cdc2-45cc-b95e-6554899996e8', 'f4381841-3a1a-46fa-b3b5-93ecb7106e17', 'Barbería Clásica', 'barberia-clasica', 'Barbería tradicional con servicios de corte y afeitado', 'Carrera 5 #12-25, San Agustín, Huila', '3188901234', 'barberia@email.com', NOW(), NOW());
 
 -- Insert business configurations with public data disabled
-INSERT INTO agendaya_business_config (business_id, permitir_reservas_online, mostrar_precios, mostrar_telefono, mostrar_email, mostrar_redes_sociales, mostrar_direccion, requiere_confirmacion, tiempo_minimo_cancelacion, notificaciones_email, notificaciones_whatsapp) VALUES
-('18a5f9bd-cdc2-45cc-b95e-6554899996d1', true, false, false, false, false, false, true, 24, true, true),
-('18a5f9bd-cdc2-45cc-b95e-6554899996d2', true, false, false, false, false, false, true, 24, true, true),
-('18a5f9bd-cdc2-45cc-b95e-6554899996d3', true, false, false, false, false, false, true, 24, true, true),
-('18a5f9bd-cdc2-45cc-b95e-6554899996d4', true, false, false, false, false, false, true, 24, true, true),
-('18a5f9bd-cdc2-45cc-b95e-6554899996d5', true, false, false, false, false, false, true, 24, true, true),
-('18a5f9bd-cdc2-45cc-b95e-6554899996d6', true, false, false, false, false, false, true, 24, true, true),
-('18a5f9bd-cdc2-45cc-b95e-6554899996d7', true, false, false, false, false, false, true, 24, true, true),
-('18a5f9bd-cdc2-45cc-b95e-6554899996d8', true, false, false, false, false, false, true, 24, true, true);
+INSERT INTO agendaya_business_config (business_id, permitir_reservas_online, mostrar_precios, mostrar_telefono, mostrar_email, mostrar_redes_sociales, mostrar_direccion, requiere_confirmacion, notificaciones_email, notificaciones_whatsapp) VALUES
+('18a5f9bd-cdc2-45cc-b95e-6554899996d1', true, false, false, false, false, false, true, true, true),
+('18a5f9bd-cdc2-45cc-b95e-6554899996d2', true, false, false, false, false, false, true, true, true),
+('18a5f9bd-cdc2-45cc-b95e-6554899996d3', true, false, false, false, false, false, true, true, true),
+('18a5f9bd-cdc2-45cc-b95e-6554899996d4', true, false, false, false, false, false, true, true, true),
+('18a5f9bd-cdc2-45cc-b95e-6554899996d5', true, false, false, false, false, false, true, true, true),
+('18a5f9bd-cdc2-45cc-b95e-6554899996d6', true, false, false, false, false, false, true, true, true),
+('18a5f9bd-cdc2-45cc-b95e-6554899996d7', true, false, false, false, false, false, true, true, true),
+('18a5f9bd-cdc2-45cc-b95e-6554899996d8', true, false, false, false, false, false, true, true, true);
 
 COMMIT; 

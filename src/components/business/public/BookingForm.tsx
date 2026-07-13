@@ -142,7 +142,7 @@ const BookingForm: React.FC<BookingFormProps> = ({
       user_id: userId || '',
       start_time: startTime.toISOString(),
       end_time: endTime.toISOString(),
-      status: 'pending' as const,
+      status: requireConfirmation ? 'pending' as const : 'confirmed' as const,
       notes: formData.notes || null,
       is_guest: !userId,
       guest_info: !userId ? guestInfo! : null,
@@ -425,6 +425,7 @@ const BookingForm: React.FC<BookingFormProps> = ({
       </div>
 
       {/* Gift Code */}
+      {service?.can_be_gifted && (
       <div className="mb-5 p-3 bg-rose-50 dark:bg-rose-900/10 rounded-2xl border border-rose-200 dark:border-rose-800/50">
         <p className="text-xs font-bold text-rose-600 dark:text-rose-400 flex items-center gap-1.5 mb-2">
           <Gift className="w-3.5 h-3.5" /> ¿Tienes un código de regalo?
@@ -476,6 +477,7 @@ const BookingForm: React.FC<BookingFormProps> = ({
         )}
         {giftError && <p className="text-xs text-red-500 mt-1.5">{giftError}</p>}
       </div>
+      )}
 
       {/* Error */}
       {error && (

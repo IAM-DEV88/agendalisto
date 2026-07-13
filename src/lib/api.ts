@@ -52,6 +52,7 @@ export interface Service {
   can_be_gifted?: boolean;
   requires_payment?: boolean;
   payment_percentage?: number;
+  min_cancellation_hours?: number;
 }
 
 export type BusinessHours = {
@@ -72,7 +73,6 @@ export interface BusinessConfig {
   mostrar_redes_sociales: boolean;
   mostrar_direccion: boolean;
   requiere_confirmacion: boolean;
-  tiempo_minimo_cancelacion: number;
   notificaciones_email: boolean;
   notificaciones_whatsapp: boolean;
 }
@@ -550,7 +550,7 @@ export const createBusiness = async (business: Omit<Business, 'id' | 'plan' | 'p
     // Crear fila de configuración por defecto
     await supabase
       .from('agendaya_business_config')
-      .insert({ business_id: newBusiness.id })
+      .insert({ business_id: newBusiness.id, requiere_confirmacion: true })
       .then(({ error: cfgError }) => {
         if (cfgError) console.error('[createBusiness] Error creating config:', cfgError);
       });

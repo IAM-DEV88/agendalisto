@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useDispatch, useSelector } from 'react-redux';
-import { Settings, Eye, Bell, ListOrdered, Save, Loader2, CheckCircle2, AlertCircle, Clock, ChevronDown, Link as LinkIcon, Copy, Check, ExternalLink, Trash2, AlertTriangle } from 'lucide-react';
+import { Settings, Eye, Bell, ListOrdered, Save, Loader2, CheckCircle2, AlertCircle, ChevronDown, Link as LinkIcon, Copy, Check, ExternalLink, Trash2, AlertTriangle } from 'lucide-react';
 import { BusinessConfig, deleteBusiness } from '../../lib/api';
 import { useAuth } from '../../hooks/useAuth';
 import { useUIConfig } from '../../hooks/useUIConfig';
@@ -127,26 +127,6 @@ export const BusinessConfigSection: React.FC<BusinessConfigSectionProps> = ({
                 />
               </div>
 
-              <div className="space-y-2 px-3 pt-2">
-                <label htmlFor="tiempo_minimo_cancelacion" className="block text-sm font-bold text-slate-700 dark:text-slate-300">
-                  Tiempo mínimo para cancelaciones (horas)
-                </label>
-                <div className="relative">
-                  <Clock className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
-                  <input
-                    type="number"
-                    id="tiempo_minimo_cancelacion"
-                    value={config.tiempo_minimo_cancelacion}
-                    onChange={(e) => onConfigChange('tiempo_minimo_cancelacion', parseInt(e.target.value) || 0)}
-                    min="0"
-                    max="72"
-                    className="w-full pl-10 pr-4 py-2.5 rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 focus:ring-2 focus:ring-primary-500/20 focus:border-primary-500 outline-none transition-all text-sm font-bold"
-                  />
-                </div>
-                <p className="text-xs text-slate-500 dark:text-slate-400 italic">
-                  Plazo límite para que los clientes puedan cancelar sus citas.
-                </p>
-              </div>
             </div>
 
             {/* Información Visible */}

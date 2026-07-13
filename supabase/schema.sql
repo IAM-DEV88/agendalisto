@@ -56,6 +56,11 @@ CREATE TABLE IF NOT EXISTS public.agendaya_businesses (
   lat NUMERIC(10,8),
   lng NUMERIC(11,8),
   category_id UUID REFERENCES public.agendaya_business_categories(id),
+  showcase_only BOOLEAN DEFAULT false,
+  likes_count INTEGER DEFAULT 0,
+  slug TEXT UNIQUE,
+  plan_score INTEGER DEFAULT 0,
+  referral_code TEXT,
   created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
   updated_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
 );
@@ -89,6 +94,11 @@ CREATE TABLE IF NOT EXISTS public.agendaya_services (
   price NUMERIC(10,2) NOT NULL,
   provider TEXT,
   is_active BOOLEAN DEFAULT TRUE,
+  can_be_gifted BOOLEAN DEFAULT false,
+  requires_payment BOOLEAN DEFAULT false,
+  payment_percentage NUMERIC(5,2) DEFAULT 100.00,
+  image_urls JSONB DEFAULT '[]'::jsonb,
+  min_cancellation_hours INTEGER DEFAULT 48,
   created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
   updated_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
 );
@@ -112,9 +122,8 @@ CREATE TABLE IF NOT EXISTS public.agendaya_business_config (
   mostrar_email BOOLEAN NOT NULL DEFAULT false,
   mostrar_redes_sociales BOOLEAN NOT NULL DEFAULT true,
   mostrar_direccion BOOLEAN NOT NULL DEFAULT true,
-  requiere_confirmacion BOOLEAN NOT NULL DEFAULT false,
-  tiempo_minimo_cancelacion INTEGER NOT NULL DEFAULT 48,
-  notificaciones_email BOOLEAN NOT NULL DEFAULT true,
+  requiere_confirmacion BOOLEAN NOT NULL DEFAULT true,
+  notificaciones_email BOOLEAN NOT NULL DEFAULT false,
   notificaciones_whatsapp BOOLEAN NOT NULL DEFAULT false,
   updated_at TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT NOW()
 );

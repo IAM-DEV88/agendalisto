@@ -8,7 +8,7 @@ import {
 } from '../lib/api';
 import { supabase } from '../lib/supabase';
 import { BookingForm } from '../components/business/public';
-import { ArrowLeft, ChevronLeft, ChevronRight, X, Store, Calendar, Clock, Mail, User, Phone, Eye } from 'lucide-react';
+import { ArrowLeft, ChevronLeft, ChevronRight, X, Store, Calendar, Clock, Mail, User, Phone, Eye, CheckCircle } from 'lucide-react';
 import EmptyState from '../components/ui/EmptyState';
 import SEO from '../components/SEO';
 
@@ -127,59 +127,118 @@ function BookingPage() {
         </div>
       </div>
 
-      <div className="max-w-5xl mx-auto px-4 mt-8 animate-in fade-in slide-in-from-bottom-4 duration-500">
-        <div className="grid grid-cols-1 lg:grid-cols-5 gap-8">
-          {/* ─── LEFT: Service Info + Gallery ─── */}
-          <div className="lg:col-span-2 space-y-6">
-            {/* Gallery */}
-            {images.length > 0 && (
-              <div className="bg-white dark:bg-slate-900 rounded-2xl border border-slate-200 dark:border-slate-800 overflow-hidden group">
-                <div className="relative aspect-[4/3] bg-slate-100 dark:bg-slate-800">
+      <div className="max-w-5xl mx-auto px-4 mt-6 animate-in fade-in slide-in-from-bottom-4 duration-500">
+        <div className="grid grid-cols-1 lg:grid-cols-5 gap-6 lg:gap-8">
+          {/* ─── LEFT: Service Summary + Confirmation Banner ─── */}
+          <div className="lg:col-span-2 space-y-5">
+            {/* Service header card — image as small thumbnail */}
+            <div className="bg-white dark:bg-slate-900 rounded-2xl border border-slate-200 dark:border-slate-800 p-5">
+              <div className="flex items-start gap-4">
+                {images.length > 0 && (
+                  <div
+                    className="w-20 h-20 rounded-xl overflow-hidden bg-slate-100 dark:bg-slate-800 cursor-zoom-in flex-shrink-0 shadow-sm border border-slate-200 dark:border-slate-700"
+                    onClick={() => setFullscreenImage(images[0])}
+                  >
+                    <img
+                      src={images[0]}
+                      alt={service.name}
+                      className="w-full h-full object-contain"
+                    />
+                  </div>
+                )}
+                <div className="min-w-0 flex-1">
+                  <h2 className="font-black text-lg sm:text-xl text-slate-900 dark:text-white leading-tight">{service.name}</h2>
+                  <div className="flex items-center flex-wrap gap-x-4 gap-y-1 mt-1.5">
+                    <div className="flex items-center gap-1 text-sm font-bold text-slate-500 dark:text-slate-400">
+                      <Clock className="w-3.5 h-3.5 text-primary-500" />
+                      {service.duration} min
+                    </div>
+                    {(businessData.config?.mostrar_precios ?? true) && service.price > 0 && (
+                      <div className="text-base font-black text-primary-600 dark:text-primary-400">
+                        ${service.price.toLocaleString()}
+                      </div>
+                    )}
+                  </div>
+                </div>
+              </div>
+              {service.description && (
+                <p className="text-sm text-slate-500 dark:text-slate-400 leading-relaxed mt-3 pt-3 border-t border-slate-100 dark:border-slate-800">
+                  {service.description}
+                </p>
+              )}
+            </div>
+
+            {/* Gallery for multiple images — compact like marketplace */}
+            {images.length > 1 && (
+              <div className="bg-white dark:bg-slate-900 rounded-2xl border border-slate-200 dark:border-slate-800 p-3 space-y-3">
+                <div className="relative aspect-video bg-slate-100 dark:bg-slate-800 rounded-xl overflow-hidden group">
                   <img
                     src={images[activeImageIndex]}
                     alt={service.name}
-                    className="w-full h-full object-contain bg-slate-100 dark:bg-slate-800 cursor-zoom-in transition-transform duration-500 group-hover:scale-105"
+                    className="w-full h-full object-contain bg-slate-100 dark:bg-slate-800 cursor-zoom-in transition-transform duration-300 group-hover:scale-105"
                     onClick={() => setFullscreenImage(images[activeImageIndex])}
                   />
-                  {images.length > 1 && (
-                    <>
-                      <button onClick={() => setActiveImageIndex(prev => (prev - 1 + images.length) % images.length)}
-                        className="absolute left-3 top-1/2 -translate-y-1/2 p-2 bg-black/30 hover:bg-black/50 text-white rounded-full backdrop-blur-sm transition-all opacity-0 group-hover:opacity-100">
-                        <ChevronLeft className="w-5 h-5" />
-                      </button>
-                      <button onClick={() => setActiveImageIndex(prev => (prev + 1) % images.length)}
-                        className="absolute right-3 top-1/2 -translate-y-1/2 p-2 bg-black/30 hover:bg-black/50 text-white rounded-full backdrop-blur-sm transition-all opacity-0 group-hover:opacity-100">
-                        <ChevronRight className="w-5 h-5" />
-                      </button>
-                      <div className="absolute bottom-3 left-1/2 -translate-x-1/2 flex gap-1.5">
-                        {images.map((_, i) => (
-                          <div key={i} className={`w-1.5 h-1.5 rounded-full transition-all ${i === activeImageIndex ? 'bg-white scale-125' : 'bg-white/40'}`} />
-                        ))}
-                      </div>
-                    </>
-                  )}
+                  <div className="absolute inset-x-0 bottom-0 h-12 bg-gradient-to-t from-black/20 to-transparent pointer-events-none" />
+                  <span className="absolute top-2 right-2 px-2 py-0.5 bg-black/40 backdrop-blur-sm text-white text-[10px] font-bold rounded-lg">
+                    {activeImageIndex + 1}/{images.length}
+                  </span>
+                  <button onClick={() => setActiveImageIndex(prev => (prev - 1 + images.length) % images.length)}
+                    className="absolute left-2 top-1/2 -translate-y-1/2 p-1.5 bg-white/80 hover:bg-white text-slate-700 rounded-lg shadow-sm transition-all opacity-0 group-hover:opacity-100">
+                    <ChevronLeft className="w-4 h-4" />
+                  </button>
+                  <button onClick={() => setActiveImageIndex(prev => (prev + 1) % images.length)}
+                    className="absolute right-2 top-1/2 -translate-y-1/2 p-1.5 bg-white/80 hover:bg-white text-slate-700 rounded-lg shadow-sm transition-all opacity-0 group-hover:opacity-100">
+                    <ChevronRight className="w-4 h-4" />
+                  </button>
+                </div>
+                <div className="flex gap-2 overflow-x-auto no-scrollbar">
+                  {images.map((url, i) => (
+                    <button
+                      key={i}
+                      onClick={() => setActiveImageIndex(i)}
+                      className={`w-14 h-14 rounded-lg overflow-hidden flex-shrink-0 border-2 transition-all ${
+                        i === activeImageIndex
+                          ? 'border-primary-500 ring-1 ring-primary-500/30 shadow-sm'
+                          : 'border-transparent opacity-60 hover:opacity-100'
+                      }`}
+                    >
+                      <img src={url} alt="" className="w-full h-full object-contain bg-slate-100 dark:bg-slate-800" />
+                    </button>
+                  ))}
                 </div>
               </div>
             )}
 
-            {/* Service Details Card */}
-            <div className="bg-white dark:bg-slate-900 rounded-2xl border border-slate-200 dark:border-slate-800 p-5 space-y-3">
-              <h2 className="font-black text-xl text-slate-900 dark:text-white">{service.name}</h2>
-              <p className="text-sm text-slate-500 dark:text-slate-400 leading-relaxed">
-                {service.description}
-              </p>
-              <div className="flex items-center gap-4 pt-2">
-                <div className="flex items-center gap-1.5 text-sm font-medium text-slate-500">
-                  <Clock className="w-4 h-4 text-primary-500" />
-                  <span className="font-bold text-slate-700 dark:text-slate-300">{service.duration} min</span>
-                </div>
-                {(businessData.config?.mostrar_precios ?? true) && service.price > 0 && (
-                  <div className="text-xl font-black text-primary-600 dark:text-primary-400">
-                    ${service.price.toLocaleString()}
-                  </div>
+            {/* Confirmation banner */}
+            {!isOwner && (
+              <div className={`rounded-2xl p-4 border flex items-start gap-3 ${
+                businessData.config?.requiere_confirmacion
+                  ? 'bg-amber-50 dark:bg-amber-900/10 border-amber-200 dark:border-amber-800/50'
+                  : 'bg-emerald-50 dark:bg-emerald-900/10 border-emerald-200 dark:border-emerald-800/50'
+              }`}>
+                {businessData.config?.requiere_confirmacion ? (
+                  <>
+                    <Clock className="w-5 h-5 text-amber-600 dark:text-amber-400 flex-shrink-0 mt-0.5" />
+                    <div>
+                      <p className="text-sm font-bold text-amber-800 dark:text-amber-300">Requiere confirmación</p>
+                      <p className="text-xs text-amber-600 dark:text-amber-400 mt-0.5">
+                        El negocio revisará tu solicitud y confirmará la cita manualmente.
+                      </p>
+                    </div>
+                  </>
+                ) : (
+                  <>
+                    <CheckCircle className="w-5 h-5 text-emerald-600 dark:text-emerald-400 flex-shrink-0 mt-0.5" />
+                    <div>
+                      <p className="text-sm font-bold text-emerald-800 dark:text-emerald-300">Reserva inmediata</p>
+                      <p className="text-xs text-emerald-600 dark:text-emerald-400 mt-0.5">
+                        Tu cita será agendada automáticamente sin necesidad de confirmación.
+                      </p>
+                    </div>
+                  </>
                 )}
               </div>
-            </div>
+            )}
           </div>
 
           {/* ─── RIGHT: Booking Form ─── */}
@@ -247,7 +306,7 @@ function BookingPage() {
                 requireConfirmation={businessData.config?.requiere_confirmacion}
                 notifyEmail={businessData.config?.notificaciones_email}
                 notifyWhatsapp={businessData.config?.notificaciones_whatsapp}
-                minCancellationHours={businessData.config?.tiempo_minimo_cancelacion}
+                minCancellationHours={service.min_cancellation_hours ?? 48}
                 guestInfo={guestMode ? guestInfo : undefined}
                 isOwnerPreview={isOwner}
               />

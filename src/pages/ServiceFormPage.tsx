@@ -73,6 +73,7 @@ export default function ServiceFormPage() {
     can_be_gifted: false,
     requires_payment: false,
     payment_percentage: 100,
+    min_cancellation_hours: 48,
   });
 
   const [activeImageIndex, setActiveImageIndex] = useState(0);
@@ -115,6 +116,7 @@ export default function ServiceFormPage() {
             can_be_gifted: data.can_be_gifted || false,
             requires_payment: data.requires_payment || false,
             payment_percentage: data.payment_percentage ?? 100,
+            min_cancellation_hours: data.min_cancellation_hours ?? 48,
           });
         } else {
           const userBizs = businesses || [];
@@ -219,6 +221,7 @@ export default function ServiceFormPage() {
           can_be_gifted: formData.can_be_gifted,
           requires_payment: formData.requires_payment,
           payment_percentage: formData.payment_percentage,
+          min_cancellation_hours: formData.min_cancellation_hours,
         };
         response = await updateBusinessService(serviceId, updates);
         if (response.success) {
@@ -246,6 +249,7 @@ export default function ServiceFormPage() {
           can_be_gifted: formData.can_be_gifted,
           requires_payment: formData.requires_payment,
           payment_percentage: formData.payment_percentage,
+          min_cancellation_hours: formData.min_cancellation_hours,
         };
         response = await createBusinessService(serviceData);
         if (response.success) {
@@ -613,6 +617,26 @@ export default function ServiceFormPage() {
                         </p>
                       </div>
                     )}
+
+                    <div className="space-y-2 pt-2">
+                      <label htmlFor="min_cancellation_hours" className="text-sm font-bold text-slate-700 dark:text-slate-300">
+                        Tiempo mínimo para cancelaciones (horas)
+                      </label>
+                      <div className="relative">
+                        <Clock className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
+                        <input
+                          type="number"
+                          id="min_cancellation_hours"
+                          value={formData.min_cancellation_hours}
+                          onChange={e => setFormData({ ...formData, min_cancellation_hours: parseInt(e.target.value) || 0 })}
+                          min="0" max="72"
+                          className="w-full pl-10 pr-4 py-2.5 rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 focus:ring-2 focus:ring-primary-500/20 focus:border-primary-500 outline-none transition-all text-sm font-bold"
+                        />
+                      </div>
+                      <p className="text-xs text-slate-500 dark:text-slate-400 italic">
+                        Plazo límite para que los clientes puedan cancelar sus citas.
+                      </p>
+                    </div>
                   </div>
                 </div>
 

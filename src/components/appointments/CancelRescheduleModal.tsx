@@ -1,7 +1,7 @@
-import { useState } from 'react';
+import { useState, useEffect, useMemo } from 'react';
 import { X, AlertCircle, Calendar, ChevronLeft, Clock } from 'lucide-react';
 import { Appointment } from '../../types/appointment';
-import { cancelAppointment, rescheduleAppointment } from '../../lib/api';
+import { cancelAppointment, rescheduleAppointment, getBusinessHours, getBusinessAppointments, BusinessHours, Appointment as ApiAppointment } from '../../lib/api';
 import { toast } from 'react-hot-toast';
 import { format } from 'date-fns';
 import { es } from 'date-fns/locale';
@@ -10,20 +10,85 @@ interface Props {
   isOpen: boolean;
   onClose: () => void;
   appointment: Appointment | null;
-  businessMinCancellationHours?: number;
 }
 
-export default function CancelRescheduleModal({ isOpen, onClose, appointment, businessMinCancellationHours = 0 }: Props) {
+export default function CancelRescheduleModal({ isOpen, onClose, appointment }: Props) {
   const [mode, setMode] = useState<'cancel' | 'reschedule' | null>(null);
   const [reason, setReason] = useState('');
   const [newDate, setNewDate] = useState('');
   const [newTime, setNewTime] = useState('');
   const [loading, setLoading] = useState(false);
+  const [businessHours, setBusinessHours] = useState<BusinessHours[]>([]);
+  const [appointments, setAppointments] = useState<ApiAppointment[]>([]);
+  const [loadingSlots, setLoadingSlots] = useState(true);
+
+  const minCancellationHours = appointment?.services?.min_cancellation_hours ?? 48;
+
+  useEffect(() => {
+    if (!appointment?.business_id || !mode) return;
+    const fetchSchedule = async () => {
+      try {
+        setLoadingSlots(true);
+        const hours = await getBusinessHours(appointment.business_id);
+        const apptsRes = await getBusinessAppointments(appointment.business_id);
+        const fullWeek = Array.from({ length: 7 }, (_, idx) => {
+          const found = hours.find(h => h.day_of_week === idx);
+          return found || {
+            id: `${appointment.business_id}-${idx}`,
+            business_id: appointment.business_id,
+            day_of_week: idx,
+            start_time: '00:00',
+            end_time: '00:00',
+            is_closed: true,
+          } as BusinessHours;
+        });
+        setBusinessHours(fullWeek);
+        setAppointments(apptsRes.success && apptsRes.data ? apptsRes.data.filter(a => a.id !== appointment.id) : []);
+      } catch { /* ignore */ }
+      finally { setLoadingSlots(false); }
+    };
+    fetchSchedule();
+  }, [appointment?.business_id, mode]);
+
+  const serviceDuration = appointment?.services?.duration || 60;
+
+  const availableTimeSlots = useMemo(() => {
+    if (!newDate || loadingSlots || !appointment) return [];
+    const jsDay = new Date(`${newDate}T00:00`).getDay();
+    const selectedDay = (jsDay + 6) % 7;
+    const todaysHours = businessHours.find(h => h.day_of_week === selectedDay);
+    if (!todaysHours || todaysHours.is_closed) return [];
+
+    const [startH, startM] = todaysHours.start_time.replace('.', ':').split(':').map(Number);
+    const [endH, endM] = todaysHours.end_time.replace('.', ':').split(':').map(Number);
+    let businessStart = startH * 60 + startM;
+    let businessEnd = endH * 60 + endM;
+    if (businessEnd <= businessStart) businessEnd += 24 * 60;
+
+    const slots: string[] = [];
+    for (let mins = businessStart; mins + serviceDuration <= businessEnd; mins += 30) {
+      const h = Math.floor(mins / 60);
+      const m = mins % 60;
+      slots.push(`${String(h).padStart(2, '0')}:${String(m).padStart(2, '0')}`);
+    }
+
+    return slots.filter(slot => {
+      const slotTime = new Date(`${newDate}T${slot}`).getTime();
+      const slotEnd = slotTime + serviceDuration * 60000;
+      return !appointments.some(appt => {
+        const apptDate = (appt as any).start_time?.split?.('T')[0];
+        if (apptDate !== newDate || appt.status === 'cancelled') return false;
+        const aStart = new Date(appt.start_time).getTime();
+        const aEnd = new Date(appt.end_time).getTime();
+        return slotTime < aEnd && slotEnd > aStart;
+      });
+    });
+  }, [newDate, loadingSlots, businessHours, appointments, appointment, serviceDuration]);
 
   if (!isOpen || !appointment) return null;
 
-  const isWithinMinTime = businessMinCancellationHours > 0 &&
-    (new Date(appointment.start_time).getTime() - Date.now()) < businessMinCancellationHours * 3600000;
+  const isWithinMinTime = minCancellationHours > 0 &&
+    (new Date(appointment.start_time).getTime() - Date.now()) < minCancellationHours * 3600000;
 
   const handleCancel = async () => {
     setLoading(true);
@@ -40,7 +105,7 @@ export default function CancelRescheduleModal({ isOpen, onClose, appointment, bu
   const handleReschedule = async () => {
     if (!newDate || !newTime) { toast.error('Selecciona fecha y hora'); return; }
     const startTime = new Date(`${newDate}T${newTime}`);
-    const endTime = new Date(startTime.getTime() + 3600000);
+    const endTime = new Date(startTime.getTime() + serviceDuration * 60000);
     setLoading(true);
     const res = await rescheduleAppointment(appointment.id, startTime.toISOString(), endTime.toISOString());
     setLoading(false);
@@ -109,7 +174,7 @@ export default function CancelRescheduleModal({ isOpen, onClose, appointment, bu
             <div className="flex items-start gap-2.5 p-3 bg-amber-50 dark:bg-amber-900/10 rounded-xl border border-amber-200 dark:border-amber-800/50">
               <AlertCircle className="w-4 h-4 text-amber-500 flex-shrink-0 mt-0.5" />
               <p className="text-xs font-medium text-amber-700 dark:text-amber-300">
-                Esta cita está dentro del tiempo mínimo de cancelación ({businessMinCancellationHours}h). Puede que el negocio no acepte cambios de último minuto.
+                Esta cita está dentro del tiempo mínimo de cancelación ({minCancellationHours}h). Puede que el negocio no acepte cambios de último minuto.
               </p>
             </div>
           )}
@@ -170,13 +235,41 @@ export default function CancelRescheduleModal({ isOpen, onClose, appointment, bu
                 />
               </div>
               <div>
-                <label className="block text-xs font-bold text-slate-700 dark:text-slate-300 mb-1.5">Nueva hora</label>
-                <input
-                  type="time"
-                  value={newTime}
-                  onChange={e => setNewTime(e.target.value)}
-                  className="w-full bg-slate-50 dark:bg-slate-800/50 border border-slate-200 dark:border-slate-700 rounded-xl px-3 py-2.5 text-sm text-slate-900 dark:text-white focus:ring-2 focus:ring-primary-500/20 focus:border-primary-500 transition-all"
-                />
+                <label className="block text-xs font-bold text-slate-700 dark:text-slate-300 mb-1.5">Nuevo horario</label>
+                {!newDate ? (
+                  <div className="py-6 text-center bg-slate-50 dark:bg-slate-800/50 rounded-xl border border-dashed border-slate-200 dark:border-slate-700">
+                    <Calendar className="w-6 h-6 text-slate-300 dark:text-slate-600 mx-auto mb-1" />
+                    <p className="text-xs font-medium text-slate-400 italic">Selecciona una fecha primero</p>
+                  </div>
+                ) : loadingSlots ? (
+                  <div className="grid grid-cols-3 sm:grid-cols-4 gap-2">
+                    {[...Array(6)].map((_, i) => (
+                      <div key={i} className="h-10 bg-slate-200 dark:bg-slate-700 rounded-xl animate-pulse" />
+                    ))}
+                  </div>
+                ) : availableTimeSlots.length === 0 ? (
+                  <div className="py-6 text-center bg-amber-50 dark:bg-amber-500/10 rounded-xl border border-dashed border-amber-200 dark:border-amber-800">
+                    <Clock className="w-6 h-6 text-amber-400 mx-auto mb-1" />
+                    <p className="text-xs font-bold text-amber-700 dark:text-amber-400">No hay turnos disponibles este día</p>
+                  </div>
+                ) : (
+                  <div className="grid grid-cols-3 sm:grid-cols-4 gap-2 max-h-48 overflow-y-auto pr-1">
+                    {availableTimeSlots.map((slot) => (
+                      <button
+                        key={slot}
+                        type="button"
+                        onClick={() => setNewTime(slot)}
+                        className={`py-2.5 text-xs font-black rounded-xl border-2 transition-all active:scale-95 ${
+                          newTime === slot
+                            ? 'bg-primary-600 border-primary-600 text-white shadow-lg shadow-primary-500/30'
+                            : 'bg-white dark:bg-slate-800 border-slate-200 dark:border-slate-700 text-slate-700 dark:text-slate-300 hover:border-primary-400 dark:hover:border-primary-600'
+                        }`}
+                      >
+                        {slot}
+                      </button>
+                    ))}
+                  </div>
+                )}
               </div>
               <button
                 onClick={handleReschedule}

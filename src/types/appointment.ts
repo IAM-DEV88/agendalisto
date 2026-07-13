@@ -26,6 +26,7 @@ export interface Service {
   is_active: boolean;
   provider?: string;
   image_urls?: string[];
+  min_cancellation_hours?: number;
   created_at: string;
   updated_at: string;
 }

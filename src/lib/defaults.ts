@@ -7,8 +7,7 @@ export const DEFAULT_BUSINESS_CONFIG: BusinessConfig = {
   mostrar_email: false,
   mostrar_redes_sociales: true,
   mostrar_direccion: true,
-  requiere_confirmacion: false,
-  tiempo_minimo_cancelacion: 48,
+  requiere_confirmacion: true,
   notificaciones_email: false,
   notificaciones_whatsapp: false,
 };
