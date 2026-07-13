@@ -342,24 +342,24 @@ export default function ServiceFormPage() {
           )}
 
           {/* Step navigation */}
-          <div className="flex items-center gap-2 text-xs font-bold">
+          <div className="flex items-center gap-2 text-xs font-bold overflow-x-auto no-scrollbar">
             {tabs.map((tab, i) => {
               const Icon = tab.icon;
               return (
-                <div key={tab.id} className="flex items-center gap-2">
+                <div key={tab.id} className="flex items-center gap-2 flex-shrink-0">
                   <button type="button" onClick={() => switchTab(tab.id)}
-                    className={`flex items-center gap-2 px-4 py-2 rounded-xl transition-all ${
+                    className={`flex items-center gap-1.5 sm:gap-2 px-3 sm:px-4 py-2 rounded-xl transition-all whitespace-nowrap ${
                       activeTab === tab.id
                         ? 'bg-primary-600 text-white shadow-lg shadow-primary-500/25'
                         : 'bg-white dark:bg-slate-900 text-slate-500 dark:text-slate-400 border border-slate-200 dark:border-slate-700 hover:border-primary-300 dark:hover:border-primary-700'
                     }`}>
-                    <span className={`w-5 h-5 rounded-full flex items-center justify-center text-[10px] font-black ${
+                    <span className={`w-5 h-5 rounded-full flex items-center justify-center text-[10px] font-black flex-shrink-0 ${
                       activeTab === tab.id ? 'bg-white/20 text-white' : 'bg-slate-200 dark:bg-slate-700 text-slate-500'
                     }`}>{i + 1}</span>
-                    <Icon className={`w-3.5 h-3.5 ${activeTab === tab.id ? 'text-white' : 'text-slate-400'}`} />
+                    <Icon className={`w-3.5 h-3.5 flex-shrink-0 ${activeTab === tab.id ? 'text-white' : 'text-slate-400'}`} />
                     {tab.label}
                   </button>
-                  {i < tabs.length - 1 && <span className="text-slate-300 dark:text-slate-500 text-lg font-bold">→</span>}
+                  {i < tabs.length - 1 && <span className="text-slate-300 dark:text-slate-500 text-lg font-bold flex-shrink-0">→</span>}
                 </div>
               );
             })}
