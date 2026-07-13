@@ -353,6 +353,16 @@ export default function CancelRescheduleModal({ isOpen, onClose, appointment, is
                       });
                     })()}
                   </div>
+                  {businessHours.length > 0 && (
+                    <div className="flex items-center gap-3 px-2 py-1.5 border-t border-slate-100 dark:border-slate-800">
+                      <span className="flex items-center gap-1 text-[10px] font-bold text-slate-400">
+                        <span className="w-2 h-2 rounded-full bg-red-400" /> Cerrado
+                      </span>
+                      <span className="flex items-center gap-1 text-[10px] font-bold text-slate-400">
+                        <span className="w-2 h-2 rounded-full bg-emerald-400" /> Disponible
+                      </span>
+                    </div>
+                  )}
                 </div>
               </div>
               <div>

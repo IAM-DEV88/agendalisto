@@ -349,8 +349,8 @@ const AppointmentCalendar: React.FC<AppointmentCalendarProps> = ({
             </div>
           </div>
 
-          {/* Legend (hidden on md+ when day is selected to save space) */}
-          <div className={`flex flex-wrap items-center gap-4 text-[11px] font-bold text-slate-500 dark:text-slate-400 ${selectedDate ? 'md:hidden' : ''}`}>
+          {/* Legend */}
+          <div className="flex flex-wrap items-center gap-4 text-[11px] font-bold text-slate-500 dark:text-slate-400">
             {allStatuses.map(s => (
               <span key={s} className="flex items-center gap-1.5">
                 <span className={`w-2 h-2 rounded-full ${statusDot[s]}`} />
