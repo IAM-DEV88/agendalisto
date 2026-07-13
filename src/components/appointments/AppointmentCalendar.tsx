@@ -469,7 +469,7 @@ const AppointmentCalendar: React.FC<AppointmentCalendarProps> = ({
           }
           setSelectedAppointment(null);
         } : undefined}
-        onCancel={onCancel}
+        onReschedule={onCancel}
         showReviewSection={true}
       />
 
