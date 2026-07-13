@@ -9,6 +9,7 @@ import { Star, Clock, Calendar, User, ChevronRight } from 'lucide-react';
 interface BusinessAppointmentListProps {
   appointments: Appointment[];
   onStatusChange?: (id: string, status: AppointmentStatus) => void;
+  onReschedule?: (appointment: Appointment) => void;
   showReviewSection?: boolean;
 }
 
@@ -42,6 +43,7 @@ const statusStyles: Record<string, { dot: string; bg: string; text: string; bord
 const BusinessAppointmentList: React.FC<BusinessAppointmentListProps> = ({
   appointments,
   onStatusChange,
+  onReschedule,
   showReviewSection = false,
 }) => {
   const [selectedAppointment, setSelectedAppointment] = useState<Appointment | null>(null);
@@ -145,6 +147,7 @@ const BusinessAppointmentList: React.FC<BusinessAppointmentListProps> = ({
         onClose={() => setSelectedAppointment(null)}
         appointment={selectedAppointment}
         onStatusChange={handleStatusChange}
+        onReschedule={onReschedule}
         showReviewSection={showReviewSection}
       />
     </>

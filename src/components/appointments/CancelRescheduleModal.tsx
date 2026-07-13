@@ -169,6 +169,16 @@ export default function CancelRescheduleModal({ isOpen, onClose, appointment }: 
             </div>
           </div>
 
+          {/* Warning: rescheduling confirmed resets status (B1/R5) */}
+          {mode === 'reschedule' && appointment.status === 'confirmed' && (
+            <div className="flex items-start gap-2.5 p-3 bg-amber-50 dark:bg-amber-900/10 rounded-xl border border-amber-200 dark:border-amber-800/50">
+              <AlertCircle className="w-4 h-4 text-amber-500 flex-shrink-0 mt-0.5" />
+              <p className="text-xs font-medium text-amber-700 dark:text-amber-300">
+                Tu cita esta confirmada. Al reprogramar, el negocio debera confirmar nuevamente.
+              </p>
+            </div>
+          )}
+
           {/* Warning */}
           {isWithinMinTime && (
             <div className="flex items-start gap-2.5 p-3 bg-amber-50 dark:bg-amber-900/10 rounded-xl border border-amber-200 dark:border-amber-800/50">

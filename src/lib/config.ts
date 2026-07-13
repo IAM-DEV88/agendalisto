@@ -7,12 +7,9 @@ export const SUPABASE_ANON_KEY = import.meta.env.VITE_SUPABASE_ANON_KEY as strin
 // API URLs
 export const BASE_URL = import.meta.env.VITE_BASE_URL || window.location.origin;
 
-// Feature flags
-export const ENABLE_NOTIFICATIONS = import.meta.env.VITE_ENABLE_NOTIFICATIONS === 'true';
-
 // App settings
 export const APP_NAME = 'AgendaYa';
-export const APP_DESCRIPTION = 'Plataforma para la gestión de reservas y citas para negocios y servicios.';
+export const APP_DESCRIPTION = 'Plataforma para la gestion de reservas y citas para negocios y servicios.';
 export const DEFAULT_AVATAR = 'https://via.placeholder.com/150?text=Usuario';
 export const DEFAULT_BUSINESS_LOGO = 'https://via.placeholder.com/300?text=Negocio';
 
@@ -28,7 +25,6 @@ export default {
   SUPABASE_URL,
   SUPABASE_ANON_KEY,
   BASE_URL,
-  ENABLE_NOTIFICATIONS,
   APP_NAME,
   APP_DESCRIPTION,
   DEFAULT_AVATAR,

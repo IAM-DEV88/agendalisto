@@ -75,6 +75,9 @@ export interface BusinessConfig {
   requiere_confirmacion: boolean;
   notificaciones_email: boolean;
   notificaciones_whatsapp: boolean;
+  slot_interval_minutes?: number;
+  buffer_minutes?: number;
+  max_advance_booking_days?: number;
 }
 
 // Helper to create URL-friendly slug from business name
@@ -430,14 +433,23 @@ export const redeemGiftCode = async (code: string): Promise<{ success: boolean; 
 };
 
 export const createAppointment = async (appointment: Omit<Appointment, 'id' | 'created_at' | 'updated_at'>) => {
-  const { data, error } = await supabase
-    .from('agendaya_appointments')
-    .insert(appointment)
-    .select()
-    .single();
-  
+  const { data, error } = await supabase.rpc('create_appointment_safe', {
+    p_business_id: appointment.business_id,
+    p_service_id: appointment.service_id,
+    p_user_id: appointment.user_id || '',
+    p_start_time: appointment.start_time,
+    p_end_time: appointment.end_time,
+    p_notes: appointment.notes || null,
+    p_guest_info: appointment.guest_info || null,
+    p_is_guest: appointment.is_guest || false,
+    p_payment_provider: appointment.payment_provider || null,
+    p_payment_id: appointment.payment_id || null,
+    p_payment_amount: appointment.payment_amount || null,
+  });
+
   if (error) throw error;
-  return data;
+  if (!data?.success) throw new Error(data?.error || 'Error al crear la cita');
+  return data.data;
 };
 
 export const updateAppointmentStatus = async (id: string, status: AppointmentStatus) => {
@@ -458,25 +470,28 @@ export const updateAppointmentStatus = async (id: string, status: AppointmentSta
 
 export const cancelAppointment = async (id: string, reason?: string): Promise<{ success: boolean; error?: string }> => {
   try {
-    const { error } = await supabase
-      .from('agendaya_appointments')
-      .update({ status: 'cancelled', cancel_reason: reason || null })
-      .eq('id', id);
+    const { data, error } = await supabase.rpc('cancel_appointment_safe', {
+      p_appointment_id: id,
+      p_reason: reason || null,
+    });
     if (error) throw error;
+    if (!data?.success) return { success: false, error: data?.error || 'Error al cancelar' };
     return { success: true };
   } catch (err: unknown) {
     return { success: false, error: getErrorMessage(err) };
   }
 };
 
-export const rescheduleAppointment = async (id: string, startTime: string, endTime: string): Promise<{ success: boolean; error?: string }> => {
+export const rescheduleAppointment = async (id: string, startTime: string, endTime: string): Promise<{ success: boolean; error?: string; new_status?: string }> => {
   try {
-    const { error } = await supabase
-      .from('agendaya_appointments')
-      .update({ start_time: startTime, end_time: endTime, status: 'pending' })
-      .eq('id', id);
+    const { data, error } = await supabase.rpc('reschedule_appointment_safe', {
+      p_appointment_id: id,
+      p_new_start: startTime,
+      p_new_end: endTime,
+    });
     if (error) throw error;
-    return { success: true };
+    if (!data?.success) return { success: false, error: data?.error || 'Error al reprogramar' };
+    return { success: true, new_status: data.new_status };
   } catch (err: unknown) {
     return { success: false, error: getErrorMessage(err) };
   }
@@ -505,6 +520,81 @@ export async function getBusinessClients(businessId: string): Promise<{ success:
     return { success: true, data: profiles as UserProfile[], error: null };
   } catch (err: unknown) {
     return { success: false, data: null, error: getErrorMessage(err) || 'Error al obtener clientes del negocio' };
+  }
+}
+
+// --- Appointment Slot Availability (server-validated) ---
+
+export interface AvailableSlot {
+  start: string;
+  end: string;
+  available: boolean;
+}
+
+export async function getAvailableSlots(businessId: string, serviceId: string, date: string): Promise<{ success: boolean; slots?: AvailableSlot[]; closed?: boolean; error?: string }> {
+  try {
+    const { data, error } = await supabase.rpc('get_available_slots', {
+      p_business_id: businessId,
+      p_service_id: serviceId,
+      p_date: date,
+    });
+    if (error) throw error;
+    return { success: true, slots: data?.slots || [], closed: data?.closed || false };
+  } catch (err: unknown) {
+    return { success: false, error: getErrorMessage(err) || 'Error al cargar disponibilidad' };
+  }
+}
+
+// --- Auto-complete appointments (call periodically) ---
+
+export async function triggerAutoComplete(): Promise<{ success: boolean; completed?: number; error?: string }> {
+  try {
+    const { data, error } = await supabase.rpc('trigger_auto_complete');
+    if (error) throw error;
+    return { success: true, completed: data || 0 };
+  } catch (err: unknown) {
+    return { success: false, error: getErrorMessage(err) };
+  }
+}
+
+// --- Waitlist ---
+
+export async function joinWaitlist(params: {
+  business_id: string;
+  service_id: string;
+  user_id?: string;
+  guest_name?: string;
+  guest_email?: string;
+  preferred_date?: string;
+  preferred_time_start?: string;
+  preferred_time_end?: string;
+}): Promise<{ success: boolean; error?: string }> {
+  try {
+    const { data, error } = await supabase.rpc('join_waitlist', {
+      p_business_id: params.business_id,
+      p_service_id: params.service_id,
+      p_user_id: params.user_id || null,
+      p_guest_name: params.guest_name || null,
+      p_guest_email: params.guest_email || null,
+      p_preferred_date: params.preferred_date || null,
+      p_preferred_time_start: params.preferred_time_start || null,
+      p_preferred_time_end: params.preferred_time_end || null,
+    });
+    if (error) throw error;
+    if (!data?.success) return { success: false, error: data?.error || 'Error al unirse a la lista de espera' };
+    return { success: true };
+  } catch (err: unknown) {
+    return { success: false, error: getErrorMessage(err) };
+  }
+}
+
+export async function getWaitlist(businessId: string): Promise<{ success: boolean; data?: Record<string, unknown>[]; error?: string }> {
+  try {
+    const { data, error } = await supabase.rpc('get_waitlist', { p_business_id: businessId });
+    if (error) throw error;
+    return { success: true, data: data || [] };
+  } catch (err: unknown) {
+    return { success: false, error: getErrorMessage(err) };
   }
 }
 

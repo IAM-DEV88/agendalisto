@@ -5,7 +5,7 @@ import { Appointment, AppointmentStatus } from '../../types/appointment';
 import { getStatusText } from '../../utils/appointmentUtils';
 import {
   X, User, Calendar, Clock, MessageSquareText,
-  CheckCircle, XCircle, Phone, Mail, Star,
+  CheckCircle, XCircle, Phone, Mail, Star, CalendarClock,
 } from 'lucide-react';
 
 interface AppointmentModalProps {
@@ -14,6 +14,7 @@ interface AppointmentModalProps {
   appointment: Appointment | null;
   onStatusChange?: (status: AppointmentStatus) => void;
   onCancel?: (appointment: Appointment) => void;
+  onReschedule?: (appointment: Appointment) => void;
   showReviewSection?: boolean;
 }
 
@@ -46,6 +47,7 @@ const AppointmentModal: React.FC<AppointmentModalProps> = ({
   appointment,
   onStatusChange,
   onCancel,
+  onReschedule,
   showReviewSection = false,
 }) => {
   if (!isOpen || !appointment) return null;
@@ -247,28 +249,6 @@ const AppointmentModal: React.FC<AppointmentModalProps> = ({
               </div>
             )}
 
-            {/* Status history */}
-            {appointment.status_history && appointment.status_history.length > 0 && (
-              <div>
-                <p className="text-[10px] font-bold uppercase tracking-wider text-slate-400 mb-2">Historial</p>
-                <div className="space-y-1.5">
-                  {[...appointment.status_history].reverse().map((entry, i) => {
-                    const entryCfg = statusConfig[entry.status] || statusConfig.pending;
-                    return (
-                      <div key={i} className="flex items-center gap-2 text-xs">
-                        <div className={`w-1.5 h-1.5 rounded-full flex-shrink-0 ${entryCfg.dot}`} />
-                        <span className={`font-semibold ${entryCfg.text}`}>
-                          {getStatusText(entry.status)}
-                        </span>
-                        <span className="text-slate-400">
-                          {format(new Date(entry.timestamp), "d MMM HH:mm", { locale: es })}
-                        </span>
-                      </div>
-                    );
-                  })}
-                </div>
-              </div>
-            )}
           </div>
 
           {/* Actions footer */}
@@ -294,7 +274,32 @@ const AppointmentModal: React.FC<AppointmentModalProps> = ({
                       </button>
                     </div>
                   )}
-                  {appointment.status === 'confirmed' && (
+                  {appointment.status === 'confirmed' && onReschedule && (
+                    <div className="flex gap-2">
+                      <button
+                        onClick={() => onReschedule(appointment)}
+                        className="flex-1 inline-flex items-center justify-center gap-1.5 px-4 py-2.5 bg-amber-50 hover:bg-amber-100 dark:bg-amber-500/10 dark:hover:bg-amber-500/20 text-amber-600 dark:text-amber-400 text-sm font-bold rounded-xl transition-all active:scale-[0.97]"
+                      >
+                        <CalendarClock className="w-4 h-4" />
+                        Reagendar
+                      </button>
+                      <button
+                        onClick={() => handleStatusChange('cancelled')}
+                        className="flex-1 inline-flex items-center justify-center gap-1.5 px-4 py-2.5 bg-red-50 hover:bg-red-100 dark:bg-red-500/10 dark:hover:bg-red-500/20 text-red-600 dark:text-red-400 text-sm font-bold rounded-xl transition-all active:scale-[0.97]"
+                      >
+                        <XCircle className="w-4 h-4" />
+                        Cancelar
+                      </button>
+                      <button
+                        onClick={() => handleStatusChange('completed')}
+                        className="flex-1 inline-flex items-center justify-center gap-1.5 px-4 py-2.5 bg-emerald-600 hover:bg-emerald-700 text-white text-sm font-bold rounded-xl shadow-lg shadow-emerald-500/20 transition-all active:scale-[0.97]"
+                      >
+                        <CheckCircle className="w-4 h-4" />
+                        Completar
+                      </button>
+                    </div>
+                  )}
+                  {appointment.status === 'confirmed' && !onReschedule && (
                     <div className="flex gap-2">
                       <button
                         onClick={() => handleStatusChange('cancelled')}

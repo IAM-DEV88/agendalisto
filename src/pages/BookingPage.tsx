@@ -309,6 +309,9 @@ function BookingPage() {
                 minCancellationHours={service.min_cancellation_hours ?? 48}
                 guestInfo={guestMode ? guestInfo : undefined}
                 isOwnerPreview={isOwner}
+                slotIntervalMinutes={businessData.config?.slot_interval_minutes ?? 30}
+                bufferMinutes={businessData.config?.buffer_minutes ?? 0}
+                maxAdvanceBookingDays={businessData.config?.max_advance_booking_days ?? 90}
               />
               {guestMode && (
                 <p className="text-xs text-slate-400 text-center mt-4">

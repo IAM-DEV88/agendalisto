@@ -41,11 +41,6 @@ export interface Profile {
   is_business?: boolean;
 }
 
-export interface StatusHistory {
-  status: AppointmentStatus;
-  timestamp: string;
-}
-
 export interface Appointment {
   id: string;
   user_id: string;
@@ -58,7 +53,6 @@ export interface Appointment {
   profiles?: Profile;
   review?: Review;
   notes?: string | null;
-  status_history?: StatusHistory[];
   guest_info?: GuestInfo | null;
   is_guest?: boolean;
   cancel_reason?: string | null;

@@ -61,23 +61,22 @@ export async function executePaymentAction(
 
   if (action === 'create_appointment') {
     const d = actionData as unknown as AppointmentActionData;
-    const { error, data } = await supabase.from('agendaya_appointments').insert({
-      business_id: d.business_id,
-      service_id: d.service_id,
-      user_id: d.user_id,
-      start_time: d.start_time,
-      end_time: d.end_time,
-      status: 'pending',
-      notes: d.notes || null,
-      guest_info: d.guest_info || null,
-      is_guest: !!d.guest_info,
-      payment_status: 'completed',
-      payment_provider: d.payment_provider,
-      payment_id: d.payment_id,
-      payment_amount: d.payment_amount,
-    }).select().single();
+    const { data, error } = await supabase.rpc('create_appointment_safe', {
+      p_business_id: d.business_id,
+      p_service_id: d.service_id,
+      p_user_id: d.user_id || '',
+      p_start_time: d.start_time,
+      p_end_time: d.end_time,
+      p_notes: d.notes || null,
+      p_guest_info: d.guest_info || null,
+      p_is_guest: !!d.guest_info,
+      p_payment_provider: d.payment_provider,
+      p_payment_id: d.payment_id,
+      p_payment_amount: d.payment_amount,
+    });
     if (error) return { success: false, error: error.message };
-    return { success: true, data };
+    if (!data?.success) return { success: false, error: data?.error || 'Error al crear cita' };
+    return { success: true, data: data.data };
   }
 
   return { success: false, error: `Acción desconocida: ${action}` };

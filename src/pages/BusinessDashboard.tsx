@@ -3,7 +3,7 @@ import { Link, useSearchParams } from 'react-router-dom';
 import { useSelector } from 'react-redux';
 import { Business, getBusinessStats, getBusinessById, getBusinessServices, getUserBusinesses, updateAppointmentStatus, rescheduleAppointment, updateBusiness, deleteBusinessService, BusinessStats } from '../lib/api';
 import { supabase } from '../lib/supabase';
-import { AppointmentStatus } from '../types/appointment';
+import { Appointment, AppointmentStatus } from '../types/appointment';
 import { useBusinessAppointments } from '../hooks/useBusinessAppointments';
 import { notifySuccess, notifyError } from '../lib/toast';
 import { useUIConfig } from '../hooks/useUIConfig';
@@ -30,6 +30,7 @@ import BusinessProgressSection from '../components/business/BusinessProgressSect
 import BusinessQrCode from '../components/business/BusinessQrCode';
 import BusinessAppointmentList from '../components/appointments/BusinessAppointmentList';
 import AppointmentCalendar from '../components/appointments/AppointmentCalendar';
+import CancelRescheduleModal from '../components/appointments/CancelRescheduleModal';
 import Pagination from '../components/ui/Pagination';
 import EmptyState from '../components/ui/EmptyState';
 
@@ -64,6 +65,7 @@ export const BusinessDashboard: React.FC = () => {
 
   const [totalServices, setTotalServices] = useState(0);
   const [businessStats, setBusinessStats] = useState<BusinessStats | null>(null);
+  const [appointmentToReschedule, setAppointmentToReschedule] = useState<Appointment | null>(null);
   const days = ['Lunes', 'Martes', 'Miércoles', 'Jueves', 'Viernes', 'Sábado', 'Domingo'];
 
   const [pagination, setPagination] = useState({
@@ -452,6 +454,7 @@ export const BusinessDashboard: React.FC = () => {
                         <BusinessAppointmentList
                           appointments={pagedPending}
                           onStatusChange={handleUpdateAppointmentStatus}
+                          onReschedule={(appt) => setAppointmentToReschedule(appt)}
                           showReviewSection={false}
                         />
                         {pendingAppointments.length > pagination.pending.perPage && (
@@ -477,6 +480,7 @@ export const BusinessDashboard: React.FC = () => {
                         <BusinessAppointmentList
                           appointments={pagedConfirmed}
                           onStatusChange={handleUpdateAppointmentStatus}
+                          onReschedule={(appt) => setAppointmentToReschedule(appt)}
                           showReviewSection={false}
                         />
                         {confirmedAppointments.length > pagination.confirmed.perPage && (
@@ -510,6 +514,7 @@ export const BusinessDashboard: React.FC = () => {
                         <BusinessAppointmentList
                           appointments={pagedPast}
                           onStatusChange={handleUpdateAppointmentStatus}
+                          onReschedule={(appt) => setAppointmentToReschedule(appt)}
                           showReviewSection={true}
                         />
                         {pastAppointments.length > pagination.history.perPage && (
@@ -646,6 +651,12 @@ export const BusinessDashboard: React.FC = () => {
 
         </div>
       </div>
+
+      <CancelRescheduleModal
+        isOpen={!!appointmentToReschedule}
+        onClose={() => setAppointmentToReschedule(null)}
+        appointment={appointmentToReschedule}
+      />
     </div>
   );
 };

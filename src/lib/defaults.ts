@@ -10,4 +10,7 @@ export const DEFAULT_BUSINESS_CONFIG: BusinessConfig = {
   requiere_confirmacion: true,
   notificaciones_email: false,
   notificaciones_whatsapp: false,
+  slot_interval_minutes: 30,
+  buffer_minutes: 0,
+  max_advance_booking_days: 90,
 };
