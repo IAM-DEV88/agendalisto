@@ -70,6 +70,10 @@ const BookingForm: React.FC<BookingFormProps> = ({
   const [formData, setFormData] = useState({ date: '', time: '', notes: '' });
   const [submitting, setSubmitting] = useState(false);
   const [bookingSuccess, setBookingSuccess] = useState(false);
+
+  useEffect(() => {
+    if (bookingSuccess) window.scrollTo({ top: 0, behavior: 'smooth' });
+  }, [bookingSuccess]);
   const [error, setError] = useState<string | null>(null);
   const [giftCodeInput, setGiftCodeInput] = useState('');
   const [giftApplied, setGiftApplied] = useState<GiftCode | null>(null);
