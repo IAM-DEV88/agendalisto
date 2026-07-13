@@ -10,7 +10,7 @@ import type { RootState } from '../store';
 import {
   ArrowLeft, ChevronLeft, ChevronRight, X, Store,
   Clock, User, Loader2, Image as ImageIcon, Plus,
-  CheckCircle, XCircle, Sparkles, Save, Tag, FileText, DollarSign
+  Sparkles, Save, Tag, FileText, DollarSign, Info, Settings, LayoutGrid, Eye, CheckCircle
 } from 'lucide-react';
 
 const ALLOWED_IMAGE_TYPES = ['image/jpeg', 'image/png', 'image/webp', 'image/gif'];
@@ -20,24 +20,15 @@ function ServiceFormSkeleton() {
   return (
     <div className="min-h-screen bg-gradient-to-b from-slate-50 to-white dark:from-slate-950 dark:to-slate-900 pb-20 animate-in fade-in duration-300">
       <div className="bg-white dark:bg-slate-900 border-b border-slate-200 dark:border-slate-800 sticky top-0 z-30">
-        <div className="max-w-5xl mx-auto px-4 h-16 flex items-center justify-between">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between">
           <div className="h-5 bg-slate-200 dark:bg-slate-700 rounded-lg w-32 animate-pulse" />
           <div className="h-5 bg-slate-200 dark:bg-slate-700 rounded-lg w-24 animate-pulse" />
         </div>
       </div>
-      <div className="max-w-5xl mx-auto px-4 mt-8">
-        <div className="grid grid-cols-1 lg:grid-cols-5 gap-8">
-          <div className="lg:col-span-3 space-y-4">
-            <div className="h-8 bg-slate-200 dark:bg-slate-800 rounded-lg w-1/2 animate-pulse" />
-            <div className="h-24 bg-slate-200 dark:bg-slate-800 rounded-xl animate-pulse" />
-            <div className="h-12 bg-slate-200 dark:bg-slate-800 rounded-xl w-3/4 animate-pulse" />
-            <div className="h-48 bg-slate-200 dark:bg-slate-800 rounded-2xl animate-pulse" />
-          </div>
-          <div className="lg:col-span-2 space-y-4">
-            <div className="aspect-[4/3] bg-slate-200 dark:bg-slate-800 rounded-2xl animate-pulse" />
-            <div className="h-32 bg-slate-200 dark:bg-slate-800 rounded-2xl animate-pulse" />
-          </div>
-        </div>
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 mt-8 space-y-6">
+        <div className="h-12 bg-slate-200 dark:bg-slate-800 rounded-xl w-64 animate-pulse" />
+        <div className="h-64 bg-slate-200 dark:bg-slate-800 rounded-2xl animate-pulse" />
+        <div className="h-12 bg-slate-200 dark:bg-slate-800 rounded-2xl animate-pulse" />
       </div>
     </div>
   );
@@ -61,6 +52,12 @@ export default function ServiceFormPage() {
   const [error, setError] = useState<string | null>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isUploading, setIsUploading] = useState(false);
+  const [activeTab, setActiveTab] = useState<'info' | 'gallery' | 'config'>('info');
+
+  const switchTab = (tab: typeof activeTab) => {
+    setActiveTab(tab);
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  };
 
   const [formData, setFormData] = useState({
     name: '',
@@ -301,17 +298,21 @@ export default function ServiceFormPage() {
 
   const paymentCalc = (parseFloat(formData.price) || 0) * formData.payment_percentage / 100;
 
+  const tabs = [
+    { id: 'info' as const, label: 'Información', icon: Info },
+    { id: 'gallery' as const, label: 'Galería', icon: LayoutGrid },
+    { id: 'config' as const, label: 'Configuración', icon: Settings },
+  ];
+
   return (
     <div className="min-h-screen bg-gradient-to-b from-slate-50 to-white dark:from-slate-950 dark:to-slate-900 pb-20">
       <SEO title={`${isEditing ? 'Editar' : 'Nuevo'} Servicio — ${businessName}`} />
 
-      {/* ─── Sticky Header ─── */}
+      {/* Sticky Header */}
       <div className="bg-white/90 dark:bg-slate-900/90 backdrop-blur-md border-b border-slate-200 dark:border-slate-800 sticky top-0 z-30 shadow-sm">
-        <div className="max-w-5xl mx-auto px-4 h-16 flex items-center justify-between">
-          <button
-            onClick={() => navigate('/business/dashboard?tab=services')}
-            className="inline-flex items-center gap-2 text-sm font-bold text-slate-500 hover:text-primary-600 transition-colors"
-          >
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between">
+          <button onClick={() => navigate('/business/dashboard?tab=services')}
+            className="inline-flex items-center gap-2 text-sm font-bold text-slate-500 hover:text-primary-600 transition-colors">
             <ArrowLeft className="w-4 h-4" />
             <span className="hidden sm:inline">Volver a servicios</span>
           </button>
@@ -331,407 +332,406 @@ export default function ServiceFormPage() {
       </div>
 
       <form onSubmit={handleSubmit}>
-        <div className="max-w-5xl mx-auto px-4 mt-8 animate-in fade-in slide-in-from-bottom-4 duration-500">
-          <div className="grid grid-cols-1 lg:grid-cols-5 gap-8">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 mt-6 animate-in fade-in slide-in-from-bottom-4 duration-500 space-y-6">
 
-            {/* ═══ LEFT (wide): Form ═══ */}
-            <div className="lg:col-span-3">
-              <div className="bg-white dark:bg-slate-900 rounded-2xl border border-slate-200 dark:border-slate-800 shadow-xl shadow-slate-200/50 dark:shadow-none p-6 sm:p-8 space-y-6">
+          {/* Error banner */}
+          {error && (
+            <div className="flex items-start gap-2.5 px-5 py-4 bg-red-50 dark:bg-red-500/10 border border-red-200 dark:border-red-800 rounded-2xl">
+              <span className="text-sm font-bold text-red-700 dark:text-red-400">{error}</span>
+            </div>
+          )}
 
-                {/* Error */}
-                {error && (
-                  <div className="flex items-start gap-2.5 px-4 py-3 bg-red-50 dark:bg-red-500/10 border border-red-200 dark:border-red-800 rounded-2xl">
-                    <span className="text-sm font-bold text-red-700 dark:text-red-400">{error}</span>
-                  </div>
-                )}
-
-                {/* Section: Info básica */}
-                <div>
-                  <h3 className="text-xs font-black text-slate-400 uppercase tracking-widest mb-4">Información básica</h3>
-                  <div className="space-y-4">
-                    <div className="space-y-1">
-                      <label htmlFor="name" className="text-sm font-bold text-slate-700 dark:text-slate-300">
-                        Nombre del servicio <span className="text-red-500">*</span>
-                      </label>
-                      <div className="relative">
-                        <Tag className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400 pointer-events-none" />
-                        <input
-                          type="text" id="name" required
-                          value={formData.name}
-                          onChange={e => setFormData({ ...formData, name: e.target.value })}
-                          className="w-full pl-10 pr-4 py-3 rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 focus:ring-2 focus:ring-primary-500/20 focus:border-primary-500 outline-none transition-all font-medium"
-                          placeholder="Ej: Corte de Cabello"
-                        />
-                      </div>
-                    </div>
-
-                    <div className="space-y-1">
-                      <label htmlFor="description" className="text-sm font-bold text-slate-700 dark:text-slate-300">
-                        Descripción <span className="text-red-500">*</span>
-                      </label>
-                      <div className="relative">
-                        <FileText className="absolute top-3.5 left-3.5 w-4 h-4 text-slate-400 pointer-events-none" />
-                        <textarea
-                          id="description" required
-                          value={formData.description}
-                          onChange={e => setFormData({ ...formData, description: e.target.value })}
-                          rows={4}
-                          className="w-full pl-10 pr-4 py-3 rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 text-slate-900 dark:text-white focus:ring-2 focus:ring-primary-500/20 focus:border-primary-500 outline-none transition-all resize-none font-medium"
-                          placeholder="Describe brevemente el servicio..."
-                        />
-                      </div>
-                    </div>
-
-                    <div className="grid grid-cols-2 gap-4">
-                      <div className="space-y-1">
-                        <label htmlFor="duration" className="text-sm font-bold text-slate-700 dark:text-slate-300">
-                          Duración (min) <span className="text-red-500">*</span>
-                        </label>
-                        <div className="relative">
-                          <Clock className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400 pointer-events-none" />
-                          <input
-                            type="number" id="duration" required min="5"
-                            value={formData.duration}
-                            onChange={e => setFormData({ ...formData, duration: e.target.value })}
-                            className="w-full pl-10 pr-4 py-3 rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 focus:ring-2 focus:ring-primary-500/20 focus:border-primary-500 outline-none transition-all font-medium"
-                          />
-                        </div>
-                      </div>
-                      <div className="space-y-1">
-                        <label htmlFor="price" className="text-sm font-bold text-slate-700 dark:text-slate-300">
-                          Precio ($) <span className="text-red-500">*</span>
-                        </label>
-                        <div className="relative">
-                          <DollarSign className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400 pointer-events-none" />
-                          <input
-                            type="number" id="price" required min="0" step="0.01"
-                            value={formData.price}
-                            onChange={e => setFormData({ ...formData, price: e.target.value })}
-                            className="w-full pl-10 pr-4 py-3 rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 focus:ring-2 focus:ring-primary-500/20 focus:border-primary-500 outline-none transition-all font-medium"
-                          />
-                        </div>
-                      </div>
-                    </div>
-
-                    <div className="space-y-1">
-                      <label htmlFor="provider" className="text-sm font-bold text-slate-700 dark:text-slate-300">
-                        Encargado <span className="text-slate-400 font-normal">(opcional)</span>
-                      </label>
-                      <div className="relative">
-                        <User className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400 pointer-events-none" />
-                        <input
-                          type="text" id="provider"
-                          value={formData.provider}
-                          onChange={e => setFormData({ ...formData, provider: e.target.value })}
-                          className="w-full pl-10 pr-4 py-3 rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 focus:ring-2 focus:ring-primary-500/20 focus:border-primary-500 outline-none transition-all font-medium"
-                          placeholder="Nombre del profesional"
-                        />
-                      </div>
-                    </div>
-                  </div>
-                </div>
-
-                {/* Section: Galería */}
-                <div className="border-t border-slate-100 dark:border-slate-800 pt-6">
-                  <h3 className="text-xs font-black text-slate-400 uppercase tracking-widest mb-4">Galería de imágenes</h3>
-                  <div className="grid grid-cols-3 sm:grid-cols-4 gap-3">
-                    {formData.image_urls.map((url, index) => (
-                      <div key={index} className="relative aspect-square rounded-xl overflow-hidden border border-slate-200 dark:border-slate-700 group">
-                        <img src={url} alt="" className="w-full h-full object-contain bg-slate-50 dark:bg-slate-800" />
-                        <button
-                          type="button"
-                          onClick={() => removeImage(index)}
-                          className="absolute top-1.5 right-1.5 p-1.5 bg-red-500 text-white rounded-full opacity-0 group-hover:opacity-100 transition-opacity shadow-lg"
-                        >
-                          <X className="w-3 h-3" />
-                        </button>
-                      </div>
-                    ))}
-                    <label className={`relative aspect-square rounded-xl border-2 border-dashed border-slate-200 dark:border-slate-700 flex flex-col items-center justify-center cursor-pointer hover:bg-slate-50 dark:hover:bg-slate-800 transition-all ${isUploading ? 'opacity-50 pointer-events-none' : ''}`}>
-                      {isUploading ? (
-                        <Loader2 className="w-6 h-6 text-primary-500 animate-spin" />
-                      ) : (
-                        <>
-                          <Plus className="w-6 h-6 text-slate-400" />
-                          <span className="text-[10px] font-bold text-slate-400 uppercase mt-1">Subir</span>
-                        </>
-                      )}
-                      <input
-                        type="file" className="hidden"
-                        accept="image/*" multiple
-                        onChange={handleImageUpload}
-                      />
-                    </label>
-                  </div>
-                  <p className="text-xs text-slate-400 mt-3">
-                    {maxImages === Infinity
-                      ? 'Galería ilimitada — sube todas las imágenes que quieras.'
-                      : `Hasta ${maxImages} imagen${maxImages === 1 ? '' : 'es'} por servicio (${formData.image_urls.length}/${maxImages} usadas).`}
-                  </p>
-                </div>
-
-                {/* Section: Configuración */}
-                <div className="border-t border-slate-100 dark:border-slate-800 pt-6 space-y-5">
-                  <div className="flex items-center justify-between">
-                    <h3 className="text-xs font-black text-slate-400 uppercase tracking-widest">Configuración</h3>
-                  </div>
-
-                  {/* Toggles */}
-                  <div className="grid grid-cols-1 sm:grid-cols-3 gap-2">
-                    <label className="flex items-center gap-3 p-3 rounded-xl border border-slate-200 dark:border-slate-700 cursor-pointer hover:bg-slate-50 dark:hover:bg-slate-800/50 transition-colors">
-                      <input
-                        type="checkbox"
-                        checked={formData.is_active}
-                        onChange={e => setFormData({ ...formData, is_active: e.target.checked })}
-                        className="w-4 h-4 rounded border-slate-300 text-primary-600 focus:ring-primary-500"
-                      />
-                      <div className="min-w-0">
-                        <p className="text-xs font-bold text-slate-700 dark:text-slate-300 truncate mb-0">Activo</p>
-                        <p className="text-[10px] text-slate-400 truncate mb-0">Visible al público</p>
-                      </div>
-                    </label>
-                    <label className="flex items-center gap-3 p-3 rounded-xl border border-rose-200 dark:border-rose-800/50 cursor-pointer hover:bg-rose-50 dark:hover:bg-rose-900/10 transition-colors">
-                      <input
-                        type="checkbox"
-                        checked={formData.can_be_gifted}
-                        onChange={e => setFormData({ ...formData, can_be_gifted: e.target.checked })}
-                        className="w-4 h-4 rounded border-rose-300 text-rose-600 focus:ring-rose-500"
-                      />
-                      <div className="min-w-0">
-                        <p className="text-xs font-bold text-rose-700 dark:text-rose-300 truncate mb-0">Regalable</p>
-                        <p className="text-[10px] text-rose-500 truncate mb-0">Compra para otro</p>
-                      </div>
-                    </label>
-                    <label className="flex items-center gap-3 p-3 rounded-xl border border-amber-200 dark:border-amber-800/50 cursor-pointer hover:bg-amber-50 dark:hover:bg-amber-900/10 transition-colors">
-                      <input
-                        type="checkbox"
-                        checked={formData.requires_payment}
-                        onChange={e => setFormData({ ...formData, requires_payment: e.target.checked })}
-                        className="w-4 h-4 rounded border-amber-300 text-amber-600 focus:ring-amber-500"
-                      />
-                      <div className="min-w-0">
-                        <p className="text-xs font-bold text-amber-700 dark:text-amber-300 truncate mb-0">Pago online</p>
-                        <p className="text-[10px] text-amber-500 truncate mb-0">Cobrar al reservar</p>
-                      </div>
-                    </label>
-                  </div>
-
-                  {/* Payment percentage */}
-                  {formData.requires_payment && (
-                    <div className="flex items-center gap-4 pl-3">
-                      <span className="text-xs font-bold text-slate-500 dark:text-slate-400 whitespace-nowrap">% a cobrar</span>
-                      <input
-                        type="range"
-                        id="payment_percentage"
-                        value={formData.payment_percentage}
-                        onChange={e => setFormData({ ...formData, payment_percentage: parseInt(e.target.value) })}
-                        min="0" max="100"
-                        className="flex-1 max-w-xs accent-amber-600"
-                      />
-                      <span className="text-sm font-black text-amber-600 w-12 text-right tabular-nums">{formData.payment_percentage}%</span>
-                      <span className="text-[10px] text-slate-400 hidden sm:block">
-                        ${paymentCalc.toLocaleString()} COP
-                      </span>
-                    </div>
-                  )}
-
-                  {/* Tiempos mínimos */}
-                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                    <div className="space-y-1.5">
-                      <label htmlFor="min_cancellation_hours" className="text-xs font-bold text-slate-500 dark:text-slate-400">
-                        Cancelación (horas mín.)
-                      </label>
-                      <input
-                        type="number"
-                        id="min_cancellation_hours"
-                        value={formData.min_cancellation_hours}
-                        onChange={e => setFormData({ ...formData, min_cancellation_hours: parseInt(e.target.value) || 0 })}
-                        min="0" max="72"
-                        className="w-full px-3 py-2 rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 focus:ring-2 focus:ring-primary-500/20 focus:border-primary-500 outline-none text-sm font-bold"
-                      />
-                    </div>
-                    <div className="space-y-1.5">
-                      <label htmlFor="min_reschedule_hours" className="text-xs font-bold text-slate-500 dark:text-slate-400">
-                        Reagendamiento (horas mín.)
-                      </label>
-                      <input
-                        type="number"
-                        id="min_reschedule_hours"
-                        value={formData.min_reschedule_hours}
-                        onChange={e => setFormData({ ...formData, min_reschedule_hours: parseInt(e.target.value) || 0 })}
-                        min="0" max="72"
-                        className="w-full px-3 py-2 rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 focus:ring-2 focus:ring-primary-500/20 focus:border-primary-500 outline-none text-sm font-bold"
-                      />
-                    </div>
-                  </div>
-
-                  {/* Políticas — textareas lado a lado */}
-                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                    <div className="space-y-1.5">
-                      <label htmlFor="cancellation_policy_text" className="text-xs font-bold text-slate-500 dark:text-slate-400">
-                        Mensaje de cancelación
-                      </label>
-                      <textarea
-                        id="cancellation_policy_text"
-                        value={formData.cancellation_policy_text}
-                        onChange={e => setFormData({ ...formData, cancellation_policy_text: e.target.value })}
-                        placeholder="Ej: Cancelaciones con menos de 24h tienen cargo del 50%."
-                        rows={2}
-                        className="w-full px-3 py-2 rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 focus:ring-2 focus:ring-primary-500/20 focus:border-primary-500 outline-none text-sm resize-none"
-                      />
-                    </div>
-                    <div className="space-y-1.5">
-                      <label htmlFor="reschedule_policy_text" className="text-xs font-bold text-slate-500 dark:text-slate-400">
-                        Mensaje de reagendamiento
-                      </label>
-                      <textarea
-                        id="reschedule_policy_text"
-                        value={formData.reschedule_policy_text}
-                        onChange={e => setFormData({ ...formData, reschedule_policy_text: e.target.value })}
-                        placeholder="Ej: Reagenda con 12h de anticipación sin costo."
-                        rows={2}
-                        className="w-full px-3 py-2 rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 focus:ring-2 focus:ring-primary-500/20 focus:border-primary-500 outline-none text-sm resize-none"
-                      />
-                    </div>
-                  </div>
-                </div>
-
-                {/* Section: Plan info */}
-                {!isEditing && maxServices !== Infinity && (
-                  <div className="flex items-center gap-3 p-4 bg-blue-50 dark:bg-blue-900/10 rounded-xl border border-blue-200 dark:border-blue-800/50">
-                    <Sparkles className="w-5 h-5 text-blue-500 flex-shrink-0" />
-                    <p className="text-xs text-blue-700 dark:text-blue-300">
-                      Plan {PLAN_LABELS[plan]} — {maxServices === Infinity ? 'servicios ilimitados' : `máximo ${maxServices} servicios`}
-                    </p>
-                  </div>
-                )}
-
-                {/* Actions */}
-                <div className="flex flex-col sm:flex-row-reverse gap-3 pt-4 border-t border-slate-100 dark:border-slate-800">
-                  <button
-                    type="submit"
-                    disabled={isSubmitting}
-                    className="flex-[2] inline-flex items-center justify-center gap-2 px-6 py-3.5 bg-primary-600 hover:bg-primary-700 text-white font-bold rounded-xl shadow-lg shadow-primary-500/25 transition-all hover:-translate-y-0.5 active:translate-y-0 disabled:opacity-50 disabled:cursor-not-allowed"
-                  >
-                    {isSubmitting ? (
-                      <>
-                        <Loader2 className="w-4 h-4 animate-spin" />
-                        Guardando...
-                      </>
-                    ) : (
-                      <>
-                        <Save className="w-4 h-4" />
-                        {isEditing ? 'Guardar Cambios' : 'Crear Servicio'}
-                      </>
-                    )}
+          {/* Step navigation */}
+          <div className="flex items-center gap-2 text-xs font-bold">
+            {tabs.map((tab, i) => {
+              const Icon = tab.icon;
+              return (
+                <div key={tab.id} className="flex items-center gap-2">
+                  <button type="button" onClick={() => switchTab(tab.id)}
+                    className={`flex items-center gap-2 px-4 py-2 rounded-xl transition-all ${
+                      activeTab === tab.id
+                        ? 'bg-primary-600 text-white shadow-lg shadow-primary-500/25'
+                        : 'bg-white dark:bg-slate-900 text-slate-500 dark:text-slate-400 border border-slate-200 dark:border-slate-700 hover:border-primary-300 dark:hover:border-primary-700'
+                    }`}>
+                    <span className={`w-5 h-5 rounded-full flex items-center justify-center text-[10px] font-black ${
+                      activeTab === tab.id ? 'bg-white/20 text-white' : 'bg-slate-200 dark:bg-slate-700 text-slate-500'
+                    }`}>{i + 1}</span>
+                    <Icon className={`w-3.5 h-3.5 ${activeTab === tab.id ? 'text-white' : 'text-slate-400'}`} />
+                    {tab.label}
                   </button>
-                  <button
-                    type="button"
-                    onClick={() => navigate('/business/dashboard?tab=services')}
-                    className="flex-1 inline-flex items-center justify-center gap-2 px-6 py-3.5 bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300 font-bold rounded-xl hover:bg-slate-200 dark:hover:bg-slate-700 transition-all active:scale-[0.98]"
-                  >
-                    <ArrowLeft className="w-4 h-4" />
-                    Cancelar
+                  {i < tabs.length - 1 && <span className="text-slate-300 dark:text-slate-500 text-lg font-bold">→</span>}
+                </div>
+              );
+            })}
+          </div>
+
+          {/* Tab Content */}
+          <div className="bg-white dark:bg-slate-900 rounded-2xl border border-slate-200 dark:border-slate-800 shadow-xl shadow-slate-200/50 dark:shadow-none p-6 sm:p-8">
+
+            {/* ═══ INFORMACIÓN ═══ */}
+            {activeTab === 'info' && (
+              <div className="space-y-5">
+                <div className="flex items-center gap-3 pb-4 border-b border-slate-100 dark:border-slate-800">
+                  <span className="w-8 h-8 rounded-xl bg-primary-50 dark:bg-primary-500/10 flex items-center justify-center">
+                    <Info className="w-4 h-4 text-primary-600 dark:text-primary-400" />
+                  </span>
+                  <div>
+                    <p className="text-sm font-black text-slate-900 dark:text-white mb-0">Información básica</p>
+                    <p className="text-xs text-slate-400 mb-0">Nombre, descripción, duración y precio del servicio</p>
+                  </div>
+                </div>
+
+                <div className="space-y-1">
+                  <label htmlFor="name" className="text-sm font-bold text-slate-700 dark:text-slate-300">
+                    Nombre del servicio <span className="text-red-500">*</span>
+                  </label>
+                  <div className="relative">
+                    <Tag className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400 pointer-events-none" />
+                    <input type="text" id="name" required value={formData.name}
+                      onChange={e => setFormData({ ...formData, name: e.target.value })}
+                      className="w-full pl-10 pr-4 py-3 rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 focus:ring-2 focus:ring-primary-500/20 focus:border-primary-500 outline-none transition-all font-medium"
+                      placeholder="Ej: Corte de Cabello" />
+                  </div>
+                </div>
+
+                <div className="space-y-1">
+                  <label htmlFor="description" className="text-sm font-bold text-slate-700 dark:text-slate-300">
+                    Descripción <span className="text-red-500">*</span>
+                  </label>
+                  <div className="relative">
+                    <FileText className="absolute top-3.5 left-3.5 w-4 h-4 text-slate-400 pointer-events-none" />
+                    <textarea id="description" required value={formData.description}
+                      onChange={e => setFormData({ ...formData, description: e.target.value })}
+                      rows={4}
+                      className="w-full pl-10 pr-4 py-3 rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 focus:ring-2 focus:ring-primary-500/20 focus:border-primary-500 outline-none transition-all resize-none font-medium"
+                      placeholder="Describe brevemente el servicio..." />
+                  </div>
+                </div>
+
+                <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+                  <div className="space-y-1">
+                    <label htmlFor="duration" className="text-sm font-bold text-slate-700 dark:text-slate-300">
+                      Duración (min) <span className="text-red-500">*</span>
+                    </label>
+                    <div className="relative">
+                      <Clock className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400 pointer-events-none" />
+                      <input type="number" id="duration" required min="5" value={formData.duration}
+                        onChange={e => setFormData({ ...formData, duration: e.target.value })}
+                        className="w-full pl-10 pr-4 py-3 rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 focus:ring-2 focus:ring-primary-500/20 focus:border-primary-500 outline-none transition-all font-medium" />
+                    </div>
+                  </div>
+                  <div className="space-y-1">
+                    <label htmlFor="price" className="text-sm font-bold text-slate-700 dark:text-slate-300">
+                      Precio ($) <span className="text-red-500">*</span>
+                    </label>
+                    <div className="relative">
+                      <DollarSign className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400 pointer-events-none" />
+                      <input type="number" id="price" required min="0" step="0.01" value={formData.price}
+                        onChange={e => setFormData({ ...formData, price: e.target.value })}
+                        className="w-full pl-10 pr-4 py-3 rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 focus:ring-2 focus:ring-primary-500/20 focus:border-primary-500 outline-none transition-all font-medium" />
+                    </div>
+                  </div>
+                  <div className="space-y-1">
+                    <label htmlFor="provider" className="text-sm font-bold text-slate-700 dark:text-slate-300">
+                      Encargado <span className="text-slate-400 font-normal">(opcional)</span>
+                    </label>
+                    <div className="relative">
+                      <User className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400 pointer-events-none" />
+                      <input type="text" id="provider" value={formData.provider}
+                        onChange={e => setFormData({ ...formData, provider: e.target.value })}
+                        className="w-full pl-10 pr-4 py-3 rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 focus:ring-2 focus:ring-primary-500/20 focus:border-primary-500 outline-none transition-all font-medium"
+                        placeholder="Nombre del profesional" />
+                    </div>
+                  </div>
+                </div>
+
+                <div className="flex justify-end pt-2">
+                  <button type="button" onClick={() => switchTab('gallery')}
+                    className="inline-flex items-center gap-2 px-5 py-2.5 bg-primary-600 hover:bg-primary-700 text-white text-sm font-bold rounded-xl transition-all active:scale-[0.98]">
+                    Siguiente: Galería <ChevronRight className="w-4 h-4" />
                   </button>
                 </div>
               </div>
-            </div>
+            )}
 
-            {/* ═══ RIGHT (narrow): Gallery + Summary ═══ */}
-            <div className="lg:col-span-2 space-y-6">
-              {/* Gallery */}
-              {images.length > 0 ? (
-                <div className="bg-white dark:bg-slate-900 rounded-2xl border border-slate-200 dark:border-slate-800 overflow-hidden group">
-                  <div className="relative aspect-[4/3] bg-slate-100 dark:bg-slate-800">
-                    <img
-                      src={images[activeImageIndex]}
-                      alt={formData.name || 'Vista previa'}
-                      className="w-full h-full object-contain bg-slate-100 dark:bg-slate-800 cursor-zoom-in transition-transform duration-500 group-hover:scale-105"
-                      onClick={() => setFullscreenImage(images[activeImageIndex])}
-                    />
-                    {images.length > 1 && (
-                      <>
-                        <button
-                          type="button"
-                          onClick={() => setActiveImageIndex(prev => (prev - 1 + images.length) % images.length)}
-                          className="absolute left-3 top-1/2 -translate-y-1/2 p-2 bg-black/30 hover:bg-black/50 text-white rounded-full backdrop-blur-sm transition-all opacity-0 group-hover:opacity-100"
-                        >
-                          <ChevronLeft className="w-5 h-5" />
-                        </button>
-                        <button
-                          type="button"
-                          onClick={() => setActiveImageIndex(prev => (prev + 1) % images.length)}
-                          className="absolute right-3 top-1/2 -translate-y-1/2 p-2 bg-black/30 hover:bg-black/50 text-white rounded-full backdrop-blur-sm transition-all opacity-0 group-hover:opacity-100"
-                        >
-                          <ChevronRight className="w-5 h-5" />
-                        </button>
-                        <div className="absolute bottom-3 left-1/2 -translate-x-1/2 flex gap-1.5">
-                          {images.map((_, i) => (
-                            <div
-                              key={i}
-                              className={`w-1.5 h-1.5 rounded-full transition-all ${i === activeImageIndex ? 'bg-white scale-125' : 'bg-white/40'}`}
-                            />
-                          ))}
+            {/* ═══ GALERÍA ═══ */}
+            {activeTab === 'gallery' && (
+              <div className="space-y-5">
+                <div className="flex items-center gap-3 pb-4 border-b border-slate-100 dark:border-slate-800">
+                  <span className="w-8 h-8 rounded-xl bg-primary-50 dark:bg-primary-500/10 flex items-center justify-center">
+                    <LayoutGrid className="w-4 h-4 text-primary-600 dark:text-primary-400" />
+                  </span>
+                  <div>
+                    <p className="text-sm font-black text-slate-900 dark:text-white mb-0">Galería de imágenes</p>
+                    <p className="text-xs text-slate-400 mb-0">Muestra cómo luce el servicio</p>
+                  </div>
+                </div>
+
+                {images.length > 0 ? (
+                  <>
+                    <div className="relative aspect-video sm:aspect-[21/9] rounded-xl overflow-hidden bg-slate-100 dark:bg-slate-800 group border border-slate-200 dark:border-slate-700">
+                      <img src={images[activeImageIndex]} alt={formData.name || 'Vista previa'}
+                        className="w-full h-full object-contain cursor-zoom-in transition-transform duration-500 group-hover:scale-105"
+                        onClick={() => setFullscreenImage(images[activeImageIndex])} />
+                      {images.length > 1 && (
+                        <>
+                          <button type="button" onClick={() => setActiveImageIndex(prev => (prev - 1 + images.length) % images.length)}
+                            className="absolute left-3 top-1/2 -translate-y-1/2 p-2 bg-black/30 hover:bg-black/50 text-white rounded-full backdrop-blur-sm transition-all opacity-0 group-hover:opacity-100">
+                            <ChevronLeft className="w-5 h-5" />
+                          </button>
+                          <button type="button" onClick={() => setActiveImageIndex(prev => (prev + 1) % images.length)}
+                            className="absolute right-3 top-1/2 -translate-y-1/2 p-2 bg-black/30 hover:bg-black/50 text-white rounded-full backdrop-blur-sm transition-all opacity-0 group-hover:opacity-100">
+                            <ChevronRight className="w-5 h-5" />
+                          </button>
+                        </>
+                      )}
+                    </div>
+                    <div className="flex gap-2 overflow-x-auto no-scrollbar">
+                      {images.map((url, i) => (
+                        <div key={i} className={`relative w-16 h-16 rounded-xl overflow-hidden flex-shrink-0 border-2 transition-all ${i === activeImageIndex ? 'border-primary-500 ring-1 ring-primary-500/30' : 'border-slate-200 dark:border-slate-700'}`}>
+                          <img src={url} alt="" className="w-full h-full object-cover" />
+                          <button type="button" onClick={() => removeImage(i)}
+                            className="absolute top-0 right-0 p-0.5 bg-red-500 text-white rounded-bl-lg opacity-0 hover:opacity-100 transition-opacity text-[10px]">
+                            <X className="w-3 h-3" />
+                          </button>
                         </div>
-                      </>
+                      ))}
+                    </div>
+                  </>
+                ) : (
+                  <div className="py-12 text-center bg-slate-50 dark:bg-slate-800/50 rounded-2xl border-2 border-dashed border-slate-200 dark:border-slate-700">
+                    <ImageIcon className="w-12 h-12 text-slate-300 dark:text-slate-600 mx-auto mb-3" />
+                    <p className="text-sm font-bold text-slate-400 mb-1">Sin imágenes</p>
+                    <p className="text-xs text-slate-400">Sube imágenes para mostrar el servicio</p>
+                  </div>
+                )}
+
+                <label className={`flex items-center justify-center gap-2 px-6 py-3 bg-primary-600 hover:bg-primary-700 text-white font-bold rounded-xl cursor-pointer transition-all active:scale-[0.98] ${isUploading ? 'opacity-50 pointer-events-none' : ''}`}>
+                  {isUploading ? (
+                    <><Loader2 className="w-4 h-4 animate-spin" /> Subiendo...</>
+                  ) : (
+                    <><Plus className="w-4 h-4" /> Agregar imágenes</>
+                  )}
+                  <input type="file" className="hidden" accept="image/*" multiple onChange={handleImageUpload} />
+                </label>
+
+                <p className="text-xs text-slate-400 text-center">
+                  {maxImages === Infinity
+                    ? 'Sube todas las imágenes que quieras (JPG, PNG, WEBP, GIF — máx 5MB c/u)'
+                    : `Hasta ${maxImages} imagen${maxImages === 1 ? '' : 'es'} por servicio (${formData.image_urls.length}/${maxImages} usadas)`}
+                </p>
+
+                <div className="flex justify-between pt-2">
+                  <button type="button" onClick={() => switchTab('info')}
+                    className="inline-flex items-center gap-2 px-5 py-2.5 bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-400 text-sm font-bold rounded-xl hover:bg-slate-200 dark:hover:bg-slate-700 transition-all active:scale-[0.98]">
+                    <ChevronLeft className="w-4 h-4" /> Anterior
+                  </button>
+                  <button type="button" onClick={() => switchTab('config')}
+                    className="inline-flex items-center gap-2 px-5 py-2.5 bg-primary-600 hover:bg-primary-700 text-white text-sm font-bold rounded-xl transition-all active:scale-[0.98]">
+                    Siguiente: Configuración <ChevronRight className="w-4 h-4" />
+                  </button>
+                </div>
+              </div>
+            )}
+
+            {/* ═══ CONFIGURACIÓN ═══ */}
+            {activeTab === 'config' && (
+              <div className="space-y-6">
+                <div className="flex items-center gap-3 pb-4 border-b border-slate-100 dark:border-slate-800">
+                  <span className="w-8 h-8 rounded-xl bg-primary-50 dark:bg-primary-500/10 flex items-center justify-center">
+                    <Settings className="w-4 h-4 text-primary-600 dark:text-primary-400" />
+                  </span>
+                  <div>
+                    <p className="text-sm font-black text-slate-900 dark:text-white mb-0">Configuración</p>
+                    <p className="text-xs text-slate-400 mb-0">Visibilidad, pagos y políticas del servicio</p>
+                  </div>
+                </div>
+
+                <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+                  <label className="flex items-center gap-3 p-3 rounded-xl border border-slate-200 dark:border-slate-700 cursor-pointer hover:bg-slate-50 dark:hover:bg-slate-800/50 transition-colors">
+                    <input type="checkbox" checked={formData.is_active}
+                      onChange={e => setFormData({ ...formData, is_active: e.target.checked })}
+                      className="w-4 h-4 rounded border-slate-300 text-primary-600 focus:ring-primary-500" />
+                    <div className="min-w-0">
+                      <p className="text-xs font-bold text-slate-700 dark:text-slate-300 truncate mb-0">Activo</p>
+                      <p className="text-[10px] text-slate-400 truncate mb-0">Visible al público</p>
+                    </div>
+                  </label>
+                  <label className="flex items-center gap-3 p-3 rounded-xl border border-rose-200 dark:border-rose-800/50 cursor-pointer hover:bg-rose-50 dark:hover:bg-rose-900/10 transition-colors">
+                    <input type="checkbox" checked={formData.can_be_gifted}
+                      onChange={e => setFormData({ ...formData, can_be_gifted: e.target.checked })}
+                      className="w-4 h-4 rounded border-rose-300 text-rose-600 focus:ring-rose-500" />
+                    <div className="min-w-0">
+                      <p className="text-xs font-bold text-rose-700 dark:text-rose-300 truncate mb-0">Regalable</p>
+                      <p className="text-[10px] text-rose-500 truncate mb-0">Compra para otro</p>
+                    </div>
+                  </label>
+                  <label className="flex items-center gap-3 p-3 rounded-xl border border-amber-200 dark:border-amber-800/50 cursor-pointer hover:bg-amber-50 dark:hover:bg-amber-900/10 transition-colors">
+                    <input type="checkbox" checked={formData.requires_payment}
+                      onChange={e => setFormData({ ...formData, requires_payment: e.target.checked })}
+                      className="w-4 h-4 rounded border-amber-300 text-amber-600 focus:ring-amber-500" />
+                    <div className="min-w-0">
+                      <p className="text-xs font-bold text-amber-700 dark:text-amber-300 truncate mb-0">Pago online</p>
+                      <p className="text-[10px] text-amber-500 truncate mb-0">Cobrar al reservar</p>
+                    </div>
+                  </label>
+                </div>
+
+                {formData.requires_payment && (
+                  <div className="flex items-center gap-4 p-4 bg-amber-50 dark:bg-amber-500/10 rounded-xl border border-amber-200 dark:border-amber-800/50">
+                    <span className="text-xs font-bold text-slate-500 dark:text-slate-400 whitespace-nowrap">% a cobrar</span>
+                    <input type="range" value={formData.payment_percentage}
+                      onChange={e => setFormData({ ...formData, payment_percentage: parseInt(e.target.value) })}
+                      min="0" max="100" className="flex-1 max-w-xs accent-amber-600" />
+                    <span className="text-sm font-black text-amber-600 w-12 text-right tabular-nums">{formData.payment_percentage}%</span>
+                    <span className="text-[10px] text-slate-400 hidden sm:block">${paymentCalc.toLocaleString()} COP</span>
+                  </div>
+                )}
+
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                  <div className="space-y-1.5">
+                    <label htmlFor="min_cancellation_hours" className="text-xs font-bold text-slate-500 dark:text-slate-400">Cancelación (horas mín.)</label>
+                    <input type="number" id="min_cancellation_hours" value={formData.min_cancellation_hours}
+                      onChange={e => setFormData({ ...formData, min_cancellation_hours: parseInt(e.target.value) || 0 })}
+                      min="0" max="72" className="w-full px-3 py-2 rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 focus:ring-2 focus:ring-primary-500/20 focus:border-primary-500 outline-none text-sm font-bold" />
+                  </div>
+                  <div className="space-y-1.5">
+                    <label htmlFor="min_reschedule_hours" className="text-xs font-bold text-slate-500 dark:text-slate-400">Reagendamiento (horas mín.)</label>
+                    <input type="number" id="min_reschedule_hours" value={formData.min_reschedule_hours}
+                      onChange={e => setFormData({ ...formData, min_reschedule_hours: parseInt(e.target.value) || 0 })}
+                      min="0" max="72" className="w-full px-3 py-2 rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 focus:ring-2 focus:ring-primary-500/20 focus:border-primary-500 outline-none text-sm font-bold" />
+                  </div>
+                </div>
+
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                  <div className="space-y-1.5">
+                    <label htmlFor="cancellation_policy_text" className="text-xs font-bold text-slate-500 dark:text-slate-400">Mensaje de cancelación</label>
+                    <textarea id="cancellation_policy_text" value={formData.cancellation_policy_text}
+                      onChange={e => setFormData({ ...formData, cancellation_policy_text: e.target.value })}
+                      placeholder="Ej: Cancelaciones con menos de 24h tienen cargo del 50%." rows={2}
+                      className="w-full px-3 py-2 rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 focus:ring-2 focus:ring-primary-500/20 focus:border-primary-500 outline-none text-sm resize-none" />
+                  </div>
+                  <div className="space-y-1.5">
+                    <label htmlFor="reschedule_policy_text" className="text-xs font-bold text-slate-500 dark:text-slate-400">Mensaje de reagendamiento</label>
+                    <textarea id="reschedule_policy_text" value={formData.reschedule_policy_text}
+                      onChange={e => setFormData({ ...formData, reschedule_policy_text: e.target.value })}
+                      placeholder="Ej: Reagenda con 12h de anticipación sin costo." rows={2}
+                      className="w-full px-3 py-2 rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 focus:ring-2 focus:ring-primary-500/20 focus:border-primary-500 outline-none text-sm resize-none" />
+                  </div>
+                </div>
+
+                <div className="flex justify-start pt-2">
+                  <button type="button" onClick={() => switchTab('gallery')}
+                    className="inline-flex items-center gap-2 px-5 py-2.5 bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-400 text-sm font-bold rounded-xl hover:bg-slate-200 dark:hover:bg-slate-700 transition-all active:scale-[0.98]">
+                    <ChevronLeft className="w-4 h-4" /> Anterior: Galería
+                  </button>
+                </div>
+              </div>
+            )}
+
+          </div>
+
+          {/* Preview — como se vera el servicio */}
+          <div className="bg-white dark:bg-slate-900 rounded-2xl border border-slate-200 dark:border-slate-800 shadow-xl shadow-slate-200/50 dark:shadow-none overflow-hidden">
+            <div className="flex items-center gap-2 px-5 py-3 bg-slate-50 dark:bg-slate-800/50 border-b border-slate-100 dark:border-slate-800">
+              <Eye className="w-3.5 h-3.5 text-slate-400" />
+              <span className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Vista previa</span>
+            </div>
+            <div className="flex flex-col sm:flex-row">
+              {images.length > 0 && (
+                <div className="sm:w-48 lg:w-56 flex-shrink-0 bg-slate-100 dark:bg-slate-800 border-b sm:border-b-0 sm:border-r border-slate-200 dark:border-slate-700">
+                  <div className="relative aspect-[4/3] sm:aspect-square">
+                    <img src={images[activeImageIndex]} alt={formData.name || ''}
+                      className="w-full h-full object-contain p-2" />
+                  </div>
+                </div>
+              )}
+              <div className="flex-1 p-4 sm:p-5 space-y-2 min-w-0">
+                <div className="flex items-start justify-between gap-3">
+                  <div className="min-w-0 flex-1">
+                    <p className="text-xs font-bold text-primary-600 dark:text-primary-400 uppercase tracking-wider mb-0.5">{businessName}</p>
+                    <h3 className="text-base sm:text-lg font-black text-slate-900 dark:text-white truncate mb-0">
+                      {formData.name || 'Nombre del servicio'}
+                    </h3>
+                  </div>
+                  <div className="flex items-center gap-2 flex-shrink-0">
+                    {formData.is_active ? (
+                      <span className="inline-flex items-center gap-1 px-2 py-0.5 bg-emerald-50 dark:bg-emerald-500/10 text-emerald-700 dark:text-emerald-400 text-[10px] font-bold rounded-lg border border-emerald-200 dark:border-emerald-800/50">
+                        <CheckCircle className="w-3 h-3" /> Activo
+                      </span>
+                    ) : (
+                      <span className="inline-flex items-center gap-1 px-2 py-0.5 bg-slate-100 dark:bg-slate-800 text-slate-400 text-[10px] font-bold rounded-lg">
+                        Inactivo
+                      </span>
+                    )}
+                    {formData.price && (
+                      <span className="text-lg font-black text-primary-600 dark:text-primary-400">
+                        ${parseFloat(formData.price).toLocaleString()}
+                      </span>
                     )}
                   </div>
                 </div>
-              ) : (
-                <div className="bg-white dark:bg-slate-900 rounded-2xl border-2 border-dashed border-slate-200 dark:border-slate-700 aspect-[4/3] flex flex-col items-center justify-center text-slate-400">
-                  <ImageIcon className="w-10 h-10 mb-3" />
-                  <p className="text-sm font-bold">Sin imágenes</p>
-                  <p className="text-xs mt-1">Sube imágenes desde el formulario</p>
-                </div>
-              )}
-
-              {/* ═══ Summary Card (live preview) ═══ */}
-              <div className="bg-white dark:bg-slate-900 rounded-2xl border border-slate-200 dark:border-slate-800 p-5 space-y-3">
-                <div className="flex items-center justify-between mb-1">
-                  <h2 className="font-black text-lg text-slate-900 dark:text-white truncate">
-                    {formData.name || 'Nombre del servicio'}
-                  </h2>
-                  {formData.is_active ? (
-                    <CheckCircle className="w-5 h-5 text-emerald-500 flex-shrink-0" />
-                  ) : (
-                    <XCircle className="w-5 h-5 text-slate-300 flex-shrink-0" />
-                  )}
-                </div>
-                <p className="text-sm text-slate-500 dark:text-slate-400 line-clamp-2 leading-relaxed">
-                  {formData.description || 'Sin descripción'}
-                </p>
-                <div className="flex flex-wrap items-center gap-3 pt-2 border-t border-slate-100 dark:border-slate-800">
+                {formData.description && (
+                  <p className="text-xs sm:text-sm text-slate-500 dark:text-slate-400 leading-relaxed line-clamp-2">{formData.description}</p>
+                )}
+                <div className="flex items-center flex-wrap gap-x-4 gap-y-1 text-xs font-bold text-slate-400">
                   {formData.duration && (
-                    <div className="flex items-center gap-1.5 text-sm font-medium text-slate-500">
-                      <Clock className="w-4 h-4 text-primary-500" />
-                      <span className="font-bold text-slate-700 dark:text-slate-300">{formData.duration} min</span>
-                    </div>
+                    <span className="flex items-center gap-1"><Clock className="w-3 h-3 text-primary-400" /> {formData.duration} min</span>
                   )}
-                  {formData.price && (
-                    <div className="text-lg font-black text-primary-600 dark:text-primary-400">
-                      ${parseFloat(formData.price).toLocaleString()}
-                    </div>
+                  {formData.provider && (
+                    <span className="flex items-center gap-1"><User className="w-3 h-3 text-primary-400" /> {formData.provider}</span>
                   )}
+                  {formData.can_be_gifted && <span className="text-rose-400">🎁 Regalable</span>}
+                  {formData.requires_payment && <span className="text-amber-500">🔒 Pago online ({formData.payment_percentage}%)</span>}
+                  {formData.min_cancellation_hours > 0 && <span>⏳ Cancelación: {formData.min_cancellation_hours}h</span>}
+                  {formData.min_reschedule_hours > 0 && <span>🔄 Reagendamiento: {formData.min_reschedule_hours}h</span>}
                 </div>
-                {formData.provider && (
-                  <div className="flex items-center gap-1.5 text-xs font-medium text-slate-400">
-                    <User className="w-3.5 h-3.5" />
-                    {formData.provider}
-                  </div>
-                )}
-                {formData.can_be_gifted && (
-                  <div className="flex items-center gap-1.5 text-xs font-bold text-rose-500">
-                    <span>🎁</span> Se puede regalar
-                  </div>
-                )}
-                {formData.requires_payment && (
-                  <div className="flex items-center gap-1.5 text-xs font-bold text-amber-500">
-                    <span>🔒</span> Pago online ({formData.payment_percentage}%)
+                {(formData.cancellation_policy_text || formData.reschedule_policy_text) && (
+                  <div className="flex flex-wrap gap-3 pt-2 border-t border-slate-100 dark:border-slate-800 text-[10px] text-slate-400">
+                    {formData.cancellation_policy_text && (
+                      <div className="flex-1 min-w-0">
+                        <span className="font-bold text-slate-500">Cancelación:</span>{' '}
+                        <span className="line-clamp-1">{formData.cancellation_policy_text}</span>
+                      </div>
+                    )}
+                    {formData.reschedule_policy_text && (
+                      <div className="flex-1 min-w-0">
+                        <span className="font-bold text-slate-500">Reagendamiento:</span>{' '}
+                        <span className="line-clamp-1">{formData.reschedule_policy_text}</span>
+                      </div>
+                    )}
                   </div>
                 )}
               </div>
             </div>
           </div>
+
+          {/* Actions — siempre visibles fuera de los tabs */}
+          <div className="bg-white dark:bg-slate-900 rounded-2xl border border-slate-200 dark:border-slate-800 shadow-xl shadow-slate-200/50 dark:shadow-none p-5 sm:p-6">
+            <div className="flex flex-col sm:flex-row-reverse gap-3">
+              {!isEditing && maxServices !== Infinity && (
+                <div className="flex items-center gap-3 p-3 bg-blue-50 dark:bg-blue-900/10 rounded-xl border border-blue-200 dark:border-blue-800/50 mb-2 sm:mb-0 sm:mr-auto">
+                  <Sparkles className="w-5 h-5 text-blue-500 flex-shrink-0" />
+                  <p className="text-xs text-blue-700 dark:text-blue-300">
+                    Plan {PLAN_LABELS[plan]} — {maxServices === Infinity ? 'servicios ilimitados' : `máximo ${maxServices} servicios`}
+                  </p>
+                </div>
+              )}
+              <button type="submit" disabled={isSubmitting}
+                className="flex-[2] inline-flex items-center justify-center gap-2 px-6 py-3.5 bg-primary-600 hover:bg-primary-700 text-white font-bold rounded-xl shadow-lg shadow-primary-500/25 transition-all hover:-translate-y-0.5 active:translate-y-0 disabled:opacity-50 disabled:cursor-not-allowed">
+                {isSubmitting ? (
+                  <><Loader2 className="w-4 h-4 animate-spin" /> Guardando...</>
+                ) : (
+                  <><Save className="w-4 h-4" /> {isEditing ? 'Guardar Cambios' : 'Crear Servicio'}</>
+                )}
+              </button>
+              <button type="button" onClick={() => navigate('/business/dashboard?tab=services')}
+                className="flex-1 inline-flex items-center justify-center gap-2 px-6 py-3.5 bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300 font-bold rounded-xl hover:bg-slate-200 dark:hover:bg-slate-700 transition-all active:scale-[0.98]">
+                <ArrowLeft className="w-4 h-4" /> Cancelar
+              </button>
+            </div>
+          </div>
+
         </div>
       </form>
 

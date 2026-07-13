@@ -150,6 +150,7 @@ function BookingPage() {
             notifyEmail={businessData.config?.notificaciones_email}
             notifyWhatsapp={businessData.config?.notificaciones_whatsapp}
             minCancellationHours={service.min_cancellation_hours ?? 48}
+            minRescheduleHours={service.min_reschedule_hours ?? 48}
             isOwnerPreview={isOwner}
             slotIntervalMinutes={businessData.config?.slot_interval_minutes ?? 30}
             bufferMinutes={businessData.config?.buffer_minutes ?? 0}

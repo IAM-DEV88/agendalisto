@@ -24,6 +24,7 @@ interface BookingFormProps {
   notifyEmail?: boolean;
   notifyWhatsapp?: boolean;
   minCancellationHours?: number;
+  minRescheduleHours?: number;
   guestInfo?: GuestInfo;
   isOwnerPreview?: boolean;
   slotIntervalMinutes?: number;
@@ -50,6 +51,7 @@ const BookingForm: React.FC<BookingFormProps> = ({
   notifyEmail = false,
   notifyWhatsapp = false,
   minCancellationHours = 0,
+  minRescheduleHours = 0,
   guestInfo,
   isOwnerPreview = false,
   slotIntervalMinutes = 30,
@@ -199,7 +201,7 @@ const BookingForm: React.FC<BookingFormProps> = ({
       return;
     }
     if (requireConfirmation && !confirmationChecked) {
-      setError(`Debes aceptar las condiciones de cancelacion (${minCancellationHours}h de antelacion)`);
+      setError(`Debes aceptar las condiciones: cancelación ${minCancellationHours}h${minRescheduleHours > 0 ? `, reagendamiento ${minRescheduleHours}h` : ''} de antelación`);
       return;
     }
     if (!businessId || !serviceId || !service) {
@@ -697,7 +699,9 @@ const BookingForm: React.FC<BookingFormProps> = ({
               className="w-5 h-5 mt-0.5 rounded-md border-amber-300 text-primary-600 focus:ring-primary-500" />
             <div>
               <p className="text-sm font-bold text-amber-800 dark:text-amber-400 mb-0">Acepto las condiciones de cancelacion</p>
-              <p className="text-xs text-amber-600 dark:text-amber-500 mt-0.5 mb-0">Debo cancelar con al menos {minCancellationHours}h de antelacion.</p>
+              <p className="text-xs text-amber-600 dark:text-amber-500 mt-0.5 mb-0">
+                Cancelación con {minCancellationHours}h de antelación{minRescheduleHours > 0 ? ` · Reagendamiento con ${minRescheduleHours}h` : ''}.
+              </p>
             </div>
           </label>
         )}
