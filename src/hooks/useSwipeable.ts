@@ -46,16 +46,16 @@ export function useSwipeable(
     const el = elRef.current;
     if (!el) return;
 
-    const isDraggableTarget = (target: EventTarget | null) =>
-      (target as HTMLElement)?.closest?.('[draggable="true"]');
+    const isSwipeBlocked = (target: EventTarget | null) =>
+      (target as HTMLElement)?.closest?.('[data-swipe-block]');
 
     const onTouchStart = (e: TouchEvent) => {
-      if (isDraggableTarget(e.target)) return;
+      if (isSwipeBlocked(e.target)) return;
       handleStart(e.touches[0].clientX, e.touches[0].clientY);
     };
 
     const onTouchMove = (e: TouchEvent) => {
-      if (isDraggableTarget(e.target)) return;
+      if (isSwipeBlocked(e.target)) return;
       handleMove(e.touches[0].clientX);
     };
 
@@ -65,7 +65,7 @@ export function useSwipeable(
     };
 
     const onMouseDown = (e: MouseEvent) => {
-      if (isDraggableTarget(e.target)) return;
+      if (isSwipeBlocked(e.target)) return;
       handleStart(e.clientX, e.clientY);
 
       const onMouseMove = (me: MouseEvent) => handleMove(me.clientX);

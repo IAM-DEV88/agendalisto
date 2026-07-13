@@ -1,4 +1,4 @@
-import React, { useState, useRef } from 'react';
+import React, { useState, useRef, useEffect, useCallback } from 'react';
 import {
   format,
   startOfMonth,
@@ -45,6 +45,13 @@ const statusChipBg: Record<string, string> = {
   cancelled: 'bg-red-50 dark:bg-red-500/10 border-red-200 dark:border-red-800 text-red-700 dark:text-red-400',
 };
 
+interface DragState {
+  appointmentId: string;
+  originalStart: string;
+  originalEnd: string;
+  ghostEl: HTMLDivElement | null;
+}
+
 const AppointmentCalendar: React.FC<AppointmentCalendarProps> = ({
   appointments,
   onStatusChange,
@@ -56,7 +63,10 @@ const AppointmentCalendar: React.FC<AppointmentCalendarProps> = ({
   const [dragOverDate, setDragOverDate] = useState<string | null>(null);
   const [selectedAppointment, setSelectedAppointment] = useState<Appointment | null>(null);
   const [rescheduling, setRescheduling] = useState(false);
-  const dragDataRef = useRef<{ id: string; originalStart: string; originalEnd: string } | null>(null);
+  const [draggingId, setDraggingId] = useState<string | null>(null);
+
+  const dragRef = useRef<DragState | null>(null);
+  const lastHoveredCell = useRef<string | null>(null);
 
   const monthStart = startOfMonth(currentMonth);
   const monthEnd = endOfMonth(currentMonth);
@@ -85,64 +95,54 @@ const AppointmentCalendar: React.FC<AppointmentCalendarProps> = ({
   const statusOrder: AppointmentStatus[] = ['pending', 'confirmed', 'completed', 'cancelled'];
 
   const handleCellClick = (day: Date) => {
-    if (dragDataRef.current) return;
+    if (dragRef.current) return;
     setSelectedDate(prev => (prev && isSameDay(prev, day)) ? null : day);
   };
 
-  const handleDragStart = (e: React.DragEvent, appointment: Appointment) => {
-    dragDataRef.current = {
-      id: appointment.id,
-      originalStart: appointment.start_time,
-      originalEnd: appointment.end_time,
-    };
-    e.dataTransfer.effectAllowed = 'move';
-    e.dataTransfer.setData('text/plain', appointment.id);
-    const el = e.currentTarget as HTMLElement;
-    el.classList.add('opacity-40');
-  };
+  const findCalendarDayStr = useCallback((x: number, y: number): string | null => {
+    const elements = document.elementsFromPoint(x, y);
+    for (const el of elements) {
+      const cell = (el as HTMLElement).closest('[data-day]');
+      if (cell) return cell.getAttribute('data-day');
+    }
+    return null;
+  }, []);
 
-  const handleDragEnd = (e: React.DragEvent) => {
-    dragDataRef.current = null;
-    const el = e.currentTarget as HTMLElement;
-    el.classList.remove('opacity-40');
+  const finishDrag = useCallback(() => {
+    const drag = dragRef.current;
+    if (!drag) return;
+    if (drag.ghostEl) {
+      drag.ghostEl.remove();
+    }
+    dragRef.current = null;
+    lastHoveredCell.current = null;
+    setDraggingId(null);
     setDragOverDate(null);
-  };
+  }, []);
 
-  const handleDragOver = (e: React.DragEvent, dayStr: string) => {
-    e.preventDefault();
-    e.dataTransfer.dropEffect = 'move';
-    setDragOverDate(dayStr);
-  };
+  const handleMouseUp = useCallback(async (e: MouseEvent) => {
+    const drag = dragRef.current;
+    if (!drag) return;
 
-  const handleDragLeave = () => {
-    setDragOverDate(null);
-  };
+    const targetDayStr = findCalendarDayStr(e.clientX, e.clientY);
+    finishDrag();
 
-  const handleDrop = async (e: React.DragEvent, targetDay: Date) => {
-    e.preventDefault();
-    setDragOverDate(null);
+    if (!targetDayStr || !onReschedule) return;
 
-    const dragData = dragDataRef.current;
-    dragDataRef.current = null;
-    if (!dragData || !onReschedule) return;
-    if (isSameDay(new Date(dragData.originalStart), targetDay)) return;
+    const targetDay = new Date(targetDayStr + 'T00:00:00');
+    const originalStart = new Date(drag.originalStart);
+    if (isSameDay(originalStart, targetDay)) return;
 
-    const originalStart = new Date(dragData.originalStart);
-    const originalEnd = new Date(dragData.originalEnd);
+    const originalEnd = new Date(drag.originalEnd);
     const duration = originalEnd.getTime() - originalStart.getTime();
 
     const newStart = new Date(targetDay);
     newStart.setHours(originalStart.getHours(), originalStart.getMinutes(), 0, 0);
-
     const newEnd = new Date(newStart.getTime() + duration);
 
     setRescheduling(true);
     try {
-      const result = await onReschedule(
-        dragData.id,
-        newStart.toISOString(),
-        newEnd.toISOString(),
-      );
+      const result = await onReschedule(drag.appointmentId, newStart.toISOString(), newEnd.toISOString());
       if (!result.success) {
         console.error('[AppointmentCalendar] Reschedule error:', result.error);
       }
@@ -151,10 +151,62 @@ const AppointmentCalendar: React.FC<AppointmentCalendarProps> = ({
     } finally {
       setRescheduling(false);
     }
+  }, [onReschedule, findCalendarDayStr, finishDrag]);
+
+  const handleMouseMove = useCallback((e: MouseEvent) => {
+    const drag = dragRef.current;
+    if (!drag) return;
+
+    if (drag.ghostEl) {
+      drag.ghostEl.style.left = `${e.clientX + 12}px`;
+      drag.ghostEl.style.top = `${e.clientY + 12}px`;
+    }
+
+    const dayStr = findCalendarDayStr(e.clientX, e.clientY);
+    if (dayStr !== lastHoveredCell.current) {
+      lastHoveredCell.current = dayStr;
+      setDragOverDate(dayStr);
+    }
+  }, [findCalendarDayStr]);
+
+  useEffect(() => {
+    if (!draggingId) return;
+    const onWindowBlur = () => finishDrag();
+    document.addEventListener('mousemove', handleMouseMove);
+    document.addEventListener('mouseup', handleMouseUp);
+    window.addEventListener('blur', onWindowBlur);
+    return () => {
+      document.removeEventListener('mousemove', handleMouseMove);
+      document.removeEventListener('mouseup', handleMouseUp);
+      window.removeEventListener('blur', onWindowBlur);
+    };
+  }, [draggingId, handleMouseMove, handleMouseUp, finishDrag]);
+
+  useEffect(() => {
+    return () => finishDrag();
+  }, [finishDrag]);
+
+  const handleDragStart = (e: React.MouseEvent, appointment: Appointment) => {
+    e.preventDefault();
+    e.stopPropagation();
+
+    const ghost = document.createElement('div');
+    ghost.className = 'fixed z-[9999] pointer-events-none px-3 py-2 bg-white dark:bg-slate-800 rounded-xl shadow-xl border border-slate-200 dark:border-slate-700 text-sm font-bold text-slate-900 dark:text-white max-w-[200px] truncate';
+    ghost.textContent = appointment.services?.name || 'Cita';
+    ghost.style.left = `${e.clientX + 12}px`;
+    ghost.style.top = `${e.clientY + 12}px`;
+    document.body.appendChild(ghost);
+
+    dragRef.current = {
+      appointmentId: appointment.id,
+      originalStart: appointment.start_time,
+      originalEnd: appointment.end_time,
+      ghostEl: ghost,
+    };
+    setDraggingId(appointment.id);
   };
 
   const today = new Date();
-
   const selectedDayAppts = selectedDate ? getAppointmentsForDay(selectedDate) : [];
 
   return (
@@ -208,7 +260,8 @@ const AppointmentCalendar: React.FC<AppointmentCalendarProps> = ({
                 return (
                   <div
                     key={i}
-                    className={`relative min-h-[72px] sm:min-h-[88px] border-b border-r border-slate-50 dark:border-slate-800/50 p-1.5 transition-all cursor-pointer select-none ${
+                    data-day={dayStr}
+                    className={`relative min-h-[72px] sm:min-h-[88px] border-b border-r border-slate-50 dark:border-slate-800/50 p-1.5 transition-colors cursor-pointer select-none ${
                       isCurrentMonth
                         ? 'hover:bg-primary-50/50 dark:hover:bg-primary-900/10'
                         : 'bg-slate-50/50 dark:bg-slate-900/50'
@@ -222,9 +275,6 @@ const AppointmentCalendar: React.FC<AppointmentCalendarProps> = ({
                         : ''
                     }`}
                     onClick={() => handleCellClick(day)}
-                    onDragOver={(e) => handleDragOver(e, dayStr)}
-                    onDragLeave={handleDragLeave}
-                    onDrop={(e) => handleDrop(e, day)}
                   >
                     <div className="flex items-center justify-between mb-1">
                       <span
@@ -302,22 +352,21 @@ const AppointmentCalendar: React.FC<AppointmentCalendarProps> = ({
               <div className="space-y-2">
                 {selectedDayAppts.map((appt) => {
                   const date = new Date(appt.start_time);
+                  const canDrag = !!onReschedule && appt.status !== 'cancelled' && appt.status !== 'completed';
                   return (
                     <div
                       key={appt.id}
-                      draggable={!!onReschedule && appt.status !== 'cancelled' && appt.status !== 'completed'}
-                      onDragStart={(e) => handleDragStart(e, appt)}
-                      onDragEnd={handleDragEnd}
-                      onClick={() => setSelectedAppointment(appt)}
-                      className={`group relative bg-white dark:bg-slate-900 rounded-xl border border-slate-200 dark:border-slate-800 hover:border-primary-200 dark:hover:border-primary-800 hover:shadow-lg transition-all duration-200 cursor-pointer ${
-                        dragDataRef.current?.id === appt.id ? 'opacity-40' : ''
-                      }`}
+                      onClick={() => !draggingId && setSelectedAppointment(appt)}
+                      className={`group relative bg-white dark:bg-slate-900 rounded-xl border border-slate-200 dark:border-slate-800 hover:border-primary-200 dark:hover:border-primary-800 hover:shadow-lg transition-all duration-200 ${
+                        canDrag ? 'cursor-grab active:cursor-grabbing' : 'cursor-pointer'
+                      } ${draggingId === appt.id ? 'opacity-40' : ''}`}
                     >
                       <div className="flex items-start gap-3 p-3 sm:p-4">
-                        {onReschedule && appt.status !== 'cancelled' && appt.status !== 'completed' && (
+                        {canDrag && (
                           <div
+                            data-swipe-block
                             className="mt-0.5 text-slate-300 dark:text-slate-600 hover:text-slate-500 dark:hover:text-slate-400 cursor-grab active:cursor-grabbing touch-none"
-                            onMouseDown={(e) => e.stopPropagation()}
+                            onMouseDown={(e) => handleDragStart(e, appt)}
                           >
                             <GripVertical className="w-4 h-4" />
                           </div>
