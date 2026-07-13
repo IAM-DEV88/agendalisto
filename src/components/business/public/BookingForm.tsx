@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useMemo } from 'react';
-import { Clock, CheckCircle, ArrowLeft, Send, AlertCircle, Gift, Check, X, Lock, FileText, Eye, CalendarDays, Info, Download } from 'lucide-react';
+import { Clock, CheckCircle, ArrowLeft, Send, AlertCircle, Gift, Check, X, Lock, FileText, Eye, CalendarDays, Info, Download, Store, User, ChevronLeft, ChevronRight, ChevronDown } from 'lucide-react';
 import CrossPromotion from '../CrossPromotion';
 import AvailabilityCalendar from './AvailabilityCalendar';
 import { createAppointment, Service, getBusinessHours, getBusinessAppointments, BusinessHours, Appointment, validateGiftCode, redeemGiftCode } from '../../../lib/api';
@@ -29,6 +29,12 @@ interface BookingFormProps {
   slotIntervalMinutes?: number;
   bufferMinutes?: number;
   maxAdvanceBookingDays?: number;
+  images?: string[];
+  activeImageIndex?: number;
+  onImageChange?: (index: number) => void;
+  onFullscreenImage?: (url: string) => void;
+  cancellationPolicy?: string | null;
+  reschedulePolicy?: string | null;
 }
 
 const BookingForm: React.FC<BookingFormProps> = ({
@@ -49,7 +55,17 @@ const BookingForm: React.FC<BookingFormProps> = ({
   slotIntervalMinutes = 30,
   bufferMinutes = 0,
   maxAdvanceBookingDays = 90,
+  images,
+  activeImageIndex: controlledImageIndex,
+  onImageChange,
+  onFullscreenImage,
+  cancellationPolicy,
+  reschedulePolicy,
 }) => {
+  const [localImageIndex, setLocalImageIndex] = useState(0);
+  const imageIndex = controlledImageIndex ?? localImageIndex;
+  const handleImageChange = onImageChange ?? setLocalImageIndex;
+  const [localGuestInfo, setLocalGuestInfo] = useState<GuestInfo>(guestInfo || { name: '', email: '', phone: '' });
   const [confirmationChecked, setConfirmationChecked] = useState(!requireConfirmation);
   const [formData, setFormData] = useState({ date: '', time: '', notes: '' });
   const [submitting, setSubmitting] = useState(false);
@@ -164,7 +180,7 @@ const BookingForm: React.FC<BookingFormProps> = ({
       status: requireConfirmation ? 'pending' as const : 'confirmed' as const,
       notes: formData.notes || null,
       is_guest: !userId,
-      guest_info: !userId ? guestInfo! : null,
+      guest_info: !userId ? localGuestInfo : null,
       payment_status: paymentProvider ? 'completed' : undefined,
       payment_provider: paymentProvider || undefined,
       payment_id: paymentId || undefined,
@@ -186,11 +202,7 @@ const BookingForm: React.FC<BookingFormProps> = ({
       setError('Faltan datos para la reserva');
       return;
     }
-    if (!userId && !guestInfo) {
-      setError('Debes iniciar sesion o proporcionar tus datos');
-      return;
-    }
-    if (guestInfo && (!guestInfo.name.trim() || !guestInfo.email.trim())) {
+    if (!userId && (!localGuestInfo.name.trim() || !localGuestInfo.email.trim())) {
       setError('Completa tu nombre y correo para reservar');
       return;
     }
@@ -283,7 +295,7 @@ const BookingForm: React.FC<BookingFormProps> = ({
             start_time: new Date(`${formData.date}T${formData.time}`).toISOString(),
             end_time: new Date(new Date(`${formData.date}T${formData.time}`).getTime() + (service?.duration || 0) * 60000).toISOString(),
             notes: formData.notes || null,
-            guest_info: !userId ? guestInfo! : null,
+            guest_info: !userId ? localGuestInfo : null,
             payment_provider: 'paypal',
             payment_amount: paymentAmount,
           },
@@ -331,8 +343,8 @@ const BookingForm: React.FC<BookingFormProps> = ({
         serviceName: service?.name || '',
         businessName,
         userId: userId || '',
-        userEmail: guestInfo?.email || '',
-        userName: guestInfo?.name || '',
+        userEmail: localGuestInfo.email || '',
+        userName: localGuestInfo.name || '',
         action: 'create_appointment',
         actionData: {
           business_id: businessId,
@@ -341,7 +353,7 @@ const BookingForm: React.FC<BookingFormProps> = ({
           start_time: startTime.toISOString(),
           end_time: endTime.toISOString(),
           notes: formData.notes || null,
-          guest_info: !userId ? guestInfo! : null,
+          guest_info: !userId ? localGuestInfo : null,
           amount: paymentAmount,
           currency: 'COP',
         },
@@ -468,12 +480,99 @@ const BookingForm: React.FC<BookingFormProps> = ({
         </div>
       )}
 
-      <div className="flex items-center justify-between mb-6 pb-5 border-b border-slate-100 dark:border-slate-800">
-        <div>
-          <h2 className="text-xl font-black text-slate-900 dark:text-white mb-0">Reservar cita</h2>
-          <p className="text-sm text-slate-500 dark:text-slate-400 mt-0.5">{businessName}</p>
+      {/* ─── Integrated hero: image gallery + service info ─── */}
+      {images && images.length > 0 && (
+        <div className={`mb-6 overflow-hidden ${images.length > 0 ? 'md:grid md:grid-cols-5' : ''}`}>
+          <div className="md:col-span-2 relative flex flex-col rounded-xl bg-slate-100 dark:bg-slate-800">
+            <div className="relative aspect-[4/3] sm:aspect-video md:flex-1 md:min-h-[240px] md:max-h-[360px] group overflow-hidden md:rounded-l-xl">
+              <img src={images[imageIndex]} alt={service?.name || ''}
+                className="w-full h-full object-contain cursor-zoom-in transition-all duration-700 group-hover:scale-110"
+                onClick={() => onFullscreenImage?.(images[imageIndex])} />
+              {images.length > 1 && (
+                <>
+                  <button onClick={(e) => { e.stopPropagation(); handleImageChange((imageIndex - 1 + images.length) % images.length); }}
+                    className="absolute left-2 top-1/2 -translate-y-1/2 p-1.5 bg-white/90 hover:bg-white text-slate-800 rounded-full shadow-lg transition-all opacity-0 group-hover:opacity-100">
+                    <ChevronLeft className="w-4 h-4" />
+                  </button>
+                  <button onClick={(e) => { e.stopPropagation(); handleImageChange((imageIndex + 1) % images.length); }}
+                    className="absolute right-2 top-1/2 -translate-y-1/2 p-1.5 bg-white/90 hover:bg-white text-slate-800 rounded-full shadow-lg transition-all opacity-0 group-hover:opacity-100">
+                    <ChevronRight className="w-4 h-4" />
+                  </button>
+                </>
+              )}
+            </div>
+            {images.length > 1 && (
+              <div className="absolute bottom-0 inset-x-0 flex gap-1.5 px-3 pb-3 pt-8 overflow-x-auto no-scrollbar z-10">
+                {images.map((url, i) => (
+                  <button key={i} onClick={() => handleImageChange(i)}
+                    className={`w-9 h-9 rounded-lg overflow-hidden flex-shrink-0 ring-2 transition-all hover:scale-105 ${
+                      i === imageIndex ? 'ring-primary-500 scale-105' : 'ring-white/50 hover:ring-white'
+                    }`}>
+                    <img src={url} alt="" className="w-full h-full object-cover" />
+                  </button>
+                ))}
+              </div>
+            )}
+          </div>
+          <div className="md:col-span-3 p-5 md:p-6 flex flex-col justify-center">
+            <span className="inline-flex items-center gap-1.5 text-xs font-bold text-primary-600 dark:text-primary-400 uppercase tracking-[0.15em] mb-1">
+              <Store className="w-3 h-3" />
+              {businessName}
+            </span>
+            <div className="flex items-start justify-between gap-3">
+              <h1 className="text-xl md:text-2xl font-black text-slate-900 dark:text-white leading-tight mb-0 flex-1">
+                {service?.name}
+              </h1>
+              {showPrices && (service?.price ?? 0) > 0 && (
+                <span className="text-xl md:text-2xl font-black text-primary-600 dark:text-primary-400 flex-shrink-0 whitespace-nowrap">
+                  ${service!.price.toLocaleString()}
+                </span>
+              )}
+            </div>
+            <div className="flex items-center flex-wrap gap-x-4 gap-y-1 mt-2">
+              <span className="flex items-center gap-1.5 text-sm font-bold text-slate-500 dark:text-slate-400">
+                <Clock className="w-4 h-4 text-primary-500" />
+                {service?.duration} min
+              </span>
+              {service?.provider && (
+                <span className="flex items-center gap-1.5 text-sm font-bold text-slate-500 dark:text-slate-400">
+                  <User className="w-4 h-4 text-primary-400" />
+                  {service.provider}
+                </span>
+              )}
+            </div>
+            {service?.description && (
+              <p className="text-sm text-slate-500 dark:text-slate-400 leading-relaxed mt-3 max-w-prose">{service.description}</p>
+            )}
+            {!isOwnerPreview && (
+              <div className={`inline-flex items-center gap-2 px-3 py-1.5 rounded-lg text-xs font-bold mt-3 w-fit ${
+                requireConfirmation
+                  ? 'bg-amber-50 dark:bg-amber-500/10 text-amber-700 dark:text-amber-400 border border-amber-200 dark:border-amber-800/50'
+                  : 'bg-emerald-50 dark:bg-emerald-500/10 text-emerald-700 dark:text-emerald-400 border border-emerald-200 dark:border-emerald-800/50'
+              }`}>
+                {requireConfirmation
+                  ? <><Clock className="w-3.5 h-3.5" /> Requiere confirmación</>
+                  : <><CheckCircle className="w-3.5 h-3.5" /> Reserva inmediata</>}
+              </div>
+            )}
+          </div>
         </div>
-      </div>
+      )}
+
+      {/* Guest info inline */}
+      {!userId && (
+        <div className="mb-5 p-4 bg-white dark:bg-slate-900 rounded-2xl border border-slate-200 dark:border-slate-800">
+          <p className="text-xs font-black text-slate-500 dark:text-slate-400 uppercase tracking-wider mb-3">Tus datos</p>
+          <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+            <input type="text" value={localGuestInfo.name} onChange={(e) => setLocalGuestInfo(p => ({ ...p, name: e.target.value }))}
+              placeholder="Nombre" className="w-full px-4 py-2.5 text-sm rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 focus:ring-2 focus:ring-primary-500/20 focus:border-primary-500 outline-none transition-all" />
+            <input type="email" value={localGuestInfo.email} onChange={(e) => setLocalGuestInfo(p => ({ ...p, email: e.target.value }))}
+              placeholder="Correo" className="w-full px-4 py-2.5 text-sm rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 focus:ring-2 focus:ring-primary-500/20 focus:border-primary-500 outline-none transition-all" />
+            <input type="tel" value={localGuestInfo.phone} onChange={(e) => setLocalGuestInfo(p => ({ ...p, phone: e.target.value }))}
+              placeholder="Teléfono" className="w-full px-4 py-2.5 text-sm rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 focus:ring-2 focus:ring-primary-500/20 focus:border-primary-500 outline-none transition-all" />
+          </div>
+        </div>
+      )}
 
       {service?.can_be_gifted && (
         <div className="mb-5 p-3 bg-rose-50 dark:bg-rose-900/10 rounded-2xl border border-rose-200 dark:border-rose-800/50">
@@ -524,54 +623,56 @@ const BookingForm: React.FC<BookingFormProps> = ({
       )}
 
       <form onSubmit={handleSubmit} className="space-y-6">
-        <div>
-          <label className="block text-sm font-bold text-slate-700 dark:text-slate-300 mb-2 flex items-center gap-2">
-            <span className="w-5 h-5 rounded-full bg-primary-600 text-white text-[10px] font-black flex items-center justify-center">1</span>
-            Selecciona el dia
-          </label>
-          <AvailabilityCalendar
-            businessHours={businessHours}
-            maxAdvanceDays={maxAdvanceBookingDays}
-            selectedDate={formData.date}
-            onSelectDate={handleDateSelect}
-          />
-        </div>
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-5 md:gap-6">
+          <div className="flex flex-col">
+            <label className="block text-sm font-bold text-slate-700 dark:text-slate-300 mb-2 flex items-center gap-2">
+              <span className="w-5 h-5 rounded-full bg-primary-600 text-white text-[10px] font-black flex items-center justify-center">1</span>
+              Selecciona el dia
+            </label>
+            <AvailabilityCalendar
+              businessHours={businessHours}
+              maxAdvanceDays={maxAdvanceBookingDays}
+              selectedDate={formData.date}
+              onSelectDate={handleDateSelect}
+            />
+          </div>
 
-        <div>
-          <label className="block text-sm font-bold text-slate-700 dark:text-slate-300 mb-2 flex items-center gap-2">
-            <span className="w-5 h-5 rounded-full bg-primary-600 text-white text-[10px] font-black flex items-center justify-center">2</span>
-            Horario disponible
-          </label>
-          {!formData.date ? (
-            <div className="py-8 text-center bg-slate-50 dark:bg-slate-800/50 rounded-2xl border border-dashed border-slate-200 dark:border-slate-700">
-              <CalendarDays className="w-8 h-8 text-slate-300 dark:text-slate-600 mx-auto mb-2" />
-              <p className="text-sm font-medium text-slate-400 italic">Selecciona una fecha primero</p>
-            </div>
-          ) : loadingSlots ? (
-            <div className="grid grid-cols-3 sm:grid-cols-4 gap-2.5">
-              {[...Array(8)].map((_, i) => (
-                <div key={i} className="h-11 bg-slate-200 dark:bg-slate-700 rounded-xl animate-pulse" />
-              ))}
-            </div>
-          ) : availableTimeSlots.length === 0 ? (
-            <div className="py-8 text-center bg-amber-50 dark:bg-amber-500/10 rounded-2xl border border-dashed border-amber-200 dark:border-amber-800">
-              <Clock className="w-8 h-8 text-amber-400 mx-auto mb-2" />
-              <p className="text-sm font-bold text-amber-700 dark:text-amber-400">No hay turnos disponibles este dia</p>
-            </div>
-          ) : (
-            <div className="grid grid-cols-3 sm:grid-cols-4 gap-2.5 max-h-56 overflow-y-auto pr-1">
-              {availableTimeSlots.map((slot) => (
-                <button key={slot} type="button" onClick={() => handleTimeSelect(slot)}
-                  className={`py-3 text-sm font-black rounded-xl border-2 transition-all active:scale-95 ${
-                    formData.time === slot
-                      ? 'bg-primary-600 border-primary-600 text-white shadow-lg shadow-primary-500/30'
+          <div className="flex flex-col">
+            <label className="block text-sm font-bold text-slate-700 dark:text-slate-300 mb-2 flex items-center gap-2">
+              <span className="w-5 h-5 rounded-full bg-primary-600 text-white text-[10px] font-black flex items-center justify-center">2</span>
+              Horario disponible
+            </label>
+            {!formData.date ? (
+              <div className="flex-1 py-8 text-center bg-slate-50 dark:bg-slate-800/50 rounded-2xl border border-dashed border-slate-200 dark:border-slate-700 flex flex-col items-center justify-center md:max-h-[380px]">
+                <CalendarDays className="w-8 h-8 text-slate-300 dark:text-slate-600 mx-auto mb-2" />
+                <p className="text-sm font-medium text-slate-400 italic">Selecciona una fecha primero</p>
+              </div>
+            ) : loadingSlots ? (
+              <div className="flex-1 grid grid-cols-2 gap-2.5 content-start md:max-h-[380px]">
+                {[...Array(8)].map((_, i) => (
+                  <div key={i} className="h-11 bg-slate-200 dark:bg-slate-700 rounded-xl animate-pulse" />
+                ))}
+              </div>
+            ) : availableTimeSlots.length === 0 ? (
+              <div className="flex-1 py-8 text-center bg-amber-50 dark:bg-amber-500/10 rounded-2xl border border-dashed border-amber-200 dark:border-amber-800 flex flex-col items-center justify-center md:max-h-[380px]">
+                <Clock className="w-8 h-8 text-amber-400 mx-auto mb-2" />
+                <p className="text-sm font-bold text-amber-700 dark:text-amber-400">No hay turnos disponibles este dia</p>
+              </div>
+            ) : (
+              <div className="flex-1 grid grid-cols-2 gap-2.5 content-start overflow-y-auto pr-1 md:max-h-[380px]">
+                {availableTimeSlots.map((slot) => (
+                  <button key={slot} type="button" onClick={() => handleTimeSelect(slot)}
+                    className={`py-3 text-sm font-black rounded-xl border-2 transition-all active:scale-95 ${
+                      formData.time === slot
+                        ? 'bg-primary-600 border-primary-600 text-white shadow-lg shadow-primary-500/30'
                       : 'bg-white dark:bg-slate-800 border-slate-200 dark:border-slate-700 text-slate-700 dark:text-slate-300 hover:border-primary-400 dark:hover:border-primary-600'
-                  }`}>
-                  {slot}
-                </button>
-              ))}
-            </div>
-          )}
+                    }`}>
+                    {slot}
+                  </button>
+                ))}
+              </div>
+            )}
+          </div>
         </div>
 
         <div>
@@ -657,6 +758,30 @@ const BookingForm: React.FC<BookingFormProps> = ({
           </>
         )}
       </form>
+
+      {/* ─── Policies integrated ─── */}
+      {!isOwnerPreview && (cancellationPolicy || reschedulePolicy) && (
+        <details className="mt-6 group">
+          <summary className="flex items-center justify-between px-4 py-3 bg-slate-50 dark:bg-slate-800/50 rounded-xl border border-slate-200 dark:border-slate-700 cursor-pointer text-sm font-bold text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors list-none">
+            Políticas
+            <ChevronDown className="w-4 h-4 transition-transform duration-200 group-open:rotate-180" />
+          </summary>
+          <div className="mt-3 space-y-3 px-4">
+            {cancellationPolicy && (
+              <div>
+                <p className="text-[10px] font-bold text-slate-400 uppercase tracking-wider mb-1">Cancelación</p>
+                <p className="text-sm text-slate-600 dark:text-slate-300 leading-relaxed">{cancellationPolicy}</p>
+              </div>
+            )}
+            {reschedulePolicy && (
+              <div>
+                <p className="text-[10px] font-bold text-slate-400 uppercase tracking-wider mb-1">Reagendamiento</p>
+                <p className="text-sm text-slate-600 dark:text-slate-300 leading-relaxed">{reschedulePolicy}</p>
+              </div>
+            )}
+          </div>
+        </details>
+      )}
     </div>
   );
 };

@@ -656,10 +656,11 @@ export const BusinessDashboard: React.FC = () => {
       </div>
 
       <CancelRescheduleModal
+        key={appointmentToReschedule?.id || 'none'}
         isOpen={!!appointmentToReschedule}
         onClose={() => setAppointmentToReschedule(null)}
         appointment={appointmentToReschedule}
-        isOwner={true}
+        isOwner
       />
     </div>
   );

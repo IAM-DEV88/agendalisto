@@ -27,15 +27,15 @@ function ServiceFormSkeleton() {
       </div>
       <div className="max-w-5xl mx-auto px-4 mt-8">
         <div className="grid grid-cols-1 lg:grid-cols-5 gap-8">
-          <div className="lg:col-span-2 space-y-4">
-            <div className="aspect-[4/3] bg-slate-200 dark:bg-slate-800 rounded-2xl animate-pulse" />
-            <div className="h-32 bg-slate-200 dark:bg-slate-800 rounded-2xl animate-pulse" />
-          </div>
           <div className="lg:col-span-3 space-y-4">
             <div className="h-8 bg-slate-200 dark:bg-slate-800 rounded-lg w-1/2 animate-pulse" />
             <div className="h-24 bg-slate-200 dark:bg-slate-800 rounded-xl animate-pulse" />
             <div className="h-12 bg-slate-200 dark:bg-slate-800 rounded-xl w-3/4 animate-pulse" />
             <div className="h-48 bg-slate-200 dark:bg-slate-800 rounded-2xl animate-pulse" />
+          </div>
+          <div className="lg:col-span-2 space-y-4">
+            <div className="aspect-[4/3] bg-slate-200 dark:bg-slate-800 rounded-2xl animate-pulse" />
+            <div className="h-32 bg-slate-200 dark:bg-slate-800 rounded-2xl animate-pulse" />
           </div>
         </div>
       </div>
@@ -334,102 +334,7 @@ export default function ServiceFormPage() {
         <div className="max-w-5xl mx-auto px-4 mt-8 animate-in fade-in slide-in-from-bottom-4 duration-500">
           <div className="grid grid-cols-1 lg:grid-cols-5 gap-8">
 
-            {/* ═══ LEFT: Gallery + Summary ═══ */}
-            <div className="lg:col-span-2 space-y-6">
-              {/* Gallery */}
-              {images.length > 0 ? (
-                <div className="bg-white dark:bg-slate-900 rounded-2xl border border-slate-200 dark:border-slate-800 overflow-hidden group">
-                  <div className="relative aspect-[4/3] bg-slate-100 dark:bg-slate-800">
-                    <img
-                      src={images[activeImageIndex]}
-                      alt={formData.name || 'Vista previa'}
-                      className="w-full h-full object-contain bg-slate-100 dark:bg-slate-800 cursor-zoom-in transition-transform duration-500 group-hover:scale-105"
-                      onClick={() => setFullscreenImage(images[activeImageIndex])}
-                    />
-                    {images.length > 1 && (
-                      <>
-                        <button
-                          type="button"
-                          onClick={() => setActiveImageIndex(prev => (prev - 1 + images.length) % images.length)}
-                          className="absolute left-3 top-1/2 -translate-y-1/2 p-2 bg-black/30 hover:bg-black/50 text-white rounded-full backdrop-blur-sm transition-all opacity-0 group-hover:opacity-100"
-                        >
-                          <ChevronLeft className="w-5 h-5" />
-                        </button>
-                        <button
-                          type="button"
-                          onClick={() => setActiveImageIndex(prev => (prev + 1) % images.length)}
-                          className="absolute right-3 top-1/2 -translate-y-1/2 p-2 bg-black/30 hover:bg-black/50 text-white rounded-full backdrop-blur-sm transition-all opacity-0 group-hover:opacity-100"
-                        >
-                          <ChevronRight className="w-5 h-5" />
-                        </button>
-                        <div className="absolute bottom-3 left-1/2 -translate-x-1/2 flex gap-1.5">
-                          {images.map((_, i) => (
-                            <div
-                              key={i}
-                              className={`w-1.5 h-1.5 rounded-full transition-all ${i === activeImageIndex ? 'bg-white scale-125' : 'bg-white/40'}`}
-                            />
-                          ))}
-                        </div>
-                      </>
-                    )}
-                  </div>
-                </div>
-              ) : (
-                <div className="bg-white dark:bg-slate-900 rounded-2xl border-2 border-dashed border-slate-200 dark:border-slate-700 aspect-[4/3] flex flex-col items-center justify-center text-slate-400">
-                  <ImageIcon className="w-10 h-10 mb-3" />
-                  <p className="text-sm font-bold">Sin imágenes</p>
-                  <p className="text-xs mt-1">Sube imágenes desde el formulario</p>
-                </div>
-              )}
-
-              {/* ═══ Summary Card (live preview) ═══ */}
-              <div className="bg-white dark:bg-slate-900 rounded-2xl border border-slate-200 dark:border-slate-800 p-5 space-y-3">
-                <div className="flex items-center justify-between mb-1">
-                  <h2 className="font-black text-lg text-slate-900 dark:text-white truncate">
-                    {formData.name || 'Nombre del servicio'}
-                  </h2>
-                  {formData.is_active ? (
-                    <CheckCircle className="w-5 h-5 text-emerald-500 flex-shrink-0" />
-                  ) : (
-                    <XCircle className="w-5 h-5 text-slate-300 flex-shrink-0" />
-                  )}
-                </div>
-                <p className="text-sm text-slate-500 dark:text-slate-400 line-clamp-2 leading-relaxed">
-                  {formData.description || 'Sin descripción'}
-                </p>
-                <div className="flex flex-wrap items-center gap-3 pt-2 border-t border-slate-100 dark:border-slate-800">
-                  {formData.duration && (
-                    <div className="flex items-center gap-1.5 text-sm font-medium text-slate-500">
-                      <Clock className="w-4 h-4 text-primary-500" />
-                      <span className="font-bold text-slate-700 dark:text-slate-300">{formData.duration} min</span>
-                    </div>
-                  )}
-                  {formData.price && (
-                    <div className="text-lg font-black text-primary-600 dark:text-primary-400">
-                      ${parseFloat(formData.price).toLocaleString()}
-                    </div>
-                  )}
-                </div>
-                {formData.provider && (
-                  <div className="flex items-center gap-1.5 text-xs font-medium text-slate-400">
-                    <User className="w-3.5 h-3.5" />
-                    {formData.provider}
-                  </div>
-                )}
-                {formData.can_be_gifted && (
-                  <div className="flex items-center gap-1.5 text-xs font-bold text-rose-500">
-                    <span>🎁</span> Se puede regalar
-                  </div>
-                )}
-                {formData.requires_payment && (
-                  <div className="flex items-center gap-1.5 text-xs font-bold text-amber-500">
-                    <span>🔒</span> Pago online ({formData.payment_percentage}%)
-                  </div>
-                )}
-              </div>
-            </div>
-
-            {/* ═══ RIGHT: Form ═══ */}
+            {/* ═══ LEFT (wide): Form ═══ */}
             <div className="lg:col-span-3">
               <div className="bg-white dark:bg-slate-900 rounded-2xl border border-slate-200 dark:border-slate-800 shadow-xl shadow-slate-200/50 dark:shadow-none p-6 sm:p-8 space-y-6">
 
@@ -729,6 +634,101 @@ export default function ServiceFormPage() {
                     Cancelar
                   </button>
                 </div>
+              </div>
+            </div>
+
+            {/* ═══ RIGHT (narrow): Gallery + Summary ═══ */}
+            <div className="lg:col-span-2 space-y-6">
+              {/* Gallery */}
+              {images.length > 0 ? (
+                <div className="bg-white dark:bg-slate-900 rounded-2xl border border-slate-200 dark:border-slate-800 overflow-hidden group">
+                  <div className="relative aspect-[4/3] bg-slate-100 dark:bg-slate-800">
+                    <img
+                      src={images[activeImageIndex]}
+                      alt={formData.name || 'Vista previa'}
+                      className="w-full h-full object-contain bg-slate-100 dark:bg-slate-800 cursor-zoom-in transition-transform duration-500 group-hover:scale-105"
+                      onClick={() => setFullscreenImage(images[activeImageIndex])}
+                    />
+                    {images.length > 1 && (
+                      <>
+                        <button
+                          type="button"
+                          onClick={() => setActiveImageIndex(prev => (prev - 1 + images.length) % images.length)}
+                          className="absolute left-3 top-1/2 -translate-y-1/2 p-2 bg-black/30 hover:bg-black/50 text-white rounded-full backdrop-blur-sm transition-all opacity-0 group-hover:opacity-100"
+                        >
+                          <ChevronLeft className="w-5 h-5" />
+                        </button>
+                        <button
+                          type="button"
+                          onClick={() => setActiveImageIndex(prev => (prev + 1) % images.length)}
+                          className="absolute right-3 top-1/2 -translate-y-1/2 p-2 bg-black/30 hover:bg-black/50 text-white rounded-full backdrop-blur-sm transition-all opacity-0 group-hover:opacity-100"
+                        >
+                          <ChevronRight className="w-5 h-5" />
+                        </button>
+                        <div className="absolute bottom-3 left-1/2 -translate-x-1/2 flex gap-1.5">
+                          {images.map((_, i) => (
+                            <div
+                              key={i}
+                              className={`w-1.5 h-1.5 rounded-full transition-all ${i === activeImageIndex ? 'bg-white scale-125' : 'bg-white/40'}`}
+                            />
+                          ))}
+                        </div>
+                      </>
+                    )}
+                  </div>
+                </div>
+              ) : (
+                <div className="bg-white dark:bg-slate-900 rounded-2xl border-2 border-dashed border-slate-200 dark:border-slate-700 aspect-[4/3] flex flex-col items-center justify-center text-slate-400">
+                  <ImageIcon className="w-10 h-10 mb-3" />
+                  <p className="text-sm font-bold">Sin imágenes</p>
+                  <p className="text-xs mt-1">Sube imágenes desde el formulario</p>
+                </div>
+              )}
+
+              {/* ═══ Summary Card (live preview) ═══ */}
+              <div className="bg-white dark:bg-slate-900 rounded-2xl border border-slate-200 dark:border-slate-800 p-5 space-y-3">
+                <div className="flex items-center justify-between mb-1">
+                  <h2 className="font-black text-lg text-slate-900 dark:text-white truncate">
+                    {formData.name || 'Nombre del servicio'}
+                  </h2>
+                  {formData.is_active ? (
+                    <CheckCircle className="w-5 h-5 text-emerald-500 flex-shrink-0" />
+                  ) : (
+                    <XCircle className="w-5 h-5 text-slate-300 flex-shrink-0" />
+                  )}
+                </div>
+                <p className="text-sm text-slate-500 dark:text-slate-400 line-clamp-2 leading-relaxed">
+                  {formData.description || 'Sin descripción'}
+                </p>
+                <div className="flex flex-wrap items-center gap-3 pt-2 border-t border-slate-100 dark:border-slate-800">
+                  {formData.duration && (
+                    <div className="flex items-center gap-1.5 text-sm font-medium text-slate-500">
+                      <Clock className="w-4 h-4 text-primary-500" />
+                      <span className="font-bold text-slate-700 dark:text-slate-300">{formData.duration} min</span>
+                    </div>
+                  )}
+                  {formData.price && (
+                    <div className="text-lg font-black text-primary-600 dark:text-primary-400">
+                      ${parseFloat(formData.price).toLocaleString()}
+                    </div>
+                  )}
+                </div>
+                {formData.provider && (
+                  <div className="flex items-center gap-1.5 text-xs font-medium text-slate-400">
+                    <User className="w-3.5 h-3.5" />
+                    {formData.provider}
+                  </div>
+                )}
+                {formData.can_be_gifted && (
+                  <div className="flex items-center gap-1.5 text-xs font-bold text-rose-500">
+                    <span>🎁</span> Se puede regalar
+                  </div>
+                )}
+                {formData.requires_payment && (
+                  <div className="flex items-center gap-1.5 text-xs font-bold text-amber-500">
+                    <span>🔒</span> Pago online ({formData.payment_percentage}%)
+                  </div>
+                )}
               </div>
             </div>
           </div>

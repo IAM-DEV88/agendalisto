@@ -815,6 +815,7 @@ const ProfileDashboard = ({ user }: ProfileDashboardProps) => {
       )}
 
       <CancelRescheduleModal
+        key={selectedAppointmentForCancel?.id || 'none'}
         isOpen={!!selectedAppointmentForCancel}
         onClose={() => setSelectedAppointmentForCancel(null)}
         appointment={selectedAppointmentForCancel}
