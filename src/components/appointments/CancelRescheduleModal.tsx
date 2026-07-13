@@ -1,18 +1,22 @@
 import { useState, useEffect, useMemo } from 'react';
-import { X, AlertCircle, Calendar, ChevronLeft, Clock } from 'lucide-react';
+import { X, AlertCircle, Calendar as CalendarIcon, ChevronLeft, ChevronRight, Clock } from 'lucide-react';
 import { Appointment } from '../../types/appointment';
 import { cancelAppointment, rescheduleAppointment, getBusinessHours, getBusinessAppointments, getBusinessConfig, BusinessHours, Appointment as ApiAppointment } from '../../lib/api';
 import { toast } from 'react-hot-toast';
-import { format } from 'date-fns';
+import {
+  format,   startOfMonth, endOfMonth, eachDayOfInterval, startOfWeek, endOfWeek,
+  isSameMonth, addMonths, subMonths,
+} from 'date-fns';
 import { es } from 'date-fns/locale';
 
 interface Props {
   isOpen: boolean;
   onClose: () => void;
   appointment: Appointment | null;
+  isOwner?: boolean;
 }
 
-export default function CancelRescheduleModal({ isOpen, onClose, appointment }: Props) {
+export default function CancelRescheduleModal({ isOpen, onClose, appointment, isOwner }: Props) {
   const [mode, setMode] = useState<'cancel' | 'reschedule' | null>(null);
   const [reason, setReason] = useState('');
   const [newDate, setNewDate] = useState('');
@@ -23,8 +27,10 @@ export default function CancelRescheduleModal({ isOpen, onClose, appointment }: 
   const [loadingSlots, setLoadingSlots] = useState(true);
   const [slotInterval, setSlotInterval] = useState(30);
   const [bufferMinutes, setBufferMinutes] = useState(0);
+  const [calendarMonth, setCalendarMonth] = useState(new Date());
 
   const minCancellationHours = appointment?.services?.min_cancellation_hours ?? 48;
+  const minRescheduleHours = appointment?.services?.min_reschedule_hours ?? 48;
 
   useEffect(() => {
     if (!appointment?.business_id || !mode) return;
@@ -81,6 +87,8 @@ export default function CancelRescheduleModal({ isOpen, onClose, appointment }: 
 
     return slots.filter(slot => {
       const slotTime = new Date(`${newDate}T${slot}`).getTime();
+      const now = Date.now();
+      if (slotTime <= now) return false;
       const slotEnd = slotTime + serviceDuration * 60000;
       const slotEndWithBuffer = slotEnd + bufferMinutes * 60000;
       return !appointments.some(appt => {
@@ -95,42 +103,50 @@ export default function CancelRescheduleModal({ isOpen, onClose, appointment }: 
 
   if (!isOpen || !appointment) return null;
 
-  const isWithinMinTime = minCancellationHours > 0 &&
+  const isWithinMinTime = !isOwner && minCancellationHours > 0 &&
     (new Date(appointment.start_time).getTime() - Date.now()) < minCancellationHours * 3600000;
 
+  const isRescheduleLocked = !isOwner && minRescheduleHours > 0 &&
+    (new Date(appointment.start_time).getTime() - Date.now()) < minRescheduleHours * 3600000;
+
   const handleCancel = async () => {
+    if (isWithinMinTime) { toast.error(`Contacta al negocio — solo pueden cancelar con ${minCancellationHours}h de anticipación`); return; }
     setLoading(true);
+    toast.loading('Cancelando cita...', { id: 'cancel' });
     const res = await cancelAppointment(appointment.id, reason);
     setLoading(false);
     if (res.success) {
-      toast.success('Cita cancelada');
+      toast.success('Cita cancelada correctamente', { id: 'cancel' });
       onClose();
     } else {
-      toast.error(res.error || 'Error al cancelar');
+      toast.error(res.error || 'Error al cancelar', { id: 'cancel' });
     }
   };
 
   const handleReschedule = async () => {
     if (!newDate || !newTime) { toast.error('Selecciona fecha y hora'); return; }
+    if (isRescheduleLocked) { toast.error(`Contacta al negocio — solo pueden reagendar con ${minRescheduleHours}h de anticipación`); return; }
     const startTime = new Date(`${newDate}T${newTime}`);
     const endTime = new Date(startTime.getTime() + serviceDuration * 60000);
+    if (startTime <= new Date()) { toast.error('La nueva fecha y hora no puede estar en el pasado'); return; }
     setLoading(true);
+    toast.loading('Reprogramando cita...', { id: 'reschedule' });
     const res = await rescheduleAppointment(appointment.id, startTime.toISOString(), endTime.toISOString());
     setLoading(false);
     if (res.success) {
-      toast.success('Cita reprogramada');
+      toast.success('Cita reprogramada correctamente', { id: 'reschedule' });
       onClose();
     } else {
-      toast.error(res.error || 'Error al reprogramar');
+      toast.error(res.error || 'Error al reprogramar', { id: 'reschedule' });
     }
   };
 
   const reset = () => { setMode(null); setReason(''); setNewDate(''); setNewTime(''); };
 
   return (
-    <div className="fixed inset-0 z-50 flex items-end sm:items-center justify-center p-0 sm:p-4 bg-black/50 backdrop-blur-sm animate-in fade-in duration-200" onClick={onClose}>
+    <div className="fixed inset-0 z-50 flex items-start sm:items-center justify-center px-2 pt-16 sm:pt-0 sm:p-4 bg-black/50 backdrop-blur-sm animate-in fade-in duration-200" onClick={onClose}>
       <div
-        className="relative w-full sm:max-w-md max-h-[90dvh] bg-white dark:bg-slate-900 rounded-t-3xl sm:rounded-3xl shadow-2xl overflow-hidden animate-in slide-in-from-bottom sm:zoom-in-95 duration-300"
+        className="relative w-full sm:max-w-md max-h-[calc(100dvh-5rem)] sm:max-h-[85vh] bg-white dark:bg-slate-900 rounded-3xl shadow-2xl overflow-hidden animate-in sm:zoom-in-95 duration-300"
         onClick={e => e.stopPropagation()}
       >
         {/* Drag handle (mobile) */}
@@ -148,7 +164,7 @@ export default function CancelRescheduleModal({ isOpen, onClose, appointment }: 
                 </button>
               ) : (
                 <div className="w-8 h-8 rounded-xl bg-primary-50 dark:bg-primary-500/10 flex items-center justify-center">
-                  <Calendar className="w-4 h-4 text-primary-500" />
+                  <CalendarIcon className="w-4 h-4 text-primary-500" />
                 </div>
               )}
             </div>
@@ -165,13 +181,13 @@ export default function CancelRescheduleModal({ isOpen, onClose, appointment }: 
           {/* Appointment summary */}
           <div className="flex items-center gap-3 p-3 bg-slate-50 dark:bg-slate-800/50 rounded-xl border border-slate-100 dark:border-slate-800">
             <div className="w-10 h-10 rounded-xl bg-primary-50 dark:bg-primary-500/10 flex items-center justify-center flex-shrink-0">
-              <Calendar className="w-5 h-5 text-primary-500" />
+              <CalendarIcon className="w-5 h-5 text-primary-500" />
             </div>
             <div className="min-w-0">
-              <p className="text-sm font-bold text-slate-900 dark:text-white truncate">
+              <p className="text-sm font-bold text-slate-900 dark:text-white truncate mb-0">
                 {appointment.services?.name || 'Cita'}
               </p>
-              <p className="text-xs font-medium text-slate-400 truncate">
+              <p className="text-xs font-medium text-slate-400 truncate mb-0">
                 {format(new Date(appointment.start_time), "EEE d MMM · HH:mm", { locale: es })} hs
               </p>
             </div>
@@ -181,18 +197,28 @@ export default function CancelRescheduleModal({ isOpen, onClose, appointment }: 
           {mode === 'reschedule' && appointment.status === 'confirmed' && (
             <div className="flex items-start gap-2.5 p-3 bg-amber-50 dark:bg-amber-900/10 rounded-xl border border-amber-200 dark:border-amber-800/50">
               <AlertCircle className="w-4 h-4 text-amber-500 flex-shrink-0 mt-0.5" />
-              <p className="text-xs font-medium text-amber-700 dark:text-amber-300">
+              <p className="text-xs font-medium text-amber-700 dark:text-amber-300 mb-0">
                 Tu cita esta confirmada. Al reprogramar, el negocio debera confirmar nuevamente.
               </p>
             </div>
           )}
 
-          {/* Warning */}
+          {/* Warning: reschedule lockout */}
+          {mode === 'reschedule' && isRescheduleLocked && (
+            <div className="flex items-start gap-2.5 p-3 bg-red-50 dark:bg-red-900/10 rounded-xl border border-red-200 dark:border-red-800/50">
+              <AlertCircle className="w-4 h-4 text-red-500 flex-shrink-0 mt-0.5" />
+              <p className="text-xs font-medium text-red-700 dark:text-red-300 mb-0">
+                Esta cita está dentro del tiempo mínimo de reagendación ({minRescheduleHours}h). Contacta al negocio para gestionar cambios.
+              </p>
+            </div>
+          )}
+
+          {/* Warning: cancellation lockout */}
           {isWithinMinTime && (
-            <div className="flex items-start gap-2.5 p-3 bg-amber-50 dark:bg-amber-900/10 rounded-xl border border-amber-200 dark:border-amber-800/50">
-              <AlertCircle className="w-4 h-4 text-amber-500 flex-shrink-0 mt-0.5" />
-              <p className="text-xs font-medium text-amber-700 dark:text-amber-300">
-                Esta cita está dentro del tiempo mínimo de cancelación ({minCancellationHours}h). Puede que el negocio no acepte cambios de último minuto.
+            <div className="flex items-start gap-2.5 p-3 bg-red-50 dark:bg-red-900/10 rounded-xl border border-red-200 dark:border-red-800/50">
+              <AlertCircle className="w-4 h-4 text-red-500 flex-shrink-0 mt-0.5" />
+              <p className="text-xs font-medium text-red-700 dark:text-red-300 mb-0">
+                Esta cita está dentro del tiempo mínimo de cancelación ({minCancellationHours}h). Contacta al negocio para gestionar cambios.
               </p>
             </div>
           )}
@@ -201,23 +227,41 @@ export default function CancelRescheduleModal({ isOpen, onClose, appointment }: 
           {!mode ? (
             <div className="space-y-2">
               <button onClick={() => setMode('reschedule')}
-                className="w-full flex items-center gap-3 p-3.5 bg-white dark:bg-slate-800/50 rounded-xl border border-slate-200 dark:border-slate-700 hover:border-primary-300 dark:hover:border-primary-700 transition-all text-left active:scale-[0.99]">
+                disabled={isRescheduleLocked}
+                className={`w-full flex items-center gap-3 p-3.5 rounded-xl border transition-all text-left active:scale-[0.99] ${
+                  isRescheduleLocked
+                    ? 'bg-slate-50 dark:bg-slate-800/50 border-slate-200 dark:border-slate-700 opacity-60 cursor-not-allowed'
+                    : 'bg-white dark:bg-slate-800/50 border-slate-200 dark:border-slate-700 hover:border-primary-300 dark:hover:border-primary-700'
+                }`}>
                 <div className="w-9 h-9 rounded-xl bg-primary-50 dark:bg-primary-900/20 flex items-center justify-center flex-shrink-0">
                   <Clock className="w-4 h-4 text-primary-600 dark:text-primary-400" />
                 </div>
                 <div className="flex-1 min-w-0">
-                  <p className="text-sm font-bold text-slate-900 dark:text-white">Reprogramar</p>
-                  <p className="text-xs text-slate-500">Elige una nueva fecha y hora</p>
+                  <p className="text-sm font-bold text-slate-900 dark:text-white mb-0">Reprogramar</p>
+                  <p className="text-xs text-slate-500 mb-0">
+                    {isRescheduleLocked
+                      ? `Contacta al negocio (mín. ${minRescheduleHours}h)`
+                      : 'Elige una nueva fecha y hora'}
+                  </p>
                 </div>
               </button>
               <button onClick={() => setMode('cancel')}
-                className="w-full flex items-center gap-3 p-3.5 bg-white dark:bg-slate-800/50 rounded-xl border border-slate-200 dark:border-slate-700 hover:border-red-300 dark:hover:border-red-700 transition-all text-left active:scale-[0.99]">
+                disabled={isWithinMinTime}
+                className={`w-full flex items-center gap-3 p-3.5 rounded-xl border transition-all text-left active:scale-[0.99] ${
+                  isWithinMinTime
+                    ? 'bg-slate-50 dark:bg-slate-800/50 border-slate-200 dark:border-slate-700 opacity-60 cursor-not-allowed'
+                    : 'bg-white dark:bg-slate-800/50 border-slate-200 dark:border-slate-700 hover:border-red-300 dark:hover:border-red-700'
+                }`}>
                 <div className="w-9 h-9 rounded-xl bg-red-50 dark:bg-red-900/20 flex items-center justify-center flex-shrink-0">
                   <X className="w-4 h-4 text-red-500" />
                 </div>
                 <div className="flex-1 min-w-0">
-                  <p className="text-sm font-bold text-slate-900 dark:text-white">Cancelar cita</p>
-                  <p className="text-xs text-slate-500">Esta acción no se puede deshacer</p>
+                  <p className="text-sm font-bold text-slate-900 dark:text-white mb-0">Cancelar cita</p>
+                  <p className="text-xs text-slate-500 mb-0">
+                    {isWithinMinTime
+                      ? `Contacta al negocio (mín. ${minCancellationHours}h)`
+                      : 'Esta acción no se puede deshacer'}
+                  </p>
                 </div>
               </button>
             </div>
@@ -243,21 +287,80 @@ export default function CancelRescheduleModal({ isOpen, onClose, appointment }: 
           ) : (
             <div className="space-y-4">
               <div>
-                <label className="block text-xs font-bold text-slate-700 dark:text-slate-300 mb-1.5">Nueva fecha</label>
-                <input
-                  type="date"
-                  value={newDate}
-                  onChange={e => setNewDate(e.target.value)}
-                  min={new Date().toISOString().split('T')[0]}
-                  className="w-full bg-slate-50 dark:bg-slate-800/50 border border-slate-200 dark:border-slate-700 rounded-xl px-3 py-2.5 text-sm text-slate-900 dark:text-white focus:ring-2 focus:ring-primary-500/20 focus:border-primary-500 transition-all"
-                />
+                <label className="block text-xs font-bold text-slate-700 dark:text-slate-300 mb-2">Nueva fecha</label>
+                <div className="bg-white dark:bg-slate-900 rounded-xl border border-slate-200 dark:border-slate-700 overflow-hidden">
+                  {/* Month nav */}
+                  <div className="flex items-center justify-between px-2 py-2 bg-slate-50 dark:bg-slate-800/50 border-b border-slate-100 dark:border-slate-800">
+                    <button
+                      onClick={() => setCalendarMonth(subMonths(calendarMonth, 1))}
+                      className="p-1 hover:bg-slate-200 dark:hover:bg-slate-700 rounded-lg transition-colors"
+                    >
+                      <ChevronLeft className="w-4 h-4 text-slate-500" />
+                    </button>
+                    <span className="text-xs font-bold text-slate-700 dark:text-slate-300">
+                      {format(calendarMonth, "MMMM yyyy", { locale: es })}
+                    </span>
+                    <button
+                      onClick={() => setCalendarMonth(addMonths(calendarMonth, 1))}
+                      className="p-1 hover:bg-slate-200 dark:hover:bg-slate-700 rounded-lg transition-colors"
+                    >
+                      <ChevronRight className="w-4 h-4 text-slate-500" />
+                    </button>
+                  </div>
+                  {/* Day headers */}
+                  <div className="grid grid-cols-7 border-b border-slate-100 dark:border-slate-800">
+                    {['Lu', 'Ma', 'Mi', 'Ju', 'Vi', 'Sa', 'Do'].map(d => (
+                      <div key={d} className="py-1 text-center text-[10px] font-bold text-slate-400">{d}</div>
+                    ))}
+                  </div>
+                  {/* Day grid */}
+                  <div className="grid grid-cols-7">
+                    {(() => {
+                      const monthStart = startOfMonth(calendarMonth);
+                      const monthEnd = endOfMonth(calendarMonth);
+                      const calStart = startOfWeek(monthStart, { weekStartsOn: 1 });
+                      const calEnd = endOfWeek(monthEnd, { weekStartsOn: 1 });
+                      const days = eachDayOfInterval({ start: calStart, end: calEnd });
+                      const today = new Date();
+                      today.setHours(0, 0, 0, 0);
+                      return days.map((day, i) => {
+                        const dayStr = format(day, 'yyyy-MM-dd');
+                        const isCurrentMonth = isSameMonth(day, calendarMonth);
+                        const isSelected = newDate === dayStr;
+                        const isDisabled = day < today;
+                        const bizDayOfWeek = (day.getDay() + 6) % 7;
+                        const dayHours = businessHours.find(h => h.day_of_week === bizDayOfWeek);
+                        const isClosed = !isDisabled && isCurrentMonth && businessHours.length > 0 && dayHours?.is_closed === true;
+                        return (
+                          <button
+                            key={i}
+                            type="button"
+                            disabled={isDisabled || !isCurrentMonth}
+                            onClick={() => { setNewDate(dayStr); setNewTime(''); }}
+                            className={`py-1.5 text-center text-xs font-bold rounded-none transition-colors ${
+                              isSelected
+                                ? 'bg-primary-600 text-white'
+                                : isDisabled || !isCurrentMonth
+                                ? 'text-slate-300 dark:text-slate-600 cursor-not-allowed'
+                                : isClosed
+                                ? 'text-red-400 dark:text-red-500'
+                                : 'text-slate-700 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800'
+                            }`}
+                          >
+                            {format(day, 'd')}
+                          </button>
+                        );
+                      });
+                    })()}
+                  </div>
+                </div>
               </div>
               <div>
                 <label className="block text-xs font-bold text-slate-700 dark:text-slate-300 mb-1.5">Nuevo horario</label>
                 {!newDate ? (
                   <div className="py-6 text-center bg-slate-50 dark:bg-slate-800/50 rounded-xl border border-dashed border-slate-200 dark:border-slate-700">
-                    <Calendar className="w-6 h-6 text-slate-300 dark:text-slate-600 mx-auto mb-1" />
-                    <p className="text-xs font-medium text-slate-400 italic">Selecciona una fecha primero</p>
+                    <CalendarIcon className="w-6 h-6 text-slate-300 dark:text-slate-600 mx-auto mb-1" />
+                    <p className="text-xs font-medium text-slate-400 italic mb-0">Selecciona una fecha primero</p>
                   </div>
                 ) : loadingSlots ? (
                   <div className="grid grid-cols-3 sm:grid-cols-4 gap-2">
@@ -268,7 +371,7 @@ export default function CancelRescheduleModal({ isOpen, onClose, appointment }: 
                 ) : availableTimeSlots.length === 0 ? (
                   <div className="py-6 text-center bg-amber-50 dark:bg-amber-500/10 rounded-xl border border-dashed border-amber-200 dark:border-amber-800">
                     <Clock className="w-6 h-6 text-amber-400 mx-auto mb-1" />
-                    <p className="text-xs font-bold text-amber-700 dark:text-amber-400">No hay turnos disponibles este día</p>
+                    <p className="text-xs font-bold text-amber-700 dark:text-amber-400 mb-0">No hay turnos disponibles este día</p>
                   </div>
                 ) : (
                   <div className="grid grid-cols-3 sm:grid-cols-4 gap-2 max-h-48 overflow-y-auto pr-1">

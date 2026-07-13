@@ -27,6 +27,12 @@ export interface Service {
   provider?: string;
   image_urls?: string[];
   min_cancellation_hours?: number;
+  cancellation_policy_text?: string;
+  min_reschedule_hours?: number;
+  reschedule_policy_text?: string;
+  can_be_gifted?: boolean;
+  requires_payment?: boolean;
+  payment_percentage?: number;
   created_at: string;
   updated_at: string;
 }

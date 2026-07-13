@@ -499,6 +499,8 @@ export const BusinessDashboard: React.FC = () => {
                       appointments={appointments}
                       onStatusChange={handleUpdateAppointmentStatus}
                       onReschedule={handleReschedule}
+                      onCancel={(appt) => setAppointmentToReschedule(appt)}
+                      isOwner
                     />
                   )}
 
@@ -656,6 +658,7 @@ export const BusinessDashboard: React.FC = () => {
         isOpen={!!appointmentToReschedule}
         onClose={() => setAppointmentToReschedule(null)}
         appointment={appointmentToReschedule}
+        isOwner={true}
       />
     </div>
   );

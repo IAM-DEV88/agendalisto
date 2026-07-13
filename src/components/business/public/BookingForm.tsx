@@ -132,6 +132,8 @@ const BookingForm: React.FC<BookingFormProps> = ({
 
     return slots.filter(slot => {
       const slotTime = new Date(`${formData.date}T${slot}`).getTime();
+      const now = Date.now();
+      if (slotTime <= now) return false;
       const slotEnd = slotTime + service.duration * 60000;
       const slotEndWithBuffer = slotEnd + buffer * 60000;
       return !appointments.some(appt => {
@@ -468,21 +470,8 @@ const BookingForm: React.FC<BookingFormProps> = ({
 
       <div className="flex items-center justify-between mb-6 pb-5 border-b border-slate-100 dark:border-slate-800">
         <div>
-          <h2 className="text-xl font-black text-slate-900 dark:text-white">Reservar cita</h2>
+          <h2 className="text-xl font-black text-slate-900 dark:text-white mb-0">Reservar cita</h2>
           <p className="text-sm text-slate-500 dark:text-slate-400 mt-0.5">{businessName}</p>
-        </div>
-      </div>
-
-      <div className="mb-6 p-4 bg-slate-50 dark:bg-slate-800/50 rounded-2xl border border-slate-100 dark:border-slate-700/50">
-        <div className="flex items-center justify-between mb-1">
-          <span className="font-bold text-slate-900 dark:text-white">{service?.name}</span>
-          {showPrices && service?.price ? (
-            <span className="font-black text-primary-600 dark:text-primary-400">${service.price.toLocaleString()}</span>
-          ) : null}
-        </div>
-        <div className="flex items-center gap-1.5 text-xs font-medium text-slate-500">
-          <Clock className="w-3.5 h-3.5" />
-          {service?.duration} min
         </div>
       </div>
 
@@ -602,8 +591,8 @@ const BookingForm: React.FC<BookingFormProps> = ({
             <input type="checkbox" checked={confirmationChecked} onChange={(e) => setConfirmationChecked(e.target.checked)}
               className="w-5 h-5 mt-0.5 rounded-md border-amber-300 text-primary-600 focus:ring-primary-500" />
             <div>
-              <p className="text-sm font-bold text-amber-800 dark:text-amber-400">Acepto las condiciones de cancelacion</p>
-              <p className="text-xs text-amber-600 dark:text-amber-500 mt-0.5">Debo cancelar con al menos {minCancellationHours}h de antelacion.</p>
+              <p className="text-sm font-bold text-amber-800 dark:text-amber-400 mb-0">Acepto las condiciones de cancelacion</p>
+              <p className="text-xs text-amber-600 dark:text-amber-500 mt-0.5 mb-0">Debo cancelar con al menos {minCancellationHours}h de antelacion.</p>
             </div>
           </label>
         )}

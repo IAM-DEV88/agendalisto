@@ -74,6 +74,9 @@ export default function ServiceFormPage() {
     requires_payment: false,
     payment_percentage: 100,
     min_cancellation_hours: 48,
+    cancellation_policy_text: '',
+    min_reschedule_hours: 48,
+    reschedule_policy_text: '',
   });
 
   const [activeImageIndex, setActiveImageIndex] = useState(0);
@@ -117,6 +120,9 @@ export default function ServiceFormPage() {
             requires_payment: data.requires_payment || false,
             payment_percentage: data.payment_percentage ?? 100,
             min_cancellation_hours: data.min_cancellation_hours ?? 48,
+            cancellation_policy_text: data.cancellation_policy_text || '',
+            min_reschedule_hours: data.min_reschedule_hours ?? 48,
+            reschedule_policy_text: data.reschedule_policy_text || '',
           });
         } else {
           const userBizs = businesses || [];
@@ -222,6 +228,9 @@ export default function ServiceFormPage() {
           requires_payment: formData.requires_payment,
           payment_percentage: formData.payment_percentage,
           min_cancellation_hours: formData.min_cancellation_hours,
+          cancellation_policy_text: formData.cancellation_policy_text || '',
+          min_reschedule_hours: formData.min_reschedule_hours,
+          reschedule_policy_text: formData.reschedule_policy_text || '',
         };
         response = await updateBusinessService(serviceId, updates);
         if (response.success) {
@@ -250,6 +259,9 @@ export default function ServiceFormPage() {
           requires_payment: formData.requires_payment,
           payment_percentage: formData.payment_percentage,
           min_cancellation_hours: formData.min_cancellation_hours,
+          cancellation_policy_text: formData.cancellation_policy_text || '',
+          min_reschedule_hours: formData.min_reschedule_hours,
+          reschedule_policy_text: formData.reschedule_policy_text || '',
         };
         response = await createBusinessService(serviceData);
         if (response.success) {
@@ -498,7 +510,7 @@ export default function ServiceFormPage() {
 
                     <div className="space-y-1">
                       <label htmlFor="provider" className="text-sm font-bold text-slate-700 dark:text-slate-300">
-                        Proveedor <span className="text-slate-400 font-normal">(opcional)</span>
+                        Encargado <span className="text-slate-400 font-normal">(opcional)</span>
                       </label>
                       <div className="relative">
                         <User className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400 pointer-events-none" />
@@ -554,88 +566,127 @@ export default function ServiceFormPage() {
                 </div>
 
                 {/* Section: Configuración */}
-                <div className="border-t border-slate-100 dark:border-slate-800 pt-6">
-                  <h3 className="text-xs font-black text-slate-400 uppercase tracking-widest mb-4">Configuración</h3>
-                  <div className="space-y-3">
-                    <label className="flex items-center gap-3 p-4 bg-slate-50 dark:bg-slate-800/50 rounded-xl cursor-pointer">
+                <div className="border-t border-slate-100 dark:border-slate-800 pt-6 space-y-5">
+                  <div className="flex items-center justify-between">
+                    <h3 className="text-xs font-black text-slate-400 uppercase tracking-widest">Configuración</h3>
+                  </div>
+
+                  {/* Toggles */}
+                  <div className="grid grid-cols-1 sm:grid-cols-3 gap-2">
+                    <label className="flex items-center gap-3 p-3 rounded-xl border border-slate-200 dark:border-slate-700 cursor-pointer hover:bg-slate-50 dark:hover:bg-slate-800/50 transition-colors">
                       <input
                         type="checkbox"
                         checked={formData.is_active}
                         onChange={e => setFormData({ ...formData, is_active: e.target.checked })}
-                        className="w-5 h-5 rounded-md border-slate-300 text-primary-600 focus:ring-primary-500"
+                        className="w-4 h-4 rounded border-slate-300 text-primary-600 focus:ring-primary-500"
                       />
-                      <div>
-                        <p className="text-sm font-bold text-slate-700 dark:text-slate-300">Servicio activo</p>
-                        <p className="text-xs text-slate-400">Visible para reservas del público</p>
+                      <div className="min-w-0">
+                        <p className="text-xs font-bold text-slate-700 dark:text-slate-300 truncate mb-0">Activo</p>
+                        <p className="text-[10px] text-slate-400 truncate mb-0">Visible al público</p>
                       </div>
                     </label>
-
-                    <label className="flex items-center gap-3 p-4 bg-rose-50 dark:bg-rose-900/10 rounded-xl border border-rose-200 dark:border-rose-800/50 cursor-pointer">
+                    <label className="flex items-center gap-3 p-3 rounded-xl border border-rose-200 dark:border-rose-800/50 cursor-pointer hover:bg-rose-50 dark:hover:bg-rose-900/10 transition-colors">
                       <input
                         type="checkbox"
                         checked={formData.can_be_gifted}
                         onChange={e => setFormData({ ...formData, can_be_gifted: e.target.checked })}
-                        className="w-5 h-5 rounded-md border-rose-300 text-rose-600 focus:ring-rose-500"
+                        className="w-4 h-4 rounded border-rose-300 text-rose-600 focus:ring-rose-500"
                       />
-                      <div>
-                        <p className="text-sm font-bold text-rose-700 dark:text-rose-300">Permitir regalar este servicio</p>
-                        <p className="text-xs text-rose-500">Los clientes podrán comprar y regalar este servicio a otra persona</p>
+                      <div className="min-w-0">
+                        <p className="text-xs font-bold text-rose-700 dark:text-rose-300 truncate mb-0">Regalable</p>
+                        <p className="text-[10px] text-rose-500 truncate mb-0">Compra para otro</p>
                       </div>
                     </label>
-
-                    <label className="flex items-center gap-3 p-4 bg-amber-50 dark:bg-amber-900/10 rounded-xl border border-amber-200 dark:border-amber-800/50 cursor-pointer">
+                    <label className="flex items-center gap-3 p-3 rounded-xl border border-amber-200 dark:border-amber-800/50 cursor-pointer hover:bg-amber-50 dark:hover:bg-amber-900/10 transition-colors">
                       <input
                         type="checkbox"
                         checked={formData.requires_payment}
                         onChange={e => setFormData({ ...formData, requires_payment: e.target.checked })}
-                        className="w-5 h-5 rounded-md border-amber-300 text-amber-600 focus:ring-amber-500"
+                        className="w-4 h-4 rounded border-amber-300 text-amber-600 focus:ring-amber-500"
                       />
-                      <div>
-                        <p className="text-sm font-bold text-amber-700 dark:text-amber-300">Requiere pago online</p>
-                        <p className="text-xs text-amber-500">El cliente debe pagar antes de confirmar la reserva</p>
+                      <div className="min-w-0">
+                        <p className="text-xs font-bold text-amber-700 dark:text-amber-300 truncate mb-0">Pago online</p>
+                        <p className="text-[10px] text-amber-500 truncate mb-0">Cobrar al reservar</p>
                       </div>
                     </label>
+                  </div>
 
-                    {formData.requires_payment && (
-                      <div className="pl-12 space-y-2">
-                        <label htmlFor="payment_percentage" className="text-sm font-bold text-slate-700 dark:text-slate-300">
-                          Porcentaje a cobrar
-                        </label>
-                        <div className="flex items-center gap-3">
-                          <input
-                            type="range"
-                            id="payment_percentage"
-                            value={formData.payment_percentage}
-                            onChange={e => setFormData({ ...formData, payment_percentage: parseInt(e.target.value) })}
-                            min="0" max="100"
-                            className="flex-1 accent-amber-600"
-                          />
-                          <span className="text-lg font-black text-amber-600 w-12 text-right">{formData.payment_percentage}%</span>
-                        </div>
-                        <p className="text-xs text-slate-400">
-                          Se cobrará <strong>${paymentCalc.toLocaleString()} COP</strong> ({formData.payment_percentage}% de ${(parseFloat(formData.price) || 0).toLocaleString()})
-                        </p>
-                      </div>
-                    )}
+                  {/* Payment percentage */}
+                  {formData.requires_payment && (
+                    <div className="flex items-center gap-4 pl-3">
+                      <span className="text-xs font-bold text-slate-500 dark:text-slate-400 whitespace-nowrap">% a cobrar</span>
+                      <input
+                        type="range"
+                        id="payment_percentage"
+                        value={formData.payment_percentage}
+                        onChange={e => setFormData({ ...formData, payment_percentage: parseInt(e.target.value) })}
+                        min="0" max="100"
+                        className="flex-1 max-w-xs accent-amber-600"
+                      />
+                      <span className="text-sm font-black text-amber-600 w-12 text-right tabular-nums">{formData.payment_percentage}%</span>
+                      <span className="text-[10px] text-slate-400 hidden sm:block">
+                        ${paymentCalc.toLocaleString()} COP
+                      </span>
+                    </div>
+                  )}
 
-                    <div className="space-y-2 pt-2">
-                      <label htmlFor="min_cancellation_hours" className="text-sm font-bold text-slate-700 dark:text-slate-300">
-                        Tiempo mínimo para cancelaciones (horas)
+                  {/* Tiempos mínimos */}
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                    <div className="space-y-1.5">
+                      <label htmlFor="min_cancellation_hours" className="text-xs font-bold text-slate-500 dark:text-slate-400">
+                        Cancelación (horas mín.)
                       </label>
-                      <div className="relative">
-                        <Clock className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
-                        <input
-                          type="number"
-                          id="min_cancellation_hours"
-                          value={formData.min_cancellation_hours}
-                          onChange={e => setFormData({ ...formData, min_cancellation_hours: parseInt(e.target.value) || 0 })}
-                          min="0" max="72"
-                          className="w-full pl-10 pr-4 py-2.5 rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 focus:ring-2 focus:ring-primary-500/20 focus:border-primary-500 outline-none transition-all text-sm font-bold"
-                        />
-                      </div>
-                      <p className="text-xs text-slate-500 dark:text-slate-400 italic">
-                        Plazo límite para que los clientes puedan cancelar sus citas.
-                      </p>
+                      <input
+                        type="number"
+                        id="min_cancellation_hours"
+                        value={formData.min_cancellation_hours}
+                        onChange={e => setFormData({ ...formData, min_cancellation_hours: parseInt(e.target.value) || 0 })}
+                        min="0" max="72"
+                        className="w-full px-3 py-2 rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 focus:ring-2 focus:ring-primary-500/20 focus:border-primary-500 outline-none text-sm font-bold"
+                      />
+                    </div>
+                    <div className="space-y-1.5">
+                      <label htmlFor="min_reschedule_hours" className="text-xs font-bold text-slate-500 dark:text-slate-400">
+                        Reagendamiento (horas mín.)
+                      </label>
+                      <input
+                        type="number"
+                        id="min_reschedule_hours"
+                        value={formData.min_reschedule_hours}
+                        onChange={e => setFormData({ ...formData, min_reschedule_hours: parseInt(e.target.value) || 0 })}
+                        min="0" max="72"
+                        className="w-full px-3 py-2 rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 focus:ring-2 focus:ring-primary-500/20 focus:border-primary-500 outline-none text-sm font-bold"
+                      />
+                    </div>
+                  </div>
+
+                  {/* Políticas — textareas lado a lado */}
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                    <div className="space-y-1.5">
+                      <label htmlFor="cancellation_policy_text" className="text-xs font-bold text-slate-500 dark:text-slate-400">
+                        Mensaje de cancelación
+                      </label>
+                      <textarea
+                        id="cancellation_policy_text"
+                        value={formData.cancellation_policy_text}
+                        onChange={e => setFormData({ ...formData, cancellation_policy_text: e.target.value })}
+                        placeholder="Ej: Cancelaciones con menos de 24h tienen cargo del 50%."
+                        rows={2}
+                        className="w-full px-3 py-2 rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 focus:ring-2 focus:ring-primary-500/20 focus:border-primary-500 outline-none text-sm resize-none"
+                      />
+                    </div>
+                    <div className="space-y-1.5">
+                      <label htmlFor="reschedule_policy_text" className="text-xs font-bold text-slate-500 dark:text-slate-400">
+                        Mensaje de reagendamiento
+                      </label>
+                      <textarea
+                        id="reschedule_policy_text"
+                        value={formData.reschedule_policy_text}
+                        onChange={e => setFormData({ ...formData, reschedule_policy_text: e.target.value })}
+                        placeholder="Ej: Reagenda con 12h de anticipación sin costo."
+                        rows={2}
+                        className="w-full px-3 py-2 rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 focus:ring-2 focus:ring-primary-500/20 focus:border-primary-500 outline-none text-sm resize-none"
+                      />
                     </div>
                   </div>
                 </div>

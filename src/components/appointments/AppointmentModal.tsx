@@ -259,7 +259,10 @@ const AppointmentModal: React.FC<AppointmentModalProps> = ({
                   {appointment.status === 'pending' && (
                     <div className="flex gap-2">
                       <button
-                        onClick={() => handleStatusChange('cancelled')}
+                        onClick={() => {
+                          if (onCancel) { onCancel(appointment); onClose(); }
+                          else handleStatusChange('cancelled');
+                        }}
                         className="flex-1 inline-flex items-center justify-center gap-1.5 px-4 py-2.5 bg-red-50 hover:bg-red-100 dark:bg-red-500/10 dark:hover:bg-red-500/20 text-red-600 dark:text-red-400 text-sm font-bold rounded-xl transition-all active:scale-[0.97]"
                       >
                         <XCircle className="w-4 h-4" />
@@ -277,14 +280,20 @@ const AppointmentModal: React.FC<AppointmentModalProps> = ({
                   {appointment.status === 'confirmed' && onReschedule && (
                     <div className="flex gap-2">
                       <button
-                        onClick={() => onReschedule(appointment)}
+                        onClick={() => {
+                          if (onCancel) { onCancel(appointment); onClose(); }
+                          else onReschedule(appointment);
+                        }}
                         className="flex-1 inline-flex items-center justify-center gap-1.5 px-4 py-2.5 bg-amber-50 hover:bg-amber-100 dark:bg-amber-500/10 dark:hover:bg-amber-500/20 text-amber-600 dark:text-amber-400 text-sm font-bold rounded-xl transition-all active:scale-[0.97]"
                       >
                         <CalendarClock className="w-4 h-4" />
                         Reagendar
                       </button>
                       <button
-                        onClick={() => handleStatusChange('cancelled')}
+                        onClick={() => {
+                          if (onCancel) { onCancel(appointment); onClose(); }
+                          else handleStatusChange('cancelled');
+                        }}
                         className="flex-1 inline-flex items-center justify-center gap-1.5 px-4 py-2.5 bg-red-50 hover:bg-red-100 dark:bg-red-500/10 dark:hover:bg-red-500/20 text-red-600 dark:text-red-400 text-sm font-bold rounded-xl transition-all active:scale-[0.97]"
                       >
                         <XCircle className="w-4 h-4" />
@@ -302,7 +311,10 @@ const AppointmentModal: React.FC<AppointmentModalProps> = ({
                   {appointment.status === 'confirmed' && !onReschedule && (
                     <div className="flex gap-2">
                       <button
-                        onClick={() => handleStatusChange('cancelled')}
+                        onClick={() => {
+                          if (onCancel) { onCancel(appointment); onClose(); }
+                          else handleStatusChange('cancelled');
+                        }}
                         className="flex-1 inline-flex items-center justify-center gap-1.5 px-4 py-2.5 bg-red-50 hover:bg-red-100 dark:bg-red-500/10 dark:hover:bg-red-500/20 text-red-600 dark:text-red-400 text-sm font-bold rounded-xl transition-all active:scale-[0.97]"
                       >
                         <XCircle className="w-4 h-4" />

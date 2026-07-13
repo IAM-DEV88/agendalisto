@@ -147,7 +147,7 @@ function BookingPage() {
                   </div>
                 )}
                 <div className="min-w-0 flex-1">
-                  <h2 className="font-black text-lg sm:text-xl text-slate-900 dark:text-white leading-tight">{service.name}</h2>
+                  <h2 className="font-black text-lg sm:text-xl text-slate-900 dark:text-white leading-tight mb-0">{service.name}</h2>
                   <div className="flex items-center flex-wrap gap-x-4 gap-y-1 mt-1.5">
                     <div className="flex items-center gap-1 text-sm font-bold text-slate-500 dark:text-slate-400">
                       <Clock className="w-3.5 h-3.5 text-primary-500" />
@@ -156,6 +156,11 @@ function BookingPage() {
                     {(businessData.config?.mostrar_precios ?? true) && service.price > 0 && (
                       <div className="text-base font-black text-primary-600 dark:text-primary-400">
                         ${service.price.toLocaleString()}
+                      </div>
+                    )}
+                    {service.provider && (
+                      <div className="text-sm font-bold text-slate-500 dark:text-slate-400">
+                        Encargado: {service.provider}
                       </div>
                     )}
                   </div>
@@ -220,8 +225,8 @@ function BookingPage() {
                   <>
                     <Clock className="w-5 h-5 text-amber-600 dark:text-amber-400 flex-shrink-0 mt-0.5" />
                     <div>
-                      <p className="text-sm font-bold text-amber-800 dark:text-amber-300">Requiere confirmación</p>
-                      <p className="text-xs text-amber-600 dark:text-amber-400 mt-0.5">
+                      <p className="text-sm font-bold text-amber-800 dark:text-amber-300 mb-0">Requiere confirmación</p>
+                      <p className="text-xs text-amber-600 dark:text-amber-400 mt-0.5 mb-0">
                         El negocio revisará tu solicitud y confirmará la cita manualmente.
                       </p>
                     </div>
@@ -230,12 +235,31 @@ function BookingPage() {
                   <>
                     <CheckCircle className="w-5 h-5 text-emerald-600 dark:text-emerald-400 flex-shrink-0 mt-0.5" />
                     <div>
-                      <p className="text-sm font-bold text-emerald-800 dark:text-emerald-300">Reserva inmediata</p>
-                      <p className="text-xs text-emerald-600 dark:text-emerald-400 mt-0.5">
+                      <p className="text-sm font-bold text-emerald-800 dark:text-emerald-300 mb-0">Reserva inmediata</p>
+                      <p className="text-xs text-emerald-600 dark:text-emerald-400 mt-0.5 mb-0">
                         Tu cita será agendada automáticamente sin necesidad de confirmación.
                       </p>
                     </div>
                   </>
+                )}
+              </div>
+            )}
+
+            {/* Rescheduling & cancellation policy */}
+            {!isOwner && (service.cancellation_policy_text || service.reschedule_policy_text) && (
+              <div className="bg-slate-50 dark:bg-slate-800/50 rounded-2xl p-4 border border-slate-200 dark:border-slate-700 space-y-3">
+                <p className="text-xs font-black text-slate-400 uppercase tracking-widest">Políticas</p>
+                {service.cancellation_policy_text && (
+                  <div>
+                    <p className="text-[10px] font-bold text-slate-400 uppercase tracking-wider mb-1">Cancelación</p>
+                    <p className="text-sm text-slate-600 dark:text-slate-300 leading-relaxed mb-0">{service.cancellation_policy_text}</p>
+                  </div>
+                )}
+                {service.reschedule_policy_text && (
+                  <div>
+                    <p className="text-[10px] font-bold text-slate-400 uppercase tracking-wider mb-1">Reagendamiento</p>
+                    <p className="text-sm text-slate-600 dark:text-slate-300 leading-relaxed mb-0">{service.reschedule_policy_text}</p>
+                  </div>
                 )}
               </div>
             )}

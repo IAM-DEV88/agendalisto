@@ -53,6 +53,9 @@ export interface Service {
   requires_payment?: boolean;
   payment_percentage?: number;
   min_cancellation_hours?: number;
+  cancellation_policy_text?: string;
+  min_reschedule_hours?: number;
+  reschedule_policy_text?: string;
 }
 
 export type BusinessHours = {
@@ -232,7 +235,11 @@ export async function getUserAppointments(userId: string) {
         services:agendaya_services (
           name,
           duration,
-          price
+          price,
+          min_cancellation_hours,
+          min_reschedule_hours,
+          cancellation_policy_text,
+          reschedule_policy_text
         ),
         review:agendaya_reviews!appointment_id (
           id,
@@ -275,7 +282,7 @@ export async function getBusinessAppointments(businessId: string) {
         ? supabase.from('agendaya_profiles').select('id, full_name, phone').in('id', userIds)
         : { data: [] },
       serviceIds.length > 0
-        ? supabase.from('agendaya_services').select('id, name, duration, price').in('id', serviceIds)
+        ? supabase.from('agendaya_services').select('id, name, duration, price, min_cancellation_hours, min_reschedule_hours, cancellation_policy_text, reschedule_policy_text').in('id', serviceIds)
         : { data: [] },
     ]);
 

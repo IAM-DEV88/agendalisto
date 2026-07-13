@@ -190,7 +190,7 @@ const ServicesSection: React.FC<ServicesSectionProps> = ({
                       <div className="flex items-center justify-between text-sm">
                         <div className="flex items-center gap-2 text-slate-500 dark:text-slate-400">
                           <User className="w-4 h-4" />
-                          <span>Proveedor</span>
+                          <span>Encargado</span>
                         </div>
                         <span className="font-bold text-slate-900 dark:text-white truncate max-w-[120px]">{service.provider}</span>
                       </div>

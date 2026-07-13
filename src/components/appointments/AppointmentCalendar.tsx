@@ -12,6 +12,7 @@ import {
   subMonths,
 } from 'date-fns';
 import { es } from 'date-fns/locale';
+import toast from 'react-hot-toast';
 import { Appointment, AppointmentStatus } from '../../types/appointment';
 import { getStatusText } from '../../utils/appointmentUtils';
 import AppointmentModal from './AppointmentModal';
@@ -29,6 +30,7 @@ interface AppointmentCalendarProps {
   onStatusChange?: (id: string, status: AppointmentStatus) => void;
   onReschedule?: (id: string, startTime: string, endTime: string) => Promise<{ success: boolean; error?: string }>;
   onCancel?: (appointment: Appointment) => void;
+  isOwner?: boolean;
 }
 
 const statusDot: Record<string, string> = {
@@ -57,6 +59,7 @@ const AppointmentCalendar: React.FC<AppointmentCalendarProps> = ({
   onStatusChange,
   onReschedule,
   onCancel,
+  isOwner,
 }) => {
   const [currentMonth, setCurrentMonth] = useState(new Date());
   const [selectedDate, setSelectedDate] = useState<Date | null>(null);
@@ -133,6 +136,25 @@ const AppointmentCalendar: React.FC<AppointmentCalendarProps> = ({
     const originalStart = new Date(drag.originalStart);
     if (isSameDay(originalStart, targetDay)) return;
 
+    const todayStart = new Date();
+    todayStart.setHours(0, 0, 0, 0);
+    if (targetDay < todayStart) {
+      toast.error('No se puede reagendar a una fecha pasada');
+      return;
+    }
+
+    if (!isOwner) {
+      const appointment = appointments.find(a => a.id === drag.appointmentId);
+      const minRescheduleHours = appointment?.services?.min_reschedule_hours ?? 48;
+      if (minRescheduleHours > 0) {
+        const lockoutTime = new Date(originalStart.getTime() - minRescheduleHours * 60 * 60 * 1000);
+        if (new Date() > lockoutTime) {
+          toast.error(`Contacta al negocio — solo pueden reagendar con ${minRescheduleHours}h de anticipación`);
+          return;
+        }
+      }
+    }
+
     const originalEnd = new Date(drag.originalEnd);
     const duration = originalEnd.getTime() - originalStart.getTime();
 
@@ -140,18 +162,26 @@ const AppointmentCalendar: React.FC<AppointmentCalendarProps> = ({
     newStart.setHours(originalStart.getHours(), originalStart.getMinutes(), 0, 0);
     const newEnd = new Date(newStart.getTime() + duration);
 
+    if (newStart <= new Date()) {
+      toast.error('La nueva fecha y hora no puede estar en el pasado');
+      return;
+    }
+
     setRescheduling(true);
+    toast.loading('Reprogramando cita...', { id: 'reschedule' });
     try {
       const result = await onReschedule(drag.appointmentId, newStart.toISOString(), newEnd.toISOString());
-      if (!result.success) {
-        console.error('[AppointmentCalendar] Reschedule error:', result.error);
+      if (result.success) {
+        toast.success('Cita reprogramada correctamente', { id: 'reschedule' });
+      } else {
+        toast.error(result.error || 'Error al reprogramar', { id: 'reschedule' });
       }
-    } catch (err) {
-      console.error('[AppointmentCalendar] Reschedule error:', err);
+    } catch {
+      toast.error('Error al reprogramar la cita', { id: 'reschedule' });
     } finally {
       setRescheduling(false);
     }
-  }, [onReschedule, findCalendarDayStr, finishDrag]);
+  }, [onReschedule, findCalendarDayStr, finishDrag, appointments, isOwner]);
 
   const handleMouseMove = useCallback((e: MouseEvent) => {
     const drag = dragRef.current;

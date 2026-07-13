@@ -477,6 +477,7 @@ const ProfileDashboard = ({ user }: ProfileDashboardProps) => {
                       appointments={appointments}
                       onReschedule={handleDirectReschedule}
                       onCancel={(appt) => setSelectedAppointmentForCancel(appt)}
+                      isOwner={false}
                     />
                   )}
 
