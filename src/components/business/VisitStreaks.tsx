@@ -14,19 +14,27 @@ export default function VisitStreaks({ userId, businessId }: { userId: string; b
 
   useEffect(() => {
     const load = async () => {
-      const { data: loyalty } = await supabase
-        .from('agendaya_loyalty')
-        .select('visit_count, loyalty_level')
-        .eq('user_id', userId)
-        .eq('business_id', businessId)
-        .single();
+      const now = new Date();
+      const firstOfMonth = new Date(now.getFullYear(), now.getMonth(), 1).toISOString().split('T')[0];
 
-      if (loyalty) {
+      const { data: rows } = await supabase
+        .from('agendaya_loyalty')
+        .select('visit_date')
+        .eq('user_id', userId)
+        .eq('business_id', businessId);
+
+      if (rows) {
+        const total = rows.length;
+        const thisMonth = rows.filter(r => r.visit_date >= firstOfMonth).length;
+        let level = 'regular';
+        if (total >= 10) level = 'vip';
+        else if (total >= 4) level = 'frecuente';
+
         setData({
-          currentStreak: Math.min(loyalty.visit_count || 0, 7),
-          visitsThisMonth: loyalty.visit_count || 0,
-          totalVisits: loyalty.visit_count || 0,
-          level: loyalty.loyalty_level || 'regular',
+          currentStreak: Math.min(total, 7),
+          visitsThisMonth: thisMonth,
+          totalVisits: total,
+          level,
         });
       }
     };

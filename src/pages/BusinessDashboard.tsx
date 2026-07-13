@@ -501,6 +501,7 @@ export const BusinessDashboard: React.FC = () => {
                       onReschedule={handleReschedule}
                       onCancel={(appt) => setAppointmentToReschedule(appt)}
                       isOwner
+                      businessHours={businessHours}
                     />
                   )}
 

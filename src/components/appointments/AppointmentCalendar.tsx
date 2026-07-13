@@ -24,6 +24,7 @@ import {
   User,
   GripVertical,
 } from 'lucide-react';
+import { BusinessHours } from '../../lib/api';
 
 interface AppointmentCalendarProps {
   appointments: Appointment[];
@@ -31,6 +32,7 @@ interface AppointmentCalendarProps {
   onReschedule?: (id: string, startTime: string, endTime: string) => Promise<{ success: boolean; error?: string }>;
   onCancel?: (appointment: Appointment) => void;
   isOwner?: boolean;
+  businessHours?: BusinessHours[];
 }
 
 const statusDot: Record<string, string> = {
@@ -60,6 +62,7 @@ const AppointmentCalendar: React.FC<AppointmentCalendarProps> = ({
   onReschedule,
   onCancel,
   isOwner,
+  businessHours,
 }) => {
   const [currentMonth, setCurrentMonth] = useState(new Date());
   const [selectedDate, setSelectedDate] = useState<Date | null>(null);
@@ -286,6 +289,11 @@ const AppointmentCalendar: React.FC<AppointmentCalendarProps> = ({
                 const counts = statusCounts(day);
                 const totalCount = Object.values(counts).reduce((a, b) => a + b, 0);
                 const isWeekend = day.getDay() === 0 || day.getDay() === 6;
+                const bizDayOfWeek = (day.getDay() + 6) % 7;
+                const dayHours = businessHours?.find(h => h.day_of_week === bizDayOfWeek);
+                const isClosedDay = businessHours?.length
+                  ? dayHours?.is_closed !== false
+                  : isWeekend;
 
                 return (
                   <div
@@ -312,7 +320,7 @@ const AppointmentCalendar: React.FC<AppointmentCalendarProps> = ({
                           isToday
                             ? 'bg-primary-600 text-white w-6 h-6 flex items-center justify-center rounded-full'
                             : isCurrentMonth
-                            ? isWeekend
+                            ? isClosedDay
                               ? 'text-red-400 dark:text-red-500'
                               : 'text-slate-700 dark:text-slate-300'
                             : 'text-slate-300 dark:text-slate-600'

@@ -337,7 +337,7 @@ export default function CancelRescheduleModal({ isOpen, onClose, appointment, is
                             type="button"
                             disabled={isDisabled || !isCurrentMonth}
                             onClick={() => { setNewDate(dayStr); setNewTime(''); }}
-                            className={`py-1.5 text-center text-xs font-bold rounded-none transition-colors ${
+                            className={`relative flex flex-col items-center justify-center py-1 text-xs font-bold rounded-none transition-colors ${
                               isSelected
                                 ? 'bg-primary-600 text-white'
                                 : isDisabled || !isCurrentMonth
@@ -347,7 +347,16 @@ export default function CancelRescheduleModal({ isOpen, onClose, appointment, is
                                 : 'text-slate-700 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800'
                             }`}
                           >
-                            {format(day, 'd')}
+                            <span>{format(day, 'd')}</span>
+                            {!isDisabled && isCurrentMonth && (
+                              <span className={`w-1 h-1 rounded-full mt-0.5 ${
+                                isSelected
+                                  ? 'bg-white'
+                                  : isClosed
+                                    ? 'bg-red-400'
+                                    : 'bg-emerald-400'
+                              }`} />
+                            )}
                           </button>
                         );
                       });
