@@ -11,10 +11,18 @@ import PaymentMethodSelector from '../../PaymentMethodSelector';
 import { trackEvent } from '../../../lib/analytics';
 import { downloadIcs } from '../../../utils/icsUtils';
 
+interface BusinessContact {
+  phone?: string;
+  email?: string;
+  whatsapp?: string;
+  address?: string;
+}
+
 interface BookingFormProps {
   businessId: string;
   businessName: string;
   businessAddress?: string;
+  businessContact?: BusinessContact;
   serviceId: string;
   userId?: string;
   service: Service | null;
@@ -30,6 +38,7 @@ interface BookingFormProps {
   slotIntervalMinutes?: number;
   bufferMinutes?: number;
   maxAdvanceBookingDays?: number;
+  onlineBookable?: boolean;
   images?: string[];
   activeImageIndex?: number;
   onImageChange?: (index: number) => void;
@@ -42,6 +51,7 @@ const BookingForm: React.FC<BookingFormProps> = ({
   businessId,
   businessName,
   businessAddress = '',
+  businessContact,
   serviceId,
   userId,
   service,
@@ -57,6 +67,7 @@ const BookingForm: React.FC<BookingFormProps> = ({
   slotIntervalMinutes = 30,
   bufferMinutes = 0,
   maxAdvanceBookingDays = 90,
+  onlineBookable = true,
   images,
   activeImageIndex: controlledImageIndex,
   onImageChange,
@@ -83,6 +94,112 @@ const BookingForm: React.FC<BookingFormProps> = ({
   const [validatingGift, setValidatingGift] = useState(false);
   const [showPayment, setShowPayment] = useState(false);
   const [showSummary, setShowSummary] = useState(false);
+  const [showPurchase, setShowPurchase] = useState(false);
+  const [purchasing, setPurchasing] = useState(false);
+
+  const handleDirectPurchasePayPal = async (): Promise<string> => {
+    const res = await fetch('/.netlify/functions/create-service-payment', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        provider: 'paypal',
+        amount: paymentAmount,
+        currency: 'COP',
+        serviceName: service?.name || '',
+        businessName,
+        userId: userId || '',
+      }),
+    });
+    const data = await res.json();
+    if (!res.ok || !data.orderId) throw new Error(data.error || 'Error al crear pago');
+    return data.orderId;
+  };
+
+  const handleDirectPurchaseApprove = async (orderId: string) => {
+    setPurchasing(true);
+    try {
+      const placeholderDate = new Date().toISOString().split('T')[0];
+      const placeholderTime = '12:00';
+      const startTime = new Date(`${placeholderDate}T${placeholderTime}`);
+      const endTime = new Date(startTime.getTime() + (service?.duration || 60) * 60000);
+
+      const res = await fetch('/.netlify/functions/capture-service-payment', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          provider: 'paypal',
+          orderId,
+          action: 'create_appointment',
+          actionData: {
+            business_id: businessId,
+            service_id: serviceId,
+            user_id: userId || '',
+            start_time: startTime.toISOString(),
+            end_time: endTime.toISOString(),
+            notes: 'Compra directa — pendiente de coordinar fecha',
+            guest_info: !userId ? localGuestInfo : null,
+            payment_provider: 'paypal',
+            payment_amount: paymentAmount,
+          },
+        }),
+      });
+
+      const result = await res.json();
+      if (!res.ok || !result.success) throw new Error(result.error || 'Error al procesar pago');
+      toast.success('Pago exitoso! El negocio te contactará para coordinar la cita.');
+      setShowPurchase(false);
+    } catch (err: unknown) {
+      toast.error(err instanceof Error ? err.message : 'Error al procesar pago');
+    } finally {
+      setPurchasing(false);
+    }
+  };
+
+  const handleDirectPurchaseWompi = async () => {
+    setPurchasing(true);
+    try {
+      const placeholderDate = new Date().toISOString().split('T')[0];
+      const placeholderTime = '12:00';
+      const startTime = new Date(`${placeholderDate}T${placeholderTime}`);
+      const endTime = new Date(startTime.getTime() + (service?.duration || 60) * 60000);
+
+      const res = await fetch('/.netlify/functions/create-service-payment', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          provider: 'wompi',
+          amount: paymentAmount,
+          currency: 'COP',
+          serviceName: service?.name || '',
+          businessName,
+          userId: userId || '',
+          userEmail: localGuestInfo.email || '',
+          userName: localGuestInfo.name || '',
+          action: 'create_appointment',
+          actionData: {
+            business_id: businessId,
+            service_id: serviceId,
+            user_id: userId || '',
+            start_time: startTime.toISOString(),
+            end_time: endTime.toISOString(),
+            notes: 'Compra directa — pendiente de coordinar fecha',
+            guest_info: !userId ? localGuestInfo : null,
+            amount: paymentAmount,
+            currency: 'COP',
+          },
+        }),
+      });
+
+      const result = await res.json();
+      if (!res.ok || !result.success) throw new Error(result.error || 'Error al procesar pago');
+      toast.success('Pago exitoso! El negocio te contactará para coordinar la cita.');
+      setShowPurchase(false);
+    } catch (err: unknown) {
+      toast.error(err instanceof Error ? err.message : 'Error al procesar pago');
+    } finally {
+      setPurchasing(false);
+    }
+  };
 
   const [businessHours, setBusinessHours] = useState<BusinessHours[]>([]);
   const [appointments, setAppointments] = useState<Appointment[]>([]);
@@ -486,11 +603,11 @@ const BookingForm: React.FC<BookingFormProps> = ({
         </div>
       )}
 
-      {/* ─── Integrated hero: image gallery + service info ─── */}
-      {images && images.length > 0 && (
-        <div className={`mb-6 overflow-hidden ${images.length > 0 ? 'md:grid md:grid-cols-5' : ''}`}>
-          <div className="md:col-span-2 relative flex flex-col rounded-xl bg-slate-100 dark:bg-slate-800">
-            <div className="relative aspect-[4/3] sm:aspect-video md:flex-1 md:min-h-[240px] md:max-h-[360px] group overflow-hidden md:rounded-l-xl">
+      {/* ─── Hero: gallery + info combinados ─── */}
+      <div className={`mb-6 overflow-hidden bg-white dark:bg-slate-900 rounded-xl border border-slate-200 dark:border-slate-700 ${images && images.length > 0 ? 'md:grid md:grid-cols-5' : 'p-5 sm:p-6'}`}>
+        {images && images.length > 0 && (
+          <div className="md:col-span-2 relative flex flex-col bg-slate-100 dark:bg-slate-800">
+            <div className="relative aspect-[4/3] md:flex-1 md:min-h-[240px] md:max-h-[360px] group overflow-hidden md:rounded-l-xl">
               <img src={images[imageIndex]} alt={service?.name || ''}
                 className="w-full h-full object-contain cursor-zoom-in transition-all duration-700 group-hover:scale-110"
                 onClick={() => onFullscreenImage?.(images[imageIndex])} />
@@ -520,50 +637,50 @@ const BookingForm: React.FC<BookingFormProps> = ({
               </div>
             )}
           </div>
-          <div className="md:col-span-3 p-5 md:p-6 flex flex-col justify-center">
-            <span className="inline-flex items-center gap-1.5 text-xs font-bold text-primary-600 dark:text-primary-400 uppercase tracking-[0.15em] mb-1">
-              <Store className="w-3 h-3" />
-              {businessName}
-            </span>
-            <div className="flex items-start justify-between gap-3">
-              <h1 className="text-xl md:text-2xl font-black text-slate-900 dark:text-white leading-tight mb-0 flex-1">
-                {service?.name}
-              </h1>
-              {showPrices && (service?.price ?? 0) > 0 && (
-                <span className="text-xl md:text-2xl font-black text-primary-600 dark:text-primary-400 flex-shrink-0 whitespace-nowrap">
-                  ${service!.price.toLocaleString()}
-                </span>
-              )}
-            </div>
-            <div className="flex items-center flex-wrap gap-x-4 gap-y-1 mt-2">
-              <span className="flex items-center gap-1.5 text-sm font-bold text-slate-500 dark:text-slate-400">
-                <Clock className="w-4 h-4 text-primary-500" />
-                {service?.duration} min
+        )}
+        <div className={`${images && images.length > 0 ? 'md:col-span-3 p-5 md:p-6' : ''} flex flex-col justify-center`}>
+          <span className="inline-flex items-center gap-1.5 text-xs font-bold text-primary-600 dark:text-primary-400 uppercase tracking-[0.15em] mb-1">
+            <Store className="w-3 h-3" />
+            {businessName}
+          </span>
+          <div className="flex items-start justify-between gap-3 mt-1">
+            <h1 className="text-xl md:text-2xl font-black text-slate-900 dark:text-white leading-tight mb-0 flex-1">
+              {service?.name}
+            </h1>
+            {showPrices && (service?.price ?? 0) > 0 && (
+              <span className="text-xl md:text-2xl font-black text-primary-600 dark:text-primary-400 flex-shrink-0 whitespace-nowrap">
+                ${service!.price.toLocaleString()}
               </span>
-              {service?.provider && (
-                <span className="flex items-center gap-1.5 text-sm font-bold text-slate-500 dark:text-slate-400">
-                  <User className="w-4 h-4 text-primary-400" />
-                  {service.provider}
-                </span>
-              )}
-            </div>
-            {service?.description && (
-              <p className="text-sm text-slate-500 dark:text-slate-400 leading-relaxed mt-3 max-w-prose">{service.description}</p>
-            )}
-            {!isOwnerPreview && (
-              <div className={`inline-flex items-center gap-2 px-3 py-1.5 rounded-lg text-xs font-bold mt-3 w-fit ${
-                requireConfirmation
-                  ? 'bg-amber-50 dark:bg-amber-500/10 text-amber-700 dark:text-amber-400 border border-amber-200 dark:border-amber-800/50'
-                  : 'bg-emerald-50 dark:bg-emerald-500/10 text-emerald-700 dark:text-emerald-400 border border-emerald-200 dark:border-emerald-800/50'
-              }`}>
-                {requireConfirmation
-                  ? <><Clock className="w-3.5 h-3.5" /> Requiere confirmación</>
-                  : <><CheckCircle className="w-3.5 h-3.5" /> Reserva inmediata</>}
-              </div>
             )}
           </div>
+          <div className="flex items-center flex-wrap gap-x-4 gap-y-1 mt-2">
+            <span className="flex items-center gap-1.5 text-sm font-bold text-slate-500 dark:text-slate-400">
+              <Clock className="w-4 h-4 text-primary-500" />
+              {service?.duration} min
+            </span>
+            {service?.provider && (
+              <span className="flex items-center gap-1.5 text-sm font-bold text-slate-500 dark:text-slate-400">
+                <User className="w-4 h-4 text-primary-400" />
+                {service.provider}
+              </span>
+            )}
+          </div>
+          {service?.description && (
+            <p className="text-sm text-slate-500 dark:text-slate-400 leading-relaxed mt-3 max-w-prose">{service.description}</p>
+          )}
+          {!isOwnerPreview && onlineBookable && (
+            <div className={`inline-flex items-center gap-2 px-3 py-1.5 rounded-lg text-xs font-bold mt-3 w-fit ${
+              requireConfirmation
+                ? 'bg-amber-50 dark:bg-amber-500/10 text-amber-700 dark:text-amber-400 border border-amber-200 dark:border-amber-800/50'
+                : 'bg-emerald-50 dark:bg-emerald-500/10 text-emerald-700 dark:text-emerald-400 border border-emerald-200 dark:border-emerald-800/50'
+            }`}>
+              {requireConfirmation
+                ? <><Clock className="w-3.5 h-3.5" /> Requiere confirmación</>
+                : <><CheckCircle className="w-3.5 h-3.5" /> Reserva inmediata</>}
+            </div>
+          )}
         </div>
-      )}
+      </div>
 
       {/* Guest info inline */}
       {!userId && (
@@ -597,24 +714,36 @@ const BookingForm: React.FC<BookingFormProps> = ({
               </button>
             </div>
           ) : (
-            <div className="flex gap-2">
-              <div className="relative flex-1">
-                <Gift className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-rose-400 pointer-events-none" />
-                <input type="text" value={giftCodeInput} onChange={e => setGiftCodeInput(e.target.value.toUpperCase())} placeholder="Ej: GIFT-ABC123"
-                  className="w-full pl-10 pr-3 py-2 text-sm rounded-xl border border-rose-200 dark:border-rose-800 bg-white dark:bg-slate-800 focus:ring-2 focus:ring-rose-500/20 focus:border-rose-500 outline-none" />
+            <div className="space-y-2">
+              <div className="flex gap-2">
+                <div className="relative flex-1">
+                  <Gift className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-rose-400 pointer-events-none" />
+                  <input type="text" value={giftCodeInput} onChange={e => setGiftCodeInput(e.target.value.toUpperCase())} placeholder="Ej: GIFT-ABC123"
+                    className="w-full pl-10 pr-3 py-2 text-sm rounded-xl border border-rose-200 dark:border-rose-800 bg-white dark:bg-slate-800 focus:ring-2 focus:ring-rose-500/20 focus:border-rose-500 outline-none" />
+                </div>
+                <button onClick={async () => {
+                  if (!giftCodeInput.trim()) return;
+                  setValidatingGift(true);
+                  setGiftError('');
+                  const res = await validateGiftCode(giftCodeInput.trim(), serviceId, businessId);
+                  setValidatingGift(false);
+                  if (res.success && res.gift) { setGiftApplied(res.gift); setGiftCodeInput(''); toast.success('Codigo de regalo aplicado!'); }
+                  else { setGiftError(res.error || 'Codigo invalido'); }
+                }} disabled={validatingGift || !giftCodeInput.trim()}
+                  className="px-4 py-2 bg-rose-600 hover:bg-rose-700 text-white text-sm font-bold rounded-xl transition-all disabled:opacity-50">
+                  {validatingGift ? '...' : 'Canjear'}
+                </button>
               </div>
-              <button onClick={async () => {
-                if (!giftCodeInput.trim()) return;
-                setValidatingGift(true);
-                setGiftError('');
-                const res = await validateGiftCode(giftCodeInput.trim(), serviceId, businessId);
-                setValidatingGift(false);
-                if (res.success && res.gift) { setGiftApplied(res.gift); setGiftCodeInput(''); toast.success('Codigo de regalo aplicado!'); }
-                else { setGiftError(res.error || 'Codigo invalido'); }
-              }} disabled={validatingGift || !giftCodeInput.trim()}
-                className="px-4 py-2 bg-rose-600 hover:bg-rose-700 text-white text-sm font-bold rounded-xl transition-all disabled:opacity-50">
-                {validatingGift ? '...' : 'Canjear'}
-              </button>
+              <div className="flex items-center gap-2 text-[11px] text-rose-500">
+                <span className="flex-1 border-t border-rose-200 dark:border-rose-800/50" />
+                <span>o</span>
+                <span className="flex-1 border-t border-rose-200 dark:border-rose-800/50" />
+              </div>
+              <a href={`/${window.location.pathname.split('/')[1]}/gift/${serviceId}`}
+                className="flex items-center justify-center gap-2 px-4 py-2.5 bg-rose-100 hover:bg-rose-200 dark:bg-rose-900/30 dark:hover:bg-rose-900/50 text-rose-700 dark:text-rose-300 text-sm font-bold rounded-xl transition-all active:scale-[0.98]">
+                <Gift className="w-4 h-4" />
+                Regalar este servicio
+              </a>
             </div>
           )}
           {giftError && <p className="text-xs text-red-500 mt-1.5">{giftError}</p>}
@@ -628,6 +757,81 @@ const BookingForm: React.FC<BookingFormProps> = ({
         </div>
       )}
 
+      {!onlineBookable && !isOwnerPreview ? (
+        <div className="mb-6 p-5 sm:p-6 bg-white dark:bg-slate-900 rounded-2xl border border-slate-200 dark:border-slate-700 space-y-4">
+          <div className="flex items-center gap-3 pb-4 border-b border-slate-100 dark:border-slate-800">
+            <div className="w-10 h-10 rounded-xl bg-primary-50 dark:bg-primary-500/10 flex items-center justify-center">
+              <Store className="w-5 h-5 text-primary-600 dark:text-primary-400" />
+            </div>
+            <div>
+              <p className="text-sm font-black text-slate-900 dark:text-white mb-0">Reserva no disponible online</p>
+              <p className="text-xs text-slate-400 mb-0">Contacta directamente con {businessName}</p>
+            </div>
+          </div>
+          {service?.requires_payment && !showPurchase && (
+            <button onClick={() => setShowPurchase(true)}
+              className="flex items-center justify-center gap-2 w-full px-5 py-3 bg-primary-600 hover:bg-primary-700 text-white font-bold rounded-xl shadow-lg shadow-primary-500/25 transition-all hover:-translate-y-0.5 active:translate-y-0">
+              <Lock className="w-4 h-4" />
+              Comprar ahora — ${(service?.price ?? 0).toLocaleString()}
+            </button>
+          )}
+          {showPurchase && (
+            <div className="space-y-4 p-4 bg-slate-50 dark:bg-slate-800/50 rounded-xl border border-slate-200 dark:border-slate-700">
+              <p className="text-xs font-bold text-slate-600 dark:text-slate-400 flex items-center gap-1.5">
+                <Lock className="w-3.5 h-3.5" />
+                Pago seguro — El negocio te contactará para coordinar la cita
+              </p>
+              <PaymentMethodSelector amount={paymentAmount} currency="COP" serviceName={service?.name || ''} businessName={businessName}
+                userId={userId || ''} onPayPalCreateOrder={handleDirectPurchasePayPal} onPayPalApprove={handleDirectPurchaseApprove}
+                onWompiPay={handleDirectPurchaseWompi} disabled={purchasing} />
+            </div>
+          )}
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+            {businessContact?.whatsapp && (
+              <a href={`https://wa.me/${businessContact.whatsapp.replace(/[^0-9]/g, '')}?${encodeURIComponent(`Hola! Quiero agendar: ${service?.name || ''}`)}`}
+                target="_blank" rel="noopener noreferrer"
+                className="flex items-center gap-3 p-3 rounded-xl border border-emerald-200 dark:border-emerald-800/50 bg-emerald-50 dark:bg-emerald-900/10 hover:bg-emerald-100 dark:hover:bg-emerald-900/20 transition-all group">
+                <span className="text-xl flex-shrink-0">💬</span>
+                <div className="min-w-0">
+                  <p className="text-xs font-bold text-emerald-700 dark:text-emerald-300 group-hover:underline">WhatsApp</p>
+                  <p className="text-[11px] text-emerald-600/80 dark:text-emerald-400/80 truncate">{businessContact.whatsapp}</p>
+                </div>
+              </a>
+            )}
+            {businessContact?.phone && (
+              <a href={`tel:${businessContact.phone}`}
+                className="flex items-center gap-3 p-3 rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 hover:bg-slate-50 dark:hover:bg-slate-700/50 transition-all group">
+                <span className="text-xl flex-shrink-0">📞</span>
+                <div className="min-w-0">
+                  <p className="text-xs font-bold text-slate-700 dark:text-slate-300 group-hover:underline">Teléfono</p>
+                  <p className="text-[11px] text-slate-500 truncate">{businessContact.phone}</p>
+                </div>
+              </a>
+            )}
+            {businessContact?.email && (
+              <a href={`mailto:${businessContact.email}`}
+                className="flex items-center gap-3 p-3 rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 hover:bg-slate-50 dark:hover:bg-slate-700/50 transition-all group">
+                <span className="text-xl flex-shrink-0">📧</span>
+                <div className="min-w-0">
+                  <p className="text-xs font-bold text-slate-700 dark:text-slate-300 group-hover:underline">Email</p>
+                  <p className="text-[11px] text-slate-500 truncate">{businessContact.email}</p>
+                </div>
+              </a>
+            )}
+            {businessContact?.address && (
+              <a href={`https://maps.google.com/?q=${encodeURIComponent(businessContact.address)}`}
+                target="_blank" rel="noopener noreferrer"
+                className="flex items-center gap-3 p-3 rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 hover:bg-slate-50 dark:hover:bg-slate-700/50 transition-all group">
+                <span className="text-xl flex-shrink-0">📍</span>
+                <div className="min-w-0">
+                  <p className="text-xs font-bold text-slate-700 dark:text-slate-300 group-hover:underline">Dirección</p>
+                  <p className="text-[11px] text-slate-500 truncate">{businessContact.address}</p>
+                </div>
+              </a>
+            )}
+          </div>
+        </div>
+      ) : (
       <form onSubmit={handleSubmit} className="space-y-6">
         <div className="grid grid-cols-1 md:grid-cols-2 gap-5 md:gap-6">
           <div className="flex flex-col">
@@ -766,6 +970,7 @@ const BookingForm: React.FC<BookingFormProps> = ({
           </>
         )}
       </form>
+      )}
 
       {/* ─── Policies integrated ─── */}
       {!isOwnerPreview && (cancellationPolicy || reschedulePolicy) && (

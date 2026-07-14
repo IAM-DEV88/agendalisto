@@ -56,6 +56,9 @@ export interface Service {
   cancellation_policy_text?: string;
   min_reschedule_hours?: number;
   reschedule_policy_text?: string;
+  mostrar_precios?: boolean;
+  permitir_reservas_online?: boolean;
+  requiere_confirmacion?: boolean;
 }
 
 export type BusinessHours = {

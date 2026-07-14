@@ -42,6 +42,7 @@ function BookingPage() {
   const [error, setError] = useState<string | null>(null);
   const [user, setUser] = useState<any>(null);
   const [guestMode, setGuestMode] = useState(false);
+  const [onlineBookable, setOnlineBookable] = useState(true);
 
   const [activeImageIndex, setActiveImageIndex] = useState(0);
   const [fullscreenImage, setFullscreenImage] = useState<string | null>(null);
@@ -59,11 +60,11 @@ function BookingPage() {
 
         const { success: bS, business, error: bE } = await getBusinessBySlug(slug);
         if (!bS || !business) { setError(bE || 'Negocio no encontrado'); return; }
-        if (business.showcase_only && (!user || user.id !== business.owner_id)) { setError('Este negocio no acepta reservas online'); navigate(`/${slug}`); return; }
         setBusinessData(business);
 
         const { success: sS, data: sD, error: sE } = await getService(serviceId);
         if (!sS || !sD) { setError(sE || 'Servicio no encontrado'); return; }
+        setOnlineBookable(sD.permitir_reservas_online !== false && !business.showcase_only);
         setService(sD);
       } catch { setError('Error al cargar la información'); }
       finally { setLoading(false); }
@@ -105,8 +106,7 @@ function BookingPage() {
             <span className="hidden sm:inline">Volver</span>
           </button>
           <div className="flex items-center gap-2 text-xs font-black text-slate-400 uppercase tracking-widest">
-            <Calendar className="w-3.5 h-3.5" />
-            Agendar cita
+            {onlineBookable || isOwner ? <><Calendar className="w-3.5 h-3.5" /> Agendar cita</> : <><Eye className="w-3.5 h-3.5" /> Información</>}
           </div>
           <div className="flex items-center">
             {businessData.logo_url && (
@@ -141,17 +141,19 @@ function BookingPage() {
             businessId={businessData.id}
             businessName={businessData.name}
             businessAddress={businessData.address}
+            businessContact={{ phone: businessData.phone || undefined, email: businessData.email || undefined, whatsapp: businessData.whatsapp || undefined, address: businessData.address || undefined }}
             serviceId={service.id}
             userId={user?.id}
             service={service}
             onClose={() => navigate(`/${slug}`)}
-            showPrices={businessData.config?.mostrar_precios ?? true}
-            requireConfirmation={businessData.config?.requiere_confirmacion}
+            showPrices={service.mostrar_precios ?? true}
+            requireConfirmation={service.requiere_confirmacion ?? true}
             notifyEmail={businessData.config?.notificaciones_email}
             notifyWhatsapp={businessData.config?.notificaciones_whatsapp}
             minCancellationHours={service.min_cancellation_hours ?? 48}
             minRescheduleHours={service.min_reschedule_hours ?? 48}
             isOwnerPreview={isOwner}
+            onlineBookable={onlineBookable}
             slotIntervalMinutes={businessData.config?.slot_interval_minutes ?? 30}
             bufferMinutes={businessData.config?.buffer_minutes ?? 0}
             maxAdvanceBookingDays={businessData.config?.max_advance_booking_days ?? 90}

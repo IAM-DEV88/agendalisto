@@ -74,6 +74,9 @@ export default function ServiceFormPage() {
     cancellation_policy_text: '',
     min_reschedule_hours: 48,
     reschedule_policy_text: '',
+    mostrar_precios: true,
+    permitir_reservas_online: true,
+    requiere_confirmacion: true,
   });
 
   const [activeImageIndex, setActiveImageIndex] = useState(0);
@@ -120,6 +123,9 @@ export default function ServiceFormPage() {
             cancellation_policy_text: data.cancellation_policy_text || '',
             min_reschedule_hours: data.min_reschedule_hours ?? 48,
             reschedule_policy_text: data.reschedule_policy_text || '',
+            mostrar_precios: data.mostrar_precios ?? true,
+            permitir_reservas_online: data.permitir_reservas_online ?? true,
+            requiere_confirmacion: data.requiere_confirmacion ?? true,
           });
         } else {
           const userBizs = businesses || [];
@@ -228,6 +234,9 @@ export default function ServiceFormPage() {
           cancellation_policy_text: formData.cancellation_policy_text || '',
           min_reschedule_hours: formData.min_reschedule_hours,
           reschedule_policy_text: formData.reschedule_policy_text || '',
+          mostrar_precios: formData.mostrar_precios,
+          permitir_reservas_online: formData.permitir_reservas_online,
+          requiere_confirmacion: formData.requiere_confirmacion,
         };
         response = await updateBusinessService(serviceId, updates);
         if (response.success) {
@@ -259,6 +268,9 @@ export default function ServiceFormPage() {
           cancellation_policy_text: formData.cancellation_policy_text || '',
           min_reschedule_hours: formData.min_reschedule_hours,
           reschedule_policy_text: formData.reschedule_policy_text || '',
+          mostrar_precios: formData.mostrar_precios,
+          permitir_reservas_online: formData.permitir_reservas_online,
+          requiere_confirmacion: formData.requiere_confirmacion,
         };
         response = await createBusinessService(serviceData);
         if (response.success) {
@@ -555,6 +567,33 @@ export default function ServiceFormPage() {
                     <div className="min-w-0">
                       <p className="text-xs font-bold text-slate-700 dark:text-slate-300 truncate mb-0">Activo</p>
                       <p className="text-[10px] text-slate-400 truncate mb-0">Visible al público</p>
+                    </div>
+                  </label>
+                  <label className="flex items-center gap-3 p-3 rounded-xl border border-primary-200 dark:border-primary-800/50 cursor-pointer hover:bg-primary-50 dark:hover:bg-primary-900/10 transition-colors">
+                    <input type="checkbox" checked={formData.mostrar_precios}
+                      onChange={e => setFormData({ ...formData, mostrar_precios: e.target.checked })}
+                      className="w-4 h-4 rounded border-primary-300 text-primary-600 focus:ring-primary-500" />
+                    <div className="min-w-0">
+                      <p className="text-xs font-bold text-primary-700 dark:text-primary-300 truncate mb-0">Mostrar precios</p>
+                      <p className="text-[10px] text-primary-500 truncate mb-0">Precio visible al público</p>
+                    </div>
+                  </label>
+                  <label className="flex items-center gap-3 p-3 rounded-xl border border-emerald-200 dark:border-emerald-800/50 cursor-pointer hover:bg-emerald-50 dark:hover:bg-emerald-900/10 transition-colors">
+                    <input type="checkbox" checked={formData.permitir_reservas_online}
+                      onChange={e => setFormData({ ...formData, permitir_reservas_online: e.target.checked })}
+                      className="w-4 h-4 rounded border-emerald-300 text-emerald-600 focus:ring-emerald-500" />
+                    <div className="min-w-0">
+                      <p className="text-xs font-bold text-emerald-700 dark:text-emerald-300 truncate mb-0">Reserva online</p>
+                      <p className="text-[10px] text-emerald-500 truncate mb-0">Permitir reservas por internet</p>
+                    </div>
+                  </label>
+                  <label className="flex items-center gap-3 p-3 rounded-xl border border-amber-200 dark:border-amber-800/50 cursor-pointer hover:bg-amber-50 dark:hover:bg-amber-900/10 transition-colors">
+                    <input type="checkbox" checked={formData.requiere_confirmacion}
+                      onChange={e => setFormData({ ...formData, requiere_confirmacion: e.target.checked })}
+                      className="w-4 h-4 rounded border-amber-300 text-amber-600 focus:ring-amber-500" />
+                    <div className="min-w-0">
+                      <p className="text-xs font-bold text-amber-700 dark:text-amber-300 truncate mb-0">Requiere confirmación</p>
+                      <p className="text-[10px] text-amber-500 truncate mb-0">Cita queda pendiente hasta confirmación</p>
                     </div>
                   </label>
                   <label className="flex items-center gap-3 p-3 rounded-xl border border-rose-200 dark:border-rose-800/50 cursor-pointer hover:bg-rose-50 dark:hover:bg-rose-900/10 transition-colors">

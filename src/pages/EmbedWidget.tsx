@@ -12,7 +12,7 @@ export default function EmbedWidget() {
     if (!slug) return;
     Promise.all([
       getBusinessBySlug(slug).then(r => { if (r.success && r.business) setBusiness(r.business); }),
-      getBusinessServices(slug).then(r => { if (r.success && r.data) setServices(r.data); }),
+      getBusinessServices(slug).then(r => { if (r.success && r.data) setServices(r.data.filter(s => s.is_active !== false)); }),
     ]).finally(() => setLoading(false));
   }, [slug]);
 

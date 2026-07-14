@@ -33,6 +33,9 @@ export interface Service {
   can_be_gifted?: boolean;
   requires_payment?: boolean;
   payment_percentage?: number;
+  mostrar_precios?: boolean;
+  permitir_reservas_online?: boolean;
+  requiere_confirmacion?: boolean;
   created_at: string;
   updated_at: string;
 }

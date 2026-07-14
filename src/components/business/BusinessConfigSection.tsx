@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useDispatch, useSelector } from 'react-redux';
-import { Settings, Eye, Bell, ListOrdered, Save, Loader2, CheckCircle2, AlertCircle, ChevronDown, Link as LinkIcon, Copy, Check, ExternalLink, Trash2, AlertTriangle, Clock, Timer, CalendarClock } from 'lucide-react';
+import { Eye, Bell, ListOrdered, Save, Loader2, CheckCircle2, AlertCircle, ChevronDown, Link as LinkIcon, Copy, Check, ExternalLink, Trash2, AlertTriangle, Clock, Timer, CalendarClock } from 'lucide-react';
 import { BusinessConfig, deleteBusiness } from '../../lib/api';
 import { useAuth } from '../../hooks/useAuth';
 import { useUIConfig } from '../../hooks/useUIConfig';
@@ -100,35 +100,6 @@ export const BusinessConfigSection: React.FC<BusinessConfigSectionProps> = ({
       ) : (
         <form onSubmit={handleSubmit} className="space-y-6">
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-            {/* Reservas Online */}
-            <div className="card p-6 space-y-6">
-              <div className="flex items-center gap-3 pb-4 border-b border-slate-100 dark:border-slate-800">
-                <div className="p-2 bg-primary-50 text-primary-600 dark:bg-primary-500/10 dark:text-primary-400 rounded-lg">
-                  <Settings className="w-5 h-5" />
-                </div>
-                <h3 className="text-lg font-black text-slate-900 dark:text-white tracking-tight">Reservas Online</h3>
-              </div>
-              
-              <div className="space-y-1">
-                <ConfigToggle 
-                  id="permitir_reservas_online"
-                  label="Permitir reservas online"
-                  description="Los clientes podrán realizar reservas directamente desde la web."
-                  checked={config.permitir_reservas_online}
-                  onChange={(val) => onConfigChange('permitir_reservas_online', val)}
-                />
-
-                <ConfigToggle 
-                  id="requiere_confirmacion"
-                  label="Requerir confirmación manual"
-                  description="Las reservas quedarán pendientes hasta que las confirmes manualmente."
-                  checked={config.requiere_confirmacion}
-                  onChange={(val) => onConfigChange('requiere_confirmacion', val)}
-                />
-              </div>
-
-            </div>
-
             {/* Configuración de Horarios */}
             <div className="card p-6 space-y-6">
               <div className="flex items-center gap-3 pb-4 border-b border-slate-100 dark:border-slate-800">
@@ -223,13 +194,6 @@ export const BusinessConfigSection: React.FC<BusinessConfigSectionProps> = ({
               </div>
 
               <div className="space-y-1">
-                <ConfigToggle 
-                  id="mostrar_precios"
-                  label="Mostrar precios"
-                  description="Los precios de los servicios serán visibles en la página pública."
-                  checked={config.mostrar_precios}
-                  onChange={(val) => onConfigChange('mostrar_precios', val)}
-                />
                 <ConfigToggle 
                   id="mostrar_telefono"
                   label="Mostrar teléfono"

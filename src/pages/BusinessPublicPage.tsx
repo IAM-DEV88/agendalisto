@@ -69,7 +69,11 @@ function BusinessPublicPage() {
         recordBusinessVisit(business.id, user?.id);
 
         const { success: sS, data: sD } = await getBusinessServices(business.id);
-        if (sS && sD) { setServices(sD); if (sD.length > 0) setSelectedService(sD[0].id); }
+        if (sS && sD) {
+          const active = sD.filter(s => s.is_active !== false);
+          setServices(active);
+          if (active.length > 0) setSelectedService(active[0].id);
+        }
 
         try { setBusinessHours(await getBusinessHours(business.id)); } catch (err) {
           console.error('Error loading business hours:', err);
@@ -103,12 +107,9 @@ function BusinessPublicPage() {
   }, [location.search, navigate, slug]);
 
   const handleServiceSelection = (serviceId: string) => {
-    if (businessData?.showcase_only) return;
     setSelectedService(serviceId);
-    if (businessData?.config?.permitir_reservas_online) {
-      if (!user) { navigate(`/login?redirect=/${slug}/book/${serviceId}`); }
-      else { navigate(`/${slug}/book/${serviceId}`); }
-    }
+    if (!user) { navigate(`/login?redirect=/${slug}/book/${serviceId}`); }
+    else { navigate(`/${slug}/book/${serviceId}`); }
   };
 
   const businessSchema = businessData ? {
@@ -263,7 +264,6 @@ function BusinessPublicPage() {
                   services={services}
                   selectedService={selectedService}
                   onSelectService={handleServiceSelection}
-                  showPrices={!!businessData?.config?.mostrar_precios}
                   currentUser={user}
                   businessOwnerId={businessData?.owner_id}
                   showcaseOnly={!!businessData?.showcase_only}
@@ -329,7 +329,7 @@ function BusinessPublicPage() {
               </div>
 
               {/* Confirmation required */}
-              {businessData?.config?.requiere_confirmacion && (
+              {services.find(s => s.id === selectedService)?.requiere_confirmacion !== false && (
                 <div className="bg-amber-50/50 dark:bg-amber-500/5 rounded-2xl border border-amber-200/50 dark:border-amber-800/30 p-5">
                   <div className="flex items-start gap-3">
                     <Clock className="w-4 h-4 text-amber-500 flex-shrink-0 mt-0.5" />

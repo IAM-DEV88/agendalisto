@@ -8,7 +8,6 @@ interface ServicesListProps {
   services: Service[];
   selectedService: string | null;
   onSelectService: (serviceId: string) => void;
-  showPrices: boolean;
   currentUser: import('@supabase/supabase-js').User | null;
   businessOwnerId: string;
   showcaseOnly?: boolean;
@@ -18,7 +17,6 @@ const ServiceCard: React.FC<{
   service: Service;
   selectedService: string | null;
   onSelectService: (serviceId: string) => void;
-  showPrices: boolean;
   currentUser: import('@supabase/supabase-js').User | null;
   businessOwnerId: string;
   handlePrevImage: (e: React.MouseEvent, serviceId: string, max: number) => void;
@@ -26,7 +24,7 @@ const ServiceCard: React.FC<{
   openFullscreen: (e: React.MouseEvent, url: string) => void;
   currentImgIdx: number;
   showcaseOnly?: boolean;
-}> = ({ service, selectedService, onSelectService, showPrices, currentUser, businessOwnerId, handlePrevImage, handleNextImage, openFullscreen, currentImgIdx, showcaseOnly }) => {
+}> = ({ service, selectedService, onSelectService, currentUser, businessOwnerId, handlePrevImage, handleNextImage, openFullscreen, currentImgIdx, showcaseOnly }) => {
   const [isLiked, setIsLiked] = useState(false);
   const [likesCount, setLikesCount] = useState(service.likes_count || 0);
   const [isLiking, setIsLiking] = useState(false);
@@ -61,15 +59,13 @@ const ServiceCard: React.FC<{
   }
 
   const hasImages = images.length > 0;
-  const canReserve = !showcaseOnly && !!currentUser;
+  const canBook = service.permitir_reservas_online !== false;
   const isOwner = currentUser && currentUser.id === businessOwnerId;
 
   return (
     <div
-      onClick={() => canReserve && onSelectService(service.id)}
-      className={`relative flex flex-col rounded-2xl border transition-all overflow-hidden ${
-        canReserve ? 'cursor-pointer group' : ''
-      } ${
+      onClick={() => onSelectService(service.id)}
+      className={`relative flex flex-col rounded-2xl border transition-all overflow-hidden cursor-pointer group ${
         isOwner ? 'ring-1 ring-primary-300 dark:ring-primary-700' : ''
       } ${
         selectedService === service.id
@@ -114,7 +110,7 @@ const ServiceCard: React.FC<{
           }`}>
             {service.name}
           </h4>
-          {showPrices && service.price ? (
+          {service.mostrar_precios !== false && service.price ? (
             <span className="text-lg font-black text-primary-600 dark:text-primary-400 flex-shrink-0">
               ${service.price.toLocaleString()}
             </span>
@@ -173,9 +169,12 @@ const ServiceCard: React.FC<{
           </div>
         )}
 
-        {showcaseOnly ? (
-          <div className="mt-3 pt-3 border-t border-slate-100 dark:border-slate-800 text-center text-[10px] font-black uppercase tracking-widest text-amber-500">
-            Solo informativo — Contacta directamente
+        {showcaseOnly || !canBook ? (
+          <div className="mt-3 pt-3 border-t border-slate-100 dark:border-slate-800">
+            <a href={`/${window.location.pathname.split('/')[1]}/book/${service.id}`}
+              className="flex items-center justify-center gap-1.5 px-4 py-2 bg-primary-50 dark:bg-primary-900/20 text-primary-700 dark:text-primary-300 text-[11px] font-bold rounded-xl hover:bg-primary-100 dark:hover:bg-primary-900/40 transition-all active:scale-[0.98]">
+              Ver información <ChevronRight className="w-3.5 h-3.5" />
+            </a>
           </div>
         ) : !currentUser ? (
           <div className="mt-3 pt-3 border-t border-slate-100 dark:border-slate-800 flex items-center justify-center gap-1.5 text-[10px] font-black uppercase tracking-widest text-amber-600 dark:text-amber-400">
@@ -195,7 +194,7 @@ const ServiceCard: React.FC<{
 };
 
 const ServicesList: React.FC<ServicesListProps> = ({
-  services, selectedService, onSelectService, showPrices, currentUser, businessOwnerId, showcaseOnly,
+  services, selectedService, onSelectService, currentUser, businessOwnerId, showcaseOnly,
 }) => {
   const [activeImageIndex, setActiveImageIndex] = useState<Record<string, number>>({});
   const [fullscreenImage, setFullscreenImage] = useState<string | null>(null);
@@ -230,7 +229,6 @@ const ServicesList: React.FC<ServicesListProps> = ({
               service={service}
               selectedService={selectedService}
               onSelectService={onSelectService}
-              showPrices={showPrices}
               currentUser={currentUser}
               businessOwnerId={businessOwnerId}
               handlePrevImage={handlePrevImage}
