@@ -10,8 +10,9 @@ import type { RootState } from '../store';
 import {
   ArrowLeft, ChevronLeft, ChevronRight, X, Store,
   Clock, User, Loader2, Image as ImageIcon, Plus,
-  Sparkles, Save, Tag, FileText, DollarSign, Info, Settings, LayoutGrid, Eye, CheckCircle
+  Sparkles, Save, Tag, FileText, DollarSign, Info, Settings, LayoutGrid, Eye, CheckCircle, Wand2
 } from 'lucide-react';
+import { generateServiceDescription } from '../lib/ai';
 
 const ALLOWED_IMAGE_TYPES = ['image/jpeg', 'image/png', 'image/webp', 'image/gif'];
 const MAX_FILE_SIZE = 5 * 1024 * 1024;
@@ -52,6 +53,8 @@ export default function ServiceFormPage() {
   const [error, setError] = useState<string | null>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isUploading, setIsUploading] = useState(false);
+  const [generatingDesc, setGeneratingDesc] = useState(false);
+  const [aiOptions, setAiOptions] = useState<string[]>([]);
   const [activeTab, setActiveTab] = useState<'info' | 'gallery' | 'config'>('info');
 
   const switchTab = (tab: typeof activeTab) => {
@@ -418,6 +421,48 @@ export default function ServiceFormPage() {
                       className="w-full pl-10 pr-4 py-3 rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 focus:ring-2 focus:ring-primary-500/20 focus:border-primary-500 outline-none transition-all resize-none font-medium"
                       placeholder="Describe brevemente el servicio..." />
                   </div>
+                  <div className="flex items-center gap-2 mt-1">
+                    <button type="button" onClick={async () => {
+                      if (!formData.name.trim()) { notifyError('Primero escribe el nombre del servicio'); return; }
+                      setGeneratingDesc(true);
+                      try {
+                        const { option1, option2 } = await generateServiceDescription(formData.name, businessName);
+                        setAiOptions([option1, option2]);
+                        notifySuccess('Descripciones generadas con IA');
+                      } catch (err: unknown) {
+                        notifyError(err instanceof Error ? err.message : 'Error al generar descripción');
+                      } finally {
+                        setGeneratingDesc(false);
+                      }
+                    }} disabled={generatingDesc}
+                      className="inline-flex items-center gap-1.5 text-xs font-bold text-primary-600 dark:text-primary-400 hover:text-primary-700 dark:hover:text-primary-300 transition-colors">
+                      {generatingDesc ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <Wand2 className="w-3.5 h-3.5" />}
+                      {generatingDesc ? 'Generando...' : 'Generar descripciones con IA'}
+                    </button>
+                    {aiOptions.length > 0 && (
+                      <button type="button" onClick={() => setAiOptions([])}
+                        className="text-xs font-bold text-slate-400 hover:text-slate-600 transition-colors">
+                        Limpiar
+                      </button>
+                    )}
+                  </div>
+                  {aiOptions.length > 0 && (
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 mt-2">
+                      {aiOptions.map((opt, i) => (
+                        <button key={i} type="button" onClick={() => { setFormData(prev => ({ ...prev, description: opt })); setAiOptions([]); }}
+                          className={`text-left p-3 rounded-xl border-2 transition-all hover:scale-[1.02] active:scale-[0.98] ${
+                            formData.description === opt
+                              ? 'border-primary-500 bg-primary-50 dark:bg-primary-900/20'
+                              : 'border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 hover:border-primary-300 dark:hover:border-primary-600'
+                          }`}>
+                          <span className="text-[10px] font-black text-slate-400 uppercase tracking-wider mb-1 block">
+                            {i === 0 ? '🎯 Enfoque en resultados' : '✨ Enfoque en proceso'}
+                          </span>
+                          <p className="text-sm text-slate-700 dark:text-slate-300 leading-relaxed">{opt}</p>
+                        </button>
+                      ))}
+                    </div>
+                  )}
                 </div>
 
                 <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
@@ -711,7 +756,7 @@ export default function ServiceFormPage() {
                   </div>
                 </div>
                 {formData.description && (
-                  <p className="text-xs sm:text-sm text-slate-500 dark:text-slate-400 leading-relaxed line-clamp-2">{formData.description}</p>
+                  <p className="text-xs sm:text-sm text-slate-500 dark:text-slate-400 leading-relaxed line-clamp-3 whitespace-pre-line">{formData.description}</p>
                 )}
                 <div className="flex items-center flex-wrap gap-x-4 gap-y-1 text-xs font-bold text-slate-400">
                   {formData.duration && (

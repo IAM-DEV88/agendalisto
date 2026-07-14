@@ -666,7 +666,7 @@ const BookingForm: React.FC<BookingFormProps> = ({
             )}
           </div>
           {service?.description && (
-            <p className="text-sm text-slate-500 dark:text-slate-400 leading-relaxed mt-3 max-w-prose">{service.description}</p>
+            <p className="text-sm text-slate-500 dark:text-slate-400 leading-relaxed mt-3 max-w-prose whitespace-pre-line">{service.description}</p>
           )}
           {!isOwnerPreview && onlineBookable && (
             <div className={`inline-flex items-center gap-2 px-3 py-1.5 rounded-lg text-xs font-bold mt-3 w-fit ${
@@ -694,59 +694,6 @@ const BookingForm: React.FC<BookingFormProps> = ({
             <input type="tel" value={localGuestInfo.phone} onChange={(e) => setLocalGuestInfo(p => ({ ...p, phone: e.target.value }))}
               placeholder="Teléfono" className="w-full px-4 py-2.5 text-sm rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 focus:ring-2 focus:ring-primary-500/20 focus:border-primary-500 outline-none transition-all" />
           </div>
-        </div>
-      )}
-
-      {service?.can_be_gifted && (
-        <div className="mb-5 p-3 bg-rose-50 dark:bg-rose-900/10 rounded-2xl border border-rose-200 dark:border-rose-800/50">
-          <p className="text-xs font-bold text-rose-600 dark:text-rose-400 flex items-center gap-1.5 mb-2">
-            <Gift className="w-3.5 h-3.5" /> Tienes un codigo de regalo?
-          </p>
-          {giftApplied ? (
-            <div className="flex items-center justify-between bg-white dark:bg-slate-800 rounded-xl p-2.5 border border-emerald-200 dark:border-emerald-800">
-              <div className="flex items-center gap-2 text-sm">
-                <Check className="w-4 h-4 text-emerald-500" />
-                <span className="font-bold text-emerald-700 dark:text-emerald-300">Codigo aplicado</span>
-                <span className="text-xs text-slate-400 ml-1">Servicio gratis</span>
-              </div>
-              <button onClick={() => setGiftApplied(null)} className="p-1 rounded-lg hover:bg-slate-100 text-slate-400">
-                <X className="w-3.5 h-3.5" />
-              </button>
-            </div>
-          ) : (
-            <div className="space-y-2">
-              <div className="flex gap-2">
-                <div className="relative flex-1">
-                  <Gift className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-rose-400 pointer-events-none" />
-                  <input type="text" value={giftCodeInput} onChange={e => setGiftCodeInput(e.target.value.toUpperCase())} placeholder="Ej: GIFT-ABC123"
-                    className="w-full pl-10 pr-3 py-2 text-sm rounded-xl border border-rose-200 dark:border-rose-800 bg-white dark:bg-slate-800 focus:ring-2 focus:ring-rose-500/20 focus:border-rose-500 outline-none" />
-                </div>
-                <button onClick={async () => {
-                  if (!giftCodeInput.trim()) return;
-                  setValidatingGift(true);
-                  setGiftError('');
-                  const res = await validateGiftCode(giftCodeInput.trim(), serviceId, businessId);
-                  setValidatingGift(false);
-                  if (res.success && res.gift) { setGiftApplied(res.gift); setGiftCodeInput(''); toast.success('Codigo de regalo aplicado!'); }
-                  else { setGiftError(res.error || 'Codigo invalido'); }
-                }} disabled={validatingGift || !giftCodeInput.trim()}
-                  className="px-4 py-2 bg-rose-600 hover:bg-rose-700 text-white text-sm font-bold rounded-xl transition-all disabled:opacity-50">
-                  {validatingGift ? '...' : 'Canjear'}
-                </button>
-              </div>
-              <div className="flex items-center gap-2 text-[11px] text-rose-500">
-                <span className="flex-1 border-t border-rose-200 dark:border-rose-800/50" />
-                <span>o</span>
-                <span className="flex-1 border-t border-rose-200 dark:border-rose-800/50" />
-              </div>
-              <a href={`/${window.location.pathname.split('/')[1]}/gift/${serviceId}`}
-                className="flex items-center justify-center gap-2 px-4 py-2.5 bg-rose-100 hover:bg-rose-200 dark:bg-rose-900/30 dark:hover:bg-rose-900/50 text-rose-700 dark:text-rose-300 text-sm font-bold rounded-xl transition-all active:scale-[0.98]">
-                <Gift className="w-4 h-4" />
-                Regalar este servicio
-              </a>
-            </div>
-          )}
-          {giftError && <p className="text-xs text-red-500 mt-1.5">{giftError}</p>}
         </div>
       )}
 
@@ -994,6 +941,60 @@ const BookingForm: React.FC<BookingFormProps> = ({
             )}
           </div>
         </details>
+      )}
+
+      {/* ─── Gift section ─── */}
+      {service?.can_be_gifted && (
+        <div className="mt-6 p-3 bg-rose-50 dark:bg-rose-900/10 rounded-2xl border border-rose-200 dark:border-rose-800/50">
+          <p className="text-xs font-bold text-rose-600 dark:text-rose-400 flex items-center gap-1.5 mb-2">
+            <Gift className="w-3.5 h-3.5" /> Tienes un codigo de regalo?
+          </p>
+          {giftApplied ? (
+            <div className="flex items-center justify-between bg-white dark:bg-slate-800 rounded-xl p-2.5 border border-emerald-200 dark:border-emerald-800">
+              <div className="flex items-center gap-2 text-sm">
+                <Check className="w-4 h-4 text-emerald-500" />
+                <span className="font-bold text-emerald-700 dark:text-emerald-300">Codigo aplicado</span>
+                <span className="text-xs text-slate-400 ml-1">Servicio gratis</span>
+              </div>
+              <button onClick={() => setGiftApplied(null)} className="p-1 rounded-lg hover:bg-slate-100 text-slate-400">
+                <X className="w-3.5 h-3.5" />
+              </button>
+            </div>
+          ) : (
+            <div className="space-y-2">
+              <div className="flex gap-2">
+                <div className="relative flex-1">
+                  <Gift className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-rose-400 pointer-events-none" />
+                  <input type="text" value={giftCodeInput} onChange={e => setGiftCodeInput(e.target.value.toUpperCase())} placeholder="Ej: GIFT-ABC123"
+                    className="w-full pl-10 pr-3 py-2 text-sm rounded-xl border border-rose-200 dark:border-rose-800 bg-white dark:bg-slate-800 focus:ring-2 focus:ring-rose-500/20 focus:border-rose-500 outline-none" />
+                </div>
+                <button onClick={async () => {
+                  if (!giftCodeInput.trim()) return;
+                  setValidatingGift(true);
+                  setGiftError('');
+                  const res = await validateGiftCode(giftCodeInput.trim(), serviceId, businessId);
+                  setValidatingGift(false);
+                  if (res.success && res.gift) { setGiftApplied(res.gift); setGiftCodeInput(''); toast.success('Codigo de regalo aplicado!'); }
+                  else { setGiftError(res.error || 'Codigo invalido'); }
+                }} disabled={validatingGift || !giftCodeInput.trim()}
+                  className="px-4 py-2 bg-rose-600 hover:bg-rose-700 text-white text-sm font-bold rounded-xl transition-all disabled:opacity-50">
+                  {validatingGift ? '...' : 'Canjear'}
+                </button>
+              </div>
+              <div className="flex items-center gap-2 text-[11px] text-rose-500">
+                <span className="flex-1 border-t border-rose-200 dark:border-rose-800/50" />
+                <span>o</span>
+                <span className="flex-1 border-t border-rose-200 dark:border-rose-800/50" />
+              </div>
+              <a href={`/${window.location.pathname.split('/')[1]}/gift/${serviceId}`}
+                className="flex items-center justify-center gap-2 px-4 py-2.5 bg-rose-100 hover:bg-rose-200 dark:bg-rose-900/30 dark:hover:bg-rose-900/50 text-rose-700 dark:text-rose-300 text-sm font-bold rounded-xl transition-all active:scale-[0.98]">
+                <Gift className="w-4 h-4" />
+                Regalar este servicio
+              </a>
+            </div>
+          )}
+          {giftError && <p className="text-xs text-red-500 mt-1.5">{giftError}</p>}
+        </div>
       )}
     </div>
   );

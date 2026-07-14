@@ -118,7 +118,7 @@ const ServiceCard: React.FC<{
         </div>
 
         {service.description && (
-          <p className="text-sm text-slate-600 dark:text-slate-400 line-clamp-2 mb-4 leading-relaxed flex-1">
+          <p className="text-sm text-slate-600 dark:text-slate-400 line-clamp-3 mb-4 leading-relaxed flex-1 whitespace-pre-line">
             {service.description}
           </p>
         )}
