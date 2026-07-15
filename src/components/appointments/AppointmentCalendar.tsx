@@ -65,7 +65,7 @@ const AppointmentCalendar: React.FC<AppointmentCalendarProps> = ({
   businessHours,
 }) => {
   const [currentMonth, setCurrentMonth] = useState(new Date());
-  const [selectedDate, setSelectedDate] = useState<Date | null>(null);
+  const [selectedDate, setSelectedDate] = useState<Date | null>(new Date());
   const [dragOverDate, setDragOverDate] = useState<string | null>(null);
   const [selectedAppointment, setSelectedAppointment] = useState<Appointment | null>(null);
   const [rescheduling, setRescheduling] = useState(false);
