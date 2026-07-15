@@ -431,7 +431,7 @@ const AppointmentCalendar: React.FC<AppointmentCalendarProps> = ({
                           <div className="flex items-center gap-3 mt-1.5 text-xs text-slate-500 dark:text-slate-400">
                             <span className="flex items-center gap-1">
                               <User className="w-3 h-3" />
-                              {appt.profiles?.full_name || 'Cliente'}
+                              {appt.profiles?.full_name || (isOwner ? 'Cliente' : 'Tú')}
                             </span>
                             <span className="flex items-center gap-1">
                               <Clock className="w-3 h-3" />
