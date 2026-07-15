@@ -10,21 +10,27 @@ function getApiKey(): string {
 export async function generateBusinessDescription(
   businessName: string,
   categoryName?: string
-): Promise<string> {
+): Promise<{ option1: string; option2: string }> {
   const systemPrompt = `Eres un redactor profesional de descripciones para negocios en AgendaYa, una plataforma de reservas colombiana.
 
-Tu tarea es generar una descripción breve, atractiva y profesional para el negocio. Debes seguir estas reglas:
-- Extensión: entre 80 y 200 caracteres.
-- Tono: profesional pero cercano, en español de Colombia.
-- Debe incluir: qué ofrece el negocio, por qué es especial o qué valor aporta al cliente.
-- NO incluir frases genéricas como "Somos los mejores" sin fundamento.
+Tu tarea es generar DOS versiones de descripción breve, atractiva y profesional para el negocio. Debes seguir estas reglas:
+- Extensión: entre 80 y 200 caracteres cada una.
 - NO incluir emojis.
 - NO incluir información de contacto (dirección, teléfono, horarios).
-- Redactar en párrafo corrido, sin viñetas ni listas.`;
+- Redactar en párrafo corrido, sin viñetas ni listas.
+
+Opción 1 — Enfoque profesional: Tono formal e institucional. Destaca experiencia, calidad y trayectoria.
+Opción 2 — Enfoque cercano: Tono cálido y acogedor. Destaca el trato al cliente y la experiencia personalizada.
+
+Las dos opciones deben ser COMPLETAMENTE DIFERENTES en enfoque, tono y contenido. No repetir ideas.
+NO incluir frases genéricas como "Somos los mejores" sin fundamento.
+
+Debes responder ÚNICAMENTE con un objeto JSON con este formato exacto:
+{"option1": "texto de la opción 1", "option2": "texto de la opción 2"}`;
 
   const userPrompt = categoryName
-    ? `Genera una descripción profesional para un negocio llamado "${businessName}" de la categoría "${categoryName}".`
-    : `Genera una descripción profesional para un negocio llamado "${businessName}".`;
+    ? `Genera dos descripciones para un negocio llamado "${businessName}" de la categoría "${categoryName}". Responde SOLO con el JSON.`
+    : `Genera dos descripciones para un negocio llamado "${businessName}". Responde SOLO con el JSON.`;
 
   const groqKey = getApiKey();
 
@@ -41,7 +47,7 @@ Tu tarea es generar una descripción breve, atractiva y profesional para el nego
         { role: 'user', content: userPrompt },
       ],
       temperature: 0.7,
-      max_tokens: 300,
+      max_tokens: 500,
     }),
   });
 
@@ -55,7 +61,19 @@ Tu tarea es generar una descripción breve, atractiva y profesional para el nego
 
   if (!content) throw new Error('Respuesta vacía de Groq');
 
-  return content.trim();
+  try {
+    const parsed = JSON.parse(content.trim());
+    return {
+      option1: (parsed.option1 || '').trim().slice(0, 500),
+      option2: (parsed.option2 || '').trim().slice(0, 500),
+    };
+  } catch {
+    const parts = content.split('\n').filter(l => l.trim());
+    return {
+      option1: (parts[0] || content).trim().slice(0, 500),
+      option2: (parts[1] || content).trim().slice(0, 500),
+    };
+  }
 }
 
 export async function generateServiceDescription(

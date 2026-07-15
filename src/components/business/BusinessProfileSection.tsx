@@ -1,10 +1,10 @@
 import React, { useState, useEffect } from 'react';
-import { Camera, Save, Loader2, Globe, Phone, MapPin, Mail, Tag, Info, Wand2, Crosshair, MessageCircle, Instagram, Facebook, Store } from 'lucide-react';
+import { Camera, Save, Loader2, Globe, Phone, MapPin, Mail, Tag, Info, Crosshair, MessageCircle, Instagram, Facebook, Store } from 'lucide-react';
 import { Business, updateBusiness, getBusinessCategories, BusinessCategory } from '../../lib/api';
 import { supabase } from '../../lib/supabase';
 import { generateBusinessDescription } from '../../lib/ai';
+import DescriptionGenerator from '../DescriptionGenerator';
 import PhoneInput from '../ui/PhoneInput';
-import { toast } from 'react-hot-toast';
 import SectionHeader from '../ui/SectionHeader';
 import LocationPicker from '../ui/LocationPicker';
 import FormInput from '../ui/FormInput';
@@ -48,7 +48,6 @@ const BusinessProfileSection: React.FC<BusinessProfileSectionProps> = ({
   const [isUploading, setIsUploading] = useState(false);
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
   const [categories, setCategories] = useState<BusinessCategory[]>([]);
-  const [generatingDesc, setGeneratingDesc] = useState(false);
   const [mapLat, setMapLat] = useState<number | null>(businessData.lat);
   const [mapLng, setMapLng] = useState<number | null>(businessData.lng);
 
@@ -236,45 +235,9 @@ const BusinessProfileSection: React.FC<BusinessProfileSectionProps> = ({
               </div>
 
               <div className="space-y-2 md:col-span-2">
-                <div className="flex items-center justify-between">
                   <label htmlFor="description" className="text-sm font-bold text-slate-700 dark:text-slate-300">
                     Descripción
                   </label>
-                  <button
-                    type="button"
-                    onClick={async () => {
-                      if (!businessData.name.trim()) {
-                        toast.error('El negocio debe tener un nombre');
-                        return;
-                      }
-                      setGeneratingDesc(true);
-                      try {
-                        const category = categories.find(c => c.id === businessData.category_id);
-                        const desc = await generateBusinessDescription(
-                          businessData.name,
-                          category?.name
-                        );
-                        onChange({
-                          target: { name: 'description', value: desc }
-                        } as React.ChangeEvent<HTMLTextAreaElement>);
-                        toast.success('Descripción generada con IA');
-                      } catch (err: any) {
-                        toast.error(err.message || 'Error al generar descripción');
-                      } finally {
-                        setGeneratingDesc(false);
-                      }
-                    }}
-                    disabled={generatingDesc}
-                    className="inline-flex items-center gap-1.5 text-xs font-bold text-primary-600 dark:text-primary-400 hover:text-primary-700 dark:hover:text-primary-300 transition-colors disabled:opacity-50"
-                  >
-                    {generatingDesc ? (
-                      <Loader2 className="w-3.5 h-3.5 animate-spin" />
-                    ) : (
-                      <Wand2 className="w-3.5 h-3.5" />
-                    )}
-                    {generatingDesc ? 'Generando...' : 'Generar con IA'}
-                  </button>
-                </div>
                 <FormTextarea
                   icon={Info}
                   name="description"
@@ -283,6 +246,18 @@ const BusinessProfileSection: React.FC<BusinessProfileSectionProps> = ({
                   onChange={onChange}
                   rows={3}
                   placeholder="Describe los servicios y valores de tu negocio..."
+                />
+                <DescriptionGenerator
+                  currentValue={businessData.description || ''}
+                  onSelect={value => onChange({
+                    target: { name: 'description', value }
+                  } as React.ChangeEvent<HTMLTextAreaElement>)}
+                  generateFn={() => {
+                    const category = categories.find(c => c.id === businessData.category_id);
+                    return generateBusinessDescription(businessData.name, category?.name);
+                  }}
+                  optionLabels={['Enfoque profesional', 'Enfoque cercano']}
+                  validate={() => !businessData.name.trim() ? 'El negocio debe tener un nombre' : null}
                 />
               </div>
 
