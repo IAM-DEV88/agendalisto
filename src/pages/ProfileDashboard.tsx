@@ -60,7 +60,7 @@ interface ProfileDashboardProps {
 
 function SkeletonCard() {
   return (
-    <div className="bg-white dark:bg-slate-900 rounded-2xl border border-slate-200 dark:border-slate-800 p-5 sm:p-6 animate-pulse">
+    <div className="bg-white dark:bg-slate-900 rounded-lg border border-slate-200 dark:border-slate-800 p-5 sm:p-6 animate-pulse">
       <div className="flex items-start gap-4">
         <div className="flex-1 space-y-3">
           <div className="h-5 bg-slate-200 dark:bg-slate-700 rounded-lg w-48" />
@@ -68,8 +68,8 @@ function SkeletonCard() {
           <div className="h-3 bg-slate-200 dark:bg-slate-700 rounded-lg w-64" />
         </div>
         <div className="space-y-2">
-          <div className="h-8 bg-slate-200 dark:bg-slate-700 rounded-xl w-24" />
-          <div className="h-8 bg-slate-200 dark:bg-slate-700 rounded-xl w-24" />
+          <div className="h-8 bg-slate-200 dark:bg-slate-700 rounded-lg w-24" />
+          <div className="h-8 bg-slate-200 dark:bg-slate-700 rounded-lg w-24" />
         </div>
       </div>
     </div>
@@ -83,9 +83,9 @@ function StatCard({ icon, label, value, color }: {
   color: string;
 }) {
   return (
-    <div className="relative bg-white dark:bg-slate-900 rounded-2xl border border-slate-200 dark:border-slate-800 p-5 transition-all hover:shadow-lg hover:border-slate-300 dark:hover:border-slate-700">
+    <div className="relative bg-white dark:bg-slate-900 rounded-lg border border-slate-200 dark:border-slate-800 p-5 transition-all hover:shadow-lg hover:border-slate-300 dark:hover:border-slate-700">
       <div className="flex items-center gap-4">
-        <div className={`w-12 h-12 rounded-2xl flex items-center justify-center ${color}`}>
+        <div className={`w-12 h-12 rounded-lg flex items-center justify-center ${color}`}>
           {icon}
         </div>
         <div>
@@ -334,12 +334,12 @@ const ProfileDashboard = ({ user }: ProfileDashboardProps) => {
 
           {/* ─── HEADER ─── */}
           <div className="animate-in fade-in slide-in-from-top-4 duration-500">
-            <div className="bg-white dark:bg-slate-900 rounded-2xl border border-slate-200 dark:border-slate-800 shadow-sm p-4">
+            <div className="bg-white dark:bg-slate-900 rounded-lg border border-slate-200 dark:border-slate-800 shadow-sm p-4">
               <div className="flex flex-col sm:flex-row sm:items-center gap-3 sm:gap-4">
                 {/* Left: Avatar + Info */}
                 <div className="flex items-center gap-3 min-w-0 flex-1">
                   <div className="relative shrink-0">
-                    <div className="h-12 w-12 sm:h-14 sm:w-14 rounded-xl overflow-hidden ring-2 ring-white dark:ring-slate-800 shadow-lg transition-transform duration-300 hover:scale-105">
+                    <div className="h-12 w-12 sm:h-14 sm:w-14 rounded-lg overflow-hidden ring-2 ring-white dark:ring-slate-800 shadow-lg transition-transform duration-300 hover:scale-105">
                       <img
                         src={avatarUrl}
                         alt={`${username} avatar`}
@@ -381,7 +381,7 @@ const ProfileDashboard = ({ user }: ProfileDashboardProps) => {
                   {isVisitor ? (
                     <button
                       onClick={handleActivateClient}
-                      className="inline-flex items-center gap-1.5 px-4 py-2 bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-bold rounded-xl transition-all shadow-lg shadow-emerald-500/25 active:scale-95"
+                      className="inline-flex items-center gap-1.5 px-4 py-2 bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-bold rounded-lg transition-all shadow-lg shadow-emerald-500/25 active:scale-95"
                     >
                       <UserPlus className="w-3.5 h-3.5" />
                       <span className="hidden sm:inline">Activar cuenta</span>
@@ -392,7 +392,7 @@ const ProfileDashboard = ({ user }: ProfileDashboardProps) => {
                     <>
                       <Link
                         to="/business/dashboard"
-                        className="inline-flex items-center gap-1.5 px-4 py-2 bg-primary-600 hover:bg-primary-700 text-white text-xs font-bold rounded-xl transition-all shadow-lg shadow-primary-500/25 active:scale-95"
+                        className="inline-flex items-center gap-1.5 px-4 py-2 bg-primary-600 hover:bg-primary-700 text-white text-xs font-bold rounded-lg transition-all shadow-lg shadow-primary-500/25 active:scale-95"
                       >
                         <Store className="w-3.5 h-3.5" />
                         <span className="hidden sm:inline">Mi Negocio</span>
@@ -401,7 +401,7 @@ const ProfileDashboard = ({ user }: ProfileDashboardProps) => {
                       {canCreateMore && (
                         <Link
                           to="/business/register"
-                          className="inline-flex items-center gap-1.5 px-4 py-2 bg-white dark:bg-slate-900 text-primary-600 dark:text-primary-400 text-xs font-bold rounded-xl border border-primary-200 dark:border-primary-800 hover:bg-primary-50 dark:hover:bg-primary-900/20 active:scale-95 transition-all shadow-sm"
+                          className="inline-flex items-center gap-1.5 px-4 py-2 bg-white dark:bg-slate-900 text-primary-600 dark:text-primary-400 text-xs font-bold rounded-lg border border-primary-200 dark:border-primary-800 hover:bg-primary-50 dark:hover:bg-primary-900/20 active:scale-95 transition-all shadow-sm"
                         >
                           <Plus className="w-3.5 h-3.5" />
                           <span className="hidden sm:inline">Crear otro</span>
@@ -411,7 +411,7 @@ const ProfileDashboard = ({ user }: ProfileDashboardProps) => {
                   ) : !isVisitor ? (
                     <Link
                       to="/business/register"
-                      className="inline-flex items-center gap-1.5 px-4 py-2 bg-white dark:bg-slate-900 text-primary-600 dark:text-primary-400 text-xs font-bold rounded-xl border border-primary-200 dark:border-primary-800 hover:bg-primary-50 dark:hover:bg-primary-900/20 active:scale-95 transition-all shadow-sm"
+                      className="inline-flex items-center gap-1.5 px-4 py-2 bg-white dark:bg-slate-900 text-primary-600 dark:text-primary-400 text-xs font-bold rounded-lg border border-primary-200 dark:border-primary-800 hover:bg-primary-50 dark:hover:bg-primary-900/20 active:scale-95 transition-all shadow-sm"
                     >
                       <Store className="w-3.5 h-3.5" />
                       <span className="hidden sm:inline">Registrar mi negocio</span>
@@ -425,7 +425,7 @@ const ProfileDashboard = ({ user }: ProfileDashboardProps) => {
 
           {/* ─── VISITOR UPGRADE BANNER ─── */}
           {isVisitor && (
-            <div className="bg-gradient-to-r from-emerald-50 to-teal-50 dark:from-emerald-950/30 dark:to-teal-950/30 border border-emerald-200 dark:border-emerald-800 rounded-2xl p-4 animate-in fade-in slide-in-from-bottom-4 duration-500 delay-75">
+            <div className="bg-gradient-to-r from-emerald-50 to-teal-50 dark:from-emerald-950/30 dark:to-teal-950/30 border border-emerald-200 dark:border-emerald-800 rounded-lg p-4 animate-in fade-in slide-in-from-bottom-4 duration-500 delay-75">
               <div className="flex flex-col sm:flex-row items-start sm:items-center gap-3">
                 <div className="flex-1">
                   <h3 className="font-bold text-emerald-800 dark:text-emerald-300 text-sm">
@@ -437,7 +437,7 @@ const ProfileDashboard = ({ user }: ProfileDashboardProps) => {
                 </div>
                 <button
                   onClick={handleActivateClient}
-                  className="inline-flex items-center gap-1.5 px-4 py-2 bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-bold rounded-xl transition-all shadow-lg shadow-emerald-500/25 active:scale-95 flex-shrink-0"
+                  className="inline-flex items-center gap-1.5 px-4 py-2 bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-bold rounded-lg transition-all shadow-lg shadow-emerald-500/25 active:scale-95 flex-shrink-0"
                 >
                   <UserPlus className="w-3.5 h-3.5" />
                   Activar ahora
@@ -638,19 +638,19 @@ const ProfileDashboard = ({ user }: ProfileDashboardProps) => {
 
                 {appointments.length > 0 && (
                   <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
-                    <div className="bg-white dark:bg-slate-900 rounded-2xl border border-slate-200 dark:border-slate-800 p-5">
+                    <div className="bg-white dark:bg-slate-900 rounded-lg border border-slate-200 dark:border-slate-800 p-5">
                       <p className="text-xs font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider mb-1">Tasa de Finalización</p>
                       <p className="text-xl font-black text-slate-900 dark:text-white">
                         {Math.round((pastAppointments.filter(a => a.status === 'completed').length / appointments.length) * 100)}%
                       </p>
                     </div>
-                    <div className="bg-white dark:bg-slate-900 rounded-2xl border border-slate-200 dark:border-slate-800 p-5">
+                    <div className="bg-white dark:bg-slate-900 rounded-lg border border-slate-200 dark:border-slate-800 p-5">
                       <p className="text-xs font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider mb-1">Canceladas</p>
                       <p className="text-xl font-black text-slate-900 dark:text-white">
                         {appointments.filter(a => a.status === 'cancelled').length}
                       </p>
                     </div>
-                    <div className="bg-white dark:bg-slate-900 rounded-2xl border border-slate-200 dark:border-slate-800 p-5">
+                    <div className="bg-white dark:bg-slate-900 rounded-lg border border-slate-200 dark:border-slate-800 p-5">
                       <p className="text-xs font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider mb-1">Negocios Visitados</p>
                       <p className="text-xl font-black text-slate-900 dark:text-white">
                         {new Set(appointments.map(a => a.business_id)).size}
@@ -692,9 +692,9 @@ const ProfileDashboard = ({ user }: ProfileDashboardProps) => {
                   {activeSettingsTab === 'general' && (
                     <div className="space-y-4">
                       {/* Preferencias */}
-                      <div className="bg-white dark:bg-slate-900 rounded-2xl border border-slate-200 dark:border-slate-800 p-6 space-y-6">
+                      <div className="bg-white dark:bg-slate-900 rounded-lg border border-slate-200 dark:border-slate-800 p-6 space-y-6">
                         <div className="flex items-center gap-3 pb-4 border-b border-slate-100 dark:border-slate-800">
-                          <div className="p-2.5 bg-amber-50 dark:bg-amber-500/10 rounded-xl">
+                          <div className="p-2.5 bg-amber-50 dark:bg-amber-500/10 rounded-lg">
                             <Settings className="w-5 h-5 text-amber-600 dark:text-amber-400" />
                           </div>
                           <div>
@@ -716,12 +716,12 @@ const ProfileDashboard = ({ user }: ProfileDashboardProps) => {
                                 max="50"
                                 value={itemsPerPage}
                                 onChange={(e) => handleItemsPerPageChange(parseInt(e.target.value) || 1)}
-                                className="w-24 pl-10 pr-4 py-2.5 rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 focus:ring-2 focus:ring-primary-500/20 focus:border-primary-500 outline-none transition-all font-bold text-center"
+                                className="w-24 pl-10 pr-4 py-2.5 rounded-lg border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 focus:ring-2 focus:ring-primary-500/20 focus:border-primary-500 outline-none transition-all font-bold text-center"
                               />
                             </div>
                             <button
                               onClick={handleSaveItemsPerPage}
-                              className="px-6 py-2.5 bg-primary-600 hover:bg-primary-700 text-white text-sm font-bold rounded-xl transition-all shadow-lg shadow-primary-500/25 active:scale-95"
+                              className="px-6 py-2.5 bg-primary-600 hover:bg-primary-700 text-white text-sm font-bold rounded-lg transition-all shadow-lg shadow-primary-500/25 active:scale-95"
                             >
                               Guardar
                             </button>
@@ -732,7 +732,7 @@ const ProfileDashboard = ({ user }: ProfileDashboardProps) => {
                         </div>
 
                         {itemsPerPageMessage && (
-                          <div className={`flex items-center gap-2 px-4 py-3 rounded-xl text-sm font-bold ${
+                          <div className={`flex items-center gap-2 px-4 py-3 rounded-lg text-sm font-bold ${
                             itemsPerPageMessage.type === 'success'
                               ? 'bg-emerald-50 dark:bg-emerald-500/10 text-emerald-700 dark:text-emerald-400'
                               : 'bg-red-50 dark:bg-red-500/10 text-red-700 dark:text-red-400'
@@ -743,9 +743,9 @@ const ProfileDashboard = ({ user }: ProfileDashboardProps) => {
                       </div>
 
                       {/* Cuenta */}
-                      <div className="bg-white dark:bg-slate-900 rounded-2xl border border-slate-200 dark:border-slate-800 p-6 space-y-4">
+                      <div className="bg-white dark:bg-slate-900 rounded-lg border border-slate-200 dark:border-slate-800 p-6 space-y-4">
                         <div className="flex items-center gap-3 pb-4 border-b border-slate-100 dark:border-slate-800">
-                          <div className="p-2.5 bg-slate-100 dark:bg-slate-800 rounded-xl">
+                          <div className="p-2.5 bg-slate-100 dark:bg-slate-800 rounded-lg">
                             <Shield className="w-5 h-5 text-slate-600 dark:text-slate-400" />
                           </div>
                           <div>
@@ -756,7 +756,7 @@ const ProfileDashboard = ({ user }: ProfileDashboardProps) => {
 
                         <button
                           onClick={() => setShowDeleteConfirm(true)}
-                          className="inline-flex items-center gap-2 px-5 py-2.5 bg-red-50 hover:bg-red-100 dark:bg-red-500/10 dark:hover:bg-red-500/20 text-red-600 dark:text-red-400 text-sm font-bold rounded-xl transition-all active:scale-95"
+                          className="inline-flex items-center gap-2 px-5 py-2.5 bg-red-50 hover:bg-red-100 dark:bg-red-500/10 dark:hover:bg-red-500/20 text-red-600 dark:text-red-400 text-sm font-bold rounded-lg transition-all active:scale-95"
                         >
                           <Trash2 className="w-4 h-4" />
                           Eliminar cuenta
@@ -774,7 +774,7 @@ const ProfileDashboard = ({ user }: ProfileDashboardProps) => {
       {/* ─── MODAL CONFIRMACIÓN ELIMINAR CUENTA ─── */}
       {showDeleteConfirm && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50 backdrop-blur-sm animate-in fade-in duration-200">
-          <div className="bg-white dark:bg-slate-900 rounded-2xl shadow-2xl max-w-md w-full p-6 animate-in zoom-in-95 duration-200">
+          <div className="bg-white dark:bg-slate-900 rounded-lg shadow-2xl max-w-md w-full p-6 animate-in zoom-in-95 duration-200">
             <div className="flex items-center gap-3 mb-4">
               <div className="p-2 bg-red-100 dark:bg-red-900/40 rounded-full">
                 <AlertTriangle className="w-6 h-6 text-red-600 dark:text-red-400" />
@@ -789,7 +789,7 @@ const ProfileDashboard = ({ user }: ProfileDashboardProps) => {
               <button
                 onClick={() => setShowDeleteConfirm(false)}
                 disabled={deleting}
-                className="px-5 py-2.5 text-sm font-bold text-slate-700 dark:text-slate-300 bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 rounded-xl transition-all"
+                className="px-5 py-2.5 text-sm font-bold text-slate-700 dark:text-slate-300 bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 rounded-lg transition-all"
               >
                 Cancelar
               </button>
@@ -806,7 +806,7 @@ const ProfileDashboard = ({ user }: ProfileDashboardProps) => {
                   }
                 }}
                 disabled={deleting}
-                className="inline-flex items-center gap-2 px-5 py-2.5 text-sm font-bold text-white bg-red-600 hover:bg-red-700 rounded-xl transition-all disabled:opacity-50"
+                className="inline-flex items-center gap-2 px-5 py-2.5 text-sm font-bold text-white bg-red-600 hover:bg-red-700 rounded-lg transition-all disabled:opacity-50"
               >
                 {deleting ? <Loader2 className="w-4 h-4 animate-spin" /> : <Trash2 className="w-4 h-4" />}
                 {deleting ? 'Eliminando...' : 'Sí, eliminar'}

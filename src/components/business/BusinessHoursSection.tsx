@@ -65,7 +65,7 @@ const BusinessHoursSection: React.FC<BusinessHoursSectionProps> = ({
                           type="time"
                           value={hour.start_time}
                           onChange={e => onHoursChange(idx, 'start_time', e.target.value)}
-                          className="w-full pl-10 pr-4 py-2 rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 focus:ring-2 focus:ring-primary-500/20 focus:border-primary-500 outline-none transition-all text-sm font-bold text-slate-900 dark:text-white"
+                          className="w-full pl-10 pr-4 py-2 rounded-lg border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 focus:ring-2 focus:ring-primary-500/20 focus:border-primary-500 outline-none transition-all text-sm font-bold text-slate-900 dark:text-white"
                         />
                       </div>
                       <span className="text-slate-400 font-bold">a</span>
@@ -75,7 +75,7 @@ const BusinessHoursSection: React.FC<BusinessHoursSectionProps> = ({
                           type="time"
                           value={hour.end_time}
                           onChange={e => onHoursChange(idx, 'end_time', e.target.value)}
-                          className="w-full pl-10 pr-4 py-2 rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 focus:ring-2 focus:ring-primary-500/20 focus:border-primary-500 outline-none transition-all text-sm font-bold text-slate-900 dark:text-white"
+                          className="w-full pl-10 pr-4 py-2 rounded-lg border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 focus:ring-2 focus:ring-primary-500/20 focus:border-primary-500 outline-none transition-all text-sm font-bold text-slate-900 dark:text-white"
                         />
                       </div>
                     </div>
@@ -94,7 +94,7 @@ const BusinessHoursSection: React.FC<BusinessHoursSectionProps> = ({
             <button 
               type="submit" 
               disabled={saving} 
-              className="inline-flex items-center px-8 py-3 bg-primary-600 hover:bg-primary-700 text-white font-bold rounded-xl transition-all shadow-lg shadow-primary-500/25 gap-2 disabled:opacity-50"
+              className="inline-flex items-center px-8 py-3 bg-primary-600 hover:bg-primary-700 text-white font-bold rounded-lg transition-all shadow-lg shadow-primary-500/25 gap-2 disabled:opacity-50"
             >
               {saving ? <Loader2 className="w-5 h-5 animate-spin" /> : <Save className="w-5 h-5" />}
               {saving ? 'Guardando...' : 'Guardar Horario'}

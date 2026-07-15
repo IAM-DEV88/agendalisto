@@ -10,7 +10,7 @@ import { useLockBodyScroll } from '../hooks/useLockBodyScroll';
 
 function PostSkeleton() {
   return (
-    <div className="bg-white dark:bg-slate-900 rounded-2xl border border-slate-200 dark:border-slate-800 overflow-hidden animate-pulse">
+    <div className="bg-white dark:bg-slate-900 rounded-lg border border-slate-200 dark:border-slate-800 overflow-hidden animate-pulse">
       <div className="h-48 bg-slate-200 dark:bg-slate-800" />
       <div className="p-6 space-y-3">
         <div className="h-3 bg-slate-200 dark:bg-slate-800 rounded w-1/3" />
@@ -100,7 +100,7 @@ const Blog = () => {
 
         {/* Header */}
         <div className="text-center mb-10 animate-in fade-in slide-in-from-top-4 duration-500">
-          <div className="w-14 h-14 rounded-2xl bg-primary-50 dark:bg-primary-500/10 flex items-center justify-center mx-auto mb-4 ring-1 ring-primary-200 dark:ring-primary-800">
+          <div className="w-14 h-14 rounded-lg bg-primary-50 dark:bg-primary-500/10 flex items-center justify-center mx-auto mb-4 ring-1 ring-primary-200 dark:ring-primary-800">
             <BookOpen className="w-7 h-7 text-primary-600 dark:text-primary-400" />
           </div>
           <h1 className="text-3xl sm:text-4xl font-black text-slate-900 dark:text-white tracking-tight mb-3">
@@ -120,7 +120,7 @@ const Blog = () => {
               placeholder="Buscar publicaciones..."
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
-              className="w-full pl-11 pr-4 py-3.5 bg-white dark:bg-slate-900 rounded-2xl border border-slate-200 dark:border-slate-700 shadow-lg shadow-slate-200/50 dark:shadow-none focus:ring-2 focus:ring-primary-500/20 focus:border-primary-500 outline-none transition-all text-sm font-medium"
+              className="w-full pl-11 pr-4 py-3.5 bg-white dark:bg-slate-900 rounded-lg border border-slate-200 dark:border-slate-700 shadow-lg shadow-slate-200/50 dark:shadow-none focus:ring-2 focus:ring-primary-500/20 focus:border-primary-500 outline-none transition-all text-sm font-medium"
             />
             {searchTerm && (
               <button
@@ -137,7 +137,7 @@ const Blog = () => {
         <div className="max-w-xl mx-auto mb-8 animate-in fade-in slide-in-from-bottom-4 duration-500 delay-200">
           <Link
             to="/register"
-            className="flex items-center justify-center gap-2 px-5 py-3 bg-primary-50 dark:bg-primary-900/20 text-primary-700 dark:text-primary-300 font-bold text-sm rounded-xl border border-primary-200 dark:border-primary-800 hover:bg-primary-100 dark:hover:bg-primary-900/40 transition-all"
+            className="flex items-center justify-center gap-2 px-5 py-3 bg-primary-50 dark:bg-primary-900/20 text-primary-700 dark:text-primary-300 font-bold text-sm rounded-lg border border-primary-200 dark:border-primary-800 hover:bg-primary-100 dark:hover:bg-primary-900/40 transition-all"
           >
             🌐 ¿Tienes un negocio? Crea tu página web gratis →
           </Link>
@@ -170,7 +170,7 @@ const Blog = () => {
                       to={`/blog/${post.id}`}
                       className="group block h-full"
                     >
-                      <div className="bg-white dark:bg-slate-900 rounded-2xl border border-slate-200 dark:border-slate-800 overflow-hidden hover:border-primary-300 dark:hover:border-primary-700 hover:shadow-2xl transition-all duration-300 hover:-translate-y-1 h-full flex flex-col">
+                      <div className="bg-white dark:bg-slate-900 rounded-lg border border-slate-200 dark:border-slate-800 overflow-hidden hover:border-primary-300 dark:hover:border-primary-700 hover:shadow-2xl transition-all duration-300 hover:-translate-y-1 h-full flex flex-col">
                       {/* Image */}
                       <div className="h-48 overflow-hidden bg-slate-100 dark:bg-slate-800 flex-shrink-0">
                         {post.image_url ? (
@@ -235,7 +235,7 @@ const Blog = () => {
             {/* Loading more */}
             {loadingMore && (
               <div className="flex justify-center py-8 animate-in fade-in duration-300">
-                <div className="flex items-center gap-3 px-6 py-3 bg-white dark:bg-slate-900 rounded-2xl shadow-lg border border-slate-200 dark:border-slate-700">
+                <div className="flex items-center gap-3 px-6 py-3 bg-white dark:bg-slate-900 rounded-lg shadow-lg border border-slate-200 dark:border-slate-700">
                   <Loader2 className="w-5 h-5 text-primary-600 animate-spin" />
                   <span className="text-sm font-black text-slate-600 dark:text-slate-400 uppercase tracking-widest">Cargando más...</span>
                 </div>
@@ -259,7 +259,7 @@ const Blog = () => {
       {/* Botón flotante del Newsletter */}
       <button
         onClick={() => setNewsletterOpen(true)}
-        className="fixed bottom-6 left-6 z-40 flex items-center gap-3 px-5 py-3.5 bg-gradient-to-br from-primary-600 to-primary-800 dark:from-primary-700 dark:to-primary-900 text-white rounded-2xl shadow-2xl shadow-primary-500/30 hover:shadow-primary-500/50 hover:scale-105 active:scale-95 transition-all duration-300 group"
+        className="fixed bottom-6 left-6 z-40 flex items-center gap-3 px-5 py-3.5 bg-gradient-to-br from-primary-600 to-primary-800 dark:from-primary-700 dark:to-primary-900 text-white rounded-lg shadow-2xl shadow-primary-500/30 hover:shadow-primary-500/50 hover:scale-105 active:scale-95 transition-all duration-300 group"
       >
         <div className="relative">
           <Mail className="w-5 h-5" />
@@ -303,18 +303,18 @@ const NewsletterModal = ({ onClose }: { onClose: () => void }) => {
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center p-4 animate-in fade-in duration-200">
       <div className="absolute inset-0 bg-black/40 backdrop-blur-sm" onClick={onClose} />
-      <div className="relative w-full max-w-md bg-gradient-to-br from-primary-600 to-primary-800 dark:from-primary-700 dark:to-primary-900 rounded-3xl p-8 sm:p-10 shadow-2xl shadow-primary-500/30 text-center animate-in zoom-in-95 duration-200">
-        <div className="absolute inset-0 bg-[radial-gradient(circle_at_top_right,_rgba(255,255,255,0.1)_0%,_transparent_60%)] pointer-events-none rounded-3xl" />
+      <div className="relative w-full max-w-md bg-gradient-to-br from-primary-600 to-primary-800 dark:from-primary-700 dark:to-primary-900 rounded-lg p-8 sm:p-10 shadow-2xl shadow-primary-500/30 text-center animate-in zoom-in-95 duration-200">
+        <div className="absolute inset-0 bg-[radial-gradient(circle_at_top_right,_rgba(255,255,255,0.1)_0%,_transparent_60%)] pointer-events-none rounded-lg" />
 
         <button
           onClick={onClose}
-          className="absolute top-4 right-4 p-2 rounded-xl bg-white/10 hover:bg-white/20 text-white/70 hover:text-white transition-all z-10"
+          className="absolute top-4 right-4 p-2 rounded-lg bg-white/10 hover:bg-white/20 text-white/70 hover:text-white transition-all z-10"
         >
           <X className="w-4 h-4" />
         </button>
 
         <div className="relative z-10">
-          <div className="w-14 h-14 mx-auto mb-5 rounded-2xl bg-white/15 flex items-center justify-center backdrop-blur-sm">
+          <div className="w-14 h-14 mx-auto mb-5 rounded-lg bg-white/15 flex items-center justify-center backdrop-blur-sm">
             <Mail className="w-7 h-7 text-white" />
           </div>
           <h3 className="text-2xl font-black text-white mb-2">Newsletter AgendaYa</h3>
@@ -333,12 +333,12 @@ const NewsletterModal = ({ onClose }: { onClose: () => void }) => {
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
                 placeholder="tu@correo.com"
-                className="w-full px-4 py-3.5 rounded-2xl bg-white/10 border border-white/20 text-white placeholder-white/50 text-sm font-medium focus:outline-none focus:ring-2 focus:ring-white/40 focus:border-transparent transition-all"
+                className="w-full px-4 py-3.5 rounded-lg bg-white/10 border border-white/20 text-white placeholder-white/50 text-sm font-medium focus:outline-none focus:ring-2 focus:ring-white/40 focus:border-transparent transition-all"
               />
               <button
                 type="submit"
                 disabled={subscribing || !email.trim()}
-                className="w-full px-6 py-3.5 bg-white text-primary-700 font-black text-sm rounded-2xl hover:bg-primary-50 transition-all disabled:opacity-50 flex items-center justify-center gap-2 shadow-xl shadow-black/10"
+                className="w-full px-6 py-3.5 bg-white text-primary-700 font-black text-sm rounded-lg hover:bg-primary-50 transition-all disabled:opacity-50 flex items-center justify-center gap-2 shadow-xl shadow-black/10"
               >
                 {subscribing ? (
                   <>

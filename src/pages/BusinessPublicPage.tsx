@@ -17,7 +17,7 @@ import { Store, Clock, MapPin } from 'lucide-react';
 
 function SkeletonHeader() {
   return (
-    <div className="bg-white dark:bg-slate-900 rounded-3xl border border-slate-200 dark:border-slate-800 overflow-hidden animate-pulse">
+    <div className="bg-white dark:bg-slate-900 rounded-lg border border-slate-200 dark:border-slate-800 overflow-hidden animate-pulse">
       <div className="h-48 md:h-72 bg-slate-200 dark:bg-slate-800" />
       <div className="p-6 md:p-10 space-y-4">
         <div className="h-8 bg-slate-200 dark:bg-slate-800 rounded-lg w-64" />
@@ -30,7 +30,7 @@ function SkeletonHeader() {
 
 function SkeletonCard() {
   return (
-    <div className="bg-white dark:bg-slate-900 rounded-2xl border border-slate-200 dark:border-slate-800 p-6 animate-pulse space-y-3">
+    <div className="bg-white dark:bg-slate-900 rounded-lg border border-slate-200 dark:border-slate-800 p-6 animate-pulse space-y-3">
       <div className="h-5 bg-slate-200 dark:bg-slate-800 rounded-lg w-3/4" />
       <div className="h-4 bg-slate-200 dark:bg-slate-800 rounded-lg w-1/2" />
       <div className="h-4 bg-slate-200 dark:bg-slate-800 rounded-lg w-full" />
@@ -206,8 +206,8 @@ function BusinessPublicPage() {
 
         {/* Showcase Banner */}
         {businessData?.showcase_only && (
-          <div className="mt-6 bg-amber-50 dark:bg-amber-900/10 rounded-2xl p-5 border border-amber-200 dark:border-amber-800/50 flex items-start gap-3">
-            <div className="w-9 h-9 rounded-xl bg-amber-100 dark:bg-amber-900/30 flex items-center justify-center flex-shrink-0">
+          <div className="mt-6 bg-amber-50 dark:bg-amber-900/10 rounded-lg p-5 border border-amber-200 dark:border-amber-800/50 flex items-start gap-3">
+            <div className="w-9 h-9 rounded-lg bg-amber-100 dark:bg-amber-900/30 flex items-center justify-center flex-shrink-0">
               <Store className="w-4 h-4 text-amber-600 dark:text-amber-400" />
             </div>
             <div>
@@ -222,7 +222,7 @@ function BusinessPublicPage() {
         {/* Content — responsive: single layout, mobile tabs, desktop grid */}
         <div className="mt-8">
           {/* Mobile tab navigation */}
-          <div className="md:hidden bg-white dark:bg-slate-900 rounded-2xl border border-slate-200 dark:border-slate-800 overflow-hidden mb-8">
+          <div className="md:hidden bg-white dark:bg-slate-900 rounded-lg border border-slate-200 dark:border-slate-800 overflow-hidden mb-8">
             <div className="flex border-b border-slate-200 dark:border-slate-700">
               {[
                 ...(!businessData?.showcase_only ? [{ id: 'services', label: 'Servicios' }] : []),
@@ -250,7 +250,7 @@ function BusinessPublicPage() {
             {!businessData?.showcase_only && (
             <div className="md:col-span-2 space-y-8">
               {/* Services — always on desktop, tab-controlled on mobile */}
-              <div className={`bg-white dark:bg-slate-900 rounded-2xl border border-slate-200 dark:border-slate-800 p-6 sm:p-8 ${activeTab !== 'services' ? 'hidden' : ''} md:block`}>
+              <div className={`bg-white dark:bg-slate-900 rounded-lg border border-slate-200 dark:border-slate-800 p-6 sm:p-8 ${activeTab !== 'services' ? 'hidden' : ''} md:block`}>
                 <h2 className="text-xl font-black text-slate-900 dark:text-white mb-6">Servicios Disponibles</h2>
                 <ServicesList
                   services={services}
@@ -259,7 +259,7 @@ function BusinessPublicPage() {
                   showcaseOnly={!!businessData?.showcase_only}
                 />
                 {user && user.id === businessData?.owner_id && (
-                  <Link to="/business/dashboard?tab=services" className="mt-6 inline-flex items-center gap-2 px-5 py-2.5 bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300 text-sm font-bold rounded-xl hover:bg-slate-200 dark:hover:bg-slate-700 transition-all md:w-auto w-full justify-center">
+                  <Link to="/business/dashboard?tab=services" className="mt-6 inline-flex items-center gap-2 px-5 py-2.5 bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300 text-sm font-bold rounded-lg hover:bg-slate-200 dark:hover:bg-slate-700 transition-all md:w-auto w-full justify-center">
                     Gestionar Servicios
                   </Link>
                 )}
@@ -275,27 +275,27 @@ function BusinessPublicPage() {
             {/* Sidebar or showcase grid items */}
             {businessData?.showcase_only ? (
               <>
-                <div className={`bg-white dark:bg-slate-900 rounded-2xl border border-slate-200 dark:border-slate-800 p-6 ${activeTab !== 'hours' ? 'hidden' : ''} md:block`}>
+                <div className={`bg-white dark:bg-slate-900 rounded-lg border border-slate-200 dark:border-slate-800 p-6 ${activeTab !== 'hours' ? 'hidden' : ''} md:block`}>
                   <h2 className="text-lg font-black text-slate-900 dark:text-white mb-4 flex items-center gap-2">
                     <Clock className="w-4 h-4 text-primary-500" />
                     Horarios
                   </h2>
                   <BusinessHoursList businessHours={businessHours} />
                   {user && user.id === businessData?.owner_id && (
-                    <Link to="/business/dashboard?tab=availability" className="mt-4 inline-flex items-center gap-2 px-4 py-2 bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300 text-xs font-bold rounded-xl hover:bg-slate-200 dark:hover:bg-slate-700 transition-all w-full justify-center">
+                    <Link to="/business/dashboard?tab=availability" className="mt-4 inline-flex items-center gap-2 px-4 py-2 bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300 text-xs font-bold rounded-lg hover:bg-slate-200 dark:hover:bg-slate-700 transition-all w-full justify-center">
                       Editar Horarios
                     </Link>
                   )}
                 </div>
                 {businessData?.config?.mostrar_direccion && (
-                  <div className={`bg-white dark:bg-slate-900 rounded-2xl border border-slate-200 dark:border-slate-800 p-6 ${activeTab !== 'location' ? 'hidden' : ''} md:block`}>
+                  <div className={`bg-white dark:bg-slate-900 rounded-lg border border-slate-200 dark:border-slate-800 p-6 ${activeTab !== 'location' ? 'hidden' : ''} md:block`}>
                     <h2 className="text-lg font-black text-slate-900 dark:text-white mb-4 flex items-center gap-2">
                       <MapPin className="w-4 h-4 text-primary-500" />
                       Ubicación
                     </h2>
                     <BusinessLocation address={businessData.address} lat={businessData.lat} lng={businessData.lng} />
                     {user && user.id === businessData?.owner_id && (
-                      <Link to="/business/dashboard?tab=profile" className="mt-4 inline-flex items-center gap-2 px-4 py-2 bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300 text-xs font-bold rounded-xl hover:bg-slate-200 dark:hover:bg-slate-700 transition-all w-full justify-center">
+                      <Link to="/business/dashboard?tab=profile" className="mt-4 inline-flex items-center gap-2 px-4 py-2 bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300 text-xs font-bold rounded-lg hover:bg-slate-200 dark:hover:bg-slate-700 transition-all w-full justify-center">
                         Editar Perfil
                       </Link>
                     )}
@@ -305,14 +305,14 @@ function BusinessPublicPage() {
             ) : (
             <div className="space-y-6 mt-8 md:mt-0">
               {/* Hours */}
-              <div className={`bg-white dark:bg-slate-900 rounded-2xl border border-slate-200 dark:border-slate-800 p-6 ${activeTab !== 'hours' ? 'hidden' : ''} md:block`}>
+              <div className={`bg-white dark:bg-slate-900 rounded-lg border border-slate-200 dark:border-slate-800 p-6 ${activeTab !== 'hours' ? 'hidden' : ''} md:block`}>
                 <h2 className="text-lg font-black text-slate-900 dark:text-white mb-4 flex items-center gap-2">
                   <Clock className="w-4 h-4 text-primary-500" />
                   Horarios
                 </h2>
                 <BusinessHoursList businessHours={businessHours} />
                 {user && user.id === businessData?.owner_id && (
-                  <Link to="/business/dashboard?tab=availability" className="mt-4 inline-flex items-center gap-2 px-4 py-2 bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300 text-xs font-bold rounded-xl hover:bg-slate-200 dark:hover:bg-slate-700 transition-all w-full justify-center">
+                  <Link to="/business/dashboard?tab=availability" className="mt-4 inline-flex items-center gap-2 px-4 py-2 bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300 text-xs font-bold rounded-lg hover:bg-slate-200 dark:hover:bg-slate-700 transition-all w-full justify-center">
                     Editar Horarios
                   </Link>
                 )}
@@ -320,14 +320,14 @@ function BusinessPublicPage() {
 
               {/* Location */}
               {businessData?.config?.mostrar_direccion && (
-                <div className={`bg-white dark:bg-slate-900 rounded-2xl border border-slate-200 dark:border-slate-800 p-6 ${activeTab !== 'location' ? 'hidden' : ''} md:block`}>
+                <div className={`bg-white dark:bg-slate-900 rounded-lg border border-slate-200 dark:border-slate-800 p-6 ${activeTab !== 'location' ? 'hidden' : ''} md:block`}>
                   <h2 className="text-lg font-black text-slate-900 dark:text-white mb-4 flex items-center gap-2">
                     <MapPin className="w-4 h-4 text-primary-500" />
                     Ubicación
                   </h2>
                   <BusinessLocation address={businessData.address} lat={businessData.lat} lng={businessData.lng} />
                   {user && user.id === businessData?.owner_id && (
-                    <Link to="/business/dashboard?tab=profile" className="mt-4 inline-flex items-center gap-2 px-4 py-2 bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300 text-xs font-bold rounded-xl hover:bg-slate-200 dark:hover:bg-slate-700 transition-all w-full justify-center">
+                    <Link to="/business/dashboard?tab=profile" className="mt-4 inline-flex items-center gap-2 px-4 py-2 bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300 text-xs font-bold rounded-lg hover:bg-slate-200 dark:hover:bg-slate-700 transition-all w-full justify-center">
                       Editar Perfil
                     </Link>
                   )}
@@ -336,12 +336,12 @@ function BusinessPublicPage() {
 
               {!user && (
                 <div className="space-y-3">
-                  <div className="bg-amber-50 dark:bg-amber-900/10 rounded-2xl border border-amber-200 dark:border-amber-800 p-5 text-center">
+                  <div className="bg-amber-50 dark:bg-amber-900/10 rounded-lg border border-amber-200 dark:border-amber-800 p-5 text-center">
                     <p className="text-sm font-bold text-amber-800 dark:text-amber-400">
                       <Link to="/login" className="underline decoration-amber-500/50 hover:text-amber-600 transition-colors">Inicia sesión</Link> para reservar servicios.
                     </p>
                   </div>
-                  <div className="bg-primary-50 dark:bg-primary-900/10 rounded-2xl border border-primary-200 dark:border-primary-800 p-5 text-center">
+                  <div className="bg-primary-50 dark:bg-primary-900/10 rounded-lg border border-primary-200 dark:border-primary-800 p-5 text-center">
                     <p className="text-sm font-bold text-primary-800 dark:text-primary-300">
                       🌐 ¿Tienes un negocio como este?{' '}
                       <Link to="/register" className="underline decoration-primary-500/50 hover:text-primary-600 transition-colors">

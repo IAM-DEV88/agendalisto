@@ -28,7 +28,7 @@ const Crowdfunding = () => {
     <div className="min-h-screen bg-slate-50 dark:bg-slate-950 transition-colors duration-200 py-12">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="text-center max-w-3xl mx-auto mb-16">
-          <div className="inline-flex items-center justify-center p-3 bg-primary-100 dark:bg-primary-900/30 text-primary-600 dark:text-primary-400 rounded-2xl mb-6">
+          <div className="inline-flex items-center justify-center p-3 bg-primary-100 dark:bg-primary-900/30 text-primary-600 dark:text-primary-400 rounded-lg mb-6">
             <Rocket className="w-8 h-8" />
           </div>
           <h1 className="text-4xl md:text-5xl font-black text-slate-900 dark:text-white tracking-tight mb-6">
@@ -54,7 +54,7 @@ const Crowdfunding = () => {
                 <div key={m.id} className="card group flex flex-col h-full hover:border-primary-500/30 transition-all duration-300">
                   <div className="p-6 flex-grow">
                     <div className="flex items-center gap-3 mb-4">
-                      <div className="p-2 bg-primary-50 dark:bg-primary-900/20 text-primary-600 dark:text-primary-400 rounded-xl">
+                      <div className="p-2 bg-primary-50 dark:bg-primary-900/20 text-primary-600 dark:text-primary-400 rounded-lg">
                         <Gift className="w-6 h-6" />
                       </div>
                       <h2 className="text-xl font-black text-slate-900 dark:text-white tracking-tight leading-tight">
@@ -92,7 +92,7 @@ const Crowdfunding = () => {
                       </div>
                     </div>
 
-                    <div className="p-4 bg-primary-50/50 dark:bg-primary-900/10 rounded-2xl border border-primary-100 dark:border-primary-900/30 mb-6">
+                    <div className="p-4 bg-primary-50/50 dark:bg-primary-900/10 rounded-lg border border-primary-100 dark:border-primary-900/30 mb-6">
                       <p className="text-sm font-bold text-primary-700 dark:text-primary-300 flex items-center gap-2">
                         <Heart className="w-4 h-4 fill-primary-500" />
                         {m.cta}
@@ -114,7 +114,7 @@ const Crowdfunding = () => {
                       <input type="hidden" name="notify_url" value={ipnUrl} />
                       <button
                         type="submit"
-                        className="w-full inline-flex items-center justify-center px-6 py-3 bg-slate-900 dark:bg-white text-white dark:text-slate-900 font-black rounded-xl hover:bg-slate-800 dark:hover:bg-slate-100 transition-all shadow-lg gap-2"
+                        className="w-full inline-flex items-center justify-center px-6 py-3 bg-slate-900 dark:bg-white text-white dark:text-slate-900 font-black rounded-lg hover:bg-slate-800 dark:hover:bg-slate-100 transition-all shadow-lg gap-2"
                       >
                         <CreditCard className="w-5 h-5" />
                         PayPal
@@ -125,7 +125,7 @@ const Crowdfunding = () => {
                       href="https://checkout.wompi.co/l/VPOS_kRgRp8"
                       target="_blank"
                       rel="noopener noreferrer"
-                      className="w-full inline-flex items-center justify-center px-6 py-3 bg-emerald-600 hover:bg-emerald-700 text-white font-black rounded-xl transition-all shadow-lg shadow-emerald-500/25 gap-2"
+                      className="w-full inline-flex items-center justify-center px-6 py-3 bg-emerald-600 hover:bg-emerald-700 text-white font-black rounded-lg transition-all shadow-lg shadow-emerald-500/25 gap-2"
                     >
                       <ExternalLink className="w-5 h-5" />
                       Wompi (Local)
@@ -137,7 +137,7 @@ const Crowdfunding = () => {
           </div>
         )}
 
-        <div className="mt-20 text-center bg-white dark:bg-slate-900 p-8 md:p-12 rounded-3xl border border-slate-200 dark:border-slate-800 shadow-xl">
+        <div className="mt-20 text-center bg-white dark:bg-slate-900 p-8 md:p-12 rounded-lg border border-slate-200 dark:border-slate-800 shadow-xl">
           <h3 className="text-2xl font-black text-slate-900 dark:text-white mb-4 tracking-tight">
             ¿Tienes alguna pregunta?
           </h3>

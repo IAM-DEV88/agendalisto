@@ -85,7 +85,7 @@ const UserProfileSection: React.FC<UserProfileSectionProps> = ({
   return (
     <div className="animate-in fade-in duration-500">
       <form onSubmit={onSave} className="space-y-6">
-        <div className="bg-white dark:bg-slate-900 rounded-2xl border border-slate-200 dark:border-slate-800 p-6 sm:p-8">
+        <div className="bg-white dark:bg-slate-900 rounded-lg border border-slate-200 dark:border-slate-800 p-6 sm:p-8">
           <div className="flex flex-col md:flex-row gap-8 items-start">
             {/* Avatar */}
             <div className="flex flex-col items-center gap-3 w-full md:w-auto">
@@ -168,7 +168,7 @@ const UserProfileSection: React.FC<UserProfileSectionProps> = ({
 
         {/* Message toast */}
         {message && (
-          <div className={`flex items-center gap-2 px-5 py-3.5 rounded-xl text-sm font-bold animate-in fade-in slide-in-from-top-2 duration-300 ${
+          <div className={`flex items-center gap-2 px-5 py-3.5 rounded-lg text-sm font-bold animate-in fade-in slide-in-from-top-2 duration-300 ${
             message.type === 'success'
               ? 'bg-emerald-50 dark:bg-emerald-500/10 text-emerald-700 dark:text-emerald-400 border border-emerald-200 dark:border-emerald-800'
               : 'bg-red-50 dark:bg-red-500/10 text-red-700 dark:text-red-400 border border-red-200 dark:border-red-800'
@@ -183,7 +183,7 @@ const UserProfileSection: React.FC<UserProfileSectionProps> = ({
           <button
             type="submit"
             disabled={saving}
-            className="w-full sm:w-auto px-10 py-3.5 bg-primary-600 hover:bg-primary-700 text-white font-bold rounded-xl transition-all shadow-lg shadow-primary-500/25 hover:-translate-y-0.5 active:translate-y-0 disabled:opacity-60 disabled:cursor-not-allowed disabled:hover:-translate-y-0"
+            className="w-full sm:w-auto px-10 py-3.5 bg-primary-600 hover:bg-primary-700 text-white font-bold rounded-lg transition-all shadow-lg shadow-primary-500/25 hover:-translate-y-0.5 active:translate-y-0 disabled:opacity-60 disabled:cursor-not-allowed disabled:hover:-translate-y-0"
           >
             {saving ? (
               <span className="inline-flex items-center gap-2">

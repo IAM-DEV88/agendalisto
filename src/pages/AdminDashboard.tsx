@@ -163,12 +163,12 @@ const AdminDashboard = ({ user }: AdminDashboardProps) => {
 
                 {/* ── Rápida sección de indicadores ── */}
                 <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
-                  <div className="bg-white dark:bg-slate-900 rounded-2xl border border-slate-200 dark:border-slate-800 p-4">
+                  <div className="bg-white dark:bg-slate-900 rounded-lg border border-slate-200 dark:border-slate-800 p-4">
                     <p className="text-xs font-bold text-slate-400 uppercase tracking-wider mb-2">Visitas hoy</p>
                     <p className="text-2xl font-black text-slate-900 dark:text-white">{metrics.visits.today}</p>
                     <p className="text-xs text-slate-500 mt-1">{metrics.visits.week} esta semana · {metrics.visits.total} total</p>
                   </div>
-                  <div className="bg-white dark:bg-slate-900 rounded-2xl border border-slate-200 dark:border-slate-800 p-4">
+                  <div className="bg-white dark:bg-slate-900 rounded-lg border border-slate-200 dark:border-slate-800 p-4">
                     <p className="text-xs font-bold text-slate-400 uppercase tracking-wider mb-2">Citas</p>
                     <p className="text-2xl font-black text-slate-900 dark:text-white">{metrics.appointments.total}</p>
                     <div className="flex gap-2 mt-1 text-[10px] font-bold">
@@ -178,7 +178,7 @@ const AdminDashboard = ({ user }: AdminDashboardProps) => {
                       <span className="text-red-600">{metrics.appointments.cancelled} canc</span>
                     </div>
                   </div>
-                  <div className="bg-white dark:bg-slate-900 rounded-2xl border border-slate-200 dark:border-slate-800 p-4">
+                  <div className="bg-white dark:bg-slate-900 rounded-lg border border-slate-200 dark:border-slate-800 p-4">
                     <p className="text-xs font-bold text-slate-400 uppercase tracking-wider mb-2">Reseñas</p>
                     <p className="text-2xl font-black text-slate-900 dark:text-white">{metrics.reviews.total}</p>
                     <div className="flex items-center gap-2 mt-1">
@@ -187,7 +187,7 @@ const AdminDashboard = ({ user }: AdminDashboardProps) => {
                       <span className="text-[10px] text-slate-400">({metrics.reviews.approved} aprob)</span>
                     </div>
                   </div>
-                  <div className="bg-white dark:bg-slate-900 rounded-2xl border border-slate-200 dark:border-slate-800 p-4">
+                  <div className="bg-white dark:bg-slate-900 rounded-lg border border-slate-200 dark:border-slate-800 p-4">
                     <p className="text-xs font-bold text-slate-400 uppercase tracking-wider mb-2">Likes totales</p>
                     <p className="text-2xl font-black text-slate-900 dark:text-white">
                       {metrics.likes.total.toLocaleString()}
@@ -200,7 +200,7 @@ const AdminDashboard = ({ user }: AdminDashboardProps) => {
 
                 {/* ── Distribuciones ── */}
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                  <div className="bg-white dark:bg-slate-900 rounded-2xl border border-slate-200 dark:border-slate-800 p-4">
+                  <div className="bg-white dark:bg-slate-900 rounded-lg border border-slate-200 dark:border-slate-800 p-4">
                     <p className="text-xs font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider mb-3">Roles</p>
                     <div className="flex flex-wrap gap-2">
                       {[
@@ -210,14 +210,14 @@ const AdminDashboard = ({ user }: AdminDashboardProps) => {
                         { label: 'Mod', value: metrics.roles.moderator, color: 'bg-violet-100 text-violet-700 dark:bg-violet-900/30 dark:text-violet-400' },
                         { label: 'Admin', value: metrics.roles.admin, color: 'bg-amber-100 text-amber-700 dark:bg-amber-900/30 dark:text-amber-400' },
                       ].map(r => (
-                        <span key={r.label} className={`inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-black rounded-xl ${r.color}`}>
+                        <span key={r.label} className={`inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-black rounded-lg ${r.color}`}>
                           {r.value}
                           <span className="font-normal opacity-70">{r.label}</span>
                         </span>
                       ))}
                     </div>
                   </div>
-                  <div className="bg-white dark:bg-slate-900 rounded-2xl border border-slate-200 dark:border-slate-800 p-4">
+                  <div className="bg-white dark:bg-slate-900 rounded-lg border border-slate-200 dark:border-slate-800 p-4">
                     <p className="text-xs font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider mb-3">Planes</p>
                     <div className="flex flex-wrap gap-2">
                       {[
@@ -225,14 +225,14 @@ const AdminDashboard = ({ user }: AdminDashboardProps) => {
                         { label: 'Pro', value: metrics.plans.pro, color: 'bg-blue-100 text-blue-700 dark:bg-blue-900/30 dark:text-blue-400' },
                         { label: 'Premium', value: metrics.plans.premium, color: 'bg-amber-100 text-amber-700 dark:bg-amber-900/30 dark:text-amber-400' },
                       ].map(p => (
-                        <span key={p.label} className={`inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-black rounded-xl ${p.color}`}>
+                        <span key={p.label} className={`inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-black rounded-lg ${p.color}`}>
                           {p.value}
                           <span className="font-normal opacity-70">{p.label}</span>
                           {p.label === 'Pro' && <Crown className="h-3 w-3" />}
                           {p.label === 'Premium' && <Crown className="h-3 w-3" />}
                         </span>
                       ))}
-                      <span className="inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-black rounded-xl bg-cyan-100 text-cyan-700 dark:bg-cyan-900/30 dark:text-cyan-400">
+                      <span className="inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-black rounded-lg bg-cyan-100 text-cyan-700 dark:bg-cyan-900/30 dark:text-cyan-400">
                         {metrics.subscriptions.active}
                         <span className="font-normal opacity-70">Suscripciones</span>
                       </span>
@@ -241,7 +241,7 @@ const AdminDashboard = ({ user }: AdminDashboardProps) => {
                 </div>
 
                 {/* ── Top 10 Negocios ── */}
-                <div className="bg-white dark:bg-slate-900 rounded-2xl border border-slate-200 dark:border-slate-800 overflow-hidden">
+                <div className="bg-white dark:bg-slate-900 rounded-lg border border-slate-200 dark:border-slate-800 overflow-hidden">
                   <div className="px-5 py-4 border-b border-slate-100 dark:border-slate-800">
                     <h4 className="text-sm font-black text-slate-900 dark:text-white">Top 10 Negocios</h4>
                     <p className="text-xs text-slate-500">Ordenados por visitas totales</p>
@@ -273,7 +273,7 @@ const AdminDashboard = ({ user }: AdminDashboardProps) => {
                 </div>
 
                 {/* ── Usuarios más activos ── */}
-                <div className="bg-white dark:bg-slate-900 rounded-2xl border border-slate-200 dark:border-slate-800 overflow-hidden">
+                <div className="bg-white dark:bg-slate-900 rounded-lg border border-slate-200 dark:border-slate-800 overflow-hidden">
                   <div className="px-5 py-4 border-b border-slate-100 dark:border-slate-800">
                     <h4 className="text-sm font-black text-slate-900 dark:text-white">Usuarios más activos</h4>
                     <p className="text-xs text-slate-500">Por citas + reseñas</p>
@@ -305,7 +305,7 @@ const AdminDashboard = ({ user }: AdminDashboardProps) => {
                 </div>
 
                 {/* ── Servicios Populares ── */}
-                <div className="bg-white dark:bg-slate-900 rounded-2xl border border-slate-200 dark:border-slate-800 overflow-hidden">
+                <div className="bg-white dark:bg-slate-900 rounded-lg border border-slate-200 dark:border-slate-800 overflow-hidden">
                   <div className="px-5 py-4 border-b border-slate-100 dark:border-slate-800">
                     <h4 className="text-sm font-black text-slate-900 dark:text-white">Servicios más populares</h4>
                     <p className="text-xs text-slate-500">Ordenados por likes</p>
@@ -331,7 +331,7 @@ const AdminDashboard = ({ user }: AdminDashboardProps) => {
                 </div>
 
                 {/* ── Actividad Reciente ── */}
-                <div className="bg-white dark:bg-slate-900 rounded-2xl border border-slate-200 dark:border-slate-800 overflow-hidden">
+                <div className="bg-white dark:bg-slate-900 rounded-lg border border-slate-200 dark:border-slate-800 overflow-hidden">
                   <div className="px-5 py-4 border-b border-slate-100 dark:border-slate-800">
                     <h4 className="text-sm font-black text-slate-900 dark:text-white">Actividad reciente</h4>
                     <p className="text-xs text-slate-500">Últimos negocios creados</p>
@@ -386,7 +386,7 @@ const AdminDashboard = ({ user }: AdminDashboardProps) => {
           )}
 
           {activeTab === 'moderators' && (
-            <div className="bg-white dark:bg-slate-900 rounded-2xl border border-slate-200 dark:border-slate-800 p-6">
+            <div className="bg-white dark:bg-slate-900 rounded-lg border border-slate-200 dark:border-slate-800 p-6">
               <p className="text-sm text-slate-500 dark:text-slate-400">Gestión de moderadores próximamente.</p>
             </div>
           )}
@@ -399,22 +399,22 @@ const AdminDashboard = ({ user }: AdminDashboardProps) => {
               {referralLoading ? (
                 <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
                   {[1, 2, 3].map(i => (
-                    <div key={i} className="h-32 bg-white dark:bg-slate-900 rounded-2xl border border-slate-200 dark:border-slate-800 animate-pulse" />
+                    <div key={i} className="h-32 bg-white dark:bg-slate-900 rounded-lg border border-slate-200 dark:border-slate-800 animate-pulse" />
                   ))}
                 </div>
               ) : (
                 <>
                   {/* Stat Cards */}
                   <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-                    <div className="bg-gradient-to-br from-primary-600 to-primary-800 dark:from-primary-700 dark:to-primary-900 rounded-2xl p-6 shadow-xl shadow-primary-500/20">
+                    <div className="bg-gradient-to-br from-primary-600 to-primary-800 dark:from-primary-700 dark:to-primary-900 rounded-lg p-6 shadow-xl shadow-primary-500/20">
                       <p className="text-primary-200 text-xs font-bold uppercase tracking-widest">Total Referidos</p>
                       <p className="text-3xl font-black text-white mt-1">{referralStats?.total_referrals || 0}</p>
                     </div>
-                    <div className="bg-white dark:bg-slate-900 rounded-2xl border border-slate-200 dark:border-slate-800 p-6">
+                    <div className="bg-white dark:bg-slate-900 rounded-lg border border-slate-200 dark:border-slate-800 p-6">
                       <p className="text-xs font-bold text-slate-400 uppercase tracking-widest">Referidores Únicos</p>
                       <p className="text-3xl font-black text-slate-900 dark:text-white mt-1">{referralStats?.unique_referrers || 0}</p>
                     </div>
-                    <div className="bg-white dark:bg-slate-900 rounded-2xl border border-slate-200 dark:border-slate-800 p-6">
+                    <div className="bg-white dark:bg-slate-900 rounded-lg border border-slate-200 dark:border-slate-800 p-6">
                       <p className="text-xs font-bold text-slate-400 uppercase tracking-widest">Promedio x Referidor</p>
                       <p className="text-3xl font-black text-slate-900 dark:text-white mt-1">
                         {referralStats && referralStats.unique_referrers > 0
@@ -425,7 +425,7 @@ const AdminDashboard = ({ user }: AdminDashboardProps) => {
                   </div>
 
                   {/* Top Referrers */}
-                  <div className="bg-white dark:bg-slate-900 rounded-2xl border border-slate-200 dark:border-slate-800 p-5 sm:p-6">
+                  <div className="bg-white dark:bg-slate-900 rounded-lg border border-slate-200 dark:border-slate-800 p-5 sm:p-6">
                     <h3 className="text-sm font-black text-slate-500 dark:text-slate-400 uppercase tracking-widest mb-4">
                       Top Referidores
                     </h3>
@@ -440,7 +440,7 @@ const AdminDashboard = ({ user }: AdminDashboardProps) => {
                         {topReferrers.map((stat, i) => (
                           <div key={stat.referrer_id}>
                             <div
-                              className="flex items-center gap-4 p-3 rounded-xl bg-slate-50 dark:bg-slate-800/50 border border-slate-100 dark:border-slate-800 hover:bg-white dark:hover:bg-slate-800 transition-all cursor-pointer"
+                              className="flex items-center gap-4 p-3 rounded-lg bg-slate-50 dark:bg-slate-800/50 border border-slate-100 dark:border-slate-800 hover:bg-white dark:hover:bg-slate-800 transition-all cursor-pointer"
                               onClick={async () => {
                                 if (expandedReferrer === stat.referrer_id) {
                                   setExpandedReferrer(null);
@@ -483,7 +483,7 @@ const AdminDashboard = ({ user }: AdminDashboardProps) => {
                               <div className="ml-12 mt-2 mb-2 space-y-1.5 animate-in fade-in slide-in-from-top-2 duration-200">
                                 {(referrerDetails[stat.referrer_id]?.length || 0) > 0 ? (
                                   referrerDetails[stat.referrer_id].map(ref => (
-                                    <div key={ref.id} className="flex items-center gap-3 p-2.5 rounded-xl bg-white dark:bg-slate-800 border border-slate-100 dark:border-slate-700">
+                                    <div key={ref.id} className="flex items-center gap-3 p-2.5 rounded-lg bg-white dark:bg-slate-800 border border-slate-100 dark:border-slate-700">
                                       <div className="w-8 h-8 rounded-full bg-slate-100 dark:bg-slate-700 flex items-center justify-center">
                                         <User className="w-4 h-4 text-slate-500" />
                                       </div>

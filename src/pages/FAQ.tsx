@@ -49,14 +49,14 @@ export default function FAQ() {
           <div className="mt-8 flex flex-col sm:flex-row items-center justify-center gap-4">
             <Link
               to="/business/register"
-              className="inline-flex items-center gap-2 px-6 py-3 bg-primary-600 hover:bg-primary-700 text-white font-bold rounded-xl transition-all shadow-lg shadow-primary-500/25 active:scale-[0.98]"
+              className="inline-flex items-center gap-2 px-6 py-3 bg-primary-600 hover:bg-primary-700 text-white font-bold rounded-lg transition-all shadow-lg shadow-primary-500/25 active:scale-[0.98]"
             >
               <Store className="w-4 h-4" />
               🌐 Mi web gratis
             </Link>
             <Link
               to="/explore"
-              className="inline-flex items-center gap-2 px-6 py-3 bg-white dark:bg-slate-900 text-slate-700 dark:text-slate-300 font-bold rounded-xl border border-slate-200 dark:border-slate-800 hover:border-slate-300 dark:hover:border-slate-700 transition-all"
+              className="inline-flex items-center gap-2 px-6 py-3 bg-white dark:bg-slate-900 text-slate-700 dark:text-slate-300 font-bold rounded-lg border border-slate-200 dark:border-slate-800 hover:border-slate-300 dark:hover:border-slate-700 transition-all"
             >
               Ver negocios en AgendaYa
             </Link>
@@ -73,7 +73,7 @@ export default function FAQ() {
               <button
                 key={cat.id}
                 onClick={() => { setActiveCategory(cat.name); setOpenQuestion(null); }}
-                className={`px-4 py-2.5 rounded-xl text-sm font-bold transition-all ${
+                className={`px-4 py-2.5 rounded-lg text-sm font-bold transition-all ${
                   isActive
                     ? 'bg-primary-600 text-white shadow-md shadow-primary-500/25'
                     : 'bg-white dark:bg-slate-900 text-slate-600 dark:text-slate-400 border border-slate-200 dark:border-slate-800 hover:border-primary-300 dark:hover:border-primary-700 hover:text-primary-600 dark:hover:text-primary-400'
@@ -105,7 +105,7 @@ export default function FAQ() {
                 return (
                   <div
                     key={i}
-                    className={`rounded-2xl border transition-all duration-300 ${
+                    className={`rounded-lg border transition-all duration-300 ${
                       isOpen
                         ? 'bg-white dark:bg-slate-900 border-primary-200 dark:border-primary-800 shadow-lg shadow-primary-500/5'
                         : 'bg-white/60 dark:bg-slate-900/60 border-slate-200 dark:border-slate-800 hover:border-slate-300 dark:hover:border-slate-700 hover:shadow-sm'
@@ -141,7 +141,7 @@ export default function FAQ() {
             <div className="my-10 text-center">
               <Link
                 to="/business/register"
-                className="inline-flex items-center gap-2 px-6 py-3 bg-primary-600 hover:bg-primary-700 text-white font-bold rounded-xl transition-all shadow-lg shadow-primary-500/25 active:scale-[0.98]"
+                className="inline-flex items-center gap-2 px-6 py-3 bg-primary-600 hover:bg-primary-700 text-white font-bold rounded-lg transition-all shadow-lg shadow-primary-500/25 active:scale-[0.98]"
               >
                 <Sparkles className="w-4 h-4" />
                 Quiero AgendaYa para mi negocio
@@ -165,7 +165,7 @@ export default function FAQ() {
           <div className="mt-10 flex flex-col sm:flex-row items-center justify-center gap-4">
             <Link
               to="/business/register"
-              className="inline-flex items-center gap-2 px-8 py-3.5 bg-white text-primary-700 font-black rounded-xl hover:bg-primary-50 transition-all shadow-xl active:scale-[0.98]"
+              className="inline-flex items-center gap-2 px-8 py-3.5 bg-white text-primary-700 font-black rounded-lg hover:bg-primary-50 transition-all shadow-xl active:scale-[0.98]"
             >
               <Store className="w-4 h-4" />
               🌐 Mi web gratis
@@ -173,7 +173,7 @@ export default function FAQ() {
             </Link>
             <Link
               to="/plans"
-              className="inline-flex items-center gap-2 px-8 py-3.5 bg-primary-500/20 text-white font-bold rounded-xl border border-white/20 hover:bg-primary-500/30 transition-all"
+              className="inline-flex items-center gap-2 px-8 py-3.5 bg-primary-500/20 text-white font-bold rounded-lg border border-white/20 hover:bg-primary-500/30 transition-all"
             >
               Ver planes
             </Link>

@@ -352,14 +352,14 @@ export const BusinessDashboard: React.FC = () => {
 
           {/* ═══ HEADER ═══ */}
           <div className="animate-in fade-in slide-in-from-top-4 duration-500">
-            <div className="bg-white dark:bg-slate-900 rounded-2xl border border-slate-200 dark:border-slate-800 shadow-sm p-4">
+            <div className="bg-white dark:bg-slate-900 rounded-lg border border-slate-200 dark:border-slate-800 shadow-sm p-4">
               <div className="flex flex-col sm:flex-row sm:items-center gap-3 sm:gap-4">
                 {/* Left: Business Info */}
                 <div className="flex items-center gap-3 min-w-0 flex-1">
                   {businessData ? (
                     <Link to={`/${businessData.slug}`} className="flex items-center gap-3 group min-w-0 flex-1">
                       <div className="relative shrink-0">
-                        <div className="h-12 w-12 sm:h-14 sm:w-14 rounded-xl overflow-hidden ring-2 ring-white dark:ring-slate-800 shadow-lg transition-transform duration-300 group-hover:scale-105">
+                        <div className="h-12 w-12 sm:h-14 sm:w-14 rounded-lg overflow-hidden ring-2 ring-white dark:ring-slate-800 shadow-lg transition-transform duration-300 group-hover:scale-105">
                           <img
                             src={businessData.logo_url || 'https://upload.wikimedia.org/wikipedia/commons/8/89/Portrait_Placeholder.png'}
                             alt={`${businessData.name} logo`}
@@ -387,7 +387,7 @@ export const BusinessDashboard: React.FC = () => {
                     </Link>
                   ) : (
                     <div className="flex items-center gap-3">
-                      <div className="h-12 w-12 sm:h-14 sm:w-14 rounded-xl bg-slate-200 dark:bg-slate-800 animate-pulse" />
+                      <div className="h-12 w-12 sm:h-14 sm:w-14 rounded-lg bg-slate-200 dark:bg-slate-800 animate-pulse" />
                       <div className="space-y-2">
                         <div className="h-5 bg-slate-200 dark:bg-slate-800 rounded-lg w-40 animate-pulse" />
                         <div className="h-3 bg-slate-200 dark:bg-slate-800 rounded-lg w-28 animate-pulse" />
@@ -406,7 +406,7 @@ export const BusinessDashboard: React.FC = () => {
                   )}
                   <Link
                     to="/dashboard"
-                    className="inline-flex items-center gap-1.5 px-4 py-2 bg-white dark:bg-slate-900 text-slate-700 dark:text-slate-300 text-xs font-bold rounded-xl border border-slate-200 dark:border-slate-800 hover:bg-slate-50 dark:hover:bg-slate-800 active:scale-95 transition-all shadow-sm"
+                    className="inline-flex items-center gap-1.5 px-4 py-2 bg-white dark:bg-slate-900 text-slate-700 dark:text-slate-300 text-xs font-bold rounded-lg border border-slate-200 dark:border-slate-800 hover:bg-slate-50 dark:hover:bg-slate-800 active:scale-95 transition-all shadow-sm"
                   >
                     <ArrowLeft className="w-3.5 h-3.5" />
                     <span className="hidden sm:inline">Mi Perfil</span>

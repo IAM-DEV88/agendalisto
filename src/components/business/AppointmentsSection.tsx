@@ -39,7 +39,7 @@ const AppointmentsSection: React.FC<AppointmentsSectionProps> = ({
         </div>
       ) : appointments.length === 0 ? (
         <div className="card p-12 flex flex-col items-center text-center max-w-lg mx-auto">
-          <div className="w-16 h-16 rounded-2xl bg-slate-50 dark:bg-slate-800 flex items-center justify-center mb-6 text-slate-400">
+          <div className="w-16 h-16 rounded-lg bg-slate-50 dark:bg-slate-800 flex items-center justify-center mb-6 text-slate-400">
             <Calendar className="w-8 h-8" />
           </div>
           <h3 className="text-xl font-black text-slate-900 dark:text-white mb-2">No hay citas pendientes</h3>
@@ -53,7 +53,7 @@ const AppointmentsSection: React.FC<AppointmentsSectionProps> = ({
                 <li key={appointment.id} className="p-4 sm:p-6 hover:bg-slate-50/50 dark:hover:bg-slate-800/50 transition-colors">
                   <div className="flex flex-col md:flex-row md:items-center justify-between gap-6">
                     <div className="flex items-start gap-4">
-                      <div className={`w-12 h-12 rounded-xl flex items-center justify-center shrink-0 ${
+                      <div className={`w-12 h-12 rounded-lg flex items-center justify-center shrink-0 ${
                         appointment.status === 'pending' 
                           ? 'bg-amber-50 text-amber-600 dark:bg-amber-500/10 dark:text-amber-400' 
                           : 'bg-primary-50 text-primary-600 dark:bg-primary-500/10 dark:text-primary-400'
@@ -65,7 +65,7 @@ const AppointmentsSection: React.FC<AppointmentsSectionProps> = ({
                           <h4 className="text-lg font-black text-slate-900 dark:text-white truncate tracking-tight">
                             {appointment.services?.name}
                           </h4>
-                          <span className={`px-2 py-0.5 text-[10px] font-black uppercase tracking-wider rounded-md ${
+                          <span className={`px-2 py-0.5 text-[10px] font-black uppercase tracking-wider rounded-lg ${
                             appointment.status === 'pending' 
                               ? 'bg-amber-100 text-amber-700 dark:bg-amber-900/30 dark:text-amber-400' 
                               : 'bg-primary-100 text-primary-700 dark:bg-primary-900/30 dark:text-primary-400'
@@ -91,14 +91,14 @@ const AppointmentsSection: React.FC<AppointmentsSectionProps> = ({
                         <>
                           <button
                             onClick={() => onUpdateStatus?.(appointment.id, 'confirmed')}
-                            className="flex-1 md:flex-none inline-flex items-center justify-center px-4 py-2 bg-emerald-600 hover:bg-emerald-700 text-white text-sm font-bold rounded-xl transition-all shadow-lg shadow-emerald-500/25 gap-2"
+                            className="flex-1 md:flex-none inline-flex items-center justify-center px-4 py-2 bg-emerald-600 hover:bg-emerald-700 text-white text-sm font-bold rounded-lg transition-all shadow-lg shadow-emerald-500/25 gap-2"
                           >
                             <CheckCircle2 className="w-4 h-4" />
                             Confirmar
                           </button>
                           <button
                             onClick={() => onUpdateStatus?.(appointment.id, 'cancelled')}
-                            className="flex-1 md:flex-none inline-flex items-center justify-center px-4 py-2 bg-white dark:bg-slate-800 border border-red-200 dark:border-red-900/30 text-red-600 dark:text-red-400 text-sm font-bold rounded-xl hover:bg-red-50 dark:hover:bg-red-900/20 transition-all gap-2"
+                            className="flex-1 md:flex-none inline-flex items-center justify-center px-4 py-2 bg-white dark:bg-slate-800 border border-red-200 dark:border-red-900/30 text-red-600 dark:text-red-400 text-sm font-bold rounded-lg hover:bg-red-50 dark:hover:bg-red-900/20 transition-all gap-2"
                           >
                             <XCircle className="w-4 h-4" />
                             Rechazar
@@ -108,7 +108,7 @@ const AppointmentsSection: React.FC<AppointmentsSectionProps> = ({
                       {appointment.status === 'confirmed' && (
                         <button
                           onClick={() => onUpdateStatus?.(appointment.id, 'completed')}
-                          className="w-full md:w-auto inline-flex items-center justify-center px-6 py-2.5 bg-primary-600 hover:bg-primary-700 text-white text-sm font-bold rounded-xl transition-all shadow-lg shadow-primary-500/25 gap-2"
+                          className="w-full md:w-auto inline-flex items-center justify-center px-6 py-2.5 bg-primary-600 hover:bg-primary-700 text-white text-sm font-bold rounded-lg transition-all shadow-lg shadow-primary-500/25 gap-2"
                         >
                           <CheckCircle2 className="w-4 h-4" />
                           Finalizar Cita

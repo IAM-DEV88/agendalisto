@@ -10,7 +10,7 @@ export function Skeleton({ className }: SkeletonProps) {
 
 export function SkeletonCard() {
   return (
-    <div className="bg-white dark:bg-slate-900 rounded-2xl shadow-sm border border-slate-200 dark:border-slate-800 overflow-hidden animate-pulse">
+    <div className="bg-white dark:bg-slate-900 rounded-lg shadow-sm border border-slate-200 dark:border-slate-800 overflow-hidden animate-pulse">
       <div className="aspect-[4/3] bg-slate-200 dark:bg-slate-700" />
       <div className="p-4 space-y-3">
         <div className="h-5 bg-slate-200 dark:bg-slate-700 rounded w-3/4" />
@@ -33,14 +33,14 @@ export function ServiceFormSkeleton() {
       <div className="max-w-5xl mx-auto px-4 mt-8">
         <div className="grid grid-cols-1 lg:grid-cols-5 gap-8">
           <div className="lg:col-span-2 space-y-4">
-            <Skeleton className="aspect-[4/3] rounded-2xl" />
-            <Skeleton className="h-32 rounded-2xl" />
+            <Skeleton className="aspect-[4/3] rounded-lg" />
+            <Skeleton className="h-32 rounded-lg" />
           </div>
           <div className="lg:col-span-3 space-y-4">
             <Skeleton className="h-8 w-1/2" />
-            <Skeleton className="h-24 rounded-xl" />
-            <Skeleton className="h-12 w-3/4 rounded-xl" />
-            <Skeleton className="h-48 rounded-2xl" />
+            <Skeleton className="h-24 rounded-lg" />
+            <Skeleton className="h-12 w-3/4 rounded-lg" />
+            <Skeleton className="h-48 rounded-lg" />
           </div>
         </div>
       </div>

@@ -59,14 +59,14 @@ const ReviewModal: React.FC<ReviewModalProps> = ({
       onClick={onClose}
     >
       <div
-        className="w-full max-w-lg bg-white dark:bg-slate-900 rounded-3xl shadow-2xl overflow-hidden animate-in fade-in zoom-in-95 duration-200"
+        className="w-full max-w-lg bg-white dark:bg-slate-900 rounded-lg shadow-2xl overflow-hidden animate-in fade-in zoom-in-95 duration-200"
         onClick={e => e.stopPropagation()}
       >
         {/* Header */}
         <div className="relative px-6 pt-6 pb-4 border-b border-slate-100 dark:border-slate-800">
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-3">
-              <div className="p-2 bg-amber-50 dark:bg-amber-500/10 rounded-xl">
+              <div className="p-2 bg-amber-50 dark:bg-amber-500/10 rounded-lg">
                 <Heart className="w-5 h-5 text-amber-500" />
               </div>
               <div>
@@ -80,7 +80,7 @@ const ReviewModal: React.FC<ReviewModalProps> = ({
             </div>
             <button
               onClick={onClose}
-              className="p-2 hover:bg-slate-100 dark:hover:bg-slate-800 text-slate-400 hover:text-slate-600 dark:hover:text-slate-300 rounded-xl transition-all"
+              className="p-2 hover:bg-slate-100 dark:hover:bg-slate-800 text-slate-400 hover:text-slate-600 dark:hover:text-slate-300 rounded-lg transition-all"
             >
               <X className="w-5 h-5" />
             </button>
@@ -89,7 +89,7 @@ const ReviewModal: React.FC<ReviewModalProps> = ({
 
         <form onSubmit={handleSubmit} className="p-6 space-y-6">
           {/* Service info */}
-          <div className="bg-slate-50 dark:bg-slate-800/50 p-4 rounded-2xl border border-slate-100 dark:border-slate-800">
+          <div className="bg-slate-50 dark:bg-slate-800/50 p-4 rounded-lg border border-slate-100 dark:border-slate-800">
             <p className="text-[10px] font-black uppercase tracking-widest text-slate-400 mb-1">
               Servicio
             </p>
@@ -106,7 +106,7 @@ const ReviewModal: React.FC<ReviewModalProps> = ({
             <label className="block text-sm font-bold text-slate-700 dark:text-slate-300">
               Puntuación
             </label>
-            <div className="flex flex-col items-center gap-3 py-5 bg-slate-50 dark:bg-slate-800/50 rounded-2xl border border-slate-100 dark:border-slate-800">
+            <div className="flex flex-col items-center gap-3 py-5 bg-slate-50 dark:bg-slate-800/50 rounded-lg border border-slate-100 dark:border-slate-800">
               <div className="flex gap-2">
                 {[1, 2, 3, 4, 5].map((value) => (
                   <button
@@ -143,7 +143,7 @@ const ReviewModal: React.FC<ReviewModalProps> = ({
                 rows={3}
                 value={comment}
                 onChange={(e) => setComment(e.target.value)}
-                className="w-full pl-10 pr-4 py-3 rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 focus:ring-2 focus:ring-primary-500/20 focus:border-primary-500 outline-none transition-all text-sm"
+                className="w-full pl-10 pr-4 py-3 rounded-lg border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 focus:ring-2 focus:ring-primary-500/20 focus:border-primary-500 outline-none transition-all text-sm"
                 placeholder="Cuéntanos qué te pareció el servicio..."
               />
             </div>
@@ -156,7 +156,7 @@ const ReviewModal: React.FC<ReviewModalProps> = ({
             </p>
             <div className="grid grid-cols-2 gap-3">
               {(['before', 'after'] as const).map(side => (
-                <label key={side} className="flex flex-col items-center justify-center h-20 rounded-xl border-2 border-dashed border-slate-300 dark:border-slate-600 cursor-pointer hover:border-primary-400 bg-slate-50 dark:bg-slate-800/50 transition-all">
+                <label key={side} className="flex flex-col items-center justify-center h-20 rounded-lg border-2 border-dashed border-slate-300 dark:border-slate-600 cursor-pointer hover:border-primary-400 bg-slate-50 dark:bg-slate-800/50 transition-all">
                   {uploadingPhoto ? (
                     <div className="animate-spin rounded-full h-5 w-5 border-2 border-primary-600 border-t-transparent" />
                   ) : (side === 'before' ? beforeUrl : afterUrl) ? (
@@ -182,14 +182,14 @@ const ReviewModal: React.FC<ReviewModalProps> = ({
             <button
               type="button"
               onClick={onClose}
-              className="flex-1 px-6 py-3 bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300 font-bold rounded-xl hover:bg-slate-200 dark:hover:bg-slate-700 transition-all active:scale-[0.98]"
+              className="flex-1 px-6 py-3 bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300 font-bold rounded-lg hover:bg-slate-200 dark:hover:bg-slate-700 transition-all active:scale-[0.98]"
             >
               Cancelar
             </button>
             <button
               type="submit"
               disabled={loading}
-              className="flex-[2] inline-flex items-center justify-center gap-2 px-6 py-3 bg-primary-600 hover:bg-primary-500 text-white font-black rounded-xl shadow-lg shadow-primary-500/20 transition-all active:scale-[0.98] disabled:opacity-50 disabled:cursor-not-allowed"
+              className="flex-[2] inline-flex items-center justify-center gap-2 px-6 py-3 bg-primary-600 hover:bg-primary-500 text-white font-black rounded-lg shadow-lg shadow-primary-500/20 transition-all active:scale-[0.98] disabled:opacity-50 disabled:cursor-not-allowed"
             >
               {loading ? (
                 <>

@@ -67,7 +67,7 @@ const BusinessHistorySection: React.FC<BusinessHistorySectionProps> = ({
         </div>
       ) : appointments.length === 0 ? (
         <div className="card p-12 flex flex-col items-center text-center max-w-lg mx-auto">
-          <div className="w-16 h-16 rounded-2xl bg-slate-50 dark:bg-slate-800 flex items-center justify-center mb-6 text-slate-400">
+          <div className="w-16 h-16 rounded-lg bg-slate-50 dark:bg-slate-800 flex items-center justify-center mb-6 text-slate-400">
             <History className="w-8 h-8" />
           </div>
           <h3 className="text-xl font-black text-slate-900 dark:text-white mb-2">No hay historial aún</h3>
@@ -82,7 +82,7 @@ const BusinessHistorySection: React.FC<BusinessHistorySectionProps> = ({
                 <li key={appt.id} className="p-4 sm:p-6 hover:bg-slate-50/50 dark:hover:bg-slate-800/50 transition-colors">
                   <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
                     <div className="flex items-start gap-4">
-                      <div className={`w-12 h-12 rounded-xl flex items-center justify-center shrink-0 ${
+                      <div className={`w-12 h-12 rounded-lg flex items-center justify-center shrink-0 ${
                         appt.status === 'cancelled' 
                           ? 'bg-red-50 text-red-600 dark:bg-red-500/10 dark:text-red-400' 
                           : 'bg-primary-50 text-primary-600 dark:bg-primary-500/10 dark:text-primary-400'

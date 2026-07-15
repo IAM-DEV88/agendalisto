@@ -285,11 +285,11 @@ const BusinessHeader: React.FC<BusinessHeaderProps> = ({ businessData, averageRa
               <div>
                 <p className="text-xs font-bold text-slate-400 uppercase tracking-widest mb-2">Compartir</p>
                 <div className="flex flex-wrap items-center gap-2">
-                  <div className="flex items-center gap-2 p-1.5 bg-slate-100 dark:bg-slate-800 rounded-2xl border border-slate-200 dark:border-slate-700 shadow-sm">
+                  <div className="flex items-center gap-2 p-1.5 bg-slate-100 dark:bg-slate-800 rounded-lg border border-slate-200 dark:border-slate-700 shadow-sm">
                     <button
                       onClick={handleToggleLike}
                       disabled={isLiking}
-                      className={`flex items-center gap-2 px-4 py-2 rounded-xl transition-all ${
+                      className={`flex items-center gap-2 px-4 py-2 rounded-lg transition-all ${
                         isLiked 
                           ? 'bg-rose-500 text-white shadow-md shadow-rose-200 dark:shadow-rose-900/20' 
                           : 'hover:bg-slate-200 dark:hover:bg-slate-700 text-slate-600 dark:text-slate-400'
@@ -318,7 +318,7 @@ const BusinessHeader: React.FC<BusinessHeaderProps> = ({ businessData, averageRa
                       href={`https://wa.me/${businessData.whatsapp}`}
                       target="_blank"
                       rel="noopener noreferrer"
-                      className="flex items-center gap-2 px-4 py-2 rounded-xl bg-emerald-50 dark:bg-emerald-900/20 text-emerald-600 dark:text-emerald-400 hover:bg-emerald-100 dark:hover:bg-emerald-900/40 transition-all border border-emerald-200 dark:border-emerald-800/50 font-bold text-sm"
+                      className="flex items-center gap-2 px-4 py-2 rounded-lg bg-emerald-50 dark:bg-emerald-900/20 text-emerald-600 dark:text-emerald-400 hover:bg-emerald-100 dark:hover:bg-emerald-900/40 transition-all border border-emerald-200 dark:border-emerald-800/50 font-bold text-sm"
                       title="Contactar por WhatsApp"
                     >
                       <MessageCircle className="h-5 w-5" />
@@ -327,13 +327,13 @@ const BusinessHeader: React.FC<BusinessHeaderProps> = ({ businessData, averageRa
                   )}
                   {businessData.facebook && businessData.config?.mostrar_redes_sociales && (
                     <a href={`https://facebook.com/${businessData.facebook}`} target="_blank" rel="noopener noreferrer"
-                      className="p-3 bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-400 rounded-xl hover:bg-primary-600 hover:text-white transition-all shadow-sm border border-slate-200 dark:border-slate-700" title="Facebook">
+                      className="p-3 bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-400 rounded-lg hover:bg-primary-600 hover:text-white transition-all shadow-sm border border-slate-200 dark:border-slate-700" title="Facebook">
                       <Facebook className="h-5 w-5" />
                     </a>
                   )}
                   {businessData.instagram && businessData.config?.mostrar_redes_sociales && (
                     <a href={`https://instagram.com/${businessData.instagram}`} target="_blank" rel="noopener noreferrer"
-                      className="p-3 bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-400 rounded-xl hover:bg-primary-600 hover:text-white transition-all shadow-sm border border-slate-200 dark:border-slate-700" title="Instagram">
+                      className="p-3 bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-400 rounded-lg hover:bg-primary-600 hover:text-white transition-all shadow-sm border border-slate-200 dark:border-slate-700" title="Instagram">
                       <Instagram className="h-5 w-5" />
                     </a>
                   )}
@@ -343,7 +343,7 @@ const BusinessHeader: React.FC<BusinessHeaderProps> = ({ businessData, averageRa
           </div>
 
           <div className="w-full md:w-auto min-w-[280px]">
-            <div className="bg-slate-50 dark:bg-slate-800/50 rounded-2xl p-6 border border-slate-100 dark:border-slate-700/50">
+            <div className="bg-slate-50 dark:bg-slate-800/50 rounded-lg p-6 border border-slate-100 dark:border-slate-700/50">
               <h3 className="text-sm font-bold text-slate-400 uppercase tracking-widest mb-4">Información de contacto</h3>
               <div className="space-y-4">
                 {businessData.address && businessData.config?.mostrar_direccion && (

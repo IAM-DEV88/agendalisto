@@ -38,7 +38,7 @@ export default function BeforeAfterUpload({ userId, appointmentId: _appointmentI
         {(['before', 'after'] as const).map(side => (
           <div key={side} className="relative">
             {(side === 'before' ? before : after) ? (
-              <div className="relative group rounded-2xl overflow-hidden border border-slate-200 dark:border-slate-700">
+              <div className="relative group rounded-lg overflow-hidden border border-slate-200 dark:border-slate-700">
                 <img src={side === 'before' ? before! : after!} alt={side} className="w-full h-28 object-cover" />
                 <button onClick={() => { if (side === 'before') setBefore(null); else setAfter(null); }}
                   className="absolute top-1 right-1 p-1 bg-black/50 rounded-lg text-white opacity-0 group-hover:opacity-100 transition-all">
@@ -46,7 +46,7 @@ export default function BeforeAfterUpload({ userId, appointmentId: _appointmentI
                 </button>
               </div>
             ) : (
-              <label className="flex flex-col items-center justify-center h-28 rounded-2xl border-2 border-dashed border-slate-300 dark:border-slate-600 cursor-pointer hover:border-primary-400 bg-slate-50 dark:bg-slate-800/50 transition-all">
+              <label className="flex flex-col items-center justify-center h-28 rounded-lg border-2 border-dashed border-slate-300 dark:border-slate-600 cursor-pointer hover:border-primary-400 bg-slate-50 dark:bg-slate-800/50 transition-all">
                 {uploading ? <Loader2 className="w-5 h-5 text-primary-500 animate-spin" /> : <Camera className="w-5 h-5 text-slate-400" />}
                 <span className="text-[10px] font-medium text-slate-400 mt-1">{side === 'before' ? 'Antes' : 'Después'}</span>
                 <input type="file" accept="image/*" className="hidden" onChange={e => { const f = e.target.files?.[0]; if (f) handleUpload(side, f); }} />
@@ -57,7 +57,7 @@ export default function BeforeAfterUpload({ userId, appointmentId: _appointmentI
       </div>
       {isComplete && (
         <button onClick={() => onComplete(before!, after!)}
-          className="w-full py-2.5 bg-primary-600 hover:bg-primary-700 text-white font-bold text-sm rounded-xl transition-all">
+          className="w-full py-2.5 bg-primary-600 hover:bg-primary-700 text-white font-bold text-sm rounded-lg transition-all">
           Publicar mi antes/después
         </button>
       )}

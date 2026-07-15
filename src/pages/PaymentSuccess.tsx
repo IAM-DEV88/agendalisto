@@ -70,7 +70,7 @@ export default function PaymentSuccess() {
       <div className="text-center max-w-md animate-in fade-in zoom-in-95 duration-500">
         {status === 'loading' && (
           <>
-            <div className="w-20 h-20 mx-auto mb-6 rounded-2xl bg-primary-50 dark:bg-primary-500/10 flex items-center justify-center">
+            <div className="w-20 h-20 mx-auto mb-6 rounded-lg bg-primary-50 dark:bg-primary-500/10 flex items-center justify-center">
               <Loader2 className="w-10 h-10 text-primary-600 animate-spin" />
             </div>
             <h1 className="text-2xl font-black text-slate-900 dark:text-white mb-3">Verificando pago...</h1>
@@ -80,7 +80,7 @@ export default function PaymentSuccess() {
 
         {status === 'success' && (
           <>
-            <div className="w-20 h-20 mx-auto mb-6 rounded-2xl bg-emerald-50 dark:bg-emerald-500/10 flex items-center justify-center">
+            <div className="w-20 h-20 mx-auto mb-6 rounded-lg bg-emerald-50 dark:bg-emerald-500/10 flex items-center justify-center">
               <CheckCircle className="w-10 h-10 text-emerald-500" />
             </div>
             <h1 className="text-2xl font-black text-slate-900 dark:text-white mb-3">¡Pago confirmado!</h1>
@@ -88,7 +88,7 @@ export default function PaymentSuccess() {
             <p className="text-sm text-slate-400 mb-8">Ya puedes disfrutar de todos los beneficios.</p>
             <Link
               to="/business/dashboard"
-              className="inline-flex items-center gap-2 px-6 py-3 bg-primary-600 hover:bg-primary-700 text-white font-bold rounded-xl shadow-lg shadow-primary-500/25 transition-all"
+              className="inline-flex items-center gap-2 px-6 py-3 bg-primary-600 hover:bg-primary-700 text-white font-bold rounded-lg shadow-lg shadow-primary-500/25 transition-all"
             >
               Ir al panel
             </Link>
@@ -97,7 +97,7 @@ export default function PaymentSuccess() {
 
         {status === 'error' && (
           <>
-            <div className="w-20 h-20 mx-auto mb-6 rounded-2xl bg-amber-50 dark:bg-amber-500/10 flex items-center justify-center">
+            <div className="w-20 h-20 mx-auto mb-6 rounded-lg bg-amber-50 dark:bg-amber-500/10 flex items-center justify-center">
               <AlertTriangle className="w-10 h-10 text-amber-500" />
             </div>
             <h1 className="text-2xl font-black text-slate-900 dark:text-white mb-3">Referencia inválida</h1>

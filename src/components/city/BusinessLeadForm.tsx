@@ -76,7 +76,7 @@ export default function BusinessLeadForm({ city, categories }: BusinessLeadFormP
     return (
       <section className="py-16 sm:py-20 px-4 sm:px-6 lg:px-8">
         <div className="max-w-lg mx-auto text-center">
-          <div className="w-16 h-16 rounded-2xl bg-emerald-100 dark:bg-emerald-900/50 flex items-center justify-center mx-auto mb-5">
+          <div className="w-16 h-16 rounded-lg bg-emerald-100 dark:bg-emerald-900/50 flex items-center justify-center mx-auto mb-5">
             <MessageCircle className="w-8 h-8 text-emerald-600 dark:text-emerald-400" />
           </div>
           <h3 className="text-2xl font-black text-slate-900 dark:text-white mb-2">
@@ -103,7 +103,7 @@ export default function BusinessLeadForm({ city, categories }: BusinessLeadFormP
     <section id="business-lead-form" className="py-16 sm:py-20 px-4 sm:px-6 lg:px-8 max-w-7xl mx-auto">
       <div className="max-w-2xl mx-auto">
         <div className="text-center mb-10">
-          <div className="w-14 h-14 rounded-2xl bg-primary-50 dark:bg-primary-500/10 flex items-center justify-center mx-auto mb-4">
+          <div className="w-14 h-14 rounded-lg bg-primary-50 dark:bg-primary-500/10 flex items-center justify-center mx-auto mb-4">
             <Store className="w-7 h-7 text-primary-600 dark:text-primary-400" />
           </div>
           <h2 className="text-3xl sm:text-4xl font-black text-slate-900 dark:text-white tracking-tight mb-3">
@@ -116,7 +116,7 @@ export default function BusinessLeadForm({ city, categories }: BusinessLeadFormP
 
         <form
           onSubmit={handleSubmit}
-          className="bg-white dark:bg-slate-900 rounded-3xl border border-slate-200 dark:border-slate-800 shadow-xl shadow-slate-200/50 dark:shadow-none overflow-hidden"
+          className="bg-white dark:bg-slate-900 rounded-lg border border-slate-200 dark:border-slate-800 shadow-xl shadow-slate-200/50 dark:shadow-none overflow-hidden"
         >
           <div className="divide-y divide-slate-100 dark:divide-slate-800">
             {/* Basic info section */}
@@ -209,7 +209,7 @@ export default function BusinessLeadForm({ city, categories }: BusinessLeadFormP
               <button
                 type="submit"
                 disabled={submitting}
-                className="w-full py-3.5 bg-primary-600 hover:bg-primary-700 disabled:bg-slate-300 dark:disabled:bg-slate-700 text-white font-bold rounded-xl shadow-lg shadow-primary-500/25 transition-all hover:-translate-y-0.5 active:translate-y-0 disabled:transform-none disabled:cursor-not-allowed flex items-center justify-center gap-2"
+                className="w-full py-3.5 bg-primary-600 hover:bg-primary-700 disabled:bg-slate-300 dark:disabled:bg-slate-700 text-white font-bold rounded-lg shadow-lg shadow-primary-500/25 transition-all hover:-translate-y-0.5 active:translate-y-0 disabled:transform-none disabled:cursor-not-allowed flex items-center justify-center gap-2"
               >
                 {submitting ? (
                   <>

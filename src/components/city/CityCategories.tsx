@@ -35,7 +35,7 @@ export default function CityCategories({ categories, city }: CityCategoriesProps
             <Link
               key={cat.id}
               to={buildCategoryUrl(cat, city)}
-              className="group relative bg-white dark:bg-slate-900 rounded-2xl border-2 border-primary-100 dark:border-primary-900/50 p-5 sm:p-6 text-center hover:border-primary-300 dark:hover:border-primary-700 hover:shadow-xl hover:-translate-y-1 transition-all duration-300"
+              className="group relative bg-white dark:bg-slate-900 rounded-lg border-2 border-primary-100 dark:border-primary-900/50 p-5 sm:p-6 text-center hover:border-primary-300 dark:hover:border-primary-700 hover:shadow-xl hover:-translate-y-1 transition-all duration-300"
             >
               <span className="text-3xl sm:text-4xl block mb-2">{getCategoryIcon(cat.name)}</span>
               <h3 className="font-bold text-sm sm:text-base text-slate-900 dark:text-white group-hover:text-primary-600 transition-colors">
@@ -55,7 +55,7 @@ export default function CityCategories({ categories, city }: CityCategoriesProps
             <Link
               key={cat.id}
               to={buildCategoryUrl(cat, city)}
-              className="group relative bg-white dark:bg-slate-900 rounded-2xl border-2 border-slate-100 dark:border-slate-800 p-5 sm:p-6 text-center hover:border-primary-200 dark:hover:border-primary-800 hover:shadow-lg hover:-translate-y-0.5 transition-all duration-300"
+              className="group relative bg-white dark:bg-slate-900 rounded-lg border-2 border-slate-100 dark:border-slate-800 p-5 sm:p-6 text-center hover:border-primary-200 dark:hover:border-primary-800 hover:shadow-lg hover:-translate-y-0.5 transition-all duration-300"
             >
               <span className="text-3xl sm:text-4xl block mb-2">{getCategoryIcon(cat.name)}</span>
               <h3 className="font-bold text-sm sm:text-base text-slate-900 dark:text-white group-hover:text-primary-600 transition-colors">
@@ -72,7 +72,7 @@ export default function CityCategories({ categories, city }: CityCategoriesProps
       <div className="text-center mt-10">
         <Link
           to={`/explore?location=${encodeURIComponent(city.name)}`}
-          className="inline-flex items-center gap-2 px-6 py-3 bg-primary-600 hover:bg-primary-500 text-white font-bold rounded-xl transition-all shadow-lg shadow-primary-500/25 hover:-translate-y-0.5 active:translate-y-0"
+          className="inline-flex items-center gap-2 px-6 py-3 bg-primary-600 hover:bg-primary-500 text-white font-bold rounded-lg transition-all shadow-lg shadow-primary-500/25 hover:-translate-y-0.5 active:translate-y-0"
         >
           Ver todos los negocios en {city.name}
           <ArrowRight className="w-4 h-4" />

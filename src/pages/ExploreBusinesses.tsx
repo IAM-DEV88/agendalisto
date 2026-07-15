@@ -52,7 +52,7 @@ const BusinessCard = ({ business, categories, isLiked: initialLiked, currentUser
   return (
     <Link
       to={`/${business.slug}`}
-      className="group w-full bg-white dark:bg-slate-900 rounded-2xl border border-slate-200 dark:border-slate-800 overflow-hidden hover:border-primary-300 dark:hover:border-primary-700 hover:shadow-2xl transition-all duration-300 hover:-translate-y-1 flex flex-col"
+      className="group w-full bg-white dark:bg-slate-900 rounded-lg border border-slate-200 dark:border-slate-800 overflow-hidden hover:border-primary-300 dark:hover:border-primary-700 hover:shadow-2xl transition-all duration-300 hover:-translate-y-1 flex flex-col"
     >
       <div className="w-full h-48 sm:h-52 bg-slate-100 dark:bg-slate-800 relative overflow-hidden flex-shrink-0">
         <img
@@ -68,7 +68,7 @@ const BusinessCard = ({ business, categories, isLiked: initialLiked, currentUser
               onClick={handleToggleLike}
               disabled={isLiking}
               aria-label={isLiked ? 'Quitar de favoritos' : 'Agregar a favoritos'}
-              className={`p-2 rounded-xl backdrop-blur-md transition-all ${
+              className={`p-2 rounded-lg backdrop-blur-md transition-all ${
                 isLiked ? 'bg-rose-500 text-white' : 'bg-white/20 hover:bg-white/40 text-white'
               }`}
             >
@@ -80,7 +80,7 @@ const BusinessCard = ({ business, categories, isLiked: initialLiked, currentUser
                 title={business.name}
                 variant="icon"
                 iconSize={16}
-                className="!bg-white/20 !backdrop-blur-md hover:!bg-white/40 !text-white !rounded-xl"
+                className="!bg-white/20 !backdrop-blur-md hover:!bg-white/40 !text-white !rounded-lg"
               />
             </div>
             {business.whatsapp && (
@@ -91,7 +91,7 @@ const BusinessCard = ({ business, categories, isLiked: initialLiked, currentUser
                   e.stopPropagation();
                   window.open(`https://wa.me/${business.whatsapp}?text=${encodeURIComponent('Hola, vi tu perfil en AgendaYa y quiero agendar una cita')}`, '_blank', 'noopener,noreferrer');
                 }}
-                className="p-2 rounded-xl backdrop-blur-md bg-emerald-500/80 hover:bg-emerald-500 text-white transition-all"
+                className="p-2 rounded-lg backdrop-blur-md bg-emerald-500/80 hover:bg-emerald-500 text-white transition-all"
                 title="Hablar por WhatsApp"
               >
                 <MessageCircle className="h-4 w-4" />
@@ -162,7 +162,7 @@ const BusinessCard = ({ business, categories, isLiked: initialLiked, currentUser
 
 function SkeletonCard() {
   return (
-    <div className="bg-white dark:bg-slate-900 rounded-2xl border border-slate-200 dark:border-slate-800 overflow-hidden animate-pulse">
+    <div className="bg-white dark:bg-slate-900 rounded-lg border border-slate-200 dark:border-slate-800 overflow-hidden animate-pulse">
       <div className="h-48 bg-slate-200 dark:bg-slate-800" />
       <div className="p-5 space-y-3">
         <div className="h-5 bg-slate-200 dark:bg-slate-800 rounded-lg w-3/4" />
@@ -319,7 +319,7 @@ const ExploreBusinesses = () => {
 
         {/* Header */}
         <div className="text-center mb-10 animate-in fade-in slide-in-from-top-4 duration-500">
-          <div className="w-14 h-14 rounded-2xl bg-primary-50 dark:bg-primary-500/10 flex items-center justify-center mx-auto mb-4 ring-1 ring-primary-200 dark:ring-primary-800">
+          <div className="w-14 h-14 rounded-lg bg-primary-50 dark:bg-primary-500/10 flex items-center justify-center mx-auto mb-4 ring-1 ring-primary-200 dark:ring-primary-800">
             <Store className="w-7 h-7 text-primary-600 dark:text-primary-400" />
           </div>
           <h1 className="text-3xl sm:text-4xl font-black text-slate-900 dark:text-white tracking-tight mb-3">
@@ -331,7 +331,7 @@ const ExploreBusinesses = () => {
         </div>
 
         {/* Search & Filters */}
-        <div className="bg-white dark:bg-slate-900 rounded-2xl border border-slate-200 dark:border-slate-800 shadow-lg shadow-slate-200/50 dark:shadow-none p-4 sm:p-5 mb-10 animate-in fade-in slide-in-from-bottom-4 duration-500 delay-100">
+        <div className="bg-white dark:bg-slate-900 rounded-lg border border-slate-200 dark:border-slate-800 shadow-lg shadow-slate-200/50 dark:shadow-none p-4 sm:p-5 mb-10 animate-in fade-in slide-in-from-bottom-4 duration-500 delay-100">
           <div className="flex flex-col lg:flex-row gap-3">
             <div className="flex-1 relative">
               <Search className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
@@ -340,7 +340,7 @@ const ExploreBusinesses = () => {
                 value={searchTerm}
                 onChange={(e) => setSearchTerm(e.target.value)}
                 placeholder="¿Qué servicio buscas?"
-                className="w-full pl-10 pr-4 py-3 rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 text-slate-900 dark:text-slate-100 focus:ring-2 focus:ring-primary-500/20 focus:border-primary-500 outline-none transition-all text-sm font-medium"
+                className="w-full pl-10 pr-4 py-3 rounded-lg border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 text-slate-900 dark:text-slate-100 focus:ring-2 focus:ring-primary-500/20 focus:border-primary-500 outline-none transition-all text-sm font-medium"
               />
             </div>
             <div className="flex-1 relative">
@@ -350,7 +350,7 @@ const ExploreBusinesses = () => {
                 value={locationTerm}
                 onChange={(e) => setLocationTerm(e.target.value)}
                 placeholder="Ubicación"
-                className="w-full pl-10 pr-4 py-3 rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 text-slate-900 dark:text-slate-100 focus:ring-2 focus:ring-primary-500/20 focus:border-primary-500 outline-none transition-all text-sm font-medium"
+                className="w-full pl-10 pr-4 py-3 rounded-lg border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 text-slate-900 dark:text-slate-100 focus:ring-2 focus:ring-primary-500/20 focus:border-primary-500 outline-none transition-all text-sm font-medium"
               />
             </div>
             <div className="lg:w-48 relative">
@@ -380,7 +380,7 @@ const ExploreBusinesses = () => {
 
         {/* Error */}
         {error && (
-          <div className="flex items-start gap-3 px-5 py-4 mb-8 bg-red-50 dark:bg-red-500/10 border border-red-200 dark:border-red-800 rounded-2xl animate-in fade-in duration-300">
+          <div className="flex items-start gap-3 px-5 py-4 mb-8 bg-red-50 dark:bg-red-500/10 border border-red-200 dark:border-red-800 rounded-lg animate-in fade-in duration-300">
             <span className="text-sm font-bold text-red-700 dark:text-red-400">{error}</span>
           </div>
         )}
@@ -390,14 +390,14 @@ const ExploreBusinesses = () => {
           <div className="flex items-center justify-end mb-4 gap-2">
             <button
               onClick={() => setViewMode('list')}
-              className={`p-2 rounded-xl transition-all ${viewMode === 'list' ? 'bg-primary-100 dark:bg-primary-900/40 text-primary-600 dark:text-primary-400' : 'bg-slate-100 dark:bg-slate-800 text-slate-400 hover:text-slate-600'}`}
+              className={`p-2 rounded-lg transition-all ${viewMode === 'list' ? 'bg-primary-100 dark:bg-primary-900/40 text-primary-600 dark:text-primary-400' : 'bg-slate-100 dark:bg-slate-800 text-slate-400 hover:text-slate-600'}`}
               title="Vista lista"
             >
               <List className="w-4 h-4" />
             </button>
             <button
               onClick={() => setViewMode('map')}
-              className={`p-2 rounded-xl transition-all ${viewMode === 'map' ? 'bg-primary-100 dark:bg-primary-900/40 text-primary-600 dark:text-primary-400' : 'bg-slate-100 dark:bg-slate-800 text-slate-400 hover:text-slate-600'}`}
+              className={`p-2 rounded-lg transition-all ${viewMode === 'map' ? 'bg-primary-100 dark:bg-primary-900/40 text-primary-600 dark:text-primary-400' : 'bg-slate-100 dark:bg-slate-800 text-slate-400 hover:text-slate-600'}`}
               title="Vista mapa"
             >
               <Map className="w-4 h-4" />
@@ -422,7 +422,7 @@ const ExploreBusinesses = () => {
               <div className="mt-6 text-center animate-in fade-in zoom-in-95 duration-500 delay-200">
                 <Link
                   to="/register"
-                  className="inline-flex items-center gap-2 px-5 py-3 bg-primary-50 dark:bg-primary-900/20 text-primary-700 dark:text-primary-300 font-bold text-sm rounded-xl border border-primary-200 dark:border-primary-800 hover:bg-primary-100 dark:hover:bg-primary-900/40 transition-all"
+                  className="inline-flex items-center gap-2 px-5 py-3 bg-primary-50 dark:bg-primary-900/20 text-primary-700 dark:text-primary-300 font-bold text-sm rounded-lg border border-primary-200 dark:border-primary-800 hover:bg-primary-100 dark:hover:bg-primary-900/40 transition-all"
                 >
                   🌐 ¿Tienes un negocio? Crea tu web gratis y aparece aquí →
                 </Link>
@@ -430,7 +430,7 @@ const ExploreBusinesses = () => {
             )}
           </div>
         ) : viewMode === 'map' ? (
-          <Suspense fallback={<div className="h-[400px] bg-slate-100 dark:bg-slate-800 rounded-2xl animate-pulse" />}>
+          <Suspense fallback={<div className="h-[400px] bg-slate-100 dark:bg-slate-800 rounded-lg animate-pulse" />}>
             <BusinessMap businesses={mapBusinesses as any} />
           </Suspense>
         ) : (
@@ -457,7 +457,7 @@ const ExploreBusinesses = () => {
 
             {loadingMore && (
               <div className="flex justify-center py-8 animate-in fade-in duration-300">
-                <div className="flex items-center gap-3 px-6 py-3 bg-white dark:bg-slate-900 rounded-2xl shadow-lg border border-slate-200 dark:border-slate-700">
+                <div className="flex items-center gap-3 px-6 py-3 bg-white dark:bg-slate-900 rounded-lg shadow-lg border border-slate-200 dark:border-slate-700">
                   <Loader2 className="w-5 h-5 text-primary-600 animate-spin" />
                   <span className="text-sm font-black text-slate-600 dark:text-slate-400 uppercase tracking-widest">Cargando más...</span>
                 </div>

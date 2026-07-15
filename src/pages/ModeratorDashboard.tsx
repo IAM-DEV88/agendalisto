@@ -117,7 +117,7 @@ const ModeratorDashboard = ({ user }: ModeratorDashboardProps) => {
 
         <div className="mt-8">
           {activeTab === 'overview' && (
-            <div className="bg-white dark:bg-slate-900 rounded-2xl border border-slate-200 dark:border-slate-800 p-6">
+            <div className="bg-white dark:bg-slate-900 rounded-lg border border-slate-200 dark:border-slate-800 p-6">
               <h3 className="text-lg font-black text-slate-900 dark:text-white mb-2">Moderación General</h3>
               <p className="text-sm text-slate-600 dark:text-slate-400">
                 Gestión de contenido, reseñas y reportes de la comunidad.
@@ -145,13 +145,13 @@ const ModeratorDashboard = ({ user }: ModeratorDashboardProps) => {
           )}
 
           {activeTab === 'content' && (
-            <div className="bg-white dark:bg-slate-900 rounded-2xl border border-slate-200 dark:border-slate-800 p-6">
+            <div className="bg-white dark:bg-slate-900 rounded-lg border border-slate-200 dark:border-slate-800 p-6">
               <p className="text-sm text-slate-500 dark:text-slate-400">Moderación de contenido próximamente.</p>
             </div>
           )}
 
           {activeTab === 'reports' && (
-            <div className="bg-white dark:bg-slate-900 rounded-2xl border border-slate-200 dark:border-slate-800 p-6">
+            <div className="bg-white dark:bg-slate-900 rounded-lg border border-slate-200 dark:border-slate-800 p-6">
               <p className="text-sm text-slate-500 dark:text-slate-400">Gestión de reportes próximamente.</p>
             </div>
           )}
@@ -161,23 +161,23 @@ const ModeratorDashboard = ({ user }: ModeratorDashboardProps) => {
               {referralLoading ? (
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                   {[1, 2].map(i => (
-                    <div key={i} className="h-28 bg-white dark:bg-slate-900 rounded-2xl border border-slate-200 dark:border-slate-800 animate-pulse" />
+                    <div key={i} className="h-28 bg-white dark:bg-slate-900 rounded-lg border border-slate-200 dark:border-slate-800 animate-pulse" />
                   ))}
                 </div>
               ) : (
                 <>
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                    <div className="bg-gradient-to-br from-primary-600 to-primary-800 dark:from-primary-700 dark:to-primary-900 rounded-2xl p-6 shadow-xl shadow-primary-500/20">
+                    <div className="bg-gradient-to-br from-primary-600 to-primary-800 dark:from-primary-700 dark:to-primary-900 rounded-lg p-6 shadow-xl shadow-primary-500/20">
                       <p className="text-primary-200 text-xs font-bold uppercase tracking-widest">Total Referidos</p>
                       <p className="text-3xl font-black text-white mt-1">{referralStats?.total_referrals || 0}</p>
                     </div>
-                    <div className="bg-white dark:bg-slate-900 rounded-2xl border border-slate-200 dark:border-slate-800 p-6">
+                    <div className="bg-white dark:bg-slate-900 rounded-lg border border-slate-200 dark:border-slate-800 p-6">
                       <p className="text-xs font-bold text-slate-400 uppercase tracking-widest">Referidores Únicos</p>
                       <p className="text-3xl font-black text-slate-900 dark:text-white mt-1">{referralStats?.unique_referrers || 0}</p>
                     </div>
                   </div>
 
-                  <div className="bg-white dark:bg-slate-900 rounded-2xl border border-slate-200 dark:border-slate-800 p-5 sm:p-6">
+                  <div className="bg-white dark:bg-slate-900 rounded-lg border border-slate-200 dark:border-slate-800 p-5 sm:p-6">
                     <h3 className="text-sm font-black text-slate-500 dark:text-slate-400 uppercase tracking-widest mb-4">
                       Top Referidores
                     </h3>
@@ -192,7 +192,7 @@ const ModeratorDashboard = ({ user }: ModeratorDashboardProps) => {
                         {topReferrers.map((stat, i) => (
                           <div
                             key={stat.referrer_id}
-                            className="flex items-center gap-4 p-3 rounded-xl bg-slate-50 dark:bg-slate-800/50 border border-slate-100 dark:border-slate-800"
+                            className="flex items-center gap-4 p-3 rounded-lg bg-slate-50 dark:bg-slate-800/50 border border-slate-100 dark:border-slate-800"
                           >
                             <div className={`w-8 h-8 rounded-full flex items-center justify-center flex-shrink-0 font-black text-sm ${
                               i === 0

@@ -79,7 +79,7 @@ export default function ImageUpload({
   return (
     <div className="space-y-2">
       {displayUrl ? (
-        <div className="relative group rounded-2xl overflow-hidden border border-slate-200 dark:border-slate-700">
+        <div className="relative group rounded-lg overflow-hidden border border-slate-200 dark:border-slate-700">
           <img
             src={displayUrl}
             alt="Preview"
@@ -89,7 +89,7 @@ export default function ImageUpload({
             <button
               type="button"
               onClick={() => inputRef.current?.click()}
-              className="p-2 bg-white/90 rounded-xl hover:bg-white transition-all opacity-0 group-hover:opacity-100"
+              className="p-2 bg-white/90 rounded-lg hover:bg-white transition-all opacity-0 group-hover:opacity-100"
               aria-label="Cambiar imagen"
             >
               <Upload className="w-4 h-4 text-slate-700" />
@@ -97,7 +97,7 @@ export default function ImageUpload({
             <button
               type="button"
               onClick={handleRemove}
-              className="p-2 bg-red-500/90 rounded-xl hover:bg-red-500 transition-all opacity-0 group-hover:opacity-100"
+              className="p-2 bg-red-500/90 rounded-lg hover:bg-red-500 transition-all opacity-0 group-hover:opacity-100"
               aria-label="Eliminar imagen"
             >
               <X className="w-4 h-4 text-white" />
@@ -111,7 +111,7 @@ export default function ImageUpload({
           onDragOver={(e) => { e.preventDefault(); setDragOver(true); }}
           onDragLeave={() => setDragOver(false)}
           onDrop={handleDrop}
-          className={`w-full h-48 rounded-2xl border-2 border-dashed transition-all flex flex-col items-center justify-center gap-2 cursor-pointer ${
+          className={`w-full h-48 rounded-lg border-2 border-dashed transition-all flex flex-col items-center justify-center gap-2 cursor-pointer ${
             dragOver
               ? 'border-primary-500 bg-primary-50 dark:bg-primary-900/20'
               : 'border-slate-300 dark:border-slate-600 hover:border-primary-400 bg-slate-50 dark:bg-slate-800/50'

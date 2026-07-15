@@ -181,7 +181,7 @@ const BusinessProfileSection: React.FC<BusinessProfileSectionProps> = ({
             {/* Logo Upload Section */}
             <div className="flex-shrink-0 flex flex-col items-center gap-4 w-full md:w-auto">
               <div className="relative group">
-                <div className="w-32 h-32 rounded-2xl overflow-hidden border-4 border-slate-100 dark:border-slate-800 shadow-xl group-hover:border-primary-500/30 transition-all">
+                <div className="w-32 h-32 rounded-lg overflow-hidden border-4 border-slate-100 dark:border-slate-800 shadow-xl group-hover:border-primary-500/30 transition-all">
                   <img
                     src={previewUrl || FALLBACK_LOGO}
                     alt="Logo del negocio"
@@ -194,7 +194,7 @@ const BusinessProfileSection: React.FC<BusinessProfileSectionProps> = ({
                     </div>
                   )}
                 </div>
-                <label className="absolute -bottom-2 -right-2 p-2 bg-primary-600 hover:bg-primary-700 text-white rounded-xl shadow-lg cursor-pointer transition-all hover:scale-110">
+                <label className="absolute -bottom-2 -right-2 p-2 bg-primary-600 hover:bg-primary-700 text-white rounded-lg shadow-lg cursor-pointer transition-all hover:scale-110">
                   <Camera className="w-5 h-5" />
                   <input type="file" className="hidden" accept="image/*" onChange={handleLogoUpload} disabled={isUploading} />
                 </label>
@@ -368,7 +368,7 @@ const BusinessProfileSection: React.FC<BusinessProfileSectionProps> = ({
                     value={businessData.instagram || ''}
                     onChange={onChange}
                     placeholder="@usuario"
-                    className="w-full pl-10 pr-4 py-2.5 rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 focus:ring-2 focus:ring-primary-500/20 focus:border-primary-500 outline-none transition-all font-medium text-slate-900 dark:text-white"
+                    className="w-full pl-10 pr-4 py-2.5 rounded-lg border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 focus:ring-2 focus:ring-primary-500/20 focus:border-primary-500 outline-none transition-all font-medium text-slate-900 dark:text-white"
                   />
                 </div>
               </div>
@@ -387,7 +387,7 @@ const BusinessProfileSection: React.FC<BusinessProfileSectionProps> = ({
                     value={businessData.facebook || ''}
                     onChange={onChange}
                     placeholder="https://facebook.com/tunegocio"
-                    className="w-full pl-10 pr-4 py-2.5 rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 focus:ring-2 focus:ring-primary-500/20 focus:border-primary-500 outline-none transition-all font-medium text-slate-900 dark:text-white"
+                    className="w-full pl-10 pr-4 py-2.5 rounded-lg border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 focus:ring-2 focus:ring-primary-500/20 focus:border-primary-500 outline-none transition-all font-medium text-slate-900 dark:text-white"
                   />
                 </div>
               </div>
@@ -408,7 +408,7 @@ const BusinessProfileSection: React.FC<BusinessProfileSectionProps> = ({
         </div>
 
         {/* Showcase Toggle */}
-        <div className="bg-amber-50 dark:bg-amber-900/10 rounded-2xl border border-amber-200 dark:border-amber-800/50 p-5">
+        <div className="bg-amber-50 dark:bg-amber-900/10 rounded-lg border border-amber-200 dark:border-amber-800/50 p-5">
           <div className="flex items-start gap-3">
             <input
               type="checkbox"
@@ -433,7 +433,7 @@ const BusinessProfileSection: React.FC<BusinessProfileSectionProps> = ({
           <button
             type="submit"
             disabled={saving || isUploading}
-            className="inline-flex items-center px-8 py-3 bg-primary-600 hover:bg-primary-700 text-white font-bold rounded-xl transition-all shadow-lg shadow-primary-500/25 gap-2 disabled:opacity-50"
+            className="inline-flex items-center px-8 py-3 bg-primary-600 hover:bg-primary-700 text-white font-bold rounded-lg transition-all shadow-lg shadow-primary-500/25 gap-2 disabled:opacity-50"
           >
             {saving ? <Loader2 className="w-5 h-5 animate-spin" /> : <Save className="w-5 h-5" />}
             {saving ? 'Guardando...' : 'Guardar Cambios'}

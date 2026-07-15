@@ -30,7 +30,7 @@ const BusinessHoursList: React.FC<BusinessHoursListProps> = ({ businessHours }) 
         return (
           <div
             key={index}
-            className={`flex items-center justify-between py-2.5 px-3 rounded-xl transition-colors ${
+            className={`flex items-center justify-between py-2.5 px-3 rounded-lg transition-colors ${
               isToday ? 'bg-primary-50 dark:bg-primary-500/10 border border-primary-200 dark:border-primary-800' : ''
             }`}
           >

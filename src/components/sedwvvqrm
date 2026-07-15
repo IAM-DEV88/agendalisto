@@ -479,19 +479,4 @@ const ChatGuia = () => {
               onChange={(e) => setInput(e.target.value)}
               placeholder="Escribe un mensaje..."
               className="flex-1 bg-slate-100 border-none rounded-lg px-4 py-2 text-sm focus:ring-2 focus:ring-primary-500 text-slate-900 dark:text-white"
-            />
-            <button
-              type="submit"
-              disabled={!input.trim() || isLoading}
-              className="p-2 bg-primary-600 text-white rounded-lg hover:bg-primary-500 disabled:opacity-50 transition-colors"
-            >
-              <Send className="w-5 h-5" />
-            </button>
-          </form>
-        </div>
-      )}
-    </div>
-  );
-};
-
-export default ChatGuia;
+         

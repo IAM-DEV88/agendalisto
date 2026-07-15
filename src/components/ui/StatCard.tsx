@@ -8,9 +8,9 @@ interface StatCardProps {
 
 export default function StatCard({ icon, label, value, color, subtitle }: StatCardProps) {
   return (
-    <div className="relative bg-white dark:bg-slate-900 rounded-2xl border border-slate-200 dark:border-slate-800 p-5 transition-all hover:shadow-lg hover:border-slate-300 dark:hover:border-slate-700">
+    <div className="relative bg-white dark:bg-slate-900 rounded-lg border border-slate-200 dark:border-slate-800 p-5 transition-all hover:shadow-lg hover:border-slate-300 dark:hover:border-slate-700">
       <div className="flex items-center gap-4">
-        <div className={`w-12 h-12 rounded-2xl flex items-center justify-center ${color}`}>
+        <div className={`w-12 h-12 rounded-lg flex items-center justify-center ${color}`}>
           {icon}
         </div>
         <div>

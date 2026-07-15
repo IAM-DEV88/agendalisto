@@ -93,7 +93,7 @@ function BusinessFavorites({ userId }: { userId: string }) {
 
 function FavoriteBusinessCard({ fav, removingId, onRemove }: { fav: FavoriteItem; removingId: string | null; onRemove: (fav: FavoriteItem) => void }) {
   return (
-    <div className="group bg-white dark:bg-slate-900 rounded-2xl border border-slate-200 dark:border-slate-800 overflow-hidden hover:border-primary-300 dark:hover:border-primary-700 hover:shadow-2xl transition-all duration-300 hover:-translate-y-1 flex flex-col">
+    <div className="group bg-white dark:bg-slate-900 rounded-lg border border-slate-200 dark:border-slate-800 overflow-hidden hover:border-primary-300 dark:hover:border-primary-700 hover:shadow-2xl transition-all duration-300 hover:-translate-y-1 flex flex-col">
       <Link to={`/${fav.slug}`} className="flex flex-col flex-1">
         <div className="h-40 bg-slate-100 dark:bg-slate-800 relative overflow-hidden flex-shrink-0">
           <img
@@ -136,7 +136,7 @@ function FavoriteBusinessCard({ fav, removingId, onRemove }: { fav: FavoriteItem
         <button
           onClick={() => onRemove(fav)}
           disabled={removingId === fav.like_id}
-          className="w-full inline-flex items-center justify-center gap-2 px-4 py-2 bg-red-50 hover:bg-red-100 dark:bg-red-500/10 dark:hover:bg-red-500/20 text-red-600 dark:text-red-400 text-xs font-bold rounded-xl transition-all active:scale-95 disabled:opacity-50"
+          className="w-full inline-flex items-center justify-center gap-2 px-4 py-2 bg-red-50 hover:bg-red-100 dark:bg-red-500/10 dark:hover:bg-red-500/20 text-red-600 dark:text-red-400 text-xs font-bold rounded-lg transition-all active:scale-95 disabled:opacity-50"
         >
           <Trash2 className="w-3.5 h-3.5" />
           {removingId === fav.like_id ? 'Eliminando...' : 'Eliminar de favoritos'}
@@ -198,7 +198,7 @@ function FavoriteServiceCard({ fav, removingId, onRemove }: { fav: ServiceFavori
   const previewImage = fav.image_urls?.[0] || FALLBACK_LOGO;
 
   return (
-    <div className="group bg-white dark:bg-slate-900 rounded-2xl border border-slate-200 dark:border-slate-800 overflow-hidden hover:border-primary-300 dark:hover:border-primary-700 hover:shadow-2xl transition-all duration-300 hover:-translate-y-1 flex flex-col">
+    <div className="group bg-white dark:bg-slate-900 rounded-lg border border-slate-200 dark:border-slate-800 overflow-hidden hover:border-primary-300 dark:hover:border-primary-700 hover:shadow-2xl transition-all duration-300 hover:-translate-y-1 flex flex-col">
       <Link to={`/${fav.business_slug}/book/${fav.service_id}`} className="flex flex-col flex-1">
         <div className="h-40 bg-slate-100 dark:bg-slate-800 relative overflow-hidden flex-shrink-0">
           <img
@@ -242,7 +242,7 @@ function FavoriteServiceCard({ fav, removingId, onRemove }: { fav: ServiceFavori
         <button
           onClick={() => onRemove(fav)}
           disabled={removingId === fav.like_id}
-          className="w-full inline-flex items-center justify-center gap-2 px-4 py-2 bg-red-50 hover:bg-red-100 dark:bg-red-500/10 dark:hover:bg-red-500/20 text-red-600 dark:text-red-400 text-xs font-bold rounded-xl transition-all active:scale-95 disabled:opacity-50"
+          className="w-full inline-flex items-center justify-center gap-2 px-4 py-2 bg-red-50 hover:bg-red-100 dark:bg-red-500/10 dark:hover:bg-red-500/20 text-red-600 dark:text-red-400 text-xs font-bold rounded-lg transition-all active:scale-95 disabled:opacity-50"
         >
           <Trash2 className="w-3.5 h-3.5" />
           {removingId === fav.like_id ? 'Eliminando...' : 'Eliminar de favoritos'}
@@ -302,7 +302,7 @@ function BlogFavorites({ userId }: { userId: string }) {
 
 function FavoriteBlogCard({ fav, removingId, onRemove }: { fav: BlogPostFavoriteItem; removingId: string | null; onRemove: (fav: BlogPostFavoriteItem) => void }) {
   return (
-    <div className="group bg-white dark:bg-slate-900 rounded-2xl border border-slate-200 dark:border-slate-800 overflow-hidden hover:border-primary-300 dark:hover:border-primary-700 hover:shadow-2xl transition-all duration-300 hover:-translate-y-1 flex flex-col">
+    <div className="group bg-white dark:bg-slate-900 rounded-lg border border-slate-200 dark:border-slate-800 overflow-hidden hover:border-primary-300 dark:hover:border-primary-700 hover:shadow-2xl transition-all duration-300 hover:-translate-y-1 flex flex-col">
       <Link to={`/blog/${fav.post_id}`} className="flex flex-col flex-1">
         <div className="h-40 bg-slate-100 dark:bg-slate-800 relative overflow-hidden flex-shrink-0">
           <img
@@ -343,7 +343,7 @@ function FavoriteBlogCard({ fav, removingId, onRemove }: { fav: BlogPostFavorite
         <button
           onClick={() => onRemove(fav)}
           disabled={removingId === fav.like_id}
-          className="w-full inline-flex items-center justify-center gap-2 px-4 py-2 bg-red-50 hover:bg-red-100 dark:bg-red-500/10 dark:hover:bg-red-500/20 text-red-600 dark:text-red-400 text-xs font-bold rounded-xl transition-all active:scale-95 disabled:opacity-50"
+          className="w-full inline-flex items-center justify-center gap-2 px-4 py-2 bg-red-50 hover:bg-red-100 dark:bg-red-500/10 dark:hover:bg-red-500/20 text-red-600 dark:text-red-400 text-xs font-bold rounded-lg transition-all active:scale-95 disabled:opacity-50"
         >
           <Trash2 className="w-3.5 h-3.5" />
           {removingId === fav.like_id ? 'Eliminando...' : 'Eliminar de favoritos'}
@@ -359,8 +359,8 @@ function SkeletonGrid({ count }: { count: number }) {
   return (
     <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
       {Array.from({ length: count }).map((_, i) => (
-        <div key={i} className="bg-white dark:bg-slate-900 rounded-2xl border border-slate-200 dark:border-slate-800 p-5 animate-pulse">
-          <div className="h-40 bg-slate-200 dark:bg-slate-700 rounded-xl mb-4" />
+        <div key={i} className="bg-white dark:bg-slate-900 rounded-lg border border-slate-200 dark:border-slate-800 p-5 animate-pulse">
+          <div className="h-40 bg-slate-200 dark:bg-slate-700 rounded-lg mb-4" />
           <div className="h-5 bg-slate-200 dark:bg-slate-700 rounded-lg w-3/4 mb-2" />
           <div className="h-4 bg-slate-200 dark:bg-slate-700 rounded-lg w-1/2" />
         </div>

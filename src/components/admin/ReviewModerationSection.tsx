@@ -36,7 +36,7 @@ export default function ReviewModerationSection({
   return (
     <div className="space-y-4">
       {pendingReviews.map((review) => (
-        <div key={review.id} className="bg-white dark:bg-slate-900 rounded-2xl border border-slate-200 dark:border-slate-800 p-5">
+        <div key={review.id} className="bg-white dark:bg-slate-900 rounded-lg border border-slate-200 dark:border-slate-800 p-5">
           <div className="flex items-start justify-between gap-4">
             <div className="flex-1 min-w-0">
               <div className="flex items-center gap-3 mb-2">
@@ -66,7 +66,7 @@ export default function ReviewModerationSection({
               <button
                 onClick={() => onApprove(review.id)}
                 disabled={moderating === review.id}
-                className="flex items-center gap-1.5 px-3 py-1.5 text-xs font-bold text-emerald-700 bg-emerald-50 hover:bg-emerald-100 dark:text-emerald-400 dark:bg-emerald-900/20 dark:hover:bg-emerald-900/30 rounded-xl transition-colors disabled:opacity-50"
+                className="flex items-center gap-1.5 px-3 py-1.5 text-xs font-bold text-emerald-700 bg-emerald-50 hover:bg-emerald-100 dark:text-emerald-400 dark:bg-emerald-900/20 dark:hover:bg-emerald-900/30 rounded-lg transition-colors disabled:opacity-50"
               >
                 <CheckCircle className="h-3.5 w-3.5" />
                 Aprobar
@@ -74,7 +74,7 @@ export default function ReviewModerationSection({
               <button
                 onClick={() => onReject(review.id)}
                 disabled={moderating === review.id}
-                className="flex items-center gap-1.5 px-3 py-1.5 text-xs font-bold text-red-700 bg-red-50 hover:bg-red-100 dark:text-red-400 dark:bg-red-900/20 dark:hover:bg-red-900/30 rounded-xl transition-colors disabled:opacity-50"
+                className="flex items-center gap-1.5 px-3 py-1.5 text-xs font-bold text-red-700 bg-red-50 hover:bg-red-100 dark:text-red-400 dark:bg-red-900/20 dark:hover:bg-red-900/30 rounded-lg transition-colors disabled:opacity-50"
               >
                 <XCircle className="h-3.5 w-3.5" />
                 Rechazar

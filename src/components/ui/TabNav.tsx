@@ -74,7 +74,7 @@ export const TabNav: React.FC<TabNavProps> = ({
 
   const pillNav = (
     <div className="overflow-x-auto no-scrollbar">
-      <div className="bg-slate-100 dark:bg-slate-800/80 p-0.5 inline-flex items-center gap-0.5 w-max rounded-xl">
+      <div className="bg-slate-100 dark:bg-slate-800/80 p-0.5 inline-flex items-center gap-0.5 w-max rounded-lg">
         {tabs.map((tab) => (
           <button
             key={tab.id}
@@ -88,7 +88,7 @@ export const TabNav: React.FC<TabNavProps> = ({
           >
             <span>{tab.label}</span>
             {tab.count !== undefined && tab.count > 0 && (
-              <span className={`inline-flex items-center justify-center min-w-[18px] h-[18px] px-1 rounded-md text-[10px] font-black transition-colors ${
+              <span className={`inline-flex items-center justify-center min-w-[18px] h-[18px] px-1 rounded-lg text-[10px] font-black transition-colors ${
                 activeTabId === tab.id
                   ? 'bg-primary-600 text-white'
                   : 'bg-slate-200 dark:bg-slate-700 text-slate-600 dark:text-slate-400'
@@ -148,7 +148,7 @@ export const TabNav: React.FC<TabNavProps> = ({
         >
           <span>{tab.label}</span>
           {tab.count !== undefined && tab.count > 0 && (
-            <span className={`inline-flex items-center justify-center min-w-[22px] h-[22px] px-2 rounded-md text-[11px] font-black transition-colors ${
+            <span className={`inline-flex items-center justify-center min-w-[22px] h-[22px] px-2 rounded-lg text-[11px] font-black transition-colors ${
               activeTabId === tab.id
                 ? 'bg-primary-600 text-white shadow-sm shadow-primary-500/30'
                 : 'bg-slate-100 text-slate-600 dark:bg-slate-800 dark:text-slate-400'

@@ -83,7 +83,7 @@ export default function PaymentMethodSelector(props: PaymentMethodSelectorProps)
       </p>
 
       {paypalAvailable && (
-        <div className="border border-slate-200 dark:border-slate-700 rounded-xl p-3">
+        <div className="border border-slate-200 dark:border-slate-700 rounded-lg p-3">
           <div className="flex items-center gap-2 mb-2">
             <CreditCard className="w-4 h-4 text-blue-600" />
             <span className="text-xs font-bold text-slate-500 uppercase tracking-wider">PayPal</span>
@@ -110,7 +110,7 @@ export default function PaymentMethodSelector(props: PaymentMethodSelectorProps)
             }
           }}
           disabled={disabled || wompiLoading}
-          className="w-full inline-flex items-center justify-center gap-2 px-4 py-3 bg-emerald-600 hover:bg-emerald-700 text-white text-sm font-bold rounded-xl transition-all disabled:opacity-50 shadow-lg shadow-emerald-500/25"
+          className="w-full inline-flex items-center justify-center gap-2 px-4 py-3 bg-emerald-600 hover:bg-emerald-700 text-white text-sm font-bold rounded-lg transition-all disabled:opacity-50 shadow-lg shadow-emerald-500/25"
         >
           {wompiLoading ? (
             <>

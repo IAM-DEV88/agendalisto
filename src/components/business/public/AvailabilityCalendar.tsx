@@ -58,13 +58,13 @@ export default function AvailabilityCalendar({
   }, [currentMonth]);
 
   return (
-    <div className="bg-white dark:bg-slate-900 rounded-2xl border border-slate-200 dark:border-slate-800 p-4">
+    <div className="bg-white dark:bg-slate-900 rounded-lg border border-slate-200 dark:border-slate-800 p-4">
       {/* Header */}
       <div className="flex items-center justify-between mb-4">
         <button
           type="button"
           onClick={() => setCurrentMonth(prev => subMonths(prev, 1))}
-          className="p-2 rounded-xl hover:bg-slate-100 dark:hover:bg-slate-800 text-slate-500 transition-all active:scale-95"
+          className="p-2 rounded-lg hover:bg-slate-100 dark:hover:bg-slate-800 text-slate-500 transition-all active:scale-95"
         >
           <ChevronLeft className="w-4 h-4" />
         </button>
@@ -77,7 +77,7 @@ export default function AvailabilityCalendar({
         <button
           type="button"
           onClick={() => setCurrentMonth(prev => addMonths(prev, 1))}
-          className="p-2 rounded-xl hover:bg-slate-100 dark:hover:bg-slate-800 text-slate-500 transition-all active:scale-95"
+          className="p-2 rounded-lg hover:bg-slate-100 dark:hover:bg-slate-800 text-slate-500 transition-all active:scale-95"
         >
           <ChevronRight className="w-4 h-4" />
         </button>
@@ -113,7 +113,7 @@ export default function AvailabilityCalendar({
               disabled={disabled}
               onClick={() => !disabled && onSelectDate(dateStr)}
               className={`
-                relative flex flex-col items-center justify-center py-2 rounded-xl text-sm font-bold transition-all
+                relative flex flex-col items-center justify-center py-2 rounded-lg text-sm font-bold transition-all
                 ${disabled
                   ? 'text-slate-300 dark:text-slate-600 cursor-not-allowed'
                   : selected

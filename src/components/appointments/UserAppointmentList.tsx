@@ -68,7 +68,7 @@ const UserAppointmentList: React.FC<UserAppointmentListProps> = ({
         return (
           <div
             key={appointment.id}
-            className="group relative bg-white dark:bg-slate-900 rounded-2xl border border-slate-200 dark:border-slate-800 hover:border-primary-200 dark:hover:border-primary-800 hover:shadow-xl hover:shadow-slate-200/50 dark:hover:shadow-none transition-all duration-300 animate-in fade-in slide-in-from-bottom-2"
+            className="group relative bg-white dark:bg-slate-900 rounded-lg border border-slate-200 dark:border-slate-800 hover:border-primary-200 dark:hover:border-primary-800 hover:shadow-xl hover:shadow-slate-200/50 dark:hover:shadow-none transition-all duration-300 animate-in fade-in slide-in-from-bottom-2"
             style={{ animationDelay: `${index * 60}ms` }}
           >
             {/* Status top accent bar */}
@@ -146,7 +146,7 @@ const UserAppointmentList: React.FC<UserAppointmentListProps> = ({
                       {(appointment.status === 'pending' || appointment.status === 'confirmed') && onCancel && (
                         <button
                           onClick={() => onCancel(appointment)}
-                          className="inline-flex items-center justify-center gap-1.5 px-4 py-2 bg-red-50 hover:bg-red-100 dark:bg-red-500/10 dark:hover:bg-red-500/20 text-red-600 dark:text-red-400 text-xs font-black rounded-xl transition-all active:scale-95 uppercase tracking-wider"
+                          className="inline-flex items-center justify-center gap-1.5 px-4 py-2 bg-red-50 hover:bg-red-100 dark:bg-red-500/10 dark:hover:bg-red-500/20 text-red-600 dark:text-red-400 text-xs font-black rounded-lg transition-all active:scale-95 uppercase tracking-wider"
                         >
                           <XCircle className="w-3.5 h-3.5" />
                           Cancelar
@@ -155,7 +155,7 @@ const UserAppointmentList: React.FC<UserAppointmentListProps> = ({
                       {(appointment.status === 'pending' || appointment.status === 'confirmed' || appointment.status === 'cancelled') && onReschedule && (
                         <button
                           onClick={() => onReschedule(appointment)}
-                          className="inline-flex items-center justify-center gap-1.5 px-4 py-2 bg-slate-100 hover:bg-slate-200 dark:bg-slate-800 dark:hover:bg-slate-700 text-slate-600 dark:text-slate-300 text-xs font-black rounded-xl transition-all active:scale-95 uppercase tracking-wider"
+                          className="inline-flex items-center justify-center gap-1.5 px-4 py-2 bg-slate-100 hover:bg-slate-200 dark:bg-slate-800 dark:hover:bg-slate-700 text-slate-600 dark:text-slate-300 text-xs font-black rounded-lg transition-all active:scale-95 uppercase tracking-wider"
                         >
                           <RefreshCw className="w-3.5 h-3.5" />
                           Reagendar
@@ -164,7 +164,7 @@ const UserAppointmentList: React.FC<UserAppointmentListProps> = ({
                       {appointment.status === 'completed' && onReview && (
                         appointment.review ? (
                           appointment.review.status === 'pending' ? (
-                            <div className="inline-flex items-center justify-center gap-1.5 px-4 py-2 bg-amber-50 dark:bg-amber-500/10 rounded-xl border border-amber-200 dark:border-amber-800">
+                            <div className="inline-flex items-center justify-center gap-1.5 px-4 py-2 bg-amber-50 dark:bg-amber-500/10 rounded-lg border border-amber-200 dark:border-amber-800">
                               <Star className="w-3.5 h-3.5 text-amber-500" />
                               <span className="text-xs font-black text-amber-600 dark:text-amber-400">
                                 Pendiente
@@ -173,13 +173,13 @@ const UserAppointmentList: React.FC<UserAppointmentListProps> = ({
                           ) : appointment.review.status === 'rejected' ? (
                             <button
                               onClick={() => onReview(appointment)}
-                              className="inline-flex items-center justify-center gap-1.5 px-4 py-2 bg-amber-500 hover:bg-amber-600 text-white text-xs font-black rounded-xl transition-all shadow-lg shadow-amber-500/25 active:scale-95 uppercase tracking-wider"
+                              className="inline-flex items-center justify-center gap-1.5 px-4 py-2 bg-amber-500 hover:bg-amber-600 text-white text-xs font-black rounded-lg transition-all shadow-lg shadow-amber-500/25 active:scale-95 uppercase tracking-wider"
                             >
                               <Star className="w-3.5 h-3.5" />
                               Reseñar
                             </button>
                           ) : (
-                            <div className="inline-flex items-center justify-center gap-1.5 px-4 py-2 bg-amber-50 dark:bg-amber-500/10 rounded-xl border border-amber-200 dark:border-amber-800">
+                            <div className="inline-flex items-center justify-center gap-1.5 px-4 py-2 bg-amber-50 dark:bg-amber-500/10 rounded-lg border border-amber-200 dark:border-amber-800">
                               <Star className="w-3.5 h-3.5 text-amber-500 fill-current" />
                               <span className="text-xs font-black text-amber-700 dark:text-amber-400">
                                 {appointment.review.rating}.0
@@ -189,7 +189,7 @@ const UserAppointmentList: React.FC<UserAppointmentListProps> = ({
                         ) : (
                           <button
                             onClick={() => onReview(appointment)}
-                            className="inline-flex items-center justify-center gap-1.5 px-4 py-2 bg-amber-500 hover:bg-amber-600 text-white text-xs font-black rounded-xl transition-all shadow-lg shadow-amber-500/25 active:scale-95 uppercase tracking-wider"
+                            className="inline-flex items-center justify-center gap-1.5 px-4 py-2 bg-amber-500 hover:bg-amber-600 text-white text-xs font-black rounded-lg transition-all shadow-lg shadow-amber-500/25 active:scale-95 uppercase tracking-wider"
                           >
                             <Star className="w-3.5 h-3.5" />
                             Reseña

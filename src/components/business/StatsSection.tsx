@@ -36,9 +36,9 @@ const StatCard = ({ icon, label, value, sub, color }: {
   sub?: string;
   color: string;
 }) => (
-  <div className="bg-white dark:bg-slate-900 rounded-2xl border border-slate-200 dark:border-slate-800 p-5 hover:shadow-lg hover:border-slate-300 dark:hover:border-slate-700 transition-all">
+  <div className="bg-white dark:bg-slate-900 rounded-lg border border-slate-200 dark:border-slate-800 p-5 hover:shadow-lg hover:border-slate-300 dark:hover:border-slate-700 transition-all">
     <div className="flex items-start gap-4">
-      <div className={`p-3 rounded-xl ${color}`}>{icon}</div>
+      <div className={`p-3 rounded-lg ${color}`}>{icon}</div>
       <div className="min-w-0">
         <p className="text-xs font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider mb-1">{label}</p>
         <p className="text-xl font-black text-slate-900 dark:text-white tracking-tight">{value}</p>

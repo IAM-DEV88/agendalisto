@@ -90,7 +90,7 @@ const ServicesSection: React.FC<ServicesSectionProps> = ({
                 notifyError(`Has alcanzado el límite de ${maxServices} servicios. Actualiza tu plan para agregar más.`);
               }
             }}
-            className="inline-flex items-center px-4 py-2.5 bg-primary-600 hover:bg-primary-700 text-white text-sm font-bold rounded-xl transition-all shadow-lg shadow-primary-500/25 gap-2"
+            className="inline-flex items-center px-4 py-2.5 bg-primary-600 hover:bg-primary-700 text-white text-sm font-bold rounded-lg transition-all shadow-lg shadow-primary-500/25 gap-2"
           >
             <Plus className="w-5 h-5" />
             Nuevo Servicio
@@ -99,7 +99,7 @@ const ServicesSection: React.FC<ServicesSectionProps> = ({
       />
 
       {maxServices !== Infinity && services.length >= maxServices && (
-        <div className="flex items-center justify-between p-4 bg-amber-50 dark:bg-amber-950/30 border border-amber-200 dark:border-amber-800 rounded-xl">
+        <div className="flex items-center justify-between p-4 bg-amber-50 dark:bg-amber-950/30 border border-amber-200 dark:border-amber-800 rounded-lg">
           <div className="flex items-center gap-3">
             <Sparkles className="w-5 h-5 text-amber-600 dark:text-amber-400 flex-shrink-0" />
             <p className="text-sm font-bold text-amber-800 dark:text-amber-200">
@@ -108,7 +108,7 @@ const ServicesSection: React.FC<ServicesSectionProps> = ({
           </div>
           <Link
             to="/plans"
-            className="flex-shrink-0 px-4 py-2 bg-amber-600 hover:bg-amber-700 text-white text-xs font-bold rounded-xl transition-all shadow-lg shadow-amber-500/25"
+            className="flex-shrink-0 px-4 py-2 bg-amber-600 hover:bg-amber-700 text-white text-xs font-bold rounded-lg transition-all shadow-lg shadow-amber-500/25"
           >
             Actualizar plan
           </Link>
@@ -129,14 +129,14 @@ const ServicesSection: React.FC<ServicesSectionProps> = ({
         </div>
       ) : services.length === 0 ? (
         <div className="card p-12 flex flex-col items-center text-center max-w-lg mx-auto">
-          <div className="w-16 h-16 rounded-2xl bg-slate-50 dark:bg-slate-800 flex items-center justify-center mb-6 text-slate-400">
+          <div className="w-16 h-16 rounded-lg bg-slate-50 dark:bg-slate-800 flex items-center justify-center mb-6 text-slate-400">
             <Plus className="w-8 h-8" />
           </div>
           <h3 className="text-xl font-black text-slate-900 dark:text-white mb-2">No hay servicios</h3>
           <p className="text-slate-500 dark:text-slate-400 mb-8">Comienza agregando tu primer servicio para que tus clientes puedan reservar.</p>
           <Link
             to="/business/service/new"
-            className="inline-flex items-center px-6 py-3 bg-primary-600 hover:bg-primary-700 text-white font-bold rounded-xl transition-all shadow-lg shadow-primary-500/25 gap-2"
+            className="inline-flex items-center px-6 py-3 bg-primary-600 hover:bg-primary-700 text-white font-bold rounded-lg transition-all shadow-lg shadow-primary-500/25 gap-2"
           >
             <Plus className="w-5 h-5" />
             Nuevo Servicio
@@ -162,7 +162,7 @@ const ServicesSection: React.FC<ServicesSectionProps> = ({
                         {service.description}
                       </p>
                     </div>
-                    <div className={`flex-shrink-0 w-10 h-10 rounded-xl flex items-center justify-center ${
+                    <div className={`flex-shrink-0 w-10 h-10 rounded-lg flex items-center justify-center ${
                       service.is_active 
                         ? 'bg-emerald-50 text-emerald-600 dark:bg-emerald-500/10 dark:text-emerald-400' 
                         : 'bg-slate-100 text-slate-400 dark:bg-slate-800 dark:text-slate-600'

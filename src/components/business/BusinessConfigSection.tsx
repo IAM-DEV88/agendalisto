@@ -58,7 +58,7 @@ export const BusinessConfigSection: React.FC<BusinessConfigSectionProps> = ({
   };
 
   const ConfigToggle = ({ id, label, description, checked, onChange, disabled }: { id: string, label: string, description: string, checked: boolean, onChange: (checked: boolean) => void, disabled?: boolean }) => (
-    <label htmlFor={id} className={`flex items-start gap-3 p-3 rounded-xl transition-colors ${disabled ? 'opacity-50 cursor-not-allowed' : 'hover:bg-slate-50 dark:hover:bg-slate-800/50 cursor-pointer group'}`}>
+    <label htmlFor={id} className={`flex items-start gap-3 p-3 rounded-lg transition-colors ${disabled ? 'opacity-50 cursor-not-allowed' : 'hover:bg-slate-50 dark:hover:bg-slate-800/50 cursor-pointer group'}`}>
       <div className="flex items-center h-5 mt-0.5">
         <input
           id={id}
@@ -66,7 +66,7 @@ export const BusinessConfigSection: React.FC<BusinessConfigSectionProps> = ({
           checked={checked}
           disabled={disabled}
           onChange={(e) => onChange(e.target.checked)}
-          className="w-5 h-5 rounded-md border-slate-300 text-primary-600 focus:ring-primary-500 disabled:opacity-50"
+          className="w-5 h-5 rounded-lg border-slate-300 text-primary-600 focus:ring-primary-500 disabled:opacity-50"
         />
       </div>
       <div className="min-w-0">
@@ -122,7 +122,7 @@ export const BusinessConfigSection: React.FC<BusinessConfigSectionProps> = ({
                       id="slot_interval_minutes"
                       value={config.slot_interval_minutes ?? 30}
                       onChange={(e) => onConfigChange('slot_interval_minutes', parseInt(e.target.value))}
-                      className="flex-1 px-3 py-2 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl text-sm font-bold text-slate-900 dark:text-white focus:ring-2 focus:ring-primary-500 focus:border-primary-500"
+                      className="flex-1 px-3 py-2 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-lg text-sm font-bold text-slate-900 dark:text-white focus:ring-2 focus:ring-primary-500 focus:border-primary-500"
                     >
                       <option value={15}>15 minutos</option>
                       <option value={30}>30 minutos</option>
@@ -144,7 +144,7 @@ export const BusinessConfigSection: React.FC<BusinessConfigSectionProps> = ({
                       id="buffer_minutes"
                       value={config.buffer_minutes ?? 0}
                       onChange={(e) => onConfigChange('buffer_minutes', parseInt(e.target.value))}
-                      className="flex-1 px-3 py-2 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl text-sm font-bold text-slate-900 dark:text-white focus:ring-2 focus:ring-primary-500 focus:border-primary-500"
+                      className="flex-1 px-3 py-2 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-lg text-sm font-bold text-slate-900 dark:text-white focus:ring-2 focus:ring-primary-500 focus:border-primary-500"
                     >
                       <option value={0}>Sin buffer</option>
                       <option value={5}>5 minutos</option>
@@ -168,7 +168,7 @@ export const BusinessConfigSection: React.FC<BusinessConfigSectionProps> = ({
                       id="max_advance_booking_days"
                       value={config.max_advance_booking_days ?? 90}
                       onChange={(e) => onConfigChange('max_advance_booking_days', parseInt(e.target.value))}
-                      className="flex-1 px-3 py-2 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl text-sm font-bold text-slate-900 dark:text-white focus:ring-2 focus:ring-primary-500 focus:border-primary-500"
+                      className="flex-1 px-3 py-2 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-lg text-sm font-bold text-slate-900 dark:text-white focus:ring-2 focus:ring-primary-500 focus:border-primary-500"
                     >
                       <option value={7}>7 días</option>
                       <option value={14}>14 días</option>
@@ -277,7 +277,7 @@ export const BusinessConfigSection: React.FC<BusinessConfigSectionProps> = ({
                     max="50"
                     value={itemsPerPage}
                     onChange={(e) => setItemsPerPageValue(Math.max(1, Math.min(50, parseInt(e.target.value) || 1)))}
-                    className="w-full pl-10 pr-4 py-2.5 rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 focus:ring-2 focus:ring-primary-500/20 focus:border-primary-500 outline-none transition-all text-sm font-bold"
+                    className="w-full pl-10 pr-4 py-2.5 rounded-lg border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 focus:ring-2 focus:ring-primary-500/20 focus:border-primary-500 outline-none transition-all text-sm font-bold"
                   />
                 </div>
                 <p className="text-xs text-slate-500 dark:text-slate-400 italic">
@@ -291,7 +291,7 @@ export const BusinessConfigSection: React.FC<BusinessConfigSectionProps> = ({
             <button
               type="submit"
               disabled={saving}
-              className="inline-flex items-center px-8 py-3 bg-primary-600 hover:bg-primary-700 text-white font-bold rounded-xl transition-all shadow-lg shadow-primary-500/25 gap-2 disabled:opacity-50"
+              className="inline-flex items-center px-8 py-3 bg-primary-600 hover:bg-primary-700 text-white font-bold rounded-lg transition-all shadow-lg shadow-primary-500/25 gap-2 disabled:opacity-50"
             >
               {saving ? <Loader2 className="w-5 h-5 animate-spin" /> : <Save className="w-5 h-5" />}
               {saving ? 'Guardando...' : 'Guardar Configuración'}
@@ -325,7 +325,7 @@ export const BusinessConfigSection: React.FC<BusinessConfigSectionProps> = ({
             </div>
             <button
               onClick={() => setShowDeleteConfirm(true)}
-              className="flex-shrink-0 inline-flex items-center gap-2 px-6 py-3 bg-red-600 hover:bg-red-700 text-white font-bold rounded-xl transition-all shadow-lg shadow-red-500/25 disabled:opacity-50"
+              className="flex-shrink-0 inline-flex items-center gap-2 px-6 py-3 bg-red-600 hover:bg-red-700 text-white font-bold rounded-lg transition-all shadow-lg shadow-red-500/25 disabled:opacity-50"
             >
               <Trash2 className="w-4 h-4" />
               Eliminar negocio
@@ -337,7 +337,7 @@ export const BusinessConfigSection: React.FC<BusinessConfigSectionProps> = ({
       {/* ─── MODAL CONFIRMACIÓN ELIMINAR ─── */}
       {showDeleteConfirm && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50 backdrop-blur-sm animate-in fade-in duration-200">
-          <div className="bg-white dark:bg-slate-900 rounded-2xl shadow-2xl max-w-md w-full p-6 animate-in zoom-in-95 duration-200">
+          <div className="bg-white dark:bg-slate-900 rounded-lg shadow-2xl max-w-md w-full p-6 animate-in zoom-in-95 duration-200">
             <div className="flex items-center gap-3 mb-4">
               <div className="p-2 bg-red-100 dark:bg-red-900/40 rounded-full">
                 <AlertTriangle className="w-6 h-6 text-red-600 dark:text-red-400" />
@@ -352,7 +352,7 @@ export const BusinessConfigSection: React.FC<BusinessConfigSectionProps> = ({
               <button
                 onClick={() => setShowDeleteConfirm(false)}
                 disabled={deleting}
-                className="px-5 py-2.5 text-sm font-bold text-slate-700 dark:text-slate-300 bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 rounded-xl transition-all"
+                className="px-5 py-2.5 text-sm font-bold text-slate-700 dark:text-slate-300 bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 rounded-lg transition-all"
               >
                 Cancelar
               </button>
@@ -378,7 +378,7 @@ export const BusinessConfigSection: React.FC<BusinessConfigSectionProps> = ({
                   }
                 }}
                 disabled={deleting}
-                className="inline-flex items-center gap-2 px-5 py-2.5 text-sm font-bold text-white bg-red-600 hover:bg-red-700 rounded-xl transition-all disabled:opacity-50"
+                className="inline-flex items-center gap-2 px-5 py-2.5 text-sm font-bold text-white bg-red-600 hover:bg-red-700 rounded-lg transition-all disabled:opacity-50"
               >
                 {deleting ? <Loader2 className="w-4 h-4 animate-spin" /> : <Trash2 className="w-4 h-4" />}
                 {deleting ? 'Eliminando...' : 'Sí, eliminar'}
@@ -410,13 +410,13 @@ const GoogleMyBusinessGuide = ({ businessName, businessAddress, businessSlug }: 
   };
 
   return (
-    <div className="mt-10 bg-white dark:bg-slate-900 rounded-2xl border border-slate-200 dark:border-slate-800 overflow-hidden">
+    <div className="mt-10 bg-white dark:bg-slate-900 rounded-lg border border-slate-200 dark:border-slate-800 overflow-hidden">
       <button
         onClick={() => setExpanded(!expanded)}
         className="w-full flex items-center justify-between p-5 sm:p-6 hover:bg-slate-50 dark:hover:bg-slate-800/50 transition-all text-left"
       >
         <div className="flex items-center gap-3">
-          <div className="w-10 h-10 rounded-xl bg-amber-100 dark:bg-amber-900/30 flex items-center justify-center flex-shrink-0">
+          <div className="w-10 h-10 rounded-lg bg-amber-100 dark:bg-amber-900/30 flex items-center justify-center flex-shrink-0">
             <svg className="w-5 h-5 text-amber-600 dark:text-amber-400" viewBox="0 0 24 24" fill="currentColor">
               <path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7zm0 9.5c-1.38 0-2.5-1.12-2.5-2.5s1.12-2.5 2.5-2.5 2.5 1.12 2.5 2.5-1.12 2.5-2.5 2.5z"/>
             </svg>
@@ -432,7 +432,7 @@ const GoogleMyBusinessGuide = ({ businessName, businessAddress, businessSlug }: 
       {expanded && (
         <div className="px-5 sm:px-6 pb-6 animate-in fade-in slide-in-from-top-2 duration-200">
           <div className="border-t border-slate-100 dark:border-slate-800 pt-5 space-y-5">
-            <div className="bg-amber-50 dark:bg-amber-900/10 rounded-2xl p-5 border border-amber-100 dark:border-amber-800/30">
+            <div className="bg-amber-50 dark:bg-amber-900/10 rounded-lg p-5 border border-amber-100 dark:border-amber-800/30">
               <p className="text-sm font-bold text-amber-800 dark:text-amber-300 mb-2">📈 ¿Por qué es importante?</p>
               <p className="text-sm text-amber-700 dark:text-amber-400/80 leading-relaxed">
                 El 76% de las personas que buscan un negocio local visitan el local en 24 horas.
@@ -441,7 +441,7 @@ const GoogleMyBusinessGuide = ({ businessName, businessAddress, businessSlug }: 
             </div>
 
             {/* ENLAZAR PÁGINA DE AGENDAYA */}
-            <div className="bg-primary-50 dark:bg-primary-900/10 rounded-2xl p-5 border border-primary-100 dark:border-primary-800/30">
+            <div className="bg-primary-50 dark:bg-primary-900/10 rounded-lg p-5 border border-primary-100 dark:border-primary-800/30">
               <h4 className="text-sm font-black text-primary-800 dark:text-primary-300 mb-3 flex items-center gap-2">
                 <LinkIcon className="w-4 h-4" />
                 Enlaza tu página de AgendaYa con Google
@@ -451,13 +451,13 @@ const GoogleMyBusinessGuide = ({ businessName, businessAddress, businessSlug }: 
                 Así tus clientes podrán reservar directamente desde Google Maps.
               </p>
               <div className="flex flex-col sm:flex-row items-stretch gap-2 mb-4">
-                <div className="flex-1 flex items-center gap-2 px-4 py-2.5 bg-white dark:bg-slate-800 rounded-xl border border-primary-200 dark:border-primary-800/50 text-sm font-mono text-slate-600 dark:text-slate-300 truncate">
+                <div className="flex-1 flex items-center gap-2 px-4 py-2.5 bg-white dark:bg-slate-800 rounded-lg border border-primary-200 dark:border-primary-800/50 text-sm font-mono text-slate-600 dark:text-slate-300 truncate">
                   <ExternalLink className="w-4 h-4 flex-shrink-0 text-primary-500" />
                   <span className="truncate">{businessPageUrl}</span>
                 </div>
                 <button
                   onClick={handleCopyBusinessLink}
-                  className={`flex items-center justify-center gap-2 px-5 py-2.5 rounded-xl font-bold text-sm transition-all ${
+                  className={`flex items-center justify-center gap-2 px-5 py-2.5 rounded-lg font-bold text-sm transition-all ${
                     copied
                       ? 'bg-emerald-500 text-white'
                       : 'bg-white dark:bg-slate-800 border border-primary-200 dark:border-primary-800/50 text-primary-700 dark:text-primary-300 hover:bg-primary-50 dark:hover:bg-primary-900/20'
@@ -484,7 +484,7 @@ const GoogleMyBusinessGuide = ({ businessName, businessAddress, businessSlug }: 
                   { emoji: '⭐', title: 'Responde reseñas', desc: 'Responde a tus clientes, aumenta tu reputación' },
                   { emoji: '📊', title: 'Publica novedades', desc: 'Comparte ofertas y actualizaciones semanales' },
                 ].map((item, i) => (
-                  <div key={i} className="flex items-start gap-3 p-3 bg-slate-50 dark:bg-slate-800/50 rounded-xl border border-slate-100 dark:border-slate-800">
+                  <div key={i} className="flex items-start gap-3 p-3 bg-slate-50 dark:bg-slate-800/50 rounded-lg border border-slate-100 dark:border-slate-800">
                     <span className="text-lg flex-shrink-0">{item.emoji}</span>
                     <div>
                       <p className="font-bold text-xs text-slate-800 dark:text-slate-200">{item.title}</p>
@@ -499,7 +499,7 @@ const GoogleMyBusinessGuide = ({ businessName, businessAddress, businessSlug }: 
               href={gmbUrl}
               target="_blank"
               rel="noopener noreferrer"
-              className="inline-flex items-center gap-2 px-6 py-3 bg-amber-500 hover:bg-amber-600 text-white font-bold text-sm rounded-xl transition-all shadow-lg shadow-amber-500/25"
+              className="inline-flex items-center gap-2 px-6 py-3 bg-amber-500 hover:bg-amber-600 text-white font-bold text-sm rounded-lg transition-all shadow-lg shadow-amber-500/25"
             >
               <svg className="w-4 h-4" viewBox="0 0 24 24" fill="currentColor">
                 <path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7zm0 9.5c-1.38 0-2.5-1.12-2.5-2.5s1.12-2.5 2.5-2.5 2.5 1.12 2.5 2.5-1.12 2.5-2.5 2.5z"/>

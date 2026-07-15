@@ -162,14 +162,14 @@ export default function GiftBooking() {
     return (
       <div className="min-h-screen bg-gradient-to-b from-slate-50 to-white dark:from-slate-950 dark:to-slate-900 flex items-center justify-center px-4">
         <div className="text-center max-w-md animate-in fade-in zoom-in-95 duration-500">
-          <div className="w-20 h-20 mx-auto mb-6 rounded-2xl bg-emerald-50 dark:bg-emerald-500/10 flex items-center justify-center">
+          <div className="w-20 h-20 mx-auto mb-6 rounded-lg bg-emerald-50 dark:bg-emerald-500/10 flex items-center justify-center">
             <CheckCircle className="w-10 h-10 text-emerald-500" />
           </div>
           <h2 className="text-2xl font-black text-slate-900 dark:text-white mb-3">¡Regalo enviado!</h2>
           <p className="text-slate-500 mb-2">Código de regalo: <strong className="text-primary-600">{giftCode}</strong></p>
           <p className="text-sm text-slate-400 mb-6">Comparte este código con el destinatario para que pueda canjearlo.</p>
           <p className="text-xs text-slate-400 mb-8">El destinatario debe registrarse en AgendaYa y usar el código al reservar.</p>
-          <button onClick={() => navigate(`/${slug}`)} className="px-6 py-3 bg-primary-600 hover:bg-primary-700 text-white font-bold rounded-xl transition-all">Volver al negocio</button>
+          <button onClick={() => navigate(`/${slug}`)} className="px-6 py-3 bg-primary-600 hover:bg-primary-700 text-white font-bold rounded-lg transition-all">Volver al negocio</button>
         </div>
       </div>
     );
@@ -185,8 +185,8 @@ export default function GiftBooking() {
           <ArrowLeft className="w-4 h-4" /> Volver
         </button>
 
-        <div className="bg-white dark:bg-slate-900 rounded-3xl border border-slate-200 dark:border-slate-800 shadow-xl p-6 sm:p-8">
-          <div className="w-14 h-14 mx-auto mb-5 rounded-2xl bg-rose-50 dark:bg-rose-500/10 flex items-center justify-center">
+        <div className="bg-white dark:bg-slate-900 rounded-lg border border-slate-200 dark:border-slate-800 shadow-xl p-6 sm:p-8">
+          <div className="w-14 h-14 mx-auto mb-5 rounded-lg bg-rose-50 dark:bg-rose-500/10 flex items-center justify-center">
             <Gift className="w-7 h-7 text-rose-500" />
           </div>
           <h1 className="text-2xl font-black text-slate-900 dark:text-white text-center mb-2">Regala {service?.name}</h1>
@@ -221,12 +221,12 @@ export default function GiftBooking() {
                 <label className="block text-sm font-bold text-slate-700 dark:text-slate-300 mb-1.5">Mensaje personalizado (opcional)</label>
                 <div className="relative">
                   <Send className="absolute top-3 left-3.5 w-4 h-4 text-slate-400 pointer-events-none" />
-                  <textarea value={form.message} onChange={e => setForm({ ...form, message: e.target.value })} placeholder="¡Feliz cumpleaños! Este regalo es para ti..." className="w-full pl-10 pr-4 py-2.5 rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 focus:ring-2 focus:ring-primary-500/20 focus:border-primary-500 outline-none transition-all h-20 resize-none" />
+                  <textarea value={form.message} onChange={e => setForm({ ...form, message: e.target.value })} placeholder="¡Feliz cumpleaños! Este regalo es para ti..." className="w-full pl-10 pr-4 py-2.5 rounded-lg border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 focus:ring-2 focus:ring-primary-500/20 focus:border-primary-500 outline-none transition-all h-20 resize-none" />
                 </div>
               </div>
 
               {needsPayment && (
-                <div className="flex items-center gap-2 p-3 bg-amber-50 dark:bg-amber-900/10 rounded-xl border border-amber-200 dark:border-amber-800/50">
+                <div className="flex items-center gap-2 p-3 bg-amber-50 dark:bg-amber-900/10 rounded-lg border border-amber-200 dark:border-amber-800/50">
                   <Lock className="w-4 h-4 text-amber-600 flex-shrink-0" />
                   <p className="text-xs text-amber-700 dark:text-amber-400">
                     Al regalar este servicio se cobrará <strong>${service!.price.toLocaleString()} COP</strong>. El destinatario recibirá un código para canjearlo gratis.
@@ -235,7 +235,7 @@ export default function GiftBooking() {
               )}
 
               <button onClick={handleProceedToPayment} disabled={!user || !needsPayment}
-                className="w-full flex items-center justify-center gap-2 py-3.5 bg-rose-600 hover:bg-rose-700 text-white font-bold rounded-xl transition-all disabled:opacity-50 shadow-lg shadow-rose-500/25"
+                className="w-full flex items-center justify-center gap-2 py-3.5 bg-rose-600 hover:bg-rose-700 text-white font-bold rounded-lg transition-all disabled:opacity-50 shadow-lg shadow-rose-500/25"
               >
                 <><Send className="w-4 h-4" /> Continuar al pago</>
               </button>
@@ -244,7 +244,7 @@ export default function GiftBooking() {
             </div>
           ) : (
             <div className="space-y-4">
-              <div className="p-4 bg-slate-50 dark:bg-slate-800/50 rounded-2xl border border-slate-200 dark:border-slate-700">
+              <div className="p-4 bg-slate-50 dark:bg-slate-800/50 rounded-lg border border-slate-200 dark:border-slate-700">
                 <p className="text-sm font-bold text-slate-700 dark:text-slate-300 mb-1">Resumen del regalo</p>
                 <p className="text-xs text-slate-500">
                   Para: {form.recipientName} · {service?.name} · ${service?.price?.toLocaleString()} COP

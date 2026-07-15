@@ -100,7 +100,7 @@ const Footer = () => {
             <Link to="/business/register" className="text-xs text-slate-400 dark:text-slate-500 hover:text-slate-700 dark:hover:text-slate-300 transition-colors">Registrar negocio</Link>
             <button
               onClick={scrollToTop}
-              className="p-2 bg-slate-100 dark:bg-slate-800 hover:bg-primary-600 dark:hover:bg-primary-600 text-slate-500 dark:text-slate-400 hover:text-white rounded-xl transition-all hover:-translate-y-1"
+              className="p-2 bg-slate-100 dark:bg-slate-800 hover:bg-primary-600 dark:hover:bg-primary-600 text-slate-500 dark:text-slate-400 hover:text-white rounded-lg transition-all hover:-translate-y-1"
               aria-label="Volver arriba"
             >
               <ArrowUp className="w-4 h-4" />

@@ -24,7 +24,7 @@ Ciudad: ${form.city}`;
       <SEO title="Embajadores AgendaYa" description="Sé embajador de AgendaYa en tu ciudad y gana comisiones por cada negocio que registres." />
       <div className="max-w-4xl mx-auto">
         <div className="text-center mb-10 animate-in fade-in slide-in-from-top-4 duration-500">
-          <div className="w-14 h-14 mx-auto mb-4 rounded-2xl bg-amber-50 dark:bg-amber-500/10 flex items-center justify-center">
+          <div className="w-14 h-14 mx-auto mb-4 rounded-lg bg-amber-50 dark:bg-amber-500/10 flex items-center justify-center">
             <Users className="w-7 h-7 text-amber-600 dark:text-amber-400" />
           </div>
           <h1 className="text-3xl sm:text-4xl font-black text-slate-900 dark:text-white tracking-tight mb-3">Embajadores AgendaYa</h1>
@@ -37,8 +37,8 @@ Ciudad: ${form.city}`;
             { icon: TrendingUp, title: 'Sin límites', desc: 'Registra todos los negocios que quieras, comisiones sin tope', color: 'text-blue-600', bg: 'bg-blue-50 dark:bg-blue-500/10' },
             { icon: Gift, title: 'Bonos exclusivos', desc: 'Los mejores embajadores reciben bonos mensuales y reconocimiento', color: 'text-purple-600', bg: 'bg-purple-50 dark:bg-purple-500/10' },
           ].map((item, i) => (
-            <div key={i} className="bg-white dark:bg-slate-900 rounded-2xl border border-slate-200 dark:border-slate-800 p-6 text-center">
-              <div className={`w-12 h-12 mx-auto mb-4 rounded-xl ${item.bg} flex items-center justify-center`}>
+            <div key={i} className="bg-white dark:bg-slate-900 rounded-lg border border-slate-200 dark:border-slate-800 p-6 text-center">
+              <div className={`w-12 h-12 mx-auto mb-4 rounded-lg ${item.bg} flex items-center justify-center`}>
                 <item.icon className={`w-6 h-6 ${item.color}`} />
               </div>
               <h3 className="font-black text-slate-900 dark:text-white mb-2">{item.title}</h3>
@@ -47,7 +47,7 @@ Ciudad: ${form.city}`;
           ))}
         </div>
 
-        <div className="bg-white dark:bg-slate-900 rounded-3xl border border-slate-200 dark:border-slate-800 shadow-xl p-8">
+        <div className="bg-white dark:bg-slate-900 rounded-lg border border-slate-200 dark:border-slate-800 shadow-xl p-8">
           {sent ? (
             <div className="text-center py-8">
               <CheckCircle className="w-14 h-14 text-emerald-500 mx-auto mb-4" />
@@ -88,7 +88,7 @@ Ciudad: ${form.city}`;
                     </div>
                   </div>
                 </div>
-                <button type="submit" className="w-full py-3.5 bg-amber-500 hover:bg-amber-600 text-white font-bold rounded-xl transition-all shadow-lg shadow-amber-500/25">
+                <button type="submit" className="w-full py-3.5 bg-amber-500 hover:bg-amber-600 text-white font-bold rounded-lg transition-all shadow-lg shadow-amber-500/25">
                   Enviar solicitud por WhatsApp
                 </button>
               </form>

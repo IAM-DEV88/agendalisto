@@ -188,7 +188,7 @@ const BusinessRegister = ({ user }: BusinessRegisterProps) => {
     return (
       <div className="min-h-screen bg-gradient-to-b from-slate-50 to-white dark:from-slate-950 dark:to-slate-900 flex items-center justify-center px-4 transition-colors duration-200">
         <div className="text-center animate-in fade-in zoom-in-95 duration-500">
-          <div className="w-20 h-20 rounded-2xl bg-emerald-50 dark:bg-emerald-500/10 flex items-center justify-center mx-auto mb-6 ring-1 ring-emerald-200 dark:ring-emerald-800">
+          <div className="w-20 h-20 rounded-lg bg-emerald-50 dark:bg-emerald-500/10 flex items-center justify-center mx-auto mb-6 ring-1 ring-emerald-200 dark:ring-emerald-800">
             <Check className="w-10 h-10 text-emerald-500" />
           </div>
           <h1 className="text-3xl font-black text-slate-900 dark:text-white mb-3">
@@ -214,7 +214,7 @@ const BusinessRegister = ({ user }: BusinessRegisterProps) => {
       <div className="max-w-3xl mx-auto py-12 px-4 sm:px-6 lg:px-8">
         {/* Header */}
         <div className="text-center mb-10 animate-in fade-in slide-in-from-top-4 duration-500">
-          <div className="w-16 h-16 rounded-2xl bg-primary-50 dark:bg-primary-500/10 flex items-center justify-center mx-auto mb-5 ring-1 ring-primary-200 dark:ring-primary-800">
+          <div className="w-16 h-16 rounded-lg bg-primary-50 dark:bg-primary-500/10 flex items-center justify-center mx-auto mb-5 ring-1 ring-primary-200 dark:ring-primary-800">
             <Store className="w-8 h-8 text-primary-600 dark:text-primary-400" />
           </div>
           <h1 className="text-3xl sm:text-4xl font-black text-slate-900 dark:text-white tracking-tight mb-3">
@@ -227,7 +227,7 @@ const BusinessRegister = ({ user }: BusinessRegisterProps) => {
 
         {/* Error */}
         {error && (
-          <div className="flex items-start gap-3 px-5 py-4 mb-8 bg-red-50 dark:bg-red-500/10 border border-red-200 dark:border-red-800 rounded-2xl animate-in fade-in slide-in-from-top-2 duration-300">
+          <div className="flex items-start gap-3 px-5 py-4 mb-8 bg-red-50 dark:bg-red-500/10 border border-red-200 dark:border-red-800 rounded-lg animate-in fade-in slide-in-from-top-2 duration-300">
             <AlertCircle className="w-5 h-5 text-red-500 flex-shrink-0 mt-0.5" />
             <p className="text-sm font-bold text-red-700 dark:text-red-400">{error}</p>
           </div>
@@ -235,7 +235,7 @@ const BusinessRegister = ({ user }: BusinessRegisterProps) => {
 
         {/* Plan upgrade banner */}
         {existingCount > 0 && existingCount < maxBusinesses && (
-          <div className="flex items-start gap-3 px-5 py-4 mb-8 bg-amber-50 dark:bg-amber-500/10 border border-amber-200 dark:border-amber-800 rounded-2xl animate-in fade-in slide-in-from-top-2 duration-300">
+          <div className="flex items-start gap-3 px-5 py-4 mb-8 bg-amber-50 dark:bg-amber-500/10 border border-amber-200 dark:border-amber-800 rounded-lg animate-in fade-in slide-in-from-top-2 duration-300">
             <Crown className="w-5 h-5 text-amber-500 flex-shrink-0 mt-0.5" />
             <div className="text-sm font-medium text-amber-800 dark:text-amber-300">
               Tienes <strong>{existingCount}</strong> de {maxBusinesses === Infinity ? 'negocios ilimitados' : <strong>{maxBusinesses}</strong>} negocio{maxBusinesses !== 1 ? 's' : ''} en tu plan {PLAN_LABELS[plan]}.
@@ -247,12 +247,12 @@ const BusinessRegister = ({ user }: BusinessRegisterProps) => {
         )}
 
         {/* Form */}
-        <div className="bg-white dark:bg-slate-900 rounded-3xl border border-slate-200 dark:border-slate-800 shadow-xl shadow-slate-200/50 dark:shadow-none overflow-hidden animate-in fade-in slide-in-from-bottom-4 duration-500 delay-100">
+        <div className="bg-white dark:bg-slate-900 rounded-lg border border-slate-200 dark:border-slate-800 shadow-xl shadow-slate-200/50 dark:shadow-none overflow-hidden animate-in fade-in slide-in-from-bottom-4 duration-500 delay-100">
           <form onSubmit={handleSubmit} className="divide-y divide-slate-100 dark:divide-slate-800">
             {/* ═══ SECTION: INFORMACIÓN GENERAL ═══ */}
             <div className="p-6 sm:p-8 space-y-6">
               <div className="flex items-center gap-3 pb-2">
-                <div className="p-2 bg-primary-50 dark:bg-primary-500/10 rounded-xl">
+                <div className="p-2 bg-primary-50 dark:bg-primary-500/10 rounded-lg">
                   <Building2 className="w-5 h-5 text-primary-600 dark:text-primary-400" />
                 </div>
                 <div>
@@ -407,7 +407,7 @@ const BusinessRegister = ({ user }: BusinessRegisterProps) => {
             {/* ═══ SECTION: CONTACTO ═══ */}
             <div className="p-6 sm:p-8 space-y-6">
               <div className="flex items-center gap-3 pb-2">
-                <div className="p-2 bg-amber-50 dark:bg-amber-500/10 rounded-xl">
+                <div className="p-2 bg-amber-50 dark:bg-amber-500/10 rounded-lg">
                   <MessageCircle className="w-5 h-5 text-amber-600 dark:text-amber-400" />
                 </div>
                 <div>
@@ -505,7 +505,7 @@ const BusinessRegister = ({ user }: BusinessRegisterProps) => {
             {form.businessName && (
               <div className="p-6 sm:p-8 bg-slate-50/50 dark:bg-slate-800/30 animate-in fade-in slide-in-from-bottom-2 duration-300">
                 <div className="flex items-center gap-3 pb-4">
-                  <div className="p-2 bg-primary-50 dark:bg-primary-500/10 rounded-xl">
+                  <div className="p-2 bg-primary-50 dark:bg-primary-500/10 rounded-lg">
                     <Sparkles className="w-5 h-5 text-primary-600 dark:text-primary-400" />
                   </div>
                   <div>
@@ -513,9 +513,9 @@ const BusinessRegister = ({ user }: BusinessRegisterProps) => {
                     <p className="text-xs font-medium text-slate-500 dark:text-slate-400">Así se verá tu página pública</p>
                   </div>
                 </div>
-                <div className="bg-white dark:bg-slate-900 rounded-2xl border border-slate-200 dark:border-slate-700/50 p-5 space-y-3">
+                <div className="bg-white dark:bg-slate-900 rounded-lg border border-slate-200 dark:border-slate-700/50 p-5 space-y-3">
                   <div className="flex items-center gap-3">
-                    <div className="w-12 h-12 rounded-xl bg-primary-100 dark:bg-primary-900/30 flex items-center justify-center text-primary-600 dark:text-primary-400 font-black text-lg">
+                    <div className="w-12 h-12 rounded-lg bg-primary-100 dark:bg-primary-900/30 flex items-center justify-center text-primary-600 dark:text-primary-400 font-black text-lg">
                       {form.businessName.charAt(0)}
                     </div>
                     <div className="min-w-0">
@@ -540,7 +540,7 @@ const BusinessRegister = ({ user }: BusinessRegisterProps) => {
 
             {/* ═══ SHOWCASE OPTION ═══ */}
             <div className="px-6 sm:px-8 pb-4">
-              <div className="flex items-start gap-3 p-4 bg-amber-50 dark:bg-amber-900/10 rounded-2xl border border-amber-200 dark:border-amber-800/50">
+              <div className="flex items-start gap-3 p-4 bg-amber-50 dark:bg-amber-900/10 rounded-lg border border-amber-200 dark:border-amber-800/50">
                 <input
                   type="checkbox"
                   id="showcaseOnly"
@@ -564,7 +564,7 @@ const BusinessRegister = ({ user }: BusinessRegisterProps) => {
               <button
                 type="button"
                 onClick={() => navigate('/dashboard')}
-                className="inline-flex items-center gap-2 px-6 py-3.5 text-sm font-bold text-slate-600 dark:text-slate-400 hover:text-slate-800 dark:hover:text-slate-200 rounded-xl hover:bg-slate-100 dark:hover:bg-slate-700 transition-all w-full sm:w-auto justify-center"
+                className="inline-flex items-center gap-2 px-6 py-3.5 text-sm font-bold text-slate-600 dark:text-slate-400 hover:text-slate-800 dark:hover:text-slate-200 rounded-lg hover:bg-slate-100 dark:hover:bg-slate-700 transition-all w-full sm:w-auto justify-center"
               >
                 <ArrowLeft className="w-4 h-4" />
                 Cancelar
@@ -572,7 +572,7 @@ const BusinessRegister = ({ user }: BusinessRegisterProps) => {
               <button
                 type="submit"
                 disabled={loading}
-                className="inline-flex items-center justify-center gap-2 w-full sm:w-auto px-10 py-3.5 bg-primary-600 hover:bg-primary-700 text-white font-bold rounded-xl shadow-lg shadow-primary-500/25 transition-all hover:-translate-y-0.5 active:translate-y-0 disabled:opacity-60 disabled:cursor-not-allowed disabled:hover:-translate-y-0"
+                className="inline-flex items-center justify-center gap-2 w-full sm:w-auto px-10 py-3.5 bg-primary-600 hover:bg-primary-700 text-white font-bold rounded-lg shadow-lg shadow-primary-500/25 transition-all hover:-translate-y-0.5 active:translate-y-0 disabled:opacity-60 disabled:cursor-not-allowed disabled:hover:-translate-y-0"
               >
                 {loading ? (
                   <>

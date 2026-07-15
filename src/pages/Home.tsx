@@ -91,7 +91,7 @@ const Home = () => {
               </p>
               
               {/* Buscador Funcional — diseño responsive único */}
-              <form onSubmit={handleSearch} className="max-w-3xl bg-white p-2 rounded-2xl shadow-2xl flex flex-col md:grid md:grid-cols-6 md:gap-2 gap-2">
+              <form onSubmit={handleSearch} className="max-w-3xl bg-white p-2 rounded-lg shadow-2xl flex flex-col md:grid md:grid-cols-6 md:gap-2 gap-2">
                 <div className="md:col-span-3 relative">
                   <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-slate-400" />
                   <input 
@@ -99,7 +99,7 @@ const Home = () => {
                     placeholder="Ej: Corte de cabello, uñas, masaje" 
                     value={searchService}
                     onChange={(e) => setSearchService(e.target.value)}
-                    className="w-full pl-10 pr-4 py-3 md:py-4 rounded-xl md:rounded-lg bg-slate-50 dark:!bg-slate-50 border-0 text-sm font-medium text-slate-900 dark:!text-slate-900 placeholder-slate-400 focus:ring-2 focus:ring-primary-500 focus:outline-none"
+                    className="w-full pl-10 pr-4 py-3 md:py-4 rounded-lg md:rounded-lg bg-slate-50 dark:!bg-slate-50 border-0 text-sm font-medium text-slate-900 dark:!text-slate-900 placeholder-slate-400 focus:ring-2 focus:ring-primary-500 focus:outline-none"
                   />
                 </div>
                 <div className="relative md:col-span-1">
@@ -109,16 +109,16 @@ const Home = () => {
                     placeholder="Ubicación" 
                     value={searchLocation}
                     onChange={(e) => setSearchLocation(e.target.value)}
-                    className="w-full pl-10 pr-4 py-3 md:py-4 rounded-xl md:rounded-lg bg-slate-50 dark:!bg-slate-50 border-0 text-sm font-medium text-slate-900 dark:!text-slate-900 placeholder-slate-400 focus:ring-2 focus:ring-primary-500 focus:outline-none"
+                    className="w-full pl-10 pr-4 py-3 md:py-4 rounded-lg md:rounded-lg bg-slate-50 dark:!bg-slate-50 border-0 text-sm font-medium text-slate-900 dark:!text-slate-900 placeholder-slate-400 focus:ring-2 focus:ring-primary-500 focus:outline-none"
                   />
                 </div>
-                <button type="submit" className="md:col-span-2 bg-primary-600 hover:bg-primary-500 text-white px-8 py-3 md:py-4 rounded-xl font-black transition-all flex items-center justify-center gap-2 shadow-lg shadow-primary-500/30">
+                <button type="submit" className="md:col-span-2 bg-primary-600 hover:bg-primary-500 text-white px-8 py-3 md:py-4 rounded-lg font-black transition-all flex items-center justify-center gap-2 shadow-lg shadow-primary-500/30">
                   <Search className="w-5 h-5" /> Buscar ahora
                 </button>
               </form>
             </div>
             
-            <div className="col-span-1 bg-white/10 backdrop-blur-md p-8 rounded-2xl border border-white/20 shadow-2xl w-full">
+            <div className="col-span-1 bg-white/10 backdrop-blur-md p-8 rounded-lg border border-white/20 shadow-2xl w-full">
               <h2 className="text-2xl font-bold text-white mb-6 text-center">
                 {user ? 'Mi espacio' : 'Reservar ahora'}
               </h2>
@@ -238,7 +238,7 @@ const Home = () => {
       {/* Brand Image Section (AgendaYa Mascot) */}
       <section className="py-8 sm:py-16 bg-white dark:bg-slate-950 transition-colors duration-200">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="relative rounded-3xl overflow-hidden bg-slate-900 shadow-2xl border border-slate-200 dark:border-slate-800 min-h-[350px] sm:min-h-[450px] md:min-h-[500px] flex items-center">
+          <div className="relative rounded-lg overflow-hidden bg-slate-900 shadow-2xl border border-slate-200 dark:border-slate-800 min-h-[350px] sm:min-h-[450px] md:min-h-[500px] flex items-center">
             {/* Image as background */}
             <div className="absolute inset-0 z-0">
               <img 
@@ -265,7 +265,7 @@ const Home = () => {
                 </p>
                 <Link 
                   to={cta.registerLink} 
-                  className="inline-flex items-center px-8 py-4 bg-primary-500 hover:bg-primary-400 text-white font-black rounded-2xl transition-all shadow-xl shadow-primary-500/25 active:scale-95 group/btn"
+                  className="inline-flex items-center px-8 py-4 bg-primary-500 hover:bg-primary-400 text-white font-black rounded-lg transition-all shadow-xl shadow-primary-500/25 active:scale-95 group/btn"
                 >
                   Tu web gratis
                   <svg className="ml-3 w-5 h-5 group-hover:translate-x-1 transition-transform" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -289,13 +289,13 @@ const Home = () => {
           {loadingMilestones ? (
             <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
               {[1, 2, 3].map((i) => (
-                <div key={i} className="h-40 bg-slate-100 dark:bg-slate-700 rounded-xl animate-pulse"></div>
+                <div key={i} className="h-40 bg-slate-100 dark:bg-slate-700 rounded-lg animate-pulse"></div>
               ))}
             </div>
           ) : milestones.length ? (
             <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
               {milestones.map((m) => (
-                <div key={m.id} className="relative p-8 rounded-2xl border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-900/50 hover:shadow-lg transition-shadow">
+                <div key={m.id} className="relative p-8 rounded-lg border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-900/50 hover:shadow-lg transition-shadow">
                   <div className="absolute -top-4 left-8 bg-primary-600 text-white text-xs font-bold px-3 py-1 rounded-full uppercase tracking-wider">
                     Hito
                   </div>
@@ -310,12 +310,12 @@ const Home = () => {
           
           {!loading && (
             <div className="mt-16 text-center">
-              <div className="inline-block p-8 rounded-3xl bg-primary-50 dark:bg-primary-900/20 border border-primary-100 dark:border-primary-800 max-w-2xl">
+              <div className="inline-block p-8 rounded-lg bg-primary-50 dark:bg-primary-900/20 border border-primary-100 dark:border-primary-800 max-w-2xl">
                 <h3 className="text-2xl font-bold text-primary-800 dark:text-primary-300 mb-4">¿Quieres apoyarnos?</h3>
                 <p className="text-primary-700 dark:text-primary-400 mb-8">
                   AgendaYa es un proyecto en crecimiento. Tu apoyo nos ayuda a implementar nuevas funcionalidades más rápido.
                 </p>
-                <Link to="/crowdfunding" className="inline-flex items-center px-8 py-4 bg-primary-600 text-white font-bold rounded-xl hover:bg-primary-500 shadow-lg shadow-primary-500/30 transition-all hover:-translate-y-1">
+                <Link to="/crowdfunding" className="inline-flex items-center px-8 py-4 bg-primary-600 text-white font-bold rounded-lg hover:bg-primary-500 shadow-lg shadow-primary-500/30 transition-all hover:-translate-y-1">
                   Ver campaña de Crowdfunding
                   <svg className="ml-2 w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 7l5 5m0 0l-5 5m5-5H6" />

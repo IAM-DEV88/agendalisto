@@ -66,7 +66,7 @@ const AppointmentModal: React.FC<AppointmentModalProps> = ({
   return (
     <div className="fixed inset-0 z-50 flex items-start sm:items-center justify-center px-2 pt-16 sm:pt-0 sm:p-4 bg-black/50 backdrop-blur-sm animate-in fade-in duration-200 !mt-0" onClick={onClose}>
       <div
-        className="relative w-full sm:max-w-lg max-h-[calc(100dvh-5rem)] sm:max-h-[85vh] bg-white dark:bg-slate-900 rounded-3xl shadow-2xl overflow-hidden animate-in sm:zoom-in-95 duration-300"
+        className="relative w-full sm:max-w-lg max-h-[calc(100dvh-5rem)] sm:max-h-[85vh] bg-white dark:bg-slate-900 rounded-lg shadow-2xl overflow-hidden animate-in sm:zoom-in-95 duration-300"
         onClick={e => e.stopPropagation()}
       >
         {/* Drag handle (mobile) */}
@@ -90,7 +90,7 @@ const AppointmentModal: React.FC<AppointmentModalProps> = ({
             </div>
             <button
               onClick={onClose}
-              className="p-1.5 hover:bg-slate-100 dark:hover:bg-slate-800 text-slate-400 hover:text-slate-600 dark:hover:text-slate-300 rounded-xl transition-all active:scale-90 flex-shrink-0"
+              className="p-1.5 hover:bg-slate-100 dark:hover:bg-slate-800 text-slate-400 hover:text-slate-600 dark:hover:text-slate-300 rounded-lg transition-all active:scale-90 flex-shrink-0"
             >
               <X className="w-4 h-4" />
             </button>
@@ -103,7 +103,7 @@ const AppointmentModal: React.FC<AppointmentModalProps> = ({
             {/* Status badge + client name row */}
             <div className="flex items-center justify-between gap-3">
               <div className="flex items-center gap-2 min-w-0">
-                <div className="w-8 h-8 rounded-xl bg-primary-50 dark:bg-primary-500/10 flex items-center justify-center flex-shrink-0">
+                <div className="w-8 h-8 rounded-lg bg-primary-50 dark:bg-primary-500/10 flex items-center justify-center flex-shrink-0">
                   <User className="w-4 h-4 text-primary-500" />
                 </div>
                 <div className="min-w-0">
@@ -123,7 +123,7 @@ const AppointmentModal: React.FC<AppointmentModalProps> = ({
 
             {/* Info cards grid */}
             <div className="grid grid-cols-2 gap-2">
-              <div className="flex items-center gap-2 p-2.5 bg-slate-50 dark:bg-slate-800/50 rounded-xl border border-slate-100 dark:border-slate-800">
+              <div className="flex items-center gap-2 p-2.5 bg-slate-50 dark:bg-slate-800/50 rounded-lg border border-slate-100 dark:border-slate-800">
                 <Calendar className="w-3.5 h-3.5 text-primary-400 flex-shrink-0" />
                 <div className="min-w-0">
                   <p className="text-[10px] font-bold uppercase tracking-wider text-slate-400 mb-0">Fecha</p>
@@ -134,7 +134,7 @@ const AppointmentModal: React.FC<AppointmentModalProps> = ({
                 </div>
               </div>
 
-              <div className="flex items-center gap-2 p-2.5 bg-slate-50 dark:bg-slate-800/50 rounded-xl border border-slate-100 dark:border-slate-800">
+              <div className="flex items-center gap-2 p-2.5 bg-slate-50 dark:bg-slate-800/50 rounded-lg border border-slate-100 dark:border-slate-800">
                 <Clock className="w-3.5 h-3.5 text-primary-400 flex-shrink-0" />
                 <div className="min-w-0">
                   <p className="text-[10px] font-bold uppercase tracking-wider text-slate-400 mb-0">Horario</p>
@@ -145,7 +145,7 @@ const AppointmentModal: React.FC<AppointmentModalProps> = ({
               </div>
 
               {appointment.services?.duration && (
-                <div className="flex items-center gap-2 p-2.5 bg-slate-50 dark:bg-slate-800/50 rounded-xl border border-slate-100 dark:border-slate-800">
+                <div className="flex items-center gap-2 p-2.5 bg-slate-50 dark:bg-slate-800/50 rounded-lg border border-slate-100 dark:border-slate-800">
                   <Clock className="w-3.5 h-3.5 text-primary-400 flex-shrink-0" />
                   <div className="min-w-0">
                     <p className="text-[10px] font-bold uppercase tracking-wider text-slate-400 mb-0">Duración</p>
@@ -155,7 +155,7 @@ const AppointmentModal: React.FC<AppointmentModalProps> = ({
               )}
 
               {appointment.services?.price !== undefined && appointment.services.price > 0 && (
-                <div className="flex items-center gap-2 p-2.5 bg-slate-50 dark:bg-slate-800/50 rounded-xl border border-slate-100 dark:border-slate-800">
+                <div className="flex items-center gap-2 p-2.5 bg-slate-50 dark:bg-slate-800/50 rounded-lg border border-slate-100 dark:border-slate-800">
                   <div className="flex-shrink-0 w-3.5 h-3.5 flex items-center justify-center">
                     <span className="text-xs font-black text-primary-400">$</span>
                   </div>
@@ -171,7 +171,7 @@ const AppointmentModal: React.FC<AppointmentModalProps> = ({
 
             {/* Guest/Client contact */}
             {(appointment.is_guest && appointment.guest_info) ? (
-              <div className="p-2.5 bg-amber-50/50 dark:bg-amber-500/5 rounded-xl border border-amber-200/50 dark:border-amber-800/30">
+              <div className="p-2.5 bg-amber-50/50 dark:bg-amber-500/5 rounded-lg border border-amber-200/50 dark:border-amber-800/30">
                 <p className="text-[10px] font-bold uppercase tracking-wider text-amber-600 dark:text-amber-400 mb-1.5">Información de contacto</p>
                 <div className="space-y-1">
                   <div className="flex items-center gap-2 text-xs text-amber-800 dark:text-amber-300">
@@ -201,7 +201,7 @@ const AppointmentModal: React.FC<AppointmentModalProps> = ({
                 <MessageSquareText className="w-3 h-3 text-slate-400" />
                 <span className="text-[10px] font-bold uppercase tracking-wider text-slate-400">Notas</span>
               </div>
-              <div className="p-2.5 bg-slate-50 dark:bg-slate-800/50 rounded-xl border border-slate-100 dark:border-slate-800">
+              <div className="p-2.5 bg-slate-50 dark:bg-slate-800/50 rounded-lg border border-slate-100 dark:border-slate-800">
                 <p className="text-xs text-slate-600 dark:text-slate-400 leading-relaxed">
                   {appointment.notes || (
                     <span className="italic text-slate-400">Sin notas adicionales</span>
@@ -217,7 +217,7 @@ const AppointmentModal: React.FC<AppointmentModalProps> = ({
                   <Star className="w-3 h-3 text-amber-500" />
                   <span className="text-[10px] font-bold uppercase tracking-wider text-slate-400">Reseña</span>
                 </div>
-                <div className="p-2.5 bg-amber-50/50 dark:bg-amber-500/5 rounded-xl border border-amber-200/50 dark:border-amber-800/30 space-y-1">
+                <div className="p-2.5 bg-amber-50/50 dark:bg-amber-500/5 rounded-lg border border-amber-200/50 dark:border-amber-800/30 space-y-1">
                   <div className="flex items-center gap-1">
                     {[1, 2, 3, 4, 5].map(i => (
                       <Star
@@ -240,7 +240,7 @@ const AppointmentModal: React.FC<AppointmentModalProps> = ({
 
             {/* Cancel reason */}
             {appointment.status === 'cancelled' && appointment.cancel_reason && (
-              <div className="p-2.5 bg-red-50/50 dark:bg-red-500/5 rounded-xl border border-red-200/50 dark:border-red-800/30">
+              <div className="p-2.5 bg-red-50/50 dark:bg-red-500/5 rounded-lg border border-red-200/50 dark:border-red-800/30">
                 <div className="flex items-center gap-1.5 mb-1">
                   <XCircle className="w-3 h-3 text-red-400" />
                   <span className="text-[10px] font-bold uppercase tracking-wider text-red-500">Motivo de cancelación</span>
@@ -258,7 +258,7 @@ const AppointmentModal: React.FC<AppointmentModalProps> = ({
                 <div className="flex gap-2">
                   <button
                     onClick={() => { onReschedule(appointment); onClose(); }}
-                    className="flex-1 inline-flex items-center justify-center gap-1.5 px-4 py-2.5 bg-amber-50 hover:bg-amber-100 dark:bg-amber-500/10 dark:hover:bg-amber-500/20 text-amber-600 dark:text-amber-400 text-sm font-bold rounded-xl transition-all active:scale-[0.97]"
+                    className="flex-1 inline-flex items-center justify-center gap-1.5 px-4 py-2.5 bg-amber-50 hover:bg-amber-100 dark:bg-amber-500/10 dark:hover:bg-amber-500/20 text-amber-600 dark:text-amber-400 text-sm font-bold rounded-lg transition-all active:scale-[0.97]"
                   >
                     <CalendarClock className="w-4 h-4" />
                     Gestionar
@@ -266,7 +266,7 @@ const AppointmentModal: React.FC<AppointmentModalProps> = ({
                   {onStatusChange && (
                     <button
                       onClick={() => handleStatusChange('confirmed')}
-                      className="flex-1 inline-flex items-center justify-center gap-1.5 px-4 py-2.5 bg-primary-600 hover:bg-primary-700 text-white text-sm font-bold rounded-xl shadow-lg shadow-primary-500/20 transition-all active:scale-[0.97]"
+                      className="flex-1 inline-flex items-center justify-center gap-1.5 px-4 py-2.5 bg-primary-600 hover:bg-primary-700 text-white text-sm font-bold rounded-lg shadow-lg shadow-primary-500/20 transition-all active:scale-[0.97]"
                     >
                       <CheckCircle className="w-4 h-4" />
                       Confirmar
@@ -277,7 +277,7 @@ const AppointmentModal: React.FC<AppointmentModalProps> = ({
                 <div className="flex gap-2">
                   <button
                     onClick={() => { onReschedule(appointment); onClose(); }}
-                    className="flex-1 inline-flex items-center justify-center gap-1.5 px-4 py-2.5 bg-amber-50 hover:bg-amber-100 dark:bg-amber-500/10 dark:hover:bg-amber-500/20 text-amber-600 dark:text-amber-400 text-sm font-bold rounded-xl transition-all active:scale-[0.97]"
+                    className="flex-1 inline-flex items-center justify-center gap-1.5 px-4 py-2.5 bg-amber-50 hover:bg-amber-100 dark:bg-amber-500/10 dark:hover:bg-amber-500/20 text-amber-600 dark:text-amber-400 text-sm font-bold rounded-lg transition-all active:scale-[0.97]"
                   >
                     <CalendarClock className="w-4 h-4" />
                     Gestionar
@@ -285,7 +285,7 @@ const AppointmentModal: React.FC<AppointmentModalProps> = ({
                   {onStatusChange && (
                     <button
                       onClick={() => handleStatusChange('completed')}
-                      className="flex-1 inline-flex items-center justify-center gap-1.5 px-4 py-2.5 bg-emerald-600 hover:bg-emerald-700 text-white text-sm font-bold rounded-xl shadow-lg shadow-emerald-500/20 transition-all active:scale-[0.97]"
+                      className="flex-1 inline-flex items-center justify-center gap-1.5 px-4 py-2.5 bg-emerald-600 hover:bg-emerald-700 text-white text-sm font-bold rounded-lg shadow-lg shadow-emerald-500/20 transition-all active:scale-[0.97]"
                     >
                       <CheckCircle className="w-4 h-4" />
                       Completar

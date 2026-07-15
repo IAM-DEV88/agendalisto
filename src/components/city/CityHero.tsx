@@ -47,12 +47,12 @@ export default function CityHero({ city, onRegisterClick }: CityHeroProps) {
                 value={search}
                 onChange={(e) => setSearch(e.target.value)}
                 placeholder="¿Qué producto o servicio buscas?"
-                className="w-full pl-12 pr-4 py-4 rounded-xl border-0 text-sm font-medium text-slate-900 dark:!text-slate-900 placeholder-slate-400 bg-white dark:!bg-white shadow-xl shadow-black/10 focus:ring-2 focus:ring-primary-300 focus:outline-none transition-shadow"
+                className="w-full pl-12 pr-4 py-4 rounded-lg border-0 text-sm font-medium text-slate-900 dark:!text-slate-900 placeholder-slate-400 bg-white dark:!bg-white shadow-xl shadow-black/10 focus:ring-2 focus:ring-primary-300 focus:outline-none transition-shadow"
               />
             </div>
             <button
               type="submit"
-              className="px-8 py-4 bg-primary-600 hover:bg-primary-500 text-white font-black rounded-xl transition-all shadow-xl shadow-black/10 hover:-translate-y-0.5 active:translate-y-0 flex items-center justify-center gap-2"
+              className="px-8 py-4 bg-primary-600 hover:bg-primary-500 text-white font-black rounded-lg transition-all shadow-xl shadow-black/10 hover:-translate-y-0.5 active:translate-y-0 flex items-center justify-center gap-2"
             >
               <Search className="w-5 h-5" />
               Buscar
@@ -63,7 +63,7 @@ export default function CityHero({ city, onRegisterClick }: CityHeroProps) {
             <span className="text-primary-200 font-medium">¿Tienes un negocio aquí?</span>
             <button
               onClick={onRegisterClick}
-              className="inline-flex items-center gap-2 px-5 py-2.5 bg-white/10 hover:bg-white/20 backdrop-blur-sm text-white font-bold rounded-xl transition-all hover:-translate-y-0.5 active:translate-y-0 border border-white/10"
+              className="inline-flex items-center gap-2 px-5 py-2.5 bg-white/10 hover:bg-white/20 backdrop-blur-sm text-white font-bold rounded-lg transition-all hover:-translate-y-0.5 active:translate-y-0 border border-white/10"
             >
               <Store className="w-4 h-4" />
               Registra tu negocio gratis

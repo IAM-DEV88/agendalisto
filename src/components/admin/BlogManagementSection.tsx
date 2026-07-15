@@ -110,7 +110,7 @@ export default function BlogManagementSection() {
         </div>
         <button
           onClick={openCreate}
-          className="flex items-center gap-2 px-5 py-2.5 bg-primary-600 hover:bg-primary-700 text-white font-bold text-sm rounded-xl transition-all shadow-lg shadow-primary-500/20"
+          className="flex items-center gap-2 px-5 py-2.5 bg-primary-600 hover:bg-primary-700 text-white font-bold text-sm rounded-lg transition-all shadow-lg shadow-primary-500/20"
         >
           <Plus className="w-4 h-4" /> Nueva publicación
         </button>
@@ -118,16 +118,16 @@ export default function BlogManagementSection() {
 
       {loading ? (
         <div className="space-y-3">
-          {[1, 2, 3].map(i => <div key={i} className="h-16 bg-white dark:bg-slate-900 rounded-xl border border-slate-200 dark:border-slate-700 animate-pulse" />)}
+          {[1, 2, 3].map(i => <div key={i} className="h-16 bg-white dark:bg-slate-900 rounded-lg border border-slate-200 dark:border-slate-700 animate-pulse" />)}
         </div>
       ) : posts.length === 0 ? (
         <EmptyState icon={<Eye className="w-8 h-8" />} title="Sin publicaciones" description="Crea la primera publicación del blog." />
       ) : (
         <div className="space-y-2">
           {posts.map(post => (
-            <div key={post.id} className="flex items-center gap-4 p-4 bg-white dark:bg-slate-900 rounded-xl border border-slate-200 dark:border-slate-700 hover:border-slate-300 dark:hover:border-slate-600 transition-all">
+            <div key={post.id} className="flex items-center gap-4 p-4 bg-white dark:bg-slate-900 rounded-lg border border-slate-200 dark:border-slate-700 hover:border-slate-300 dark:hover:border-slate-600 transition-all">
               {post.image_url && (
-                <img src={post.image_url} alt="" className="w-14 h-14 rounded-xl object-cover flex-shrink-0 bg-slate-100" />
+                <img src={post.image_url} alt="" className="w-14 h-14 rounded-lg object-cover flex-shrink-0 bg-slate-100" />
               )}
               <div className="flex-1 min-w-0">
                 <p className="font-bold text-sm text-slate-900 dark:text-white truncate">{post.title}</p>
@@ -158,8 +158,8 @@ export default function BlogManagementSection() {
       {modalOpen && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4 animate-in fade-in duration-200">
           <div className="absolute inset-0 bg-black/40 backdrop-blur-sm" onClick={() => setModalOpen(false)} />
-          <div className="relative w-full max-w-3xl bg-white dark:bg-slate-900 rounded-3xl border border-slate-200 dark:border-slate-700 shadow-2xl max-h-[90vh] overflow-y-auto p-6 sm:p-8 animate-in zoom-in-95 duration-200 scrollbar-fino">
-            <button onClick={() => setModalOpen(false)} className="absolute top-4 right-4 p-2 rounded-xl hover:bg-slate-100 dark:hover:bg-slate-800 text-slate-400 transition-all">
+          <div className="relative w-full max-w-3xl bg-white dark:bg-slate-900 rounded-lg border border-slate-200 dark:border-slate-700 shadow-2xl max-h-[90vh] overflow-y-auto p-6 sm:p-8 animate-in zoom-in-95 duration-200 scrollbar-fino">
+            <button onClick={() => setModalOpen(false)} className="absolute top-4 right-4 p-2 rounded-lg hover:bg-slate-100 dark:hover:bg-slate-800 text-slate-400 transition-all">
               <X className="w-5 h-5" />
             </button>
 
@@ -201,7 +201,7 @@ export default function BlogManagementSection() {
                     value={form.content}
                     onChange={e => setForm({ ...form, content: e.target.value })}
                     placeholder="Escribe el contenido aquí... Puedes usar **negritas** con markdown"
-                    className="w-full pl-10 pr-4 py-2.5 h-64 resize-none font-mono text-sm leading-relaxed rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 focus:ring-2 focus:ring-primary-500/20 focus:border-primary-500 outline-none transition-all"
+                    className="w-full pl-10 pr-4 py-2.5 h-64 resize-none font-mono text-sm leading-relaxed rounded-lg border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 focus:ring-2 focus:ring-primary-500/20 focus:border-primary-500 outline-none transition-all"
                   />
                 </div>
                 <p className="text-xs text-slate-400 mt-1">Soporta **negritas** y [enlaces](url)</p>
@@ -209,7 +209,7 @@ export default function BlogManagementSection() {
 
               {/* Live preview */}
               {form.content && (
-                <div className="bg-slate-50 dark:bg-slate-800/50 rounded-2xl p-5 border border-slate-200 dark:border-slate-700">
+                <div className="bg-slate-50 dark:bg-slate-800/50 rounded-lg p-5 border border-slate-200 dark:border-slate-700">
                   <p className="text-xs font-bold text-slate-400 uppercase tracking-widest mb-2">Vista previa</p>
                   <h4 className="font-black text-lg text-slate-900 dark:text-white mb-2">{form.title || 'Sin título'}</h4>
                   <div className="prose prose-sm dark:prose-invert max-w-none text-slate-600 dark:text-slate-400 whitespace-pre-wrap">
@@ -225,10 +225,10 @@ export default function BlogManagementSection() {
               )}
 
               <div className="flex justify-end gap-3 pt-4 border-t border-slate-100 dark:border-slate-800">
-                <button onClick={() => setModalOpen(false)} className="px-6 py-2.5 bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-400 font-bold text-sm rounded-xl hover:bg-slate-200 dark:hover:bg-slate-700 transition-all">
+                <button onClick={() => setModalOpen(false)} className="px-6 py-2.5 bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-400 font-bold text-sm rounded-lg hover:bg-slate-200 dark:hover:bg-slate-700 transition-all">
                   Cancelar
                 </button>
-                <button onClick={handleSave} disabled={saving} className="flex items-center gap-2 px-6 py-2.5 bg-primary-600 hover:bg-primary-700 text-white font-bold text-sm rounded-xl transition-all disabled:opacity-50 shadow-lg shadow-primary-500/20">
+                <button onClick={handleSave} disabled={saving} className="flex items-center gap-2 px-6 py-2.5 bg-primary-600 hover:bg-primary-700 text-white font-bold text-sm rounded-lg transition-all disabled:opacity-50 shadow-lg shadow-primary-500/20">
                   {saving ? <Loader2 className="w-4 h-4 animate-spin" /> : <Save className="w-4 h-4" />}
                   {editing ? 'Guardar cambios' : 'Publicar'}
                 </button>
@@ -242,12 +242,12 @@ export default function BlogManagementSection() {
       {previewOpen && previewPost && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4 animate-in fade-in duration-200">
           <div className="absolute inset-0 bg-black/40 backdrop-blur-sm" onClick={() => setPreviewOpen(false)} />
-          <div className="relative w-full max-w-2xl bg-white dark:bg-slate-900 rounded-3xl border border-slate-200 dark:border-slate-700 shadow-2xl max-h-[80vh] overflow-y-auto p-6 sm:p-8 animate-in zoom-in-95 duration-200 scrollbar-fino">
-            <button onClick={() => setPreviewOpen(false)} className="absolute top-4 right-4 p-2 rounded-xl hover:bg-slate-100 dark:hover:bg-slate-800 text-slate-400 transition-all">
+          <div className="relative w-full max-w-2xl bg-white dark:bg-slate-900 rounded-lg border border-slate-200 dark:border-slate-700 shadow-2xl max-h-[80vh] overflow-y-auto p-6 sm:p-8 animate-in zoom-in-95 duration-200 scrollbar-fino">
+            <button onClick={() => setPreviewOpen(false)} className="absolute top-4 right-4 p-2 rounded-lg hover:bg-slate-100 dark:hover:bg-slate-800 text-slate-400 transition-all">
               <X className="w-5 h-5" />
             </button>
             {previewPost.image_url && (
-              <img src={previewPost.image_url} alt="" className="w-full h-48 object-cover rounded-2xl mb-6 bg-slate-100" />
+              <img src={previewPost.image_url} alt="" className="w-full h-48 object-cover rounded-lg mb-6 bg-slate-100" />
             )}
             <p className="text-xs font-bold text-slate-400 uppercase tracking-widest mb-2">
               {previewPost.author_name} · {new Date(previewPost.created_at).toLocaleDateString('es', { day: 'numeric', month: 'long', year: 'numeric' })}

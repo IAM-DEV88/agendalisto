@@ -121,14 +121,14 @@ export default function LocationPicker({ lat, lng, onChange }: LocationPickerPro
             onChange={e => setSearchQuery(e.target.value)}
             onKeyDown={e => e.key === 'Enter' && handleSearch()}
             placeholder="Buscar dirección o lugar..."
-            className="w-full pl-10 pr-4 py-2.5 rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 text-sm font-medium focus:ring-2 focus:ring-primary-500/20 focus:border-primary-500 outline-none transition-all"
+            className="w-full pl-10 pr-4 py-2.5 rounded-lg border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 text-sm font-medium focus:ring-2 focus:ring-primary-500/20 focus:border-primary-500 outline-none transition-all"
           />
         </div>
         <button
           type="button"
           onClick={handleSearch}
           disabled={searching}
-          className="px-4 py-2.5 bg-primary-600 hover:bg-primary-700 text-white font-bold text-sm rounded-xl transition-all disabled:opacity-50"
+          className="px-4 py-2.5 bg-primary-600 hover:bg-primary-700 text-white font-bold text-sm rounded-lg transition-all disabled:opacity-50"
         >
           {searching ? <Loader2 className="w-4 h-4 animate-spin" /> : 'Buscar'}
         </button>
@@ -136,7 +136,7 @@ export default function LocationPicker({ lat, lng, onChange }: LocationPickerPro
 
       <div
         ref={mapRef}
-        className="w-full h-[300px] rounded-xl overflow-hidden border border-slate-200 dark:border-slate-700 cursor-crosshair"
+        className="w-full h-[300px] rounded-lg overflow-hidden border border-slate-200 dark:border-slate-700 cursor-crosshair"
         style={{ isolation: 'isolate' }}
       />
 

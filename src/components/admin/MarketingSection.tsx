@@ -38,7 +38,7 @@ export default function MarketingSection() {
 
   if (loading) {
     return <div className="space-y-3">
-      {[1, 2, 3].map(i => <div key={i} className="h-16 bg-white dark:bg-slate-900 rounded-xl border border-slate-200 dark:border-slate-700 animate-pulse" />)}
+      {[1, 2, 3].map(i => <div key={i} className="h-16 bg-white dark:bg-slate-900 rounded-lg border border-slate-200 dark:border-slate-700 animate-pulse" />)}
     </div>;
   }
 
@@ -53,7 +53,7 @@ export default function MarketingSection() {
           { id: 'referrals', label: 'Referidos', icon: LinkIcon },
         ].map(t => (
           <button key={t.id} onClick={() => setTab(t.id as any)}
-            className={`flex items-center gap-1.5 px-4 py-2 rounded-xl text-xs font-bold transition-all ${
+            className={`flex items-center gap-1.5 px-4 py-2 rounded-lg text-xs font-bold transition-all ${
               tab === t.id ? 'bg-primary-100 dark:bg-primary-900/40 text-primary-700 dark:text-primary-300' : 'text-slate-500 hover:text-slate-700 dark:hover:text-slate-300'
             }`}
           >
@@ -67,7 +67,7 @@ export default function MarketingSection() {
         subscribers.length === 0 ? (
           <EmptyState icon={<Mail className="w-8 h-8" />} title="Sin suscriptores" description="Aún no hay registros en el newsletter." />
         ) : (
-          <div className="bg-white dark:bg-slate-900 rounded-2xl border border-slate-200 dark:border-slate-800 overflow-hidden">
+          <div className="bg-white dark:bg-slate-900 rounded-lg border border-slate-200 dark:border-slate-800 overflow-hidden">
             <div className="divide-y divide-slate-100 dark:divide-slate-800">
               {subscribers.map((sub, i) => (
                 <div key={i} className="flex items-center justify-between p-4">
@@ -99,8 +99,8 @@ export default function MarketingSection() {
           ) : (
             <div className="space-y-2">
               {filteredGifts.map(g => (
-                <div key={g.id} className="flex items-center gap-4 p-4 bg-white dark:bg-slate-900 rounded-xl border border-slate-200 dark:border-slate-700">
-                  <div className={`w-10 h-10 rounded-xl flex items-center justify-center flex-shrink-0 ${
+                <div key={g.id} className="flex items-center gap-4 p-4 bg-white dark:bg-slate-900 rounded-lg border border-slate-200 dark:border-slate-700">
+                  <div className={`w-10 h-10 rounded-lg flex items-center justify-center flex-shrink-0 ${
                     g.status === 'active' ? 'bg-emerald-100 dark:bg-emerald-900/30 text-emerald-600' : 'bg-slate-100 dark:bg-slate-800 text-slate-400'
                   }`}>
                     <Gift className="w-5 h-5" />
@@ -134,7 +134,7 @@ export default function MarketingSection() {
             { label: 'Frecuente', count: loyalty?.frecuente_count || 0, color: 'bg-amber-100 dark:bg-amber-900/30 text-amber-600', icon: Heart },
             { label: 'VIP', count: loyalty?.vip_count || 0, color: 'bg-purple-100 dark:bg-purple-900/30 text-purple-600', icon: Gift },
           ].map(item => (
-            <div key={item.label} className="bg-white dark:bg-slate-900 rounded-2xl border border-slate-200 dark:border-slate-800 p-6 text-center">
+            <div key={item.label} className="bg-white dark:bg-slate-900 rounded-lg border border-slate-200 dark:border-slate-800 p-6 text-center">
               <item.icon className={`w-8 h-8 mx-auto mb-2 ${item.color.split(' ').pop()}`} />
               <p className="text-3xl font-black text-slate-900 dark:text-white">{item.count}</p>
               <p className="text-xs font-bold text-slate-400 mt-1">{item.label}</p>
@@ -146,7 +146,7 @@ export default function MarketingSection() {
       {/* Referrals Tab */}
       {tab === 'referrals' && (
         <div className="space-y-4">
-          <div className="bg-white dark:bg-slate-900 rounded-2xl border border-slate-200 dark:border-slate-800 p-5">
+          <div className="bg-white dark:bg-slate-900 rounded-lg border border-slate-200 dark:border-slate-800 p-5">
             <h3 className="text-sm font-black text-slate-500 dark:text-slate-400 uppercase tracking-widest mb-3">
               Top Referidores
             </h3>
@@ -155,7 +155,7 @@ export default function MarketingSection() {
             ) : (
               <div className="space-y-2">
                 {topReferrers.map((r, i) => (
-                  <div key={r.referrer_id} className="flex items-center gap-4 p-3 rounded-xl bg-slate-50 dark:bg-slate-800/50 border border-slate-100 dark:border-slate-800">
+                  <div key={r.referrer_id} className="flex items-center gap-4 p-3 rounded-lg bg-slate-50 dark:bg-slate-800/50 border border-slate-100 dark:border-slate-800">
                     <div className={`w-8 h-8 rounded-full flex items-center justify-center flex-shrink-0 font-black text-sm ${
                       i === 0 ? 'bg-amber-100 dark:bg-amber-900/40 text-amber-600' :
                       i === 1 ? 'bg-slate-100 dark:bg-slate-800 text-slate-500' :
@@ -173,11 +173,11 @@ export default function MarketingSection() {
             )}
           </div>
           <div className="grid grid-cols-2 gap-4">
-            <div className="bg-white dark:bg-slate-900 rounded-2xl border border-slate-200 dark:border-slate-800 p-5 text-center">
+            <div className="bg-white dark:bg-slate-900 rounded-lg border border-slate-200 dark:border-slate-800 p-5 text-center">
               <p className="text-3xl font-black text-slate-900 dark:text-white">{referralStats?.total_referrals || 0}</p>
               <p className="text-xs font-bold text-slate-400 mt-1">Total referidos</p>
             </div>
-            <div className="bg-white dark:bg-slate-900 rounded-2xl border border-slate-200 dark:border-slate-800 p-5 text-center">
+            <div className="bg-white dark:bg-slate-900 rounded-lg border border-slate-200 dark:border-slate-800 p-5 text-center">
               <p className="text-3xl font-black text-slate-900 dark:text-white">{referralStats?.unique_referrers || 0}</p>
               <p className="text-xs font-bold text-slate-400 mt-1">Referidores únicos</p>
             </div>

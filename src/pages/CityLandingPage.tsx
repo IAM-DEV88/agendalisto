@@ -75,7 +75,7 @@ export default function CityLandingPage() {
       <div className="min-h-screen bg-gradient-to-b from-slate-50 to-white dark:from-slate-950 dark:to-slate-900 flex items-center justify-center px-4">
         <SEO title="Ciudad no encontrada" description="La ciudad que buscas no está disponible." />
         <div className="text-center max-w-md">
-          <div className="w-20 h-20 rounded-2xl bg-slate-100 dark:bg-slate-800 flex items-center justify-center mx-auto mb-6 text-slate-400">
+          <div className="w-20 h-20 rounded-lg bg-slate-100 dark:bg-slate-800 flex items-center justify-center mx-auto mb-6 text-slate-400">
             <MapPin className="w-8 h-8" />
           </div>
           <h1 className="text-2xl font-black text-slate-900 dark:text-white mb-2">
@@ -88,7 +88,7 @@ export default function CityLandingPage() {
           </p>
           <Link
             to="/explore"
-            className="inline-flex items-center gap-2 px-6 py-3 bg-primary-600 hover:bg-primary-500 text-white font-bold rounded-xl transition-all shadow-lg shadow-primary-500/25"
+            className="inline-flex items-center gap-2 px-6 py-3 bg-primary-600 hover:bg-primary-500 text-white font-bold rounded-lg transition-all shadow-lg shadow-primary-500/25"
           >
             Explorar todos los negocios
             <ArrowRight className="w-4 h-4" />
@@ -111,7 +111,7 @@ export default function CityLandingPage() {
         <div className="max-w-7xl mx-auto px-4 py-16">
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
             {[1, 2, 3, 4, 5, 6].map((i) => (
-              <div key={i} className="h-48 bg-white dark:bg-slate-900 rounded-2xl border border-slate-200 dark:border-slate-700 animate-pulse" />
+              <div key={i} className="h-48 bg-white dark:bg-slate-900 rounded-lg border border-slate-200 dark:border-slate-700 animate-pulse" />
             ))}
           </div>
         </div>
@@ -170,7 +170,7 @@ export default function CityLandingPage() {
                 <Link
                   key={business.id}
                   to={`/${business.slug}`}
-                  className="group bg-white dark:bg-slate-900 rounded-2xl border border-slate-200 dark:border-slate-800 overflow-hidden hover:border-primary-300 dark:hover:border-primary-700 hover:shadow-2xl transition-all duration-300 hover:-translate-y-1"
+                  className="group bg-white dark:bg-slate-900 rounded-lg border border-slate-200 dark:border-slate-800 overflow-hidden hover:border-primary-300 dark:hover:border-primary-700 hover:shadow-2xl transition-all duration-300 hover:-translate-y-1"
                 >
                   <div className="h-48 bg-slate-100 dark:bg-slate-800 overflow-hidden">
                     <img
@@ -203,7 +203,7 @@ export default function CityLandingPage() {
 
           <section className="py-12 sm:py-16 px-4 sm:px-6 lg:px-8 bg-white dark:bg-slate-900/50 border-y border-slate-100 dark:border-slate-800">
             <div className="max-w-2xl mx-auto text-center">
-              <div className="w-12 h-12 rounded-xl bg-primary-50 dark:bg-primary-500/10 flex items-center justify-center mx-auto mb-4">
+              <div className="w-12 h-12 rounded-lg bg-primary-50 dark:bg-primary-500/10 flex items-center justify-center mx-auto mb-4">
                 <Store className="w-6 h-6 text-primary-600 dark:text-primary-400" />
               </div>
               <h3 className="text-2xl font-black text-slate-900 dark:text-white mb-2">
@@ -214,7 +214,7 @@ export default function CityLandingPage() {
               </p>
               <button
                 onClick={scrollToLeadForm}
-                className="inline-flex items-center gap-2 px-6 py-3 bg-primary-600 hover:bg-primary-500 text-white font-bold rounded-xl transition-all shadow-lg shadow-primary-500/25 hover:-translate-y-0.5 active:translate-y-0"
+                className="inline-flex items-center gap-2 px-6 py-3 bg-primary-600 hover:bg-primary-500 text-white font-bold rounded-lg transition-all shadow-lg shadow-primary-500/25 hover:-translate-y-0.5 active:translate-y-0"
               >
                 Registrar mi negocio
                 <ArrowRight className="w-4 h-4" />
@@ -240,7 +240,7 @@ export default function CityLandingPage() {
           {/* Demand capture */}
           <section className="py-12 sm:py-16 px-4 sm:px-6 lg:px-8 max-w-7xl mx-auto">
             <div className="max-w-lg mx-auto text-center">
-              <div className="w-14 h-14 rounded-2xl bg-amber-50 dark:bg-amber-500/10 flex items-center justify-center mx-auto mb-4">
+              <div className="w-14 h-14 rounded-lg bg-amber-50 dark:bg-amber-500/10 flex items-center justify-center mx-auto mb-4">
                 <Search className="w-7 h-7 text-amber-600 dark:text-amber-400" />
               </div>
               <h3 className="text-2xl font-black text-slate-900 dark:text-white tracking-tight mb-2">
@@ -255,12 +255,12 @@ export default function CityLandingPage() {
                   value={customerDemand}
                   onChange={(e) => setCustomerDemand(e.target.value)}
                   placeholder="Ej: Café de especialidad, Bodega de aguacate..."
-                  className="flex-1 px-4 py-3 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-xl text-sm font-medium text-slate-900 dark:text-white placeholder:text-slate-400 focus:ring-2 focus:ring-primary-500 focus:border-transparent focus:outline-none transition-shadow"
+                  className="flex-1 px-4 py-3 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-lg text-sm font-medium text-slate-900 dark:text-white placeholder:text-slate-400 focus:ring-2 focus:ring-primary-500 focus:border-transparent focus:outline-none transition-shadow"
                 />
                 <button
                   type="submit"
                   disabled={demandSubmitting || !customerDemand.trim()}
-                  className="px-6 py-3 bg-primary-600 hover:bg-primary-500 disabled:bg-slate-300 dark:disabled:bg-slate-700 text-white font-bold rounded-xl transition-all shadow-lg shadow-primary-500/25 hover:-translate-y-0.5 active:translate-y-0 disabled:transform-none flex items-center justify-center gap-2 shrink-0"
+                  className="px-6 py-3 bg-primary-600 hover:bg-primary-500 disabled:bg-slate-300 dark:disabled:bg-slate-700 text-white font-bold rounded-lg transition-all shadow-lg shadow-primary-500/25 hover:-translate-y-0.5 active:translate-y-0 disabled:transform-none flex items-center justify-center gap-2 shrink-0"
                 >
                   {demandSubmitting ? (
                     <span className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" />
@@ -275,7 +275,7 @@ export default function CityLandingPage() {
           {/* WhatsApp direct */}
           <section className="py-12 sm:py-16 px-4 sm:px-6 lg:px-8 bg-primary-600/5 dark:bg-primary-500/5 border-y border-primary-100 dark:border-primary-900/30">
             <div className="max-w-lg mx-auto text-center">
-              <div className="w-14 h-14 rounded-2xl bg-green-50 dark:bg-green-500/10 flex items-center justify-center mx-auto mb-4">
+              <div className="w-14 h-14 rounded-lg bg-green-50 dark:bg-green-500/10 flex items-center justify-center mx-auto mb-4">
                 <MessageCircle className="w-7 h-7 text-green-600 dark:text-green-400" />
               </div>
               <h3 className="text-2xl font-black text-slate-900 dark:text-white tracking-tight mb-2">
@@ -288,7 +288,7 @@ export default function CityLandingPage() {
                 href={`https://wa.me/${AGENDAYA_WHATSAPP}?text=${encodeURIComponent(`Hola, quiero registrar mi negocio en AgendaYa ${cityConfig.name}.`)}`}
                 target="_blank"
                 rel="noopener noreferrer"
-                className="inline-flex items-center gap-2 px-6 py-3 bg-green-600 hover:bg-green-500 text-white font-bold rounded-xl transition-all shadow-lg shadow-green-500/25 hover:-translate-y-0.5 active:translate-y-0"
+                className="inline-flex items-center gap-2 px-6 py-3 bg-green-600 hover:bg-green-500 text-white font-bold rounded-lg transition-all shadow-lg shadow-green-500/25 hover:-translate-y-0.5 active:translate-y-0"
               >
                 <MessageCircle className="w-4 h-4" />
                 Escribir por WhatsApp

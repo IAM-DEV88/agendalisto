@@ -70,7 +70,7 @@ export default function SEOLandingPage() {
           <div className="h-8 bg-slate-200 dark:bg-slate-800 rounded-lg w-96 mb-10 animate-pulse" />
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
             {[1, 2, 3, 4, 5, 6].map(i => (
-              <div key={i} className="h-48 bg-white dark:bg-slate-900 rounded-2xl border border-slate-200 dark:border-slate-700 animate-pulse" />
+              <div key={i} className="h-48 bg-white dark:bg-slate-900 rounded-lg border border-slate-200 dark:border-slate-700 animate-pulse" />
             ))}
           </div>
         </div>
@@ -84,7 +84,7 @@ export default function SEOLandingPage() {
 
       <div className="max-w-7xl mx-auto">
         <div className="text-center mb-10 animate-in fade-in slide-in-from-top-4 duration-500">
-          <div className="w-14 h-14 rounded-2xl bg-primary-50 dark:bg-primary-500/10 flex items-center justify-center mx-auto mb-4">
+          <div className="w-14 h-14 rounded-lg bg-primary-50 dark:bg-primary-500/10 flex items-center justify-center mx-auto mb-4">
             <MapPin className="w-7 h-7 text-primary-600 dark:text-primary-400" />
           </div>
           <h1 className="text-3xl sm:text-4xl font-black text-slate-900 dark:text-white tracking-tight mb-3">{pageTitle}</h1>
@@ -100,7 +100,7 @@ export default function SEOLandingPage() {
             <div className="mt-6 text-center">
               <Link
                 to="/register"
-                className="inline-flex items-center gap-2 px-5 py-3 bg-primary-50 dark:bg-primary-900/20 text-primary-700 dark:text-primary-300 font-bold text-sm rounded-xl border border-primary-200 dark:border-primary-800 hover:bg-primary-100 dark:hover:bg-primary-900/40 transition-all"
+                className="inline-flex items-center gap-2 px-5 py-3 bg-primary-50 dark:bg-primary-900/20 text-primary-700 dark:text-primary-300 font-bold text-sm rounded-lg border border-primary-200 dark:border-primary-800 hover:bg-primary-100 dark:hover:bg-primary-900/40 transition-all"
               >
                 🌐 ¿Tienes un negocio? Crea tu web gratis y aparece aquí →
               </Link>
@@ -110,7 +110,7 @@ export default function SEOLandingPage() {
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 animate-in fade-in slide-in-from-bottom-4 duration-500">
             {businesses.map(business => (
               <Link key={business.id} to={`/${business.slug}`}
-                className="group bg-white dark:bg-slate-900 rounded-2xl border border-slate-200 dark:border-slate-800 overflow-hidden hover:border-primary-300 dark:hover:border-primary-700 hover:shadow-2xl transition-all duration-300 hover:-translate-y-1"
+                className="group bg-white dark:bg-slate-900 rounded-lg border border-slate-200 dark:border-slate-800 overflow-hidden hover:border-primary-300 dark:hover:border-primary-700 hover:shadow-2xl transition-all duration-300 hover:-translate-y-1"
               >
                 <div className="h-48 bg-slate-100 dark:bg-slate-800 overflow-hidden">
                   <img src={business.logo_url || FALLBACK_LOGO} alt={business.name}
@@ -144,7 +144,7 @@ export default function SEOLandingPage() {
               {categories.map(cat => (
                 <Link key={cat.id}
                   to={cityName ? `/categorias/${makeSlug(cat.name)}-${makeSlug(cityName)}` : `/categorias/${makeSlug(cat.name)}`}
-                  className="px-5 py-3 bg-white dark:bg-slate-900 rounded-xl border border-slate-200 dark:border-slate-700 font-bold text-sm text-slate-700 dark:text-slate-300 hover:border-primary-300 dark:hover:border-primary-700 hover:text-primary-600 transition-all"
+                  className="px-5 py-3 bg-white dark:bg-slate-900 rounded-lg border border-slate-200 dark:border-slate-700 font-bold text-sm text-slate-700 dark:text-slate-300 hover:border-primary-300 dark:hover:border-primary-700 hover:text-primary-600 transition-all"
                 >
                   {cat.name}
                 </Link>

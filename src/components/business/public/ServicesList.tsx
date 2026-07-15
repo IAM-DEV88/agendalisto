@@ -64,7 +64,7 @@ const ServiceCard: React.FC<{
   return (
     <div
       onClick={() => navigate(`/${window.location.pathname.split('/')[1]}/book/${service.id}`)}
-      className={`relative flex flex-col rounded-2xl border transition-all overflow-hidden cursor-pointer group border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 hover:border-primary-300 dark:hover:border-primary-700 hover:shadow-2xl ${
+      className={`relative flex flex-col rounded-lg border transition-all overflow-hidden cursor-pointer group border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 hover:border-primary-300 dark:hover:border-primary-700 hover:shadow-2xl ${
         isOwner ? 'ring-2 ring-primary-300 dark:ring-primary-700' : ''
       }`}
     >
@@ -126,7 +126,7 @@ const ServiceCard: React.FC<{
             <button
               onClick={handleToggleLike}
               disabled={isLiking}
-              className={`flex items-center gap-1 px-2.5 py-1.5 rounded-xl text-[10px] font-black transition-all ${
+              className={`flex items-center gap-1 px-2.5 py-1.5 rounded-lg text-[10px] font-black transition-all ${
                 isLiked ? 'bg-rose-500 text-white' : 'bg-slate-100 dark:bg-slate-800 text-slate-500 dark:text-slate-400 hover:bg-slate-200 dark:hover:bg-slate-700'
               }`}
             >
@@ -138,7 +138,7 @@ const ServiceCard: React.FC<{
                 <a
                   href={`/${window.location.pathname.split('/')[1]}/gift/${service.id}`}
                   onClick={(e) => { e.stopPropagation(); }}
-                  className="flex items-center gap-1 px-2.5 py-1.5 rounded-xl text-[10px] font-black transition-all bg-rose-50 dark:bg-rose-900/20 text-rose-500 dark:text-rose-400 hover:bg-rose-100 dark:hover:bg-rose-900/40"
+                  className="flex items-center gap-1 px-2.5 py-1.5 rounded-lg text-[10px] font-black transition-all bg-rose-50 dark:bg-rose-900/20 text-rose-500 dark:text-rose-400 hover:bg-rose-100 dark:hover:bg-rose-900/40"
                   title="Regalar este servicio"
                 >
                   <Gift className="w-3 h-3" />
@@ -157,7 +157,7 @@ const ServiceCard: React.FC<{
 
         <div className="mt-3 pt-3 border-t border-slate-100 dark:border-slate-800">
           <a href={`/${window.location.pathname.split('/')[1]}/book/${service.id}`}
-            className="flex items-center justify-center gap-1.5 px-4 py-2 bg-primary-50 dark:bg-primary-900/20 text-primary-700 dark:text-primary-300 text-[11px] font-bold rounded-xl hover:bg-primary-100 dark:hover:bg-primary-900/40 transition-all active:scale-[0.98]">
+            className="flex items-center justify-center gap-1.5 px-4 py-2 bg-primary-50 dark:bg-primary-900/20 text-primary-700 dark:text-primary-300 text-[11px] font-bold rounded-lg hover:bg-primary-100 dark:hover:bg-primary-900/40 transition-all active:scale-[0.98]">
             {showcaseOnly || !canBook ? 'Ver información' : 'Reservar ahora'} <ChevronRight className="w-3.5 h-3.5" />
           </a>
         </div>
@@ -231,7 +231,7 @@ const ServicesList: React.FC<ServicesListProps> = ({
           </button>
           <img
             src={fullscreenImage}
-            className="max-w-full max-h-full rounded-2xl shadow-2xl animate-in zoom-in-95 duration-200"
+            className="max-w-full max-h-full rounded-lg shadow-2xl animate-in zoom-in-95 duration-200"
             alt="Fullscreen"
           />
         </div>

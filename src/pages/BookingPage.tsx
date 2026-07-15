@@ -24,10 +24,10 @@ function BookingPageSkeleton() {
         </div>
       </div>
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 mt-8 space-y-6">
-        <div className="aspect-video sm:aspect-[21/9] bg-slate-200 dark:bg-slate-800 rounded-2xl animate-pulse" />
+        <div className="aspect-video sm:aspect-[21/9] bg-slate-200 dark:bg-slate-800 rounded-lg animate-pulse" />
         <div className="h-8 bg-slate-200 dark:bg-slate-800 rounded-lg w-2/3 animate-pulse" />
         <div className="h-4 bg-slate-200 dark:bg-slate-800 rounded-lg w-full animate-pulse" />
-        <div className="h-48 bg-slate-200 dark:bg-slate-800 rounded-2xl animate-pulse" />
+        <div className="h-48 bg-slate-200 dark:bg-slate-800 rounded-lg animate-pulse" />
       </div>
     </div>
   );
@@ -129,7 +129,7 @@ function BookingPage() {
 
         {/* ─── Owner preview banner ─── */}
         {isOwner && (
-          <div className="bg-primary-50 dark:bg-primary-900/20 rounded-2xl p-4 mb-6 border border-primary-200 dark:border-primary-800/50 flex items-start gap-3">
+          <div className="bg-primary-50 dark:bg-primary-900/20 rounded-lg p-4 mb-6 border border-primary-200 dark:border-primary-800/50 flex items-start gap-3">
             <Eye className="w-5 h-5 text-primary-600 dark:text-primary-400 flex-shrink-0 mt-0.5" />
             <div>
               <p className="text-sm font-bold text-primary-800 dark:text-primary-300">Vista previa — Tu negocio</p>
@@ -141,7 +141,7 @@ function BookingPage() {
         )}
 
         {/* ─── Booking Form unificado ─── */}
-        <div className="bg-white dark:bg-slate-900 rounded-2xl border border-slate-200 dark:border-slate-800 shadow-xl shadow-slate-200/50 dark:shadow-none p-5 sm:p-6">
+        <div className="bg-white dark:bg-slate-900 rounded-lg border border-slate-200 dark:border-slate-800 shadow-xl shadow-slate-200/50 dark:shadow-none p-5 sm:p-6">
           <BookingForm
             businessId={businessData.id}
             businessName={businessData.name}
@@ -179,7 +179,7 @@ function BookingPage() {
           <button onClick={() => setFullscreenImage(null)} className="absolute top-5 right-5 p-2 text-white/50 hover:text-white transition-colors">
             <X className="w-7 h-7" />
           </button>
-          <img src={fullscreenImage} className="max-w-full max-h-full rounded-2xl shadow-2xl animate-in zoom-in-95 duration-200" alt="Fullscreen" />
+          <img src={fullscreenImage} className="max-w-full max-h-full rounded-lg shadow-2xl animate-in zoom-in-95 duration-200" alt="Fullscreen" />
         </div>
       )}
     </div>

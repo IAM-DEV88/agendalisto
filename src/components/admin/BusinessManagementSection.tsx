@@ -79,13 +79,13 @@ const BusinessManagementSection = () => {
             value={search}
             onChange={e => setSearch(e.target.value)}
             placeholder="Buscar por nombre o descripción..."
-            className="w-full pl-10 pr-4 py-2.5 rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 text-sm font-medium text-slate-900 dark:text-white placeholder:text-slate-400 focus:ring-2 focus:ring-primary-500 focus:border-primary-500 transition-all"
+            className="w-full pl-10 pr-4 py-2.5 rounded-lg border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 text-sm font-medium text-slate-900 dark:text-white placeholder:text-slate-400 focus:ring-2 focus:ring-primary-500 focus:border-primary-500 transition-all"
           />
         </form>
         <select
           value={planFilter}
           onChange={e => { setPlanFilter(e.target.value); setPage(1); }}
-          className="px-3 py-2.5 rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 text-sm font-bold text-slate-700 dark:text-slate-300 focus:ring-2 focus:ring-primary-500 focus:border-primary-500 transition-all"
+          className="px-3 py-2.5 rounded-lg border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 text-sm font-bold text-slate-700 dark:text-slate-300 focus:ring-2 focus:ring-primary-500 focus:border-primary-500 transition-all"
         >
           <option value="">Todos los planes</option>
           {PLANS.map(p => (
@@ -95,7 +95,7 @@ const BusinessManagementSection = () => {
         <select
           value={categoryFilter}
           onChange={e => { setCategoryFilter(e.target.value); setPage(1); }}
-          className="px-3 py-2.5 rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 text-sm font-bold text-slate-700 dark:text-slate-300 focus:ring-2 focus:ring-primary-500 focus:border-primary-500 transition-all max-w-[180px]"
+          className="px-3 py-2.5 rounded-lg border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 text-sm font-bold text-slate-700 dark:text-slate-300 focus:ring-2 focus:ring-primary-500 focus:border-primary-500 transition-all max-w-[180px]"
         >
           <option value="">Todas las categorías</option>
           {categories.map(cat => (
@@ -114,7 +114,7 @@ const BusinessManagementSection = () => {
         />
       ) : (
         <>
-          <div className="bg-white dark:bg-slate-900 rounded-2xl border border-slate-200 dark:border-slate-800 overflow-hidden">
+          <div className="bg-white dark:bg-slate-900 rounded-lg border border-slate-200 dark:border-slate-800 overflow-hidden">
             <div className="overflow-x-auto">
               <table className="w-full">
                 <thead>

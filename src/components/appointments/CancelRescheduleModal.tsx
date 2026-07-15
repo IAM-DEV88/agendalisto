@@ -148,7 +148,7 @@ export default function CancelRescheduleModal({ isOpen, onClose, appointment, is
   return (
     <div className="fixed inset-0 z-50 flex items-start sm:items-center justify-center px-2 pt-16 sm:pt-0 sm:p-4 bg-black/50 backdrop-blur-sm animate-in fade-in duration-200" onClick={onClose}>
       <div
-        className="relative w-full sm:max-w-md max-h-[calc(100dvh-5rem)] sm:max-h-[85vh] bg-white dark:bg-slate-900 rounded-3xl shadow-2xl overflow-hidden flex flex-col animate-in sm:zoom-in-95 duration-300"
+        className="relative w-full sm:max-w-md max-h-[calc(100dvh-5rem)] sm:max-h-[85vh] bg-white dark:bg-slate-900 rounded-lg shadow-2xl overflow-hidden flex flex-col animate-in sm:zoom-in-95 duration-300"
         onClick={e => e.stopPropagation()}
       >
         {/* Drag handle (mobile) */}
@@ -165,7 +165,7 @@ export default function CancelRescheduleModal({ isOpen, onClose, appointment, is
                   <ChevronLeft className="w-4 h-4" /> Volver
                 </button>
               ) : (
-                <div className="w-8 h-8 rounded-xl bg-primary-50 dark:bg-primary-500/10 flex items-center justify-center">
+                <div className="w-8 h-8 rounded-lg bg-primary-50 dark:bg-primary-500/10 flex items-center justify-center">
                   <CalendarIcon className="w-4 h-4 text-primary-500" />
                 </div>
               )}
@@ -181,8 +181,8 @@ export default function CancelRescheduleModal({ isOpen, onClose, appointment, is
 
         <div className="overflow-y-auto flex-1 min-h-0 px-4 sm:px-5 py-4 space-y-4 scrollbar-fino">
           {/* Appointment summary */}
-          <div className="flex items-center gap-3 p-3 bg-slate-50 dark:bg-slate-800/50 rounded-xl border border-slate-100 dark:border-slate-800">
-            <div className="w-10 h-10 rounded-xl bg-primary-50 dark:bg-primary-500/10 flex items-center justify-center flex-shrink-0">
+          <div className="flex items-center gap-3 p-3 bg-slate-50 dark:bg-slate-800/50 rounded-lg border border-slate-100 dark:border-slate-800">
+            <div className="w-10 h-10 rounded-lg bg-primary-50 dark:bg-primary-500/10 flex items-center justify-center flex-shrink-0">
               <CalendarIcon className="w-5 h-5 text-primary-500" />
             </div>
             <div className="min-w-0">
@@ -197,7 +197,7 @@ export default function CancelRescheduleModal({ isOpen, onClose, appointment, is
 
           {/* Warning: rescheduling confirmed resets status (B1/R5) */}
           {mode === 'reschedule' && appointment.status === 'confirmed' && (
-            <div className="flex items-start gap-2.5 p-3 bg-amber-50 dark:bg-amber-900/10 rounded-xl border border-amber-200 dark:border-amber-800/50">
+            <div className="flex items-start gap-2.5 p-3 bg-amber-50 dark:bg-amber-900/10 rounded-lg border border-amber-200 dark:border-amber-800/50">
               <AlertCircle className="w-4 h-4 text-amber-500 flex-shrink-0 mt-0.5" />
               <p className="text-xs font-medium text-amber-700 dark:text-amber-300 mb-0">
                 Tu cita esta confirmada. Al reprogramar, el negocio debera confirmar nuevamente.
@@ -207,7 +207,7 @@ export default function CancelRescheduleModal({ isOpen, onClose, appointment, is
 
           {/* Warning: reschedule lockout */}
           {mode === 'reschedule' && isRescheduleLocked && (
-            <div className="flex items-start gap-2.5 p-3 bg-red-50 dark:bg-red-900/10 rounded-xl border border-red-200 dark:border-red-800/50">
+            <div className="flex items-start gap-2.5 p-3 bg-red-50 dark:bg-red-900/10 rounded-lg border border-red-200 dark:border-red-800/50">
               <AlertCircle className="w-4 h-4 text-red-500 flex-shrink-0 mt-0.5" />
               <p className="text-xs font-medium text-red-700 dark:text-red-300 mb-0">
                 Esta cita está dentro del tiempo mínimo de reagendación ({minRescheduleHours}h). Contacta al negocio para gestionar cambios.
@@ -217,7 +217,7 @@ export default function CancelRescheduleModal({ isOpen, onClose, appointment, is
 
           {/* Warning: cancellation lockout */}
           {isWithinMinTime && (
-            <div className="flex items-start gap-2.5 p-3 bg-red-50 dark:bg-red-900/10 rounded-xl border border-red-200 dark:border-red-800/50">
+            <div className="flex items-start gap-2.5 p-3 bg-red-50 dark:bg-red-900/10 rounded-lg border border-red-200 dark:border-red-800/50">
               <AlertCircle className="w-4 h-4 text-red-500 flex-shrink-0 mt-0.5" />
               <p className="text-xs font-medium text-red-700 dark:text-red-300 mb-0">
                 Esta cita está dentro del tiempo mínimo de cancelación ({minCancellationHours}h). Contacta al negocio para gestionar cambios.
@@ -230,12 +230,12 @@ export default function CancelRescheduleModal({ isOpen, onClose, appointment, is
             <div className="space-y-2">
               <button onClick={() => setMode('reschedule')}
                 disabled={isRescheduleLocked}
-                className={`w-full flex items-center gap-3 p-3.5 rounded-xl border transition-all text-left active:scale-[0.99] ${
+                className={`w-full flex items-center gap-3 p-3.5 rounded-lg border transition-all text-left active:scale-[0.99] ${
                   isRescheduleLocked
                     ? 'bg-slate-50 dark:bg-slate-800/50 border-slate-200 dark:border-slate-700 opacity-60 cursor-not-allowed'
                     : 'bg-white dark:bg-slate-800/50 border-slate-200 dark:border-slate-700 hover:border-primary-300 dark:hover:border-primary-700'
                 }`}>
-                <div className="w-9 h-9 rounded-xl bg-primary-50 dark:bg-primary-900/20 flex items-center justify-center flex-shrink-0">
+                <div className="w-9 h-9 rounded-lg bg-primary-50 dark:bg-primary-900/20 flex items-center justify-center flex-shrink-0">
                   <Clock className="w-4 h-4 text-primary-600 dark:text-primary-400" />
                 </div>
                 <div className="flex-1 min-w-0">
@@ -249,12 +249,12 @@ export default function CancelRescheduleModal({ isOpen, onClose, appointment, is
               </button>
               <button onClick={() => setMode('cancel')}
                 disabled={isWithinMinTime}
-                className={`w-full flex items-center gap-3 p-3.5 rounded-xl border transition-all text-left active:scale-[0.99] ${
+                className={`w-full flex items-center gap-3 p-3.5 rounded-lg border transition-all text-left active:scale-[0.99] ${
                   isWithinMinTime
                     ? 'bg-slate-50 dark:bg-slate-800/50 border-slate-200 dark:border-slate-700 opacity-60 cursor-not-allowed'
                     : 'bg-white dark:bg-slate-800/50 border-slate-200 dark:border-slate-700 hover:border-red-300 dark:hover:border-red-700'
                 }`}>
-                <div className="w-9 h-9 rounded-xl bg-red-50 dark:bg-red-900/20 flex items-center justify-center flex-shrink-0">
+                <div className="w-9 h-9 rounded-lg bg-red-50 dark:bg-red-900/20 flex items-center justify-center flex-shrink-0">
                   <X className="w-4 h-4 text-red-500" />
                 </div>
                 <div className="flex-1 min-w-0">
@@ -275,13 +275,13 @@ export default function CancelRescheduleModal({ isOpen, onClose, appointment, is
                   value={reason}
                   onChange={e => setReason(e.target.value)}
                   placeholder="Cuéntanos por qué cancelas..."
-                  className="w-full h-24 resize-none bg-slate-50 dark:bg-slate-800/50 border border-slate-200 dark:border-slate-700 rounded-xl p-3 text-sm text-slate-900 dark:text-white placeholder:text-slate-400 focus:ring-2 focus:ring-primary-500/20 focus:border-primary-500 transition-all"
+                  className="w-full h-24 resize-none bg-slate-50 dark:bg-slate-800/50 border border-slate-200 dark:border-slate-700 rounded-lg p-3 text-sm text-slate-900 dark:text-white placeholder:text-slate-400 focus:ring-2 focus:ring-primary-500/20 focus:border-primary-500 transition-all"
                 />
               </div>
               <button
                 onClick={handleCancel}
                 disabled={loading}
-                className="w-full py-3 bg-red-600 hover:bg-red-700 active:bg-red-800 text-white text-sm font-bold rounded-xl transition-all disabled:opacity-50 flex items-center justify-center gap-2 shadow-lg shadow-red-500/20 active:scale-[0.98]"
+                className="w-full py-3 bg-red-600 hover:bg-red-700 active:bg-red-800 text-white text-sm font-bold rounded-lg transition-all disabled:opacity-50 flex items-center justify-center gap-2 shadow-lg shadow-red-500/20 active:scale-[0.98]"
               >
                 {loading ? 'Cancelando...' : 'Sí, cancelar cita'}
               </button>
@@ -290,7 +290,7 @@ export default function CancelRescheduleModal({ isOpen, onClose, appointment, is
             <div className="space-y-4">
               <div>
                 <label className="block text-xs font-bold text-slate-700 dark:text-slate-300 mb-2">Nueva fecha</label>
-                <div className="bg-white dark:bg-slate-900 rounded-xl border border-slate-200 dark:border-slate-700 overflow-hidden">
+                <div className="bg-white dark:bg-slate-900 rounded-lg border border-slate-200 dark:border-slate-700 overflow-hidden">
                   {/* Month nav */}
                   <div className="flex items-center justify-between px-2 py-2 bg-slate-50 dark:bg-slate-800/50 border-b border-slate-100 dark:border-slate-800">
                     <button
@@ -379,18 +379,18 @@ export default function CancelRescheduleModal({ isOpen, onClose, appointment, is
               <div>
                 <label className="block text-xs font-bold text-slate-700 dark:text-slate-300 mb-1.5">Nuevo horario</label>
                 {!newDate ? (
-                  <div className="py-6 text-center bg-slate-50 dark:bg-slate-800/50 rounded-xl border border-dashed border-slate-200 dark:border-slate-700">
+                  <div className="py-6 text-center bg-slate-50 dark:bg-slate-800/50 rounded-lg border border-dashed border-slate-200 dark:border-slate-700">
                     <CalendarIcon className="w-6 h-6 text-slate-300 dark:text-slate-600 mx-auto mb-1" />
                     <p className="text-xs font-medium text-slate-400 italic mb-0">Selecciona una fecha primero</p>
                   </div>
                 ) : loadingSlots ? (
                   <div className="grid grid-cols-3 sm:grid-cols-4 gap-2">
                     {[...Array(6)].map((_, i) => (
-                      <div key={i} className="h-10 bg-slate-200 dark:bg-slate-700 rounded-xl animate-pulse" />
+                      <div key={i} className="h-10 bg-slate-200 dark:bg-slate-700 rounded-lg animate-pulse" />
                     ))}
                   </div>
                 ) : availableTimeSlots.length === 0 ? (
-                  <div className="py-6 text-center bg-amber-50 dark:bg-amber-500/10 rounded-xl border border-dashed border-amber-200 dark:border-amber-800">
+                  <div className="py-6 text-center bg-amber-50 dark:bg-amber-500/10 rounded-lg border border-dashed border-amber-200 dark:border-amber-800">
                     <Clock className="w-6 h-6 text-amber-400 mx-auto mb-1" />
                     <p className="text-xs font-bold text-amber-700 dark:text-amber-400 mb-0">No hay turnos disponibles este día</p>
                   </div>
@@ -401,7 +401,7 @@ export default function CancelRescheduleModal({ isOpen, onClose, appointment, is
                         key={slot}
                         type="button"
                         onClick={() => setNewTime(slot)}
-                        className={`py-2.5 text-xs font-black rounded-xl border-2 transition-all active:scale-95 ${
+                        className={`py-2.5 text-xs font-black rounded-lg border-2 transition-all active:scale-95 ${
                           newTime === slot
                             ? 'bg-primary-600 border-primary-600 text-white shadow-lg shadow-primary-500/30'
                             : 'bg-white dark:bg-slate-800 border-slate-200 dark:border-slate-700 text-slate-700 dark:text-slate-300 hover:border-primary-400 dark:hover:border-primary-600'
@@ -416,7 +416,7 @@ export default function CancelRescheduleModal({ isOpen, onClose, appointment, is
               <button
                 onClick={handleReschedule}
                 disabled={loading || !newDate || !newTime}
-                className="w-full py-3 bg-primary-600 hover:bg-primary-700 active:bg-primary-800 text-white text-sm font-bold rounded-xl transition-all disabled:opacity-50 flex items-center justify-center gap-2 shadow-lg shadow-primary-500/20 active:scale-[0.98]"
+                className="w-full py-3 bg-primary-600 hover:bg-primary-700 active:bg-primary-800 text-white text-sm font-bold rounded-lg transition-all disabled:opacity-50 flex items-center justify-center gap-2 shadow-lg shadow-primary-500/20 active:scale-[0.98]"
               >
                 {loading ? 'Reprogramando...' : 'Confirmar reprogramación'}
               </button>

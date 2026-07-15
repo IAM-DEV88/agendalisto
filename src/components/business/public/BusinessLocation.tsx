@@ -63,11 +63,11 @@ const BusinessLocation: React.FC<BusinessLocationProps> = ({ address, lat, lng }
       {hasCoords ? (
         <div
           ref={mapRef}
-          className="w-full h-44 rounded-xl overflow-hidden border border-slate-200 dark:border-slate-700"
+          className="w-full h-44 rounded-lg overflow-hidden border border-slate-200 dark:border-slate-700"
           style={{ isolation: 'isolate' }}
         />
       ) : (
-        <div className="rounded-xl overflow-hidden border border-slate-200 dark:border-slate-700 shadow-sm">
+        <div className="rounded-lg overflow-hidden border border-slate-200 dark:border-slate-700 shadow-sm">
           <iframe
             title="Ubicación del negocio"
             className="w-full h-44"

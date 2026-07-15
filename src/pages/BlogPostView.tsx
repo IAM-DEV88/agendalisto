@@ -331,7 +331,7 @@ const BlogPostView = () => {
             <ShareButton
               variant="icon"
               iconSize={24}
-              className="p-3 bg-slate-100 dark:bg-slate-800 hover:bg-primary-600 hover:text-white !rounded-xl !shadow-none"
+              className="p-3 bg-slate-100 dark:bg-slate-800 hover:bg-primary-600 hover:text-white !rounded-lg !shadow-none"
               title={post.title}
               description={post.excerpt || post.content.substring(0, 160)}
             />
@@ -342,7 +342,7 @@ const BlogPostView = () => {
         <div className="mb-8 text-center animate-in fade-in slide-in-from-bottom-4 duration-500">
           <Link
             to="/register"
-            className="inline-flex items-center gap-2 px-6 py-3 bg-primary-600 hover:bg-primary-700 text-white font-bold rounded-xl transition-all shadow-lg shadow-primary-500/25 hover:-translate-y-0.5 active:translate-y-0"
+            className="inline-flex items-center gap-2 px-6 py-3 bg-primary-600 hover:bg-primary-700 text-white font-bold rounded-lg transition-all shadow-lg shadow-primary-500/25 hover:-translate-y-0.5 active:translate-y-0"
           >
             🌐 ¿Tienes un negocio? Crea tu página web gratis →
           </Link>
@@ -358,7 +358,7 @@ const BlogPostView = () => {
           {user ? (
             <div className="space-y-4">
               {showOffensiveWarning && (
-                <div className="bg-amber-50 dark:bg-amber-900/20 border border-amber-200 dark:border-amber-800 p-4 rounded-2xl animate-in fade-in slide-in-from-top-2 duration-300">
+                <div className="bg-amber-50 dark:bg-amber-900/20 border border-amber-200 dark:border-amber-800 p-4 rounded-lg animate-in fade-in slide-in-from-top-2 duration-300">
                   <p className="text-amber-800 dark:text-amber-300 text-sm font-bold flex items-center gap-2">
                     <Bot className="w-5 h-5" /> 
                     Lo siento, solo tratamos asuntos referentes a AgendaYa de manera cordial y profesional.
@@ -370,13 +370,13 @@ const BlogPostView = () => {
                   placeholder="Escribe tu opinión..." 
                   value={newComment}
                   onChange={(e) => setNewComment(e.target.value)}
-                  className="w-full bg-slate-50 border-none rounded-2xl p-4 mb-4 h-32"
+                  className="w-full bg-slate-50 border-none rounded-lg p-4 mb-4 h-32"
                 />
                 <div className="flex justify-end">
                   <button 
                     type="submit" 
                     disabled={!newComment.trim() || isSubmitting}
-                    className="btn-primary inline-flex items-center gap-2 px-8 py-3 rounded-2xl shadow-xl shadow-primary-500/20 disabled:opacity-50"
+                    className="btn-primary inline-flex items-center gap-2 px-8 py-3 rounded-lg shadow-xl shadow-primary-500/20 disabled:opacity-50"
                   >
                     {isSubmitting ? 'Publicando...' : 'Publicar comentario'} <Send className="w-4 h-4" />
                   </button>
@@ -450,7 +450,7 @@ const BlogPostView = () => {
                                 {agentReply.likes_count}
                               </button>
                             </div>
-                            <div className="text-slate-800 dark:text-slate-200 text-sm leading-relaxed font-bold italic bg-white/40 dark:bg-slate-900/40 p-4 rounded-2xl border border-white dark:border-slate-800/50 shadow-sm">
+                            <div className="text-slate-800 dark:text-slate-200 text-sm leading-relaxed font-bold italic bg-white/40 dark:bg-slate-900/40 p-4 rounded-lg border border-white dark:border-slate-800/50 shadow-sm">
                               <MessageContent content={agentReply.content} />
                             </div>
                           </div>

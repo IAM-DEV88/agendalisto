@@ -48,7 +48,7 @@ export default function AgricultureSection({ city, onLeadClick }: AgricultureSec
 
             <button
               onClick={onLeadClick}
-              className="inline-flex items-center gap-2 px-6 py-3.5 bg-emerald-600 hover:bg-emerald-500 text-white font-bold rounded-xl transition-all shadow-lg shadow-emerald-500/25 hover:-translate-y-0.5 active:translate-y-0"
+              className="inline-flex items-center gap-2 px-6 py-3.5 bg-emerald-600 hover:bg-emerald-500 text-white font-bold rounded-lg transition-all shadow-lg shadow-emerald-500/25 hover:-translate-y-0.5 active:translate-y-0"
             >
               Quiero registrar mi bodega o finca
               <ChevronRight className="w-4 h-4" />
@@ -56,7 +56,7 @@ export default function AgricultureSection({ city, onLeadClick }: AgricultureSec
           </div>
 
           <div className="relative hidden lg:block">
-            <div className="aspect-[4/3] rounded-2xl bg-gradient-to-br from-emerald-200 to-green-100 dark:from-emerald-900/30 dark:to-slate-800 overflow-hidden">
+            <div className="aspect-[4/3] rounded-lg bg-gradient-to-br from-emerald-200 to-green-100 dark:from-emerald-900/30 dark:to-slate-800 overflow-hidden">
               <div className="absolute inset-0 flex items-center justify-center">
                 <div className="text-center">
                   <span className="text-8xl block mb-4">🌱</span>
@@ -69,15 +69,15 @@ export default function AgricultureSection({ city, onLeadClick }: AgricultureSec
                 </div>
               </div>
               <div className="absolute bottom-4 left-4 right-4 grid grid-cols-3 gap-2">
-                <div className="bg-white/80 dark:bg-slate-900/80 backdrop-blur-sm rounded-xl p-3 text-center">
+                <div className="bg-white/80 dark:bg-slate-900/80 backdrop-blur-sm rounded-lg p-3 text-center">
                   <span className="text-2xl">☕</span>
                   <p className="text-[10px] font-bold text-slate-600 dark:text-slate-400 mt-1">Café</p>
                 </div>
-                <div className="bg-white/80 dark:bg-slate-900/80 backdrop-blur-sm rounded-xl p-3 text-center">
+                <div className="bg-white/80 dark:bg-slate-900/80 backdrop-blur-sm rounded-lg p-3 text-center">
                   <span className="text-2xl">🥑</span>
                   <p className="text-[10px] font-bold text-slate-600 dark:text-slate-400 mt-1">Aguacate</p>
                 </div>
-                <div className="bg-white/80 dark:bg-slate-900/80 backdrop-blur-sm rounded-xl p-3 text-center">
+                <div className="bg-white/80 dark:bg-slate-900/80 backdrop-blur-sm rounded-lg p-3 text-center">
                   <span className="text-2xl">🐉</span>
                   <p className="text-[10px] font-bold text-slate-600 dark:text-slate-400 mt-1">Pitaya</p>
                 </div>

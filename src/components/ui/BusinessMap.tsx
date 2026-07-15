@@ -55,7 +55,7 @@ export default function BusinessMap({ businesses }: BusinessMapProps) {
     let hasValidCoords = false;
 
     const icon = L.divIcon({
-      html: '<div class="w-9 h-9 rounded-xl bg-primary-600 shadow-lg shadow-primary-500/30 flex items-center justify-center text-white font-black text-sm border-2 border-white">B</div>',
+      html: '<div class="w-9 h-9 rounded-lg bg-primary-600 shadow-lg shadow-primary-500/30 flex items-center justify-center text-white font-black text-sm border-2 border-white">B</div>',
       iconSize: [36, 36],
       iconAnchor: [18, 18],
       className: '',
@@ -92,7 +92,7 @@ export default function BusinessMap({ businesses }: BusinessMapProps) {
   return (
     <div
       ref={mapRef}
-      className="w-full h-[400px] md:h-[500px] rounded-2xl overflow-hidden border border-slate-200 dark:border-slate-700"
+      className="w-full h-[400px] md:h-[500px] rounded-lg overflow-hidden border border-slate-200 dark:border-slate-700"
       style={{ isolation: 'isolate' }}
     />
   );

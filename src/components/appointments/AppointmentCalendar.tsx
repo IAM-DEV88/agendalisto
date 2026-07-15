@@ -224,7 +224,7 @@ const AppointmentCalendar: React.FC<AppointmentCalendarProps> = ({
     e.stopPropagation();
 
     const ghost = document.createElement('div');
-    ghost.className = 'fixed z-[9999] pointer-events-none px-3 py-2 bg-white dark:bg-slate-800 rounded-xl shadow-xl border border-slate-200 dark:border-slate-700 text-sm font-bold text-slate-900 dark:text-white max-w-[200px] truncate';
+    ghost.className = 'fixed z-[9999] pointer-events-none px-3 py-2 bg-white dark:bg-slate-800 rounded-lg shadow-xl border border-slate-200 dark:border-slate-700 text-sm font-bold text-slate-900 dark:text-white max-w-[200px] truncate';
     ghost.textContent = appointment.services?.name || 'Cita';
     ghost.style.left = `${e.clientX + 12}px`;
     ghost.style.top = `${e.clientY + 12}px`;
@@ -248,10 +248,10 @@ const AppointmentCalendar: React.FC<AppointmentCalendarProps> = ({
         {/* ─── Left Column: Calendar ─── */}
         <div className="md:col-span-2 space-y-5 min-w-0">
           {/* Month Navigation */}
-          <div className="flex items-center justify-between bg-white dark:bg-slate-900 rounded-2xl border border-slate-200 dark:border-slate-800 p-3">
+          <div className="flex items-center justify-between bg-white dark:bg-slate-900 rounded-lg border border-slate-200 dark:border-slate-800 p-3">
             <button
               onClick={prevMonth}
-              className="p-2 hover:bg-slate-100 dark:hover:bg-slate-800 text-slate-500 hover:text-primary-600 dark:hover:text-primary-400 rounded-xl transition-all"
+              className="p-2 hover:bg-slate-100 dark:hover:bg-slate-800 text-slate-500 hover:text-primary-600 dark:hover:text-primary-400 rounded-lg transition-all"
             >
               <ChevronLeft className="w-5 h-5" />
             </button>
@@ -260,14 +260,14 @@ const AppointmentCalendar: React.FC<AppointmentCalendarProps> = ({
             </h3>
             <button
               onClick={nextMonth}
-              className="p-2 hover:bg-slate-100 dark:hover:bg-slate-800 text-slate-500 hover:text-primary-600 dark:hover:text-primary-400 rounded-xl transition-all"
+              className="p-2 hover:bg-slate-100 dark:hover:bg-slate-800 text-slate-500 hover:text-primary-600 dark:hover:text-primary-400 rounded-lg transition-all"
             >
               <ChevronRight className="w-5 h-5" />
             </button>
           </div>
 
           {/* Calendar Grid */}
-          <div className="bg-white dark:bg-slate-900 rounded-2xl border border-slate-200 dark:border-slate-800 overflow-hidden">
+          <div className="bg-white dark:bg-slate-900 rounded-lg border border-slate-200 dark:border-slate-800 overflow-hidden">
             <div className="grid grid-cols-7 border-b border-slate-100 dark:border-slate-800">
               {dayHeaders.map(d => (
                 <div
@@ -374,7 +374,7 @@ const AppointmentCalendar: React.FC<AppointmentCalendarProps> = ({
             <div className="animate-in fade-in slide-in-from-bottom-2 duration-300 md:sticky md:top-44 pt-6 md:pt-0">
               {/* Day header */}
               <div className="flex items-center gap-2 mb-3">
-                <div className="w-8 h-8 rounded-xl bg-primary-50 dark:bg-primary-500/10 flex items-center justify-center shrink-0">
+                <div className="w-8 h-8 rounded-lg bg-primary-50 dark:bg-primary-500/10 flex items-center justify-center shrink-0">
                   <CalendarIcon className="w-4 h-4 text-primary-600 dark:text-primary-400" />
                 </div>
                 <div className="min-w-0">
@@ -395,7 +395,7 @@ const AppointmentCalendar: React.FC<AppointmentCalendarProps> = ({
                     <div
                       key={appt.id}
                       onClick={() => !draggingId && setSelectedAppointment(appt)}
-                      className={`group relative bg-white dark:bg-slate-900 rounded-xl border border-slate-200 dark:border-slate-800 hover:border-primary-200 dark:hover:border-primary-800 hover:shadow-lg transition-all duration-200 ${
+                      className={`group relative bg-white dark:bg-slate-900 rounded-lg border border-slate-200 dark:border-slate-800 hover:border-primary-200 dark:hover:border-primary-800 hover:shadow-lg transition-all duration-200 ${
                         canDrag ? 'cursor-grab active:cursor-grabbing' : 'cursor-pointer'
                       } ${draggingId === appt.id ? 'opacity-40' : ''}`}
                     >
@@ -446,7 +446,7 @@ const AppointmentCalendar: React.FC<AppointmentCalendarProps> = ({
 
           {/* Desktop: prompt when no day selected */}
           {!selectedDate && (
-            <div className="hidden md:flex flex-col items-center justify-center h-full min-h-[240px] bg-slate-50 dark:bg-slate-900/50 rounded-2xl border border-dashed border-slate-200 dark:border-slate-800 p-6 text-center">
+            <div className="hidden md:flex flex-col items-center justify-center h-full min-h-[240px] bg-slate-50 dark:bg-slate-900/50 rounded-lg border border-dashed border-slate-200 dark:border-slate-800 p-6 text-center">
               <CalendarIcon className="w-10 h-10 text-slate-300 dark:text-slate-600 mb-3" />
               <p className="text-sm font-bold text-slate-400 dark:text-slate-500">
                 Selecciona un día
@@ -475,7 +475,7 @@ const AppointmentCalendar: React.FC<AppointmentCalendarProps> = ({
 
       {rescheduling && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/20 backdrop-blur-sm">
-          <div className="bg-white dark:bg-slate-900 rounded-2xl p-6 shadow-2xl flex items-center gap-3">
+          <div className="bg-white dark:bg-slate-900 rounded-lg p-6 shadow-2xl flex items-center gap-3">
             <div className="w-5 h-5 border-2 border-primary-600 border-t-transparent rounded-full animate-spin" />
             <span className="text-sm font-bold text-slate-700 dark:text-slate-300">
               Reprogramando cita...

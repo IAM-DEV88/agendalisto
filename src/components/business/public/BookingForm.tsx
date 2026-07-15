@@ -550,7 +550,7 @@ const BookingForm: React.FC<BookingFormProps> = ({
   if (bookingSuccess) {
     return (
       <div className="text-center py-8 animate-in fade-in zoom-in-95 duration-500">
-        <div className="w-20 h-20 rounded-2xl bg-emerald-50 dark:bg-emerald-500/10 flex items-center justify-center mx-auto mb-6 ring-1 ring-emerald-200 dark:ring-emerald-800">
+        <div className="w-20 h-20 rounded-lg bg-emerald-50 dark:bg-emerald-500/10 flex items-center justify-center mx-auto mb-6 ring-1 ring-emerald-200 dark:ring-emerald-800">
           <CheckCircle className="w-10 h-10 text-emerald-500" />
         </div>
         <h2 className="text-2xl font-black text-slate-900 dark:text-white mb-3">Solicitud enviada!</h2>
@@ -586,16 +586,16 @@ const BookingForm: React.FC<BookingFormProps> = ({
               endTime: end,
             }, `${service.name.replace(/\s+/g, '_')}.ics`);
           }}
-          className="inline-flex items-center gap-2 px-5 py-2.5 bg-emerald-50 hover:bg-emerald-100 dark:bg-emerald-500/10 dark:hover:bg-emerald-500/20 text-emerald-700 dark:text-emerald-400 font-bold text-sm rounded-xl transition-all active:scale-[0.97] border border-emerald-200 dark:border-emerald-800/50"
+          className="inline-flex items-center gap-2 px-5 py-2.5 bg-emerald-50 hover:bg-emerald-100 dark:bg-emerald-500/10 dark:hover:bg-emerald-500/20 text-emerald-700 dark:text-emerald-400 font-bold text-sm rounded-lg transition-all active:scale-[0.97] border border-emerald-200 dark:border-emerald-800/50"
         >
           <Download className="w-4 h-4" />
           Agregar a mi calendario
         </button>
         <div className="flex flex-col sm:flex-row items-center justify-center gap-3 mt-8">
-          <Link to="/dashboard" className="w-full sm:w-auto inline-flex items-center justify-center gap-2 px-6 py-3 bg-primary-600 hover:bg-primary-700 text-white font-bold rounded-xl transition-all shadow-lg shadow-primary-500/25 active:scale-[0.98]">
+          <Link to="/dashboard" className="w-full sm:w-auto inline-flex items-center justify-center gap-2 px-6 py-3 bg-primary-600 hover:bg-primary-700 text-white font-bold rounded-lg transition-all shadow-lg shadow-primary-500/25 active:scale-[0.98]">
             Ver mis reservas
           </Link>
-          <button onClick={() => { resetForm(); onClose(); }} className="w-full sm:w-auto inline-flex items-center justify-center gap-2 px-6 py-3 bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300 font-bold rounded-xl hover:bg-slate-200 dark:hover:bg-slate-700 transition-all active:scale-[0.98]">
+          <button onClick={() => { resetForm(); onClose(); }} className="w-full sm:w-auto inline-flex items-center justify-center gap-2 px-6 py-3 bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300 font-bold rounded-lg hover:bg-slate-200 dark:hover:bg-slate-700 transition-all active:scale-[0.98]">
             Cerrar
           </button>
         </div>
@@ -609,7 +609,7 @@ const BookingForm: React.FC<BookingFormProps> = ({
   return (
     <div className="animate-in slide-in-from-bottom-4 duration-500">
       {/* ─── Hero: gallery + info combinados ─── */}
-      <div className={`mb-6 overflow-hidden bg-white dark:bg-slate-900 rounded-xl border border-slate-200 dark:border-slate-700 ${images && images.length > 0 ? 'md:grid md:grid-cols-5' : 'p-5 sm:p-6'}`}>
+      <div className={`mb-6 overflow-hidden bg-white dark:bg-slate-900 rounded-lg border border-slate-200 dark:border-slate-700 ${images && images.length > 0 ? 'md:grid md:grid-cols-5' : 'p-5 sm:p-6'}`}>
         {images && images.length > 0 && (
           <div className="md:col-span-2 relative flex flex-col bg-slate-100 dark:bg-slate-800">
             <div className="relative aspect-[4/3] md:flex-1 md:min-h-[240px] md:max-h-[360px] group overflow-hidden md:rounded-l-xl">
@@ -688,9 +688,9 @@ const BookingForm: React.FC<BookingFormProps> = ({
       </div>
 
       {!onlineBookable && !isOwnerPreview ? (
-        <div className="mb-6 p-5 sm:p-6 bg-white dark:bg-slate-900 rounded-2xl border border-slate-200 dark:border-slate-700 space-y-4">
+        <div className="mb-6 p-5 sm:p-6 bg-white dark:bg-slate-900 rounded-lg border border-slate-200 dark:border-slate-700 space-y-4">
           <div className="flex items-center gap-3 pb-4 border-b border-slate-100 dark:border-slate-800">
-            <div className="w-10 h-10 rounded-xl bg-primary-50 dark:bg-primary-500/10 flex items-center justify-center">
+            <div className="w-10 h-10 rounded-lg bg-primary-50 dark:bg-primary-500/10 flex items-center justify-center">
               <Store className="w-5 h-5 text-primary-600 dark:text-primary-400" />
             </div>
             <div>
@@ -700,13 +700,13 @@ const BookingForm: React.FC<BookingFormProps> = ({
           </div>
           {service?.requires_payment && !showPurchase && (
             <button onClick={() => setShowPurchase(true)}
-              className="flex items-center justify-center gap-2 w-full px-5 py-3 bg-primary-600 hover:bg-primary-700 text-white font-bold rounded-xl shadow-lg shadow-primary-500/25 transition-all hover:-translate-y-0.5 active:translate-y-0">
+              className="flex items-center justify-center gap-2 w-full px-5 py-3 bg-primary-600 hover:bg-primary-700 text-white font-bold rounded-lg shadow-lg shadow-primary-500/25 transition-all hover:-translate-y-0.5 active:translate-y-0">
               <Lock className="w-4 h-4" />
               Comprar ahora — ${(service?.price ?? 0).toLocaleString()}
             </button>
           )}
           {showPurchase && (
-            <div className="space-y-4 p-4 bg-slate-50 dark:bg-slate-800/50 rounded-xl border border-slate-200 dark:border-slate-700">
+            <div className="space-y-4 p-4 bg-slate-50 dark:bg-slate-800/50 rounded-lg border border-slate-200 dark:border-slate-700">
               <p className="text-xs font-bold text-slate-600 dark:text-slate-400 flex items-center gap-1.5">
                 <Lock className="w-3.5 h-3.5" />
                 Pago seguro — El negocio te contactará para coordinar la cita
@@ -720,7 +720,7 @@ const BookingForm: React.FC<BookingFormProps> = ({
             {businessContact?.whatsapp && (
               <a href={`https://wa.me/${businessContact.whatsapp.replace(/[^0-9]/g, '')}?${encodeURIComponent(`Hola! Quiero agendar: ${service?.name || ''}`)}`}
                 target="_blank" rel="noopener noreferrer"
-                className="flex items-center gap-3 p-3 rounded-xl border border-emerald-200 dark:border-emerald-800/50 bg-emerald-50 dark:bg-emerald-900/10 hover:bg-emerald-100 dark:hover:bg-emerald-900/20 transition-all group">
+                className="flex items-center gap-3 p-3 rounded-lg border border-emerald-200 dark:border-emerald-800/50 bg-emerald-50 dark:bg-emerald-900/10 hover:bg-emerald-100 dark:hover:bg-emerald-900/20 transition-all group">
                 <span className="text-xl flex-shrink-0">💬</span>
                 <div className="min-w-0">
                   <p className="text-xs font-bold text-emerald-700 dark:text-emerald-300 group-hover:underline">WhatsApp</p>
@@ -730,7 +730,7 @@ const BookingForm: React.FC<BookingFormProps> = ({
             )}
             {businessContact?.phone && (
               <a href={`tel:${businessContact.phone}`}
-                className="flex items-center gap-3 p-3 rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 hover:bg-slate-50 dark:hover:bg-slate-700/50 transition-all group">
+                className="flex items-center gap-3 p-3 rounded-lg border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 hover:bg-slate-50 dark:hover:bg-slate-700/50 transition-all group">
                 <span className="text-xl flex-shrink-0">📞</span>
                 <div className="min-w-0">
                   <p className="text-xs font-bold text-slate-700 dark:text-slate-300 group-hover:underline">Teléfono</p>
@@ -740,7 +740,7 @@ const BookingForm: React.FC<BookingFormProps> = ({
             )}
             {businessContact?.email && (
               <a href={`mailto:${businessContact.email}`}
-                className="flex items-center gap-3 p-3 rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 hover:bg-slate-50 dark:hover:bg-slate-700/50 transition-all group">
+                className="flex items-center gap-3 p-3 rounded-lg border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 hover:bg-slate-50 dark:hover:bg-slate-700/50 transition-all group">
                 <span className="text-xl flex-shrink-0">📧</span>
                 <div className="min-w-0">
                   <p className="text-xs font-bold text-slate-700 dark:text-slate-300 group-hover:underline">Email</p>
@@ -751,7 +751,7 @@ const BookingForm: React.FC<BookingFormProps> = ({
             {businessContact?.address && (
               <a href={`https://maps.google.com/?q=${encodeURIComponent(businessContact.address)}`}
                 target="_blank" rel="noopener noreferrer"
-                className="flex items-center gap-3 p-3 rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 hover:bg-slate-50 dark:hover:bg-slate-700/50 transition-all group">
+                className="flex items-center gap-3 p-3 rounded-lg border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 hover:bg-slate-50 dark:hover:bg-slate-700/50 transition-all group">
                 <span className="text-xl flex-shrink-0">📍</span>
                 <div className="min-w-0">
                   <p className="text-xs font-bold text-slate-700 dark:text-slate-300 group-hover:underline">Dirección</p>
@@ -783,18 +783,18 @@ const BookingForm: React.FC<BookingFormProps> = ({
               Horario disponible
             </label>
             {!formData.date ? (
-              <div className="flex-1 py-8 text-center bg-slate-50 dark:bg-slate-800/50 rounded-2xl border border-dashed border-slate-200 dark:border-slate-700 flex flex-col items-center justify-center md:max-h-[380px]">
+              <div className="flex-1 py-8 text-center bg-slate-50 dark:bg-slate-800/50 rounded-lg border border-dashed border-slate-200 dark:border-slate-700 flex flex-col items-center justify-center md:max-h-[380px]">
                 <CalendarDays className="w-8 h-8 text-slate-300 dark:text-slate-600 mx-auto mb-2" />
                 <p className="text-sm font-medium text-slate-400 italic">Selecciona una fecha primero</p>
               </div>
             ) : loadingSlots ? (
               <div className="flex-1 grid grid-cols-2 gap-2.5 content-start md:max-h-[380px]">
                 {[...Array(8)].map((_, i) => (
-                  <div key={i} className="h-11 bg-slate-200 dark:bg-slate-700 rounded-xl animate-pulse" />
+                  <div key={i} className="h-11 bg-slate-200 dark:bg-slate-700 rounded-lg animate-pulse" />
                 ))}
               </div>
             ) : availableTimeSlots.length === 0 ? (
-              <div className="flex-1 py-8 text-center bg-amber-50 dark:bg-amber-500/10 rounded-2xl border border-dashed border-amber-200 dark:border-amber-800 flex flex-col items-center justify-center md:max-h-[380px]">
+              <div className="flex-1 py-8 text-center bg-amber-50 dark:bg-amber-500/10 rounded-lg border border-dashed border-amber-200 dark:border-amber-800 flex flex-col items-center justify-center md:max-h-[380px]">
                 <Clock className="w-8 h-8 text-amber-400 mx-auto mb-2" />
                 <p className="text-sm font-bold text-amber-700 dark:text-amber-400">No hay turnos disponibles este dia</p>
               </div>
@@ -802,7 +802,7 @@ const BookingForm: React.FC<BookingFormProps> = ({
               <div className="flex-1 grid grid-cols-2 gap-2.5 content-start overflow-y-auto pr-1 md:max-h-[380px] scrollbar-fino">
                 {availableTimeSlots.map((slot) => (
                   <button key={slot} type="button" onClick={() => handleTimeSelect(slot)}
-                    className={`py-3 text-sm font-black rounded-xl border-2 transition-all active:scale-95 ${
+                    className={`py-3 text-sm font-black rounded-lg border-2 transition-all active:scale-95 ${
                       formData.time === slot
                         ? 'bg-primary-600 border-primary-600 text-white shadow-lg shadow-primary-500/30'
                       : 'bg-white dark:bg-slate-800 border-slate-200 dark:border-slate-700 text-slate-700 dark:text-slate-300 hover:border-primary-400 dark:hover:border-primary-600'
@@ -822,15 +822,15 @@ const BookingForm: React.FC<BookingFormProps> = ({
           <div className="relative">
             <FileText className="absolute top-3.5 left-3.5 w-4 h-4 text-slate-400 pointer-events-none" />
             <textarea id="notes" value={formData.notes} onChange={(e) => setFormData({ ...formData, notes: e.target.value })}
-              className="w-full pl-10 pr-4 py-3 rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 focus:ring-2 focus:ring-primary-500/20 focus:border-primary-500 outline-none transition-all text-sm"
+              className="w-full pl-10 pr-4 py-3 rounded-lg border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 focus:ring-2 focus:ring-primary-500/20 focus:border-primary-500 outline-none transition-all text-sm"
               rows={3} placeholder="Algun detalle que debamos saber..." />
           </div>
         </div>
 
         {requireConfirmation && (
-          <label className="flex items-start gap-3 p-4 bg-amber-50 dark:bg-amber-500/10 rounded-2xl border border-amber-200 dark:border-amber-800 cursor-pointer">
+          <label className="flex items-start gap-3 p-4 bg-amber-50 dark:bg-amber-500/10 rounded-lg border border-amber-200 dark:border-amber-800 cursor-pointer">
             <input type="checkbox" checked={confirmationChecked} onChange={(e) => setConfirmationChecked(e.target.checked)}
-              className="w-5 h-5 mt-0.5 rounded-md border-amber-300 text-primary-600 focus:ring-primary-500" />
+              className="w-5 h-5 mt-0.5 rounded-lg border-amber-300 text-primary-600 focus:ring-primary-500" />
             <div>
               <p className="text-sm font-bold text-amber-800 dark:text-amber-400 mb-0">Acepto las condiciones de cancelacion</p>
               <p className="text-xs text-amber-600 dark:text-amber-500 mt-0.5 mb-0">
@@ -841,7 +841,7 @@ const BookingForm: React.FC<BookingFormProps> = ({
         )}
 
         {showSummary && formData.date && formData.time && (
-          <div className="p-4 bg-primary-50 dark:bg-primary-900/20 rounded-2xl border border-primary-200 dark:border-primary-800/50 space-y-2">
+          <div className="p-4 bg-primary-50 dark:bg-primary-900/20 rounded-lg border border-primary-200 dark:border-primary-800/50 space-y-2">
             <p className="text-xs font-bold uppercase tracking-wider text-primary-600 dark:text-primary-400 flex items-center gap-1.5">
               <CalendarDays className="w-3.5 h-3.5" /> Resumen de tu reserva
             </p>
@@ -858,7 +858,7 @@ const BookingForm: React.FC<BookingFormProps> = ({
 
         {showPayment && (
           <div className="space-y-4 pt-2 border-t border-slate-200 dark:border-slate-700">
-            <div className="flex items-center gap-2 p-3 bg-amber-50 dark:bg-amber-900/10 rounded-xl border border-amber-200 dark:border-amber-800/50">
+            <div className="flex items-center gap-2 p-3 bg-amber-50 dark:bg-amber-900/10 rounded-lg border border-amber-200 dark:border-amber-800/50">
               <Lock className="w-4 h-4 text-amber-600 flex-shrink-0" />
               <p className="text-xs text-amber-700 dark:text-amber-400">
                 Este servicio requiere pago online de <strong>${paymentAmount.toLocaleString()} COP</strong> para confirmar la reserva.
@@ -873,35 +873,35 @@ const BookingForm: React.FC<BookingFormProps> = ({
         {!showPayment && (
           <>
             {!userId && (
-              <div className="p-4 bg-white dark:bg-slate-900 rounded-2xl border border-slate-200 dark:border-slate-800">
+              <div className="p-4 bg-white dark:bg-slate-900 rounded-lg border border-slate-200 dark:border-slate-800">
                 <p className="text-xs font-black text-slate-500 dark:text-slate-400 uppercase tracking-wider mb-3">Crea tu cuenta gratis</p>
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                   <input type="text" value={localGuestInfo.name} onChange={(e) => setLocalGuestInfo(p => ({ ...p, name: e.target.value }))}
-                    placeholder="Nombre" className="w-full px-4 py-2.5 text-sm rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 focus:ring-2 focus:ring-primary-500/20 focus:border-primary-500 outline-none transition-all" />
+                    placeholder="Nombre" className="w-full px-4 py-2.5 text-sm rounded-lg border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 focus:ring-2 focus:ring-primary-500/20 focus:border-primary-500 outline-none transition-all" />
                   <input type="email" value={localGuestInfo.email} onChange={(e) => setLocalGuestInfo(p => ({ ...p, email: e.target.value }))}
-                    placeholder="Correo" className="w-full px-4 py-2.5 text-sm rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 focus:ring-2 focus:ring-primary-500/20 focus:border-primary-500 outline-none transition-all" />
+                    placeholder="Correo" className="w-full px-4 py-2.5 text-sm rounded-lg border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 focus:ring-2 focus:ring-primary-500/20 focus:border-primary-500 outline-none transition-all" />
                 </div>
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 mt-3">
                   <input type="tel" value={localGuestInfo.phone} onChange={(e) => setLocalGuestInfo(p => ({ ...p, phone: e.target.value }))}
-                    placeholder="Teléfono (opcional)" className="w-full px-4 py-2.5 text-sm rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 focus:ring-2 focus:ring-primary-500/20 focus:border-primary-500 outline-none transition-all" />
+                    placeholder="Teléfono (opcional)" className="w-full px-4 py-2.5 text-sm rounded-lg border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 focus:ring-2 focus:ring-primary-500/20 focus:border-primary-500 outline-none transition-all" />
                   <input type="password" value={guestPassword} onChange={(e) => setGuestPassword(e.target.value)}
-                    placeholder="Contraseña" className="w-full px-4 py-2.5 text-sm rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 focus:ring-2 focus:ring-primary-500/20 focus:border-primary-500 outline-none transition-all" />
+                    placeholder="Contraseña" className="w-full px-4 py-2.5 text-sm rounded-lg border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 focus:ring-2 focus:ring-primary-500/20 focus:border-primary-500 outline-none transition-all" />
                 </div>
               </div>
             )}
             {error && (
-              <div className="flex items-start gap-2.5 px-4 py-3 bg-red-50 dark:bg-red-500/10 border border-red-200 dark:border-red-800 rounded-2xl animate-in fade-in slide-in-from-top-2 duration-300">
+              <div className="flex items-start gap-2.5 px-4 py-3 bg-red-50 dark:bg-red-500/10 border border-red-200 dark:border-red-800 rounded-lg animate-in fade-in slide-in-from-top-2 duration-300">
                 <AlertCircle className="w-4 h-4 text-red-500 flex-shrink-0 mt-0.5" />
                 <p className="text-sm font-bold text-red-700 dark:text-red-400">{error}</p>
               </div>
             )}
             <div className="flex flex-col sm:flex-row gap-3 pt-2">
               <button type="button" onClick={onClose}
-                className="flex-1 inline-flex items-center justify-center gap-2 px-6 py-3.5 bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300 font-bold rounded-xl hover:bg-slate-200 dark:hover:bg-slate-700 transition-all active:scale-[0.98]">
+                className="flex-1 inline-flex items-center justify-center gap-2 px-6 py-3.5 bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300 font-bold rounded-lg hover:bg-slate-200 dark:hover:bg-slate-700 transition-all active:scale-[0.98]">
                 <ArrowLeft className="w-4 h-4" /> Cancelar
               </button>
               <button type="submit" disabled={!formData.date || !formData.time || submitting || registering || isOwnerPreview}
-                className="flex-[2] inline-flex items-center justify-center gap-2 px-6 py-3.5 bg-primary-600 hover:bg-primary-700 text-white font-bold rounded-xl shadow-lg shadow-primary-500/25 transition-all hover:-translate-y-0.5 active:translate-y-0 disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:-translate-y-0">
+                className="flex-[2] inline-flex items-center justify-center gap-2 px-6 py-3.5 bg-primary-600 hover:bg-primary-700 text-white font-bold rounded-lg shadow-lg shadow-primary-500/25 transition-all hover:-translate-y-0.5 active:translate-y-0 disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:-translate-y-0">
                 {submitting || registering ? (
                   <><div className="animate-spin rounded-full h-4 w-4 border-2 border-white border-t-transparent" /> {registering ? 'Creando cuenta...' : 'Procesando...'}</>
                 ) : isOwnerPreview ? (
@@ -930,7 +930,7 @@ const BookingForm: React.FC<BookingFormProps> = ({
       {/* ─── Policies integrated ─── */}
       {!isOwnerPreview && (cancellationPolicy || reschedulePolicy) && (
         <details className="mt-6 group">
-          <summary className="flex items-center justify-between px-4 py-3 bg-slate-50 dark:bg-slate-800/50 rounded-xl border border-slate-200 dark:border-slate-700 cursor-pointer text-sm font-bold text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors list-none">
+          <summary className="flex items-center justify-between px-4 py-3 bg-slate-50 dark:bg-slate-800/50 rounded-lg border border-slate-200 dark:border-slate-700 cursor-pointer text-sm font-bold text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors list-none">
             Políticas
             <ChevronDown className="w-4 h-4 transition-transform duration-200 group-open:rotate-180" />
           </summary>
@@ -953,12 +953,12 @@ const BookingForm: React.FC<BookingFormProps> = ({
 
       {/* ─── Gift section ─── */}
       {service?.can_be_gifted && (
-        <div className="mt-6 p-3 bg-rose-50 dark:bg-rose-900/10 rounded-2xl border border-rose-200 dark:border-rose-800/50">
+        <div className="mt-6 p-3 bg-rose-50 dark:bg-rose-900/10 rounded-lg border border-rose-200 dark:border-rose-800/50">
           <p className="text-xs font-bold text-rose-600 dark:text-rose-400 flex items-center gap-1.5 mb-2">
             <Gift className="w-3.5 h-3.5" /> Tienes un codigo de regalo?
           </p>
           {giftApplied ? (
-            <div className="flex items-center justify-between bg-white dark:bg-slate-800 rounded-xl p-2.5 border border-emerald-200 dark:border-emerald-800">
+            <div className="flex items-center justify-between bg-white dark:bg-slate-800 rounded-lg p-2.5 border border-emerald-200 dark:border-emerald-800">
               <div className="flex items-center gap-2 text-sm">
                 <Check className="w-4 h-4 text-emerald-500" />
                 <span className="font-bold text-emerald-700 dark:text-emerald-300">Codigo aplicado</span>
@@ -974,7 +974,7 @@ const BookingForm: React.FC<BookingFormProps> = ({
                 <div className="relative flex-1">
                   <Gift className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-rose-400 pointer-events-none" />
                   <input type="text" value={giftCodeInput} onChange={e => setGiftCodeInput(e.target.value.toUpperCase())} placeholder="Ej: GIFT-ABC123"
-                    className="w-full pl-10 pr-3 py-2 text-sm rounded-xl border border-rose-200 dark:border-rose-800 bg-white dark:bg-slate-800 focus:ring-2 focus:ring-rose-500/20 focus:border-rose-500 outline-none" />
+                    className="w-full pl-10 pr-3 py-2 text-sm rounded-lg border border-rose-200 dark:border-rose-800 bg-white dark:bg-slate-800 focus:ring-2 focus:ring-rose-500/20 focus:border-rose-500 outline-none" />
                 </div>
                 <button onClick={async () => {
                   if (!giftCodeInput.trim()) return;
@@ -985,7 +985,7 @@ const BookingForm: React.FC<BookingFormProps> = ({
                   if (res.success && res.gift) { setGiftApplied(res.gift); setGiftCodeInput(''); toast.success('Codigo de regalo aplicado!'); }
                   else { setGiftError(res.error || 'Codigo invalido'); }
                 }} disabled={validatingGift || !giftCodeInput.trim()}
-                  className="px-4 py-2 bg-rose-600 hover:bg-rose-700 text-white text-sm font-bold rounded-xl transition-all disabled:opacity-50">
+                  className="px-4 py-2 bg-rose-600 hover:bg-rose-700 text-white text-sm font-bold rounded-lg transition-all disabled:opacity-50">
                   {validatingGift ? '...' : 'Canjear'}
                 </button>
               </div>
@@ -995,7 +995,7 @@ const BookingForm: React.FC<BookingFormProps> = ({
                 <span className="flex-1 border-t border-rose-200 dark:border-rose-800/50" />
               </div>
               <a href={`/${window.location.pathname.split('/')[1]}/gift/${serviceId}`}
-                className="flex items-center justify-center gap-2 px-4 py-2.5 bg-rose-100 hover:bg-rose-200 dark:bg-rose-900/30 dark:hover:bg-rose-900/50 text-rose-700 dark:text-rose-300 text-sm font-bold rounded-xl transition-all active:scale-[0.98]">
+                className="flex items-center justify-center gap-2 px-4 py-2.5 bg-rose-100 hover:bg-rose-200 dark:bg-rose-900/30 dark:hover:bg-rose-900/50 text-rose-700 dark:text-rose-300 text-sm font-bold rounded-lg transition-all active:scale-[0.98]">
                 <Gift className="w-4 h-4" />
                 Regalar este servicio
               </a>

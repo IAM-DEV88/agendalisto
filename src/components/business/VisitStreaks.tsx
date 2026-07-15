@@ -52,7 +52,7 @@ export default function VisitStreaks({ userId, businessId }: { userId: string; b
   const Icon = cfg.icon;
 
   return (
-    <div className={`flex items-center gap-3 p-3 rounded-xl ${cfg.bg} border border-slate-200 dark:border-slate-700`}>
+    <div className={`flex items-center gap-3 p-3 rounded-lg ${cfg.bg} border border-slate-200 dark:border-slate-700`}>
       <Icon className={`w-8 h-8 ${cfg.color}`} />
       <div>
         <p className="font-bold text-sm text-slate-800 dark:text-slate-200 flex items-center gap-1.5">

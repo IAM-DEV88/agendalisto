@@ -8,9 +8,9 @@ import PayPalSubscribeButton from '../components/PayPalSubscribeButton';
 import { Check, X, Sparkles, Crown, Store } from 'lucide-react';
 
 const PLAN_ICONS: Record<Plan, React.ReactNode> = {
-  starter: <div className="w-10 h-10 rounded-xl bg-slate-100 dark:bg-slate-800 flex items-center justify-center text-slate-500" />,
-  pro: <div className="w-10 h-10 rounded-xl bg-blue-100 dark:bg-blue-900/30 flex items-center justify-center text-blue-600 dark:text-blue-400"><Sparkles className="w-5 h-5" /></div>,
-  premium: <div className="w-10 h-10 rounded-xl bg-amber-100 dark:bg-amber-900/30 flex items-center justify-center text-amber-600 dark:text-amber-400"><Crown className="w-5 h-5" /></div>,
+  starter: <div className="w-10 h-10 rounded-lg bg-slate-100 dark:bg-slate-800 flex items-center justify-center text-slate-500" />,
+  pro: <div className="w-10 h-10 rounded-lg bg-blue-100 dark:bg-blue-900/30 flex items-center justify-center text-blue-600 dark:text-blue-400"><Sparkles className="w-5 h-5" /></div>,
+  premium: <div className="w-10 h-10 rounded-lg bg-amber-100 dark:bg-amber-900/30 flex items-center justify-center text-amber-600 dark:text-amber-400"><Crown className="w-5 h-5" /></div>,
 };
 
 const PLAN_CARDS: Record<Plan, { border: string; bg: string; accent: string; button: string; popular?: boolean }> = {
@@ -73,7 +73,7 @@ function PlansContent() {
             return (
               <div
                 key={plan}
-                className={`relative flex flex-col rounded-3xl border-2 ${card.border} ${card.bg} shadow-lg ${
+                className={`relative flex flex-col rounded-lg border-2 ${card.border} ${card.bg} shadow-lg ${
                   card.popular ? 'scale-[1.02] shadow-xl shadow-blue-200/30 dark:shadow-blue-900/20 z-10' : ''
                 } transition-all hover:-translate-y-1`}
               >
@@ -135,18 +135,18 @@ function PlansContent() {
                     {price.amount === 0 ? (
                       <Link
                         to={hasBusiness ? '/business/dashboard' : '/business/register'}
-                        className={`inline-flex items-center justify-center gap-2 w-full py-3 font-bold rounded-xl transition-all ${card.button}`}
+                        className={`inline-flex items-center justify-center gap-2 w-full py-3 font-bold rounded-lg transition-all ${card.button}`}
                       >
                         {hasBusiness ? <><Store className="w-4 h-4" /> Ir a mi negocio</> : 'Empezar gratis'}
                       </Link>
                     ) : plan === currentPlan ? (
-                      <div className="w-full text-center py-3 font-bold rounded-xl bg-slate-100 dark:bg-slate-800 text-slate-400 cursor-not-allowed">
+                      <div className="w-full text-center py-3 font-bold rounded-lg bg-slate-100 dark:bg-slate-800 text-slate-400 cursor-not-allowed">
                         Plan actual
                       </div>
                     ) : !user || !PAYPAL_CLIENT_ID ? (
                       <Link
                         to={user ? '/business/dashboard' : '/login'}
-                        className={`block w-full text-center py-3 font-bold rounded-xl transition-all ${card.button}`}
+                        className={`block w-full text-center py-3 font-bold rounded-lg transition-all ${card.button}`}
                       >
                         {user ? `Mejora a ${PLAN_LABELS[plan]}` : 'Inicia sesión'}
                       </Link>

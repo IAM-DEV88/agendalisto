@@ -51,7 +51,7 @@ export default function BusinessProgressSection({ businessData }: { businessData
   if (allDone && !loading) return null;
 
   return (
-    <div className="bg-white dark:bg-slate-900 rounded-2xl border border-slate-200 dark:border-slate-800 p-5 sm:p-6 animate-in fade-in duration-300">
+    <div className="bg-white dark:bg-slate-900 rounded-lg border border-slate-200 dark:border-slate-800 p-5 sm:p-6 animate-in fade-in duration-300">
       <div className="flex items-center justify-between mb-4">
         <div>
           <h3 className="font-black text-slate-900 dark:text-white text-sm">Progreso de configuración</h3>
@@ -83,7 +83,7 @@ export default function BusinessProgressSection({ businessData }: { businessData
           <Link
             key={item.id}
             to={item.link}
-            className={`flex items-center gap-3 p-2.5 rounded-xl transition-all text-sm ${
+            className={`flex items-center gap-3 p-2.5 rounded-lg transition-all text-sm ${
               item.done
                 ? 'text-slate-400 dark:text-slate-500'
                 : 'text-slate-700 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-800/50'

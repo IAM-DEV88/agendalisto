@@ -118,7 +118,7 @@ const BlogHomeSection = () => {
             {popularPosts.filter(p => p.id !== latestPost?.id).map((post) => (
               <Link key={post.id} to={`/blog/${post.id}`} className="group block">
                 <div className="card p-5 hover:border-primary-400 transition-all duration-300 flex gap-5 shadow-sm hover:shadow-md">
-                  <div className="w-24 h-24 rounded-2xl overflow-hidden flex-shrink-0 bg-slate-100 dark:bg-slate-800">
+                  <div className="w-24 h-24 rounded-lg overflow-hidden flex-shrink-0 bg-slate-100 dark:bg-slate-800">
                     {post.image_url ? (
                       <img src={post.image_url} alt={post.title} className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110" />
                     ) : (

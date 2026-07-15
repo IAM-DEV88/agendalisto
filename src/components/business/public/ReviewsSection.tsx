@@ -9,9 +9,9 @@ interface ReviewsSectionProps {
 
 function SkeletonReview() {
   return (
-    <div className="bg-white dark:bg-slate-900 rounded-2xl border border-slate-200 dark:border-slate-800 p-5 animate-pulse space-y-3">
+    <div className="bg-white dark:bg-slate-900 rounded-lg border border-slate-200 dark:border-slate-800 p-5 animate-pulse space-y-3">
       <div className="flex items-center gap-3">
-        <div className="w-10 h-10 rounded-xl bg-slate-200 dark:bg-slate-700" />
+        <div className="w-10 h-10 rounded-lg bg-slate-200 dark:bg-slate-700" />
         <div className="space-y-2 flex-1">
           <div className="h-4 bg-slate-200 dark:bg-slate-700 rounded w-32" />
           <div className="h-3 bg-slate-200 dark:bg-slate-700 rounded w-20" />
@@ -45,7 +45,7 @@ const ReviewsSection: React.FC<ReviewsSectionProps> = ({ businessId }) => {
     : '0.0';
 
   return (
-    <div className="bg-white dark:bg-slate-900 rounded-2xl border border-slate-200 dark:border-slate-800 p-6 sm:p-8">
+    <div className="bg-white dark:bg-slate-900 rounded-lg border border-slate-200 dark:border-slate-800 p-6 sm:p-8">
       <div className="flex items-center justify-between mb-6">
         <h2 className="text-xl font-black text-slate-900 dark:text-white">Reseñas</h2>
         {reviews.length > 0 && (
@@ -70,10 +70,10 @@ const ReviewsSection: React.FC<ReviewsSectionProps> = ({ businessId }) => {
       ) : (
         <div className="space-y-4">
           {reviews.map((review) => (
-            <div key={review.id} className="p-5 bg-slate-50 dark:bg-slate-800/50 rounded-2xl border border-slate-100 dark:border-slate-700/50 hover:shadow-md transition-all">
+            <div key={review.id} className="p-5 bg-slate-50 dark:bg-slate-800/50 rounded-lg border border-slate-100 dark:border-slate-700/50 hover:shadow-md transition-all">
               <div className="flex items-start justify-between mb-3">
                 <div className="flex items-center gap-3">
-                  <div className="w-10 h-10 rounded-xl bg-primary-100 dark:bg-primary-900/30 flex items-center justify-center text-primary-600 dark:text-primary-400 flex-shrink-0">
+                  <div className="w-10 h-10 rounded-lg bg-primary-100 dark:bg-primary-900/30 flex items-center justify-center text-primary-600 dark:text-primary-400 flex-shrink-0">
                     <User className="w-5 h-5" />
                   </div>
                   <div>

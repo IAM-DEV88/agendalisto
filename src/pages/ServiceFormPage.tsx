@@ -28,9 +28,9 @@ function ServiceFormSkeleton() {
         </div>
       </div>
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 mt-8 space-y-6">
-        <div className="h-12 bg-slate-200 dark:bg-slate-800 rounded-xl w-64 animate-pulse" />
-        <div className="h-64 bg-slate-200 dark:bg-slate-800 rounded-2xl animate-pulse" />
-        <div className="h-12 bg-slate-200 dark:bg-slate-800 rounded-2xl animate-pulse" />
+        <div className="h-12 bg-slate-200 dark:bg-slate-800 rounded-lg w-64 animate-pulse" />
+        <div className="h-64 bg-slate-200 dark:bg-slate-800 rounded-lg animate-pulse" />
+        <div className="h-12 bg-slate-200 dark:bg-slate-800 rounded-lg animate-pulse" />
       </div>
     </div>
   );
@@ -300,12 +300,12 @@ export default function ServiceFormPage() {
     return (
       <div className="min-h-screen bg-gradient-to-b from-slate-50 to-white dark:from-slate-950 dark:to-slate-900 flex items-center justify-center p-4">
         <div className="text-center max-w-md">
-          <div className="w-16 h-16 mx-auto mb-4 rounded-2xl bg-red-50 dark:bg-red-500/10 flex items-center justify-center">
+          <div className="w-16 h-16 mx-auto mb-4 rounded-lg bg-red-50 dark:bg-red-500/10 flex items-center justify-center">
             <Store className="w-8 h-8 text-red-500" />
           </div>
           <h2 className="text-xl font-black text-slate-900 dark:text-white mb-2">Error</h2>
           <p className="text-sm text-slate-500 mb-6">{error}</p>
-          <button onClick={() => navigate('/business/dashboard')} className="px-6 py-3 bg-primary-600 hover:bg-primary-700 text-white font-bold rounded-xl transition-all">
+          <button onClick={() => navigate('/business/dashboard')} className="px-6 py-3 bg-primary-600 hover:bg-primary-700 text-white font-bold rounded-lg transition-all">
             Volver al panel
           </button>
         </div>
@@ -353,7 +353,7 @@ export default function ServiceFormPage() {
 
           {/* Error banner */}
           {error && (
-            <div className="flex items-start gap-2.5 px-5 py-4 bg-red-50 dark:bg-red-500/10 border border-red-200 dark:border-red-800 rounded-2xl">
+            <div className="flex items-start gap-2.5 px-5 py-4 bg-red-50 dark:bg-red-500/10 border border-red-200 dark:border-red-800 rounded-lg">
               <span className="text-sm font-bold text-red-700 dark:text-red-400">{error}</span>
             </div>
           )}
@@ -365,7 +365,7 @@ export default function ServiceFormPage() {
               return (
                 <div key={tab.id} className="flex items-center gap-2 flex-shrink-0">
                   <button type="button" onClick={() => switchTab(tab.id)}
-                    className={`flex items-center gap-1.5 sm:gap-2 px-3 sm:px-4 py-2 rounded-xl transition-all whitespace-nowrap ${
+                    className={`flex items-center gap-1.5 sm:gap-2 px-3 sm:px-4 py-2 rounded-lg transition-all whitespace-nowrap ${
                       activeTab === tab.id
                         ? 'bg-primary-600 text-white shadow-lg shadow-primary-500/25'
                         : 'bg-white dark:bg-slate-900 text-slate-500 dark:text-slate-400 border border-slate-200 dark:border-slate-700 hover:border-primary-300 dark:hover:border-primary-700'
@@ -383,13 +383,13 @@ export default function ServiceFormPage() {
           </div>
 
           {/* Tab Content */}
-          <div className="bg-white dark:bg-slate-900 rounded-2xl border border-slate-200 dark:border-slate-800 shadow-xl shadow-slate-200/50 dark:shadow-none p-6 sm:p-8">
+          <div className="bg-white dark:bg-slate-900 rounded-lg border border-slate-200 dark:border-slate-800 shadow-xl shadow-slate-200/50 dark:shadow-none p-6 sm:p-8">
 
             {/* ═══ INFORMACIÓN ═══ */}
             {activeTab === 'info' && (
               <div className="space-y-5">
                 <div className="flex items-center gap-3 pb-4 border-b border-slate-100 dark:border-slate-800">
-                  <span className="w-8 h-8 rounded-xl bg-primary-50 dark:bg-primary-500/10 flex items-center justify-center">
+                  <span className="w-8 h-8 rounded-lg bg-primary-50 dark:bg-primary-500/10 flex items-center justify-center">
                     <Info className="w-4 h-4 text-primary-600 dark:text-primary-400" />
                   </span>
                   <div>
@@ -406,7 +406,7 @@ export default function ServiceFormPage() {
                     <Tag className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400 pointer-events-none" />
                     <input type="text" id="name" required value={formData.name}
                       onChange={e => setFormData({ ...formData, name: e.target.value })}
-                      className="w-full pl-10 pr-4 py-3 rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 focus:ring-2 focus:ring-primary-500/20 focus:border-primary-500 outline-none transition-all font-medium"
+                      className="w-full pl-10 pr-4 py-3 rounded-lg border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 focus:ring-2 focus:ring-primary-500/20 focus:border-primary-500 outline-none transition-all font-medium"
                       placeholder="Ej: Corte de Cabello" />
                   </div>
                 </div>
@@ -420,7 +420,7 @@ export default function ServiceFormPage() {
                     <textarea id="description" required value={formData.description}
                       onChange={e => setFormData({ ...formData, description: e.target.value })}
                       rows={4}
-                      className="w-full pl-10 pr-4 py-3 rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 focus:ring-2 focus:ring-primary-500/20 focus:border-primary-500 outline-none transition-all resize-none font-medium"
+                      className="w-full pl-10 pr-4 py-3 rounded-lg border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 focus:ring-2 focus:ring-primary-500/20 focus:border-primary-500 outline-none transition-all resize-none font-medium"
                       placeholder="Describe brevemente el servicio..." />
                   </div>
                   <div className="flex items-center gap-2 mt-1">
@@ -452,7 +452,7 @@ export default function ServiceFormPage() {
                     <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 mt-2">
                       {aiOptions.map((opt, i) => (
                         <button key={i} type="button" onClick={() => { setFormData(prev => ({ ...prev, description: opt })); setAiOptions([]); }}
-                          className={`text-left p-3 rounded-xl border-2 transition-all hover:scale-[1.02] active:scale-[0.98] ${
+                          className={`text-left p-3 rounded-lg border-2 transition-all hover:scale-[1.02] active:scale-[0.98] ${
                             formData.description === opt
                               ? 'border-primary-500 bg-primary-50 dark:bg-primary-900/20'
                               : 'border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 hover:border-primary-300 dark:hover:border-primary-600'
@@ -476,7 +476,7 @@ export default function ServiceFormPage() {
                       <Clock className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400 pointer-events-none" />
                       <input type="number" id="duration" required min="5" value={formData.duration}
                         onChange={e => setFormData({ ...formData, duration: e.target.value })}
-                        className="w-full pl-10 pr-4 py-3 rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 focus:ring-2 focus:ring-primary-500/20 focus:border-primary-500 outline-none transition-all font-medium" />
+                        className="w-full pl-10 pr-4 py-3 rounded-lg border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 focus:ring-2 focus:ring-primary-500/20 focus:border-primary-500 outline-none transition-all font-medium" />
                     </div>
                   </div>
                   <div className="space-y-1">
@@ -487,7 +487,7 @@ export default function ServiceFormPage() {
                       <DollarSign className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400 pointer-events-none" />
                       <input type="number" id="price" required min="0" step="0.01" value={formData.price}
                         onChange={e => setFormData({ ...formData, price: e.target.value })}
-                        className="w-full pl-10 pr-4 py-3 rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 focus:ring-2 focus:ring-primary-500/20 focus:border-primary-500 outline-none transition-all font-medium" />
+                        className="w-full pl-10 pr-4 py-3 rounded-lg border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 focus:ring-2 focus:ring-primary-500/20 focus:border-primary-500 outline-none transition-all font-medium" />
                     </div>
                   </div>
                   <div className="space-y-1">
@@ -498,7 +498,7 @@ export default function ServiceFormPage() {
                       <User className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400 pointer-events-none" />
                       <input type="text" id="provider" value={formData.provider}
                         onChange={e => setFormData({ ...formData, provider: e.target.value })}
-                        className="w-full pl-10 pr-4 py-3 rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 focus:ring-2 focus:ring-primary-500/20 focus:border-primary-500 outline-none transition-all font-medium"
+                        className="w-full pl-10 pr-4 py-3 rounded-lg border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 focus:ring-2 focus:ring-primary-500/20 focus:border-primary-500 outline-none transition-all font-medium"
                         placeholder="Nombre del profesional" />
                     </div>
                   </div>
@@ -506,7 +506,7 @@ export default function ServiceFormPage() {
 
                 <div className="flex justify-end pt-2">
                   <button type="button" onClick={() => switchTab('gallery')}
-                    className="inline-flex items-center gap-2 px-5 py-2.5 bg-primary-600 hover:bg-primary-700 text-white text-sm font-bold rounded-xl transition-all active:scale-[0.98]">
+                    className="inline-flex items-center gap-2 px-5 py-2.5 bg-primary-600 hover:bg-primary-700 text-white text-sm font-bold rounded-lg transition-all active:scale-[0.98]">
                     Siguiente: Galería <ChevronRight className="w-4 h-4" />
                   </button>
                 </div>
@@ -517,7 +517,7 @@ export default function ServiceFormPage() {
             {activeTab === 'gallery' && (
               <div className="space-y-5">
                 <div className="flex items-center gap-3 pb-4 border-b border-slate-100 dark:border-slate-800">
-                  <span className="w-8 h-8 rounded-xl bg-primary-50 dark:bg-primary-500/10 flex items-center justify-center">
+                  <span className="w-8 h-8 rounded-lg bg-primary-50 dark:bg-primary-500/10 flex items-center justify-center">
                     <LayoutGrid className="w-4 h-4 text-primary-600 dark:text-primary-400" />
                   </span>
                   <div>
@@ -528,7 +528,7 @@ export default function ServiceFormPage() {
 
                 {images.length > 0 ? (
                   <>
-                    <div className="relative aspect-video sm:aspect-[21/9] rounded-xl overflow-hidden bg-slate-100 dark:bg-slate-800 group border border-slate-200 dark:border-slate-700">
+                    <div className="relative aspect-video sm:aspect-[21/9] rounded-lg overflow-hidden bg-slate-100 dark:bg-slate-800 group border border-slate-200 dark:border-slate-700">
                       <img src={images[activeImageIndex]} alt={formData.name || 'Vista previa'}
                         className="w-full h-full object-contain cursor-zoom-in transition-transform duration-500 group-hover:scale-105"
                         onClick={() => setFullscreenImage(images[activeImageIndex])} />
@@ -547,7 +547,7 @@ export default function ServiceFormPage() {
                     </div>
                     <div className="flex gap-2 overflow-x-auto no-scrollbar">
                       {images.map((url, i) => (
-                        <div key={i} className={`relative w-16 h-16 rounded-xl overflow-hidden flex-shrink-0 border-2 transition-all ${i === activeImageIndex ? 'border-primary-500 ring-1 ring-primary-500/30' : 'border-slate-200 dark:border-slate-700'}`}>
+                        <div key={i} className={`relative w-16 h-16 rounded-lg overflow-hidden flex-shrink-0 border-2 transition-all ${i === activeImageIndex ? 'border-primary-500 ring-1 ring-primary-500/30' : 'border-slate-200 dark:border-slate-700'}`}>
                           <img src={url} alt="" className="w-full h-full object-cover" />
                           <button type="button" onClick={() => removeImage(i)}
                             className="absolute top-0 right-0 p-0.5 bg-red-500 text-white rounded-bl-lg opacity-0 hover:opacity-100 transition-opacity text-[10px]">
@@ -558,14 +558,14 @@ export default function ServiceFormPage() {
                     </div>
                   </>
                 ) : (
-                  <div className="py-12 text-center bg-slate-50 dark:bg-slate-800/50 rounded-2xl border-2 border-dashed border-slate-200 dark:border-slate-700">
+                  <div className="py-12 text-center bg-slate-50 dark:bg-slate-800/50 rounded-lg border-2 border-dashed border-slate-200 dark:border-slate-700">
                     <ImageIcon className="w-12 h-12 text-slate-300 dark:text-slate-600 mx-auto mb-3" />
                     <p className="text-sm font-bold text-slate-400 mb-1">Sin imágenes</p>
                     <p className="text-xs text-slate-400">Sube imágenes para mostrar el servicio</p>
                   </div>
                 )}
 
-                <label className={`flex items-center justify-center gap-2 px-6 py-3 bg-primary-600 hover:bg-primary-700 text-white font-bold rounded-xl cursor-pointer transition-all active:scale-[0.98] ${isUploading ? 'opacity-50 pointer-events-none' : ''}`}>
+                <label className={`flex items-center justify-center gap-2 px-6 py-3 bg-primary-600 hover:bg-primary-700 text-white font-bold rounded-lg cursor-pointer transition-all active:scale-[0.98] ${isUploading ? 'opacity-50 pointer-events-none' : ''}`}>
                   {isUploading ? (
                     <><Loader2 className="w-4 h-4 animate-spin" /> Subiendo...</>
                   ) : (
@@ -582,11 +582,11 @@ export default function ServiceFormPage() {
 
                 <div className="flex justify-between pt-2">
                   <button type="button" onClick={() => switchTab('info')}
-                    className="inline-flex items-center gap-2 px-5 py-2.5 bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-400 text-sm font-bold rounded-xl hover:bg-slate-200 dark:hover:bg-slate-700 transition-all active:scale-[0.98]">
+                    className="inline-flex items-center gap-2 px-5 py-2.5 bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-400 text-sm font-bold rounded-lg hover:bg-slate-200 dark:hover:bg-slate-700 transition-all active:scale-[0.98]">
                     <ChevronLeft className="w-4 h-4" /> Anterior
                   </button>
                   <button type="button" onClick={() => switchTab('config')}
-                    className="inline-flex items-center gap-2 px-5 py-2.5 bg-primary-600 hover:bg-primary-700 text-white text-sm font-bold rounded-xl transition-all active:scale-[0.98]">
+                    className="inline-flex items-center gap-2 px-5 py-2.5 bg-primary-600 hover:bg-primary-700 text-white text-sm font-bold rounded-lg transition-all active:scale-[0.98]">
                     Siguiente: Configuración <ChevronRight className="w-4 h-4" />
                   </button>
                 </div>
@@ -597,7 +597,7 @@ export default function ServiceFormPage() {
             {activeTab === 'config' && (
               <div className="space-y-6">
                 <div className="flex items-center gap-3 pb-4 border-b border-slate-100 dark:border-slate-800">
-                  <span className="w-8 h-8 rounded-xl bg-primary-50 dark:bg-primary-500/10 flex items-center justify-center">
+                  <span className="w-8 h-8 rounded-lg bg-primary-50 dark:bg-primary-500/10 flex items-center justify-center">
                     <Settings className="w-4 h-4 text-primary-600 dark:text-primary-400" />
                   </span>
                   <div>
@@ -607,7 +607,7 @@ export default function ServiceFormPage() {
                 </div>
 
                 <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
-                  <label className="flex items-center gap-3 p-3 rounded-xl border border-slate-200 dark:border-slate-700 cursor-pointer hover:bg-slate-50 dark:hover:bg-slate-800/50 transition-colors">
+                  <label className="flex items-center gap-3 p-3 rounded-lg border border-slate-200 dark:border-slate-700 cursor-pointer hover:bg-slate-50 dark:hover:bg-slate-800/50 transition-colors">
                     <input type="checkbox" checked={formData.is_active}
                       onChange={e => setFormData({ ...formData, is_active: e.target.checked })}
                       className="w-4 h-4 rounded border-slate-300 text-primary-600 focus:ring-primary-500" />
@@ -616,7 +616,7 @@ export default function ServiceFormPage() {
                       <p className="text-[10px] text-slate-400 truncate mb-0">Visible al público</p>
                     </div>
                   </label>
-                  <label className="flex items-center gap-3 p-3 rounded-xl border border-primary-200 dark:border-primary-800/50 cursor-pointer hover:bg-primary-50 dark:hover:bg-primary-900/10 transition-colors">
+                  <label className="flex items-center gap-3 p-3 rounded-lg border border-primary-200 dark:border-primary-800/50 cursor-pointer hover:bg-primary-50 dark:hover:bg-primary-900/10 transition-colors">
                     <input type="checkbox" checked={formData.mostrar_precios}
                       onChange={e => setFormData({ ...formData, mostrar_precios: e.target.checked })}
                       className="w-4 h-4 rounded border-primary-300 text-primary-600 focus:ring-primary-500" />
@@ -625,7 +625,7 @@ export default function ServiceFormPage() {
                       <p className="text-[10px] text-primary-500 truncate mb-0">Precio visible al público</p>
                     </div>
                   </label>
-                  <label className="flex items-center gap-3 p-3 rounded-xl border border-emerald-200 dark:border-emerald-800/50 cursor-pointer hover:bg-emerald-50 dark:hover:bg-emerald-900/10 transition-colors">
+                  <label className="flex items-center gap-3 p-3 rounded-lg border border-emerald-200 dark:border-emerald-800/50 cursor-pointer hover:bg-emerald-50 dark:hover:bg-emerald-900/10 transition-colors">
                     <input type="checkbox" checked={formData.permitir_reservas_online}
                       onChange={e => setFormData({ ...formData, permitir_reservas_online: e.target.checked })}
                       className="w-4 h-4 rounded border-emerald-300 text-emerald-600 focus:ring-emerald-500" />
@@ -634,7 +634,7 @@ export default function ServiceFormPage() {
                       <p className="text-[10px] text-emerald-500 truncate mb-0">Permitir reservas por internet</p>
                     </div>
                   </label>
-                  <label className="flex items-center gap-3 p-3 rounded-xl border border-amber-200 dark:border-amber-800/50 cursor-pointer hover:bg-amber-50 dark:hover:bg-amber-900/10 transition-colors">
+                  <label className="flex items-center gap-3 p-3 rounded-lg border border-amber-200 dark:border-amber-800/50 cursor-pointer hover:bg-amber-50 dark:hover:bg-amber-900/10 transition-colors">
                     <input type="checkbox" checked={formData.requiere_confirmacion}
                       onChange={e => setFormData({ ...formData, requiere_confirmacion: e.target.checked })}
                       className="w-4 h-4 rounded border-amber-300 text-amber-600 focus:ring-amber-500" />
@@ -643,7 +643,7 @@ export default function ServiceFormPage() {
                       <p className="text-[10px] text-amber-500 truncate mb-0">Cita queda pendiente hasta confirmación</p>
                     </div>
                   </label>
-                  <label className="flex items-center gap-3 p-3 rounded-xl border border-rose-200 dark:border-rose-800/50 cursor-pointer hover:bg-rose-50 dark:hover:bg-rose-900/10 transition-colors">
+                  <label className="flex items-center gap-3 p-3 rounded-lg border border-rose-200 dark:border-rose-800/50 cursor-pointer hover:bg-rose-50 dark:hover:bg-rose-900/10 transition-colors">
                     <input type="checkbox" checked={formData.can_be_gifted}
                       onChange={e => setFormData({ ...formData, can_be_gifted: e.target.checked })}
                       className="w-4 h-4 rounded border-rose-300 text-rose-600 focus:ring-rose-500" />
@@ -652,7 +652,7 @@ export default function ServiceFormPage() {
                       <p className="text-[10px] text-rose-500 truncate mb-0">Compra para otro</p>
                     </div>
                   </label>
-                  <label className="flex items-center gap-3 p-3 rounded-xl border border-amber-200 dark:border-amber-800/50 cursor-pointer hover:bg-amber-50 dark:hover:bg-amber-900/10 transition-colors">
+                  <label className="flex items-center gap-3 p-3 rounded-lg border border-amber-200 dark:border-amber-800/50 cursor-pointer hover:bg-amber-50 dark:hover:bg-amber-900/10 transition-colors">
                     <input type="checkbox" checked={formData.requires_payment}
                       onChange={e => setFormData({ ...formData, requires_payment: e.target.checked })}
                       className="w-4 h-4 rounded border-amber-300 text-amber-600 focus:ring-amber-500" />
@@ -664,7 +664,7 @@ export default function ServiceFormPage() {
                 </div>
 
                 {formData.requires_payment && (
-                  <div className="flex items-center gap-4 p-4 bg-amber-50 dark:bg-amber-500/10 rounded-xl border border-amber-200 dark:border-amber-800/50">
+                  <div className="flex items-center gap-4 p-4 bg-amber-50 dark:bg-amber-500/10 rounded-lg border border-amber-200 dark:border-amber-800/50">
                     <span className="text-xs font-bold text-slate-500 dark:text-slate-400 whitespace-nowrap">% a cobrar</span>
                     <input type="range" value={formData.payment_percentage}
                       onChange={e => setFormData({ ...formData, payment_percentage: parseInt(e.target.value) })}
@@ -679,13 +679,13 @@ export default function ServiceFormPage() {
                     <label htmlFor="min_cancellation_hours" className="text-xs font-bold text-slate-500 dark:text-slate-400">Cancelación (horas mín.)</label>
                     <input type="number" id="min_cancellation_hours" value={formData.min_cancellation_hours}
                       onChange={e => setFormData({ ...formData, min_cancellation_hours: parseInt(e.target.value) || 0 })}
-                      min="0" max="72" className="w-full px-3 py-2 rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 focus:ring-2 focus:ring-primary-500/20 focus:border-primary-500 outline-none text-sm font-bold" />
+                      min="0" max="72" className="w-full px-3 py-2 rounded-lg border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 focus:ring-2 focus:ring-primary-500/20 focus:border-primary-500 outline-none text-sm font-bold" />
                   </div>
                   <div className="space-y-1.5">
                     <label htmlFor="min_reschedule_hours" className="text-xs font-bold text-slate-500 dark:text-slate-400">Reagendamiento (horas mín.)</label>
                     <input type="number" id="min_reschedule_hours" value={formData.min_reschedule_hours}
                       onChange={e => setFormData({ ...formData, min_reschedule_hours: parseInt(e.target.value) || 0 })}
-                      min="0" max="72" className="w-full px-3 py-2 rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 focus:ring-2 focus:ring-primary-500/20 focus:border-primary-500 outline-none text-sm font-bold" />
+                      min="0" max="72" className="w-full px-3 py-2 rounded-lg border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 focus:ring-2 focus:ring-primary-500/20 focus:border-primary-500 outline-none text-sm font-bold" />
                   </div>
                 </div>
 
@@ -695,20 +695,20 @@ export default function ServiceFormPage() {
                     <textarea id="cancellation_policy_text" value={formData.cancellation_policy_text}
                       onChange={e => setFormData({ ...formData, cancellation_policy_text: e.target.value })}
                       placeholder="Ej: Cancelaciones con menos de 24h tienen cargo del 50%." rows={2}
-                      className="w-full px-3 py-2 rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 focus:ring-2 focus:ring-primary-500/20 focus:border-primary-500 outline-none text-sm resize-none" />
+                      className="w-full px-3 py-2 rounded-lg border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 focus:ring-2 focus:ring-primary-500/20 focus:border-primary-500 outline-none text-sm resize-none" />
                   </div>
                   <div className="space-y-1.5">
                     <label htmlFor="reschedule_policy_text" className="text-xs font-bold text-slate-500 dark:text-slate-400">Mensaje de reagendamiento</label>
                     <textarea id="reschedule_policy_text" value={formData.reschedule_policy_text}
                       onChange={e => setFormData({ ...formData, reschedule_policy_text: e.target.value })}
                       placeholder="Ej: Reagenda con 12h de anticipación sin costo." rows={2}
-                      className="w-full px-3 py-2 rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 focus:ring-2 focus:ring-primary-500/20 focus:border-primary-500 outline-none text-sm resize-none" />
+                      className="w-full px-3 py-2 rounded-lg border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 focus:ring-2 focus:ring-primary-500/20 focus:border-primary-500 outline-none text-sm resize-none" />
                   </div>
                 </div>
 
                 <div className="flex justify-start pt-2">
                   <button type="button" onClick={() => switchTab('gallery')}
-                    className="inline-flex items-center gap-2 px-5 py-2.5 bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-400 text-sm font-bold rounded-xl hover:bg-slate-200 dark:hover:bg-slate-700 transition-all active:scale-[0.98]">
+                    className="inline-flex items-center gap-2 px-5 py-2.5 bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-400 text-sm font-bold rounded-lg hover:bg-slate-200 dark:hover:bg-slate-700 transition-all active:scale-[0.98]">
                     <ChevronLeft className="w-4 h-4" /> Anterior: Galería
                   </button>
                 </div>
@@ -718,7 +718,7 @@ export default function ServiceFormPage() {
           </div>
 
           {/* Preview — como se vera el servicio */}
-          <div className="bg-white dark:bg-slate-900 rounded-2xl border border-slate-200 dark:border-slate-800 shadow-xl shadow-slate-200/50 dark:shadow-none overflow-hidden">
+          <div className="bg-white dark:bg-slate-900 rounded-lg border border-slate-200 dark:border-slate-800 shadow-xl shadow-slate-200/50 dark:shadow-none overflow-hidden">
             <div className="flex items-center gap-2 px-5 py-3 bg-slate-50 dark:bg-slate-800/50 border-b border-slate-100 dark:border-slate-800">
               <Eye className="w-3.5 h-3.5 text-slate-400" />
               <span className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Vista previa</span>
@@ -793,10 +793,10 @@ export default function ServiceFormPage() {
           </div>
 
           {/* Actions — siempre visibles fuera de los tabs */}
-          <div className="bg-white dark:bg-slate-900 rounded-2xl border border-slate-200 dark:border-slate-800 shadow-xl shadow-slate-200/50 dark:shadow-none p-5 sm:p-6">
+          <div className="bg-white dark:bg-slate-900 rounded-lg border border-slate-200 dark:border-slate-800 shadow-xl shadow-slate-200/50 dark:shadow-none p-5 sm:p-6">
             <div className="flex flex-col sm:flex-row-reverse gap-3">
               {!isEditing && maxServices !== Infinity && (
-                <div className="flex items-center gap-3 p-3 bg-blue-50 dark:bg-blue-900/10 rounded-xl border border-blue-200 dark:border-blue-800/50 mb-2 sm:mb-0 sm:mr-auto">
+                <div className="flex items-center gap-3 p-3 bg-blue-50 dark:bg-blue-900/10 rounded-lg border border-blue-200 dark:border-blue-800/50 mb-2 sm:mb-0 sm:mr-auto">
                   <Sparkles className="w-5 h-5 text-blue-500 flex-shrink-0" />
                   <p className="text-xs text-blue-700 dark:text-blue-300">
                     Plan {PLAN_LABELS[plan]} — {maxServices === Infinity ? 'servicios ilimitados' : `máximo ${maxServices} servicios`}
@@ -804,7 +804,7 @@ export default function ServiceFormPage() {
                 </div>
               )}
               <button type="submit" disabled={isSubmitting}
-                className="flex-[2] inline-flex items-center justify-center gap-2 px-6 py-3.5 bg-primary-600 hover:bg-primary-700 text-white font-bold rounded-xl shadow-lg shadow-primary-500/25 transition-all hover:-translate-y-0.5 active:translate-y-0 disabled:opacity-50 disabled:cursor-not-allowed">
+                className="flex-[2] inline-flex items-center justify-center gap-2 px-6 py-3.5 bg-primary-600 hover:bg-primary-700 text-white font-bold rounded-lg shadow-lg shadow-primary-500/25 transition-all hover:-translate-y-0.5 active:translate-y-0 disabled:opacity-50 disabled:cursor-not-allowed">
                 {isSubmitting ? (
                   <><Loader2 className="w-4 h-4 animate-spin" /> Guardando...</>
                 ) : (
@@ -812,7 +812,7 @@ export default function ServiceFormPage() {
                 )}
               </button>
               <button type="button" onClick={() => navigate('/business/dashboard?tab=services')}
-                className="flex-1 inline-flex items-center justify-center gap-2 px-6 py-3.5 bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300 font-bold rounded-xl hover:bg-slate-200 dark:hover:bg-slate-700 transition-all active:scale-[0.98]">
+                className="flex-1 inline-flex items-center justify-center gap-2 px-6 py-3.5 bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300 font-bold rounded-lg hover:bg-slate-200 dark:hover:bg-slate-700 transition-all active:scale-[0.98]">
                 <ArrowLeft className="w-4 h-4" /> Cancelar
               </button>
             </div>
@@ -827,7 +827,7 @@ export default function ServiceFormPage() {
           <button onClick={() => setFullscreenImage(null)} className="absolute top-5 right-5 p-2 text-white/50 hover:text-white transition-colors">
             <X className="w-7 h-7" />
           </button>
-          <img src={fullscreenImage} className="max-w-full max-h-full rounded-2xl shadow-2xl animate-in zoom-in-95 duration-200" alt="" />
+          <img src={fullscreenImage} className="max-w-full max-h-full rounded-lg shadow-2xl animate-in zoom-in-95 duration-200" alt="" />
         </div>
       )}
     </div>

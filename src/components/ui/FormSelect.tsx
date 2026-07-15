@@ -32,7 +32,7 @@ export default function FormSelect({
         )}
         <select
           id={id}
-          className={`w-full ${Icon ? 'pl-10' : 'px-4'} pr-10 py-2.5 rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 focus:ring-2 focus:ring-primary-500/20 focus:border-primary-500 outline-none transition-all font-medium text-slate-900 dark:text-white appearance-none cursor-pointer ${className}`}
+          className={`w-full ${Icon ? 'pl-10' : 'px-4'} pr-10 py-2.5 rounded-lg border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 focus:ring-2 focus:ring-primary-500/20 focus:border-primary-500 outline-none transition-all font-medium text-slate-900 dark:text-white appearance-none cursor-pointer ${className}`}
           {...props}
         >
           {children}

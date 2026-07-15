@@ -8,7 +8,7 @@ export default function CajasCompensacion() {
       <SEO title="Cajas de Compensación — AgendaYa" description="Integración con cajas de compensación para ofrecer reserva de servicios a sus afiliados." />
       <div className="max-w-4xl mx-auto">
         <div className="text-center mb-12">
-          <div className="w-16 h-16 mx-auto mb-5 rounded-2xl bg-primary-50 dark:bg-primary-500/10 flex items-center justify-center">
+          <div className="w-16 h-16 mx-auto mb-5 rounded-lg bg-primary-50 dark:bg-primary-500/10 flex items-center justify-center">
             <Building2 className="w-8 h-8 text-primary-600 dark:text-primary-400" />
           </div>
           <h1 className="text-3xl sm:text-4xl font-black text-slate-900 dark:text-white tracking-tight mb-3">
@@ -26,8 +26,8 @@ export default function CajasCompensacion() {
             { title: 'Para negocios', desc: 'Los afiliados de la caja descubren y reservan en tus servicios. Nuevos clientes garantizados.', icon: CheckCircle },
             { title: 'Para la región', desc: 'Fortalecemos el comercio local y formalizamos la economía de servicios.', icon: ArrowRight },
           ].map((item, i) => (
-            <div key={i} className="bg-white dark:bg-slate-900 rounded-2xl border border-slate-200 dark:border-slate-800 p-6">
-              <div className="w-10 h-10 rounded-xl bg-primary-50 dark:bg-primary-500/10 flex items-center justify-center mb-3">
+            <div key={i} className="bg-white dark:bg-slate-900 rounded-lg border border-slate-200 dark:border-slate-800 p-6">
+              <div className="w-10 h-10 rounded-lg bg-primary-50 dark:bg-primary-500/10 flex items-center justify-center mb-3">
                 <item.icon className="w-5 h-5 text-primary-600 dark:text-primary-400" />
               </div>
               <h3 className="font-black text-slate-900 dark:text-white mb-2">{item.title}</h3>
@@ -36,14 +36,14 @@ export default function CajasCompensacion() {
           ))}
         </div>
 
-        <div className="bg-gradient-to-br from-primary-600 to-primary-800 rounded-3xl p-8 sm:p-10 text-center shadow-xl">
+        <div className="bg-gradient-to-br from-primary-600 to-primary-800 rounded-lg p-8 sm:p-10 text-center shadow-xl">
           <h2 className="text-2xl font-black text-white mb-3">¿Eres una caja de compensación?</h2>
           <p className="text-white/70 text-sm max-w-md mx-auto mb-6">
             Contáctanos para activar la integración en minutos. Sin costo para tu caja.
           </p>
           <a href="https://wa.me/573001234567?text=Hola%2C%20quiero%20integrar%20AgendaYa%20en%20mi%20caja%20de%20compensaci%C3%B3n"
             target="_blank" rel="noopener noreferrer"
-            className="inline-flex items-center gap-2 px-6 py-3 bg-white text-primary-700 font-bold rounded-xl hover:bg-primary-50 transition-all shadow-lg"
+            className="inline-flex items-center gap-2 px-6 py-3 bg-white text-primary-700 font-bold rounded-lg hover:bg-primary-50 transition-all shadow-lg"
           >
             Contactar por WhatsApp
           </a>

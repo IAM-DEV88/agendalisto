@@ -69,7 +69,7 @@ const BusinessAppointmentList: React.FC<BusinessAppointmentListProps> = ({
           return (
             <div
               key={appointment.id}
-              className="group relative bg-white dark:bg-slate-900 rounded-2xl border border-slate-200 dark:border-slate-800 hover:border-primary-200 dark:hover:border-primary-800 hover:shadow-xl hover:shadow-slate-200/50 dark:hover:shadow-none transition-all duration-300 animate-in fade-in slide-in-from-bottom-2 cursor-pointer"
+              className="group relative bg-white dark:bg-slate-900 rounded-lg border border-slate-200 dark:border-slate-800 hover:border-primary-200 dark:hover:border-primary-800 hover:shadow-xl hover:shadow-slate-200/50 dark:hover:shadow-none transition-all duration-300 animate-in fade-in slide-in-from-bottom-2 cursor-pointer"
               style={{ animationDelay: `${index * 60}ms` }}
               onClick={() => setSelectedAppointment(appointment)}
             >
@@ -123,7 +123,7 @@ const BusinessAppointmentList: React.FC<BusinessAppointmentListProps> = ({
                   <div className="flex items-center gap-3 flex-shrink-0">
                     {showReviewSection && appointment.status === 'completed' && (
                       appointment.review ? (
-                        <div className="flex items-center gap-1 px-3 py-1.5 bg-amber-50 dark:bg-amber-500/10 rounded-xl border border-amber-200 dark:border-amber-800">
+                        <div className="flex items-center gap-1 px-3 py-1.5 bg-amber-50 dark:bg-amber-500/10 rounded-lg border border-amber-200 dark:border-amber-800">
                           <Star className="w-3.5 h-3.5 text-amber-500 fill-current" />
                           <span className="text-xs font-black text-amber-700 dark:text-amber-400">{appointment.review.rating}.0</span>
                         </div>
@@ -131,7 +131,7 @@ const BusinessAppointmentList: React.FC<BusinessAppointmentListProps> = ({
                         <span className="text-xs font-bold text-slate-400 uppercase tracking-widest">Sin reseña</span>
                       )
                     )}
-                    <div className="p-2 rounded-xl text-slate-400 group-hover:text-primary-500 group-hover:bg-primary-50 dark:group-hover:bg-primary-900/20 transition-all">
+                    <div className="p-2 rounded-lg text-slate-400 group-hover:text-primary-500 group-hover:bg-primary-50 dark:group-hover:bg-primary-900/20 transition-all">
                       <ChevronRight className="w-5 h-5" />
                     </div>
                   </div>
