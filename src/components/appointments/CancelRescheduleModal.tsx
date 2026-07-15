@@ -179,7 +179,7 @@ export default function CancelRescheduleModal({ isOpen, onClose, appointment, is
           </div>
         </div>
 
-        <div className="overflow-y-auto flex-1 min-h-0 px-4 sm:px-5 py-4 space-y-4">
+        <div className="overflow-y-auto flex-1 min-h-0 px-4 sm:px-5 py-4 space-y-4 scrollbar-fino">
           {/* Appointment summary */}
           <div className="flex items-center gap-3 p-3 bg-slate-50 dark:bg-slate-800/50 rounded-xl border border-slate-100 dark:border-slate-800">
             <div className="w-10 h-10 rounded-xl bg-primary-50 dark:bg-primary-500/10 flex items-center justify-center flex-shrink-0">
@@ -395,7 +395,7 @@ export default function CancelRescheduleModal({ isOpen, onClose, appointment, is
                     <p className="text-xs font-bold text-amber-700 dark:text-amber-400 mb-0">No hay turnos disponibles este día</p>
                   </div>
                 ) : (
-                  <div className="grid grid-cols-3 sm:grid-cols-4 gap-2 max-h-48 overflow-y-auto pr-1">
+                  <div className="grid grid-cols-3 sm:grid-cols-4 gap-2 max-h-48 overflow-y-auto pr-1 scrollbar-fino">
                     {availableTimeSlots.map((slot) => (
                       <button
                         key={slot}

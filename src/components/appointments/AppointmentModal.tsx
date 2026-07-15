@@ -97,7 +97,7 @@ const AppointmentModal: React.FC<AppointmentModalProps> = ({
           </div>
         </div>
 
-        <div className="overflow-y-auto" style={{ maxHeight: 'calc(92dvh - 60px)' }}>
+        <div className="overflow-y-auto scrollbar-fino" style={{ maxHeight: 'calc(92dvh - 60px)' }}>
           <div className="px-4 sm:px-5 py-4 space-y-3">
 
             {/* Status badge + client name row */}

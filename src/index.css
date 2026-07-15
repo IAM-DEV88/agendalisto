@@ -337,3 +337,25 @@
     @apply flex flex-col sm:flex-row items-center gap-3 mt-2 sm:mt-0;
   }
 }
+
+/* ─── Scrollbar fino ─── */
+.scrollbar-fino::-webkit-scrollbar {
+  width: 4px;
+  height: 4px;
+}
+.scrollbar-fino::-webkit-scrollbar-track {
+  background: transparent;
+}
+.scrollbar-fino::-webkit-scrollbar-thumb {
+  background: #cbd5e1;
+  border-radius: 999px;
+}
+.scrollbar-fino::-webkit-scrollbar-thumb:hover {
+  background: #94a3b8;
+}
+.dark .scrollbar-fino::-webkit-scrollbar-thumb {
+  background: #475569;
+}
+.dark .scrollbar-fino::-webkit-scrollbar-thumb:hover {
+  background: #64748b;
+}

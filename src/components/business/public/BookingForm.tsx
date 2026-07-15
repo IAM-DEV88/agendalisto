@@ -799,7 +799,7 @@ const BookingForm: React.FC<BookingFormProps> = ({
                 <p className="text-sm font-bold text-amber-700 dark:text-amber-400">No hay turnos disponibles este dia</p>
               </div>
             ) : (
-              <div className="flex-1 grid grid-cols-2 gap-2.5 content-start overflow-y-auto pr-1 md:max-h-[380px]">
+              <div className="flex-1 grid grid-cols-2 gap-2.5 content-start overflow-y-auto pr-1 md:max-h-[380px] scrollbar-fino">
                 {availableTimeSlots.map((slot) => (
                   <button key={slot} type="button" onClick={() => handleTimeSelect(slot)}
                     className={`py-3 text-sm font-black rounded-xl border-2 transition-all active:scale-95 ${
