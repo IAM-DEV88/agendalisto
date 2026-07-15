@@ -41,6 +41,7 @@ import {
   CalendarClock,
   ArrowLeft,
   Clock,
+  Settings,
 } from 'lucide-react';
 
 export const BusinessDashboard: React.FC = () => {
@@ -327,9 +328,7 @@ export const BusinessDashboard: React.FC = () => {
     { id: 'appointments', label: 'Citas', count: activeAppointmentsCount },
     { id: 'services', label: 'Servicios', count: totalServices },
     { id: 'hours', label: 'Horarios' },
-    { id: 'clients', label: 'Clientes', count: businessClients.length },
     ...(canStats ? [{ id: 'stats' as const, label: 'Estadísticas' }] : []),
-    { id: 'settings', label: 'Configuración' },
   ];
 
   const appointmentTabs: Tab[] = [
@@ -337,6 +336,7 @@ export const BusinessDashboard: React.FC = () => {
     { id: 'pending', label: 'Pendientes', count: pendingAppointments.length },
     { id: 'confirmed', label: 'Confirmadas', count: confirmedAppointments.length },
     { id: 'history', label: 'Historial', count: pastAppointments.length },
+    { id: 'clients', label: 'Clientes', count: businessClients.length },
   ];
 
   const settingsTabs: Tab[] = [
@@ -404,6 +404,13 @@ export const BusinessDashboard: React.FC = () => {
                   {businessData && (
                     <BusinessQrCode businessSlug={businessData.slug!} businessName={businessData.name} />
                   )}
+                  <button
+                    onClick={() => setActiveTab('settings')}
+                    className="inline-flex items-center justify-center p-2 bg-white dark:bg-slate-900 text-slate-500 hover:text-primary-600 dark:hover:text-primary-400 rounded-lg border border-slate-200 dark:border-slate-800 hover:border-primary-300 dark:hover:border-primary-700 active:scale-95 transition-all shadow-sm"
+                    title="Configuración"
+                  >
+                    <Settings className="w-4 h-4" />
+                  </button>
                   <Link
                     to="/dashboard"
                     className="inline-flex items-center gap-1.5 px-4 py-2 bg-white dark:bg-slate-900 text-slate-700 dark:text-slate-300 text-xs font-bold rounded-lg border border-slate-200 dark:border-slate-800 hover:bg-slate-50 dark:hover:bg-slate-800 active:scale-95 transition-all shadow-sm"
@@ -505,6 +512,25 @@ export const BusinessDashboard: React.FC = () => {
                     />
                   )}
 
+                  {activeAppointmentTab === 'clients' && (
+                    <div className="animate-in fade-in zoom-in-95 duration-300">
+                      <ClientsSection
+                        clients={pagedClients}
+                        loading={loadingBusinessClients}
+                        message={clientsMessage}
+                      />
+                      {businessClients.length > pagination.clients.perPage && (
+                        <div className="mt-6">
+                          <Pagination
+                            currentPage={pagination.clients.page}
+                            totalPages={Math.ceil(businessClients.length / pagination.clients.perPage)}
+                            onPageChange={(page) => handlePageChange('clients', page)}
+                          />
+                        </div>
+                      )}
+                    </div>
+                  )}
+
                   {activeAppointmentTab === 'history' && (
                     pastAppointments.length === 0 ? (
                       <EmptyState
@@ -559,26 +585,6 @@ export const BusinessDashboard: React.FC = () => {
                   onHoursChange={handleHoursChange}
                   days={days}
                 />
-              </div>
-            )}
-
-            {/* ─── CLIENTES ─── */}
-            {activeTab === 'clients' && (
-              <div className="animate-in fade-in zoom-in-95 duration-300">
-                <ClientsSection
-                  clients={pagedClients}
-                  loading={loadingBusinessClients}
-                  message={clientsMessage}
-                />
-                {businessClients.length > pagination.clients.perPage && (
-                  <div className="mt-6">
-                    <Pagination
-                      currentPage={pagination.clients.page}
-                      totalPages={Math.ceil(businessClients.length / pagination.clients.perPage)}
-                      onPageChange={(page) => handlePageChange('clients', page)}
-                    />
-                  </div>
-                )}
               </div>
             )}
 

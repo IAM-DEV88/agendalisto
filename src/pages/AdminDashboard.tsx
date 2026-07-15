@@ -51,6 +51,9 @@ const AdminDashboard = ({ user }: AdminDashboardProps) => {
   const [moderating, setModerating] = useState<string | null>(null);
   const [page, setPage] = useState(1);
   const [activeTab, setActiveTab] = useState('overview');
+  const [activeUsersTab, setActiveUsersTab] = useState('users');
+  const [activeBusinessesTab, setActiveBusinessesTab] = useState('businesses');
+  const [activeMarketingTab, setActiveMarketingTab] = useState('marketing');
 
   const [referralStats, setReferralStats] = useState<{ total_referrals: number; unique_referrers: number } | null>(null);
   const [topReferrers, setTopReferrers] = useState<ReferralStat[]>([]);
@@ -62,9 +65,6 @@ const AdminDashboard = ({ user }: AdminDashboardProps) => {
     { id: 'overview', label: 'Resumen' },
     { id: 'users', label: 'Usuarios' },
     { id: 'businesses', label: 'Negocios' },
-    { id: 'reviews', label: 'Reseñas', count: reviewCounts.pending },
-    { id: 'moderators', label: 'Moderadores' },
-    { id: 'referrals', label: 'Referidos' },
     { id: 'blog', label: 'Blog' },
     { id: 'marketing', label: 'Marketing' },
   ];
@@ -366,53 +366,77 @@ const AdminDashboard = ({ user }: AdminDashboardProps) => {
           )}
 
           {activeTab === 'users' && (
-            <UserManagementSection />
+            <div className="space-y-5">
+              <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pb-3 border-b border-slate-100 dark:border-slate-800">
+                <SectionHeader title="Usuarios" description="Gestión de usuarios y moderadores" />
+                <TabNav tabs={[
+                  { id: 'users', label: 'Usuarios' },
+                  { id: 'moderators', label: 'Moderadores' },
+                ]} activeTabId={activeUsersTab} onTabChange={setActiveUsersTab} variant="pill" />
+              </div>
+              {activeUsersTab === 'users' && <UserManagementSection />}
+              {activeUsersTab === 'moderators' && (
+                <div className="bg-white dark:bg-slate-900 rounded-lg border border-slate-200 dark:border-slate-800 p-6">
+                  <p className="text-sm text-slate-500 dark:text-slate-400">Gestión de moderadores próximamente.</p>
+                </div>
+              )}
+            </div>
           )}
 
           {activeTab === 'businesses' && (
-            <BusinessManagementSection />
-          )}
-
-          {activeTab === 'reviews' && (
-            <ReviewModerationSection
-              pendingReviews={paginatedReviews}
-              moderating={moderating}
-              page={page}
-              totalPages={totalPages}
-              onPageChange={setPage}
-              onApprove={handleApprove}
-              onReject={handleReject}
-            />
-          )}
-
-          {activeTab === 'moderators' && (
-            <div className="bg-white dark:bg-slate-900 rounded-lg border border-slate-200 dark:border-slate-800 p-6">
-              <p className="text-sm text-slate-500 dark:text-slate-400">Gestión de moderadores próximamente.</p>
+            <div className="space-y-5">
+              <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pb-3 border-b border-slate-100 dark:border-slate-800">
+                <SectionHeader title="Negocios" description="Gestión de negocios y reseñas" />
+                <TabNav tabs={[
+                  { id: 'businesses', label: 'Negocios' },
+                  { id: 'reviews', label: 'Reseñas', count: reviewCounts.pending },
+                ]} activeTabId={activeBusinessesTab} onTabChange={setActiveBusinessesTab} variant="pill" />
+              </div>
+              {activeBusinessesTab === 'businesses' && <BusinessManagementSection />}
+              {activeBusinessesTab === 'reviews' && (
+                <ReviewModerationSection
+                  pendingReviews={paginatedReviews}
+                  moderating={moderating}
+                  page={page}
+                  totalPages={totalPages}
+                  onPageChange={setPage}
+                  onApprove={handleApprove}
+                  onReject={handleReject}
+                />
+              )}
             </div>
           )}
 
           {activeTab === 'blog' && <BlogManagementSection />}
-          {activeTab === 'marketing' && <MarketingSection />}
 
-          {activeTab === 'referrals' && (
-            <div className="animate-in fade-in zoom-in-95 duration-300 space-y-6">
-              {referralLoading ? (
-                <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-                  {[1, 2, 3].map(i => (
-                    <div key={i} className="h-32 bg-white dark:bg-slate-900 rounded-lg border border-slate-200 dark:border-slate-800 animate-pulse" />
-                  ))}
-                </div>
-              ) : (
-                <>
-                  {/* Stat Cards */}
-                  <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-                    <div className="bg-gradient-to-br from-primary-600 to-primary-800 dark:from-primary-700 dark:to-primary-900 rounded-lg p-6 shadow-xl shadow-primary-500/20">
-                      <p className="text-primary-200 text-xs font-bold uppercase tracking-widest">Total Referidos</p>
-                      <p className="text-3xl font-black text-white mt-1">{referralStats?.total_referrals || 0}</p>
+          {activeTab === 'marketing' && (
+            <div className="space-y-5">
+              <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pb-3 border-b border-slate-100 dark:border-slate-800">
+                <SectionHeader title="Marketing" description="Campañas y referidos" />
+                <TabNav tabs={[
+                  { id: 'marketing', label: 'Marketing' },
+                  { id: 'referrals', label: 'Referidos' },
+                ]} activeTabId={activeMarketingTab} onTabChange={setActiveMarketingTab} variant="pill" />
+              </div>
+              {activeMarketingTab === 'marketing' && <MarketingSection />}
+              {activeMarketingTab === 'referrals' && (
+                <div className="animate-in fade-in zoom-in-95 duration-300 space-y-6">
+                  {referralLoading ? (
+                    <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+                      {[1, 2, 3].map(i => (
+                        <div key={i} className="h-32 bg-white dark:bg-slate-900 rounded-lg border border-slate-200 dark:border-slate-800 animate-pulse" />
+                      ))}
                     </div>
-                    <div className="bg-white dark:bg-slate-900 rounded-lg border border-slate-200 dark:border-slate-800 p-6">
-                      <p className="text-xs font-bold text-slate-400 uppercase tracking-widest">Referidores Únicos</p>
-                      <p className="text-3xl font-black text-slate-900 dark:text-white mt-1">{referralStats?.unique_referrers || 0}</p>
+                  ) : (
+                    <>
+                      <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+                        <div className="bg-gradient-to-br from-primary-600 to-primary-800 dark:from-primary-700 dark:to-primary-900 rounded-lg p-6 shadow-xl shadow-primary-500/20">
+                          <p className="text-primary-200 text-xs font-bold uppercase tracking-widest">Total Referidos</p>
+                          <p className="text-3xl font-black text-white mt-1">{referralStats?.total_referrals || 0}</p>
+                        </div>
+                        <div className="bg-white dark:bg-slate-900 rounded-lg border border-slate-200 dark:border-slate-800 p-6">
+                          <p className="text-xs font-bold text-slate-400 uppercase tracking-widest">Referidores Únicos</p>
+                          <p className="text-3xl font-black text-slate-900 dark:text-white mt-1">{referralStats?.unique_referrers || 0}</p>
                     </div>
                     <div className="bg-white dark:bg-slate-900 rounded-lg border border-slate-200 dark:border-slate-800 p-6">
                       <p className="text-xs font-bold text-slate-400 uppercase tracking-widest">Promedio x Referidor</p>

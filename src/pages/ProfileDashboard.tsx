@@ -146,9 +146,10 @@ const ProfileDashboard = ({ user }: ProfileDashboardProps) => {
     }
   };
 
-  const [activeTab, setActiveTab] = useState<'appointments' | 'favorites' | 'stats' | 'settings' | 'referrals'>('appointments');
+  const [activeTab, setActiveTab] = useState<'appointments' | 'favorites' | 'stats' | 'settings'>('appointments');
   const [activeAppointmentTab, setActiveAppointmentTab] = useState('calendar');
   const [activeSettingsTab, setActiveSettingsTab] = useState('profile');
+  const [activeStatsTab, setActiveStatsTab] = useState('overview');
   const contentRef = useRef<HTMLDivElement>(null);
   const [selectedAppointmentForCancel, setSelectedAppointmentForCancel] = useState<Appointment | null>(null);
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
@@ -296,9 +297,7 @@ const ProfileDashboard = ({ user }: ProfileDashboardProps) => {
   const tabs = [
     { id: 'appointments', label: 'Mis Citas', count: activeAppointmentsCount },
     { id: 'favorites', label: 'Favoritos' },
-    { id: 'referrals', label: 'Referidos' },
     { id: 'stats', label: 'Estadísticas' },
-    { id: 'settings', label: 'Configuración' },
   ];
 
   const appointmentTabs = [
@@ -378,6 +377,13 @@ const ProfileDashboard = ({ user }: ProfileDashboardProps) => {
 
                 {/* Right: Actions */}
                 <div className="flex items-center gap-2 shrink-0">
+                  <button
+                    onClick={() => setActiveTab('settings')}
+                    className="inline-flex items-center justify-center p-2 bg-white dark:bg-slate-900 text-slate-500 hover:text-primary-600 dark:hover:text-primary-400 rounded-lg border border-slate-200 dark:border-slate-800 hover:border-primary-300 dark:hover:border-primary-700 active:scale-95 transition-all shadow-sm"
+                    title="Configuración"
+                  >
+                    <Settings className="w-4 h-4" />
+                  </button>
                   {isVisitor ? (
                     <button
                       onClick={handleActivateClient}
@@ -448,7 +454,7 @@ const ProfileDashboard = ({ user }: ProfileDashboardProps) => {
 
           {/* ─── MAIN TABS ─── (outside space-y-8 to couple with Nav) */}
         </div>
-        <TabNav tabs={tabs} activeTabId={activeTab} onTabChange={(tab) => setActiveTab(tab as 'appointments' | 'favorites' | 'stats' | 'settings' | 'referrals')} sticky />
+        <TabNav tabs={tabs} activeTabId={activeTab} onTabChange={(tab) => setActiveTab(tab as 'appointments' | 'favorites' | 'stats' | 'settings')} sticky />
         <div ref={contentRef} className="px-4 md:p-4 md:pt-8 pt-8 pb-16 space-y-6">
 
           {/* ═══ CITAS TAB ═══ */}
@@ -586,28 +592,27 @@ const ProfileDashboard = ({ user }: ProfileDashboardProps) => {
               </div>
             )}
 
-            {/* ═══ REFERRALS TAB ═══ */}
-            {activeTab === 'referrals' && user && (
-              <div className="animate-in fade-in zoom-in-95 duration-300">
-                <ReferralSection userId={user.id} />
-              </div>
-            )}
-
             {/* ═══ STATS TAB ═══ */}
             {activeTab === 'stats' && (
               <div className="animate-in fade-in zoom-in-95 duration-300 space-y-5">
+                <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pb-3 border-b border-slate-100 dark:border-slate-800">
+                  <SectionHeader
+                    title="Estadísticas"
+                    description="Resumen de tu actividad como cliente"
+                  />
+                  <TabNav tabs={[
+                    { id: 'overview', label: 'Resumen' },
+                    { id: 'referrals', label: 'Referidos' },
+                  ]} activeTabId={activeStatsTab} onTabChange={setActiveStatsTab} variant="pill" />
+                </div>
+
+                {activeStatsTab === 'overview' && (<>
                 {user && appointments.length > 0 && (
                   <VisitStreaks userId={user.id} businessId={appointments.filter(a => a.businesses?.name).reduce((acc, a) => {
                     if (!acc.find(x => x.id === a.business_id)) acc.push({ id: a.business_id, name: a.businesses?.name || '' });
                     return acc;
                   }, [] as { id: string; name: string }[])[0]?.id || ''} />
                 )}
-                <div className="pb-3 border-b border-slate-100 dark:border-slate-800">
-                  <SectionHeader
-                    title="Estadísticas de tus citas"
-                    description="Resumen de tu actividad como cliente"
-                  />
-                </div>
 
                 <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 sm:gap-4">
                   <StatCard
@@ -656,6 +661,13 @@ const ProfileDashboard = ({ user }: ProfileDashboardProps) => {
                         {new Set(appointments.map(a => a.business_id)).size}
                       </p>
                     </div>
+                  </div>
+                )}
+                </>)}
+
+                {activeStatsTab === 'referrals' && user && (
+                  <div className="animate-in fade-in zoom-in-95 duration-300">
+                    <ReferralSection userId={user.id} />
                   </div>
                 )}
               </div>
