@@ -376,7 +376,7 @@ const ProfileDashboard = ({ user }: ProfileDashboardProps) => {
                 </div>
 
                 {/* Right: Actions */}
-                <div className="flex items-center gap-2 shrink-0">
+                <div className="flex items-center gap-2 flex-wrap shrink-0 justify-end">
                   <button
                     onClick={() => setActiveTab('settings')}
                     className="inline-flex items-center justify-center p-2 bg-white dark:bg-slate-900 text-slate-500 hover:text-primary-600 dark:hover:text-primary-400 rounded-lg border border-slate-200 dark:border-slate-800 hover:border-primary-300 dark:hover:border-primary-700 active:scale-95 transition-all shadow-sm"

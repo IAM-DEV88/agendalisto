@@ -397,7 +397,7 @@ export const BusinessDashboard: React.FC = () => {
                 </div>
 
                 {/* Right: Actions */}
-                <div className="flex items-center gap-2 shrink-0">
+                <div className="flex items-center gap-2 flex-wrap shrink-0 justify-end">
                   {businesses.length > 0 && (
                     <BusinessSwitcher currentBusiness={businessData} onSwitch={handleBusinessSwitch} />
                   )}
