@@ -762,6 +762,7 @@ const BookingForm: React.FC<BookingFormProps> = ({
         </div>
       ) : (
       <form onSubmit={handleSubmit} className="space-y-4">
+        <div className='bg-white dark:bg-slate-900 rounded-lg border border-slate-200 dark:border-slate-800 shadow-xl shadow-slate-200/50 dark:shadow-none p-2 sm:p-4 flex flex-col gap-y-4'>
         {/* ─── Step 1: Date + Time ─── */}
         <div className="bg-white dark:bg-slate-900 rounded-lg border border-slate-200 dark:border-slate-700 overflow-hidden">
           <div className="px-4 py-3 bg-slate-50 dark:bg-slate-800/50 border-b border-slate-100 dark:border-slate-800">
@@ -952,7 +953,7 @@ const BookingForm: React.FC<BookingFormProps> = ({
 
         {/* ─── Actions ─── */}
         {!showPayment && (
-          <div className="bg-white dark:bg-slate-900 rounded-lg border border-slate-200 dark:border-slate-700 p-3 sm:p-4">
+          <div className="bg-white dark:bg-slate-900">
             <div className="flex flex-col sm:flex-row gap-2">
               <button type="button" onClick={onClose}
                 className="sm:flex-1 inline-flex items-center justify-center gap-2 px-5 py-3 bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-400 font-bold text-sm rounded-lg hover:bg-slate-200 dark:hover:bg-slate-700 transition-all active:scale-[0.98]">
@@ -982,6 +983,7 @@ const BookingForm: React.FC<BookingFormProps> = ({
             </p>
           </div>
         )}
+      </div>
       </form>
       )}
 

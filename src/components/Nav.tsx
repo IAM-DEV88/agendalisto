@@ -35,7 +35,7 @@ const Nav = ({ user }: NavProps) => {
   const { hasBusiness, canCreateMore, staffRole } = useMemo(() => {
     const role = user?.role || '';
     const canManage = canManageBusiness(role);
-    const hasBusiness = (canManage || isStaff(role)) && !!user?.business_id;
+    const hasBusiness = canManage && !!user?.business_id;
     const canCreateMore = hasBusiness && businesses.length < getMaxBusinesses(plan) && plan !== 'starter';
     const staffRole = isStaff(role) ? role : null;
     return { canManage, hasBusiness, canCreateMore, staffRole };

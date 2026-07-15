@@ -141,7 +141,7 @@ function BookingPage() {
         )}
 
         {/* ─── Booking Form unificado ─── */}
-        <div className="bg-white dark:bg-slate-900 rounded-lg border border-slate-200 dark:border-slate-800 shadow-xl shadow-slate-200/50 dark:shadow-none p-5 sm:p-6">
+        <div>
           <BookingForm
             businessId={businessData.id}
             businessName={businessData.name}
