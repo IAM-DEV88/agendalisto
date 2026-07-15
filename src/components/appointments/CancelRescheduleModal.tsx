@@ -1,4 +1,4 @@
-import { useState, useEffect, useMemo } from 'react';
+import { useState, useEffect } from 'react';
 import { X, AlertCircle, Calendar as CalendarIcon, ChevronLeft, ChevronRight, Clock } from 'lucide-react';
 import { Appointment } from '../../types/appointment';
 import { cancelAppointment, rescheduleAppointment, getBusinessHours, getBusinessAppointments, getBusinessConfig, BusinessHours, Appointment as ApiAppointment } from '../../lib/api';
@@ -30,6 +30,7 @@ export default function CancelRescheduleModal({ isOpen, onClose, appointment, is
   const [slotInterval, setSlotInterval] = useState(30);
   const [bufferMinutes, setBufferMinutes] = useState(0);
   const [calendarMonth, setCalendarMonth] = useState(new Date());
+  const [localSlots, setLocalSlots] = useState<string[]>([]);
 
   const minCancellationHours = appointment?.services?.min_cancellation_hours ?? 48;
   const minRescheduleHours = appointment?.services?.min_reschedule_hours ?? 48;
@@ -67,12 +68,12 @@ export default function CancelRescheduleModal({ isOpen, onClose, appointment, is
 
   const serviceDuration = appointment?.services?.duration || 60;
 
-  const availableTimeSlots = useMemo(() => {
-    if (!newDate || loadingSlots || !appointment) return [];
+  useEffect(() => {
+    if (!newDate || loadingSlots || !appointment) { setLocalSlots([]); return; }
     const jsDay = new Date(`${newDate}T00:00`).getDay();
     const selectedDay = (jsDay + 6) % 7;
     const todaysHours = businessHours.find(h => h.day_of_week === selectedDay);
-    if (!todaysHours || todaysHours.is_closed) return [];
+    if (!todaysHours || todaysHours.is_closed) { setLocalSlots([]); return; }
 
     const [startH, startM] = todaysHours.start_time.replace('.', ':').split(':').map(Number);
     const [endH, endM] = todaysHours.end_time.replace('.', ':').split(':').map(Number);
@@ -80,27 +81,36 @@ export default function CancelRescheduleModal({ isOpen, onClose, appointment, is
     let businessEnd = endH * 60 + endM;
     if (businessEnd <= businessStart) businessEnd += 24 * 60;
 
+    const interval = Math.max(slotInterval, 15);
     const slots: string[] = [];
-    for (let mins = businessStart; mins + serviceDuration <= businessEnd; mins += slotInterval) {
+    for (let mins = businessStart; mins + serviceDuration <= businessEnd && slots.length < 96; mins += interval) {
       const h = Math.floor(mins / 60);
       const m = mins % 60;
       slots.push(`${String(h).padStart(2, '0')}:${String(m).padStart(2, '0')}`);
     }
 
-    return slots.filter(slot => {
+    const available = slots.filter(slot => {
       const slotTime = new Date(`${newDate}T${slot}`).getTime();
       const now = Date.now();
       if (slotTime <= now) return false;
       const slotEnd = slotTime + serviceDuration * 60000;
       const slotEndWithBuffer = slotEnd + bufferMinutes * 60000;
       return !appointments.some(appt => {
-        const apptDate = (appt as any).start_time?.split?.('T')[0];
-        if (apptDate !== newDate || appt.status === 'cancelled') return false;
-        const aStart = new Date(appt.start_time).getTime();
-        const aEnd = new Date(appt.end_time).getTime();
+        if (!appt.start_time || !appt.end_time) return false;
+        if (appt.status === 'cancelled' || appt.status === 'completed') return false;
+        const apptStartDate = new Date(appt.start_time);
+        const apptEndDate = new Date(appt.end_time);
+        const aStart = apptStartDate.getTime();
+        const aEnd = apptEndDate.getTime();
+        if (isNaN(aStart) || isNaN(aEnd)) return false;
+        const apptLocalDate = apptStartDate.toLocaleDateString('sv-SE');
+        if (apptLocalDate !== newDate) return false;
         return slotTime < aEnd && slotEndWithBuffer > aStart;
       });
     });
+
+    const id = requestAnimationFrame(() => setLocalSlots(available));
+    return () => cancelAnimationFrame(id);
   }, [newDate, loadingSlots, businessHours, appointments, appointment, serviceDuration, slotInterval, bufferMinutes]);
 
   if (!isOpen || !appointment) return null;
@@ -389,14 +399,14 @@ export default function CancelRescheduleModal({ isOpen, onClose, appointment, is
                       <div key={i} className="h-10 bg-slate-200 dark:bg-slate-700 rounded-lg animate-pulse" />
                     ))}
                   </div>
-                ) : availableTimeSlots.length === 0 ? (
+                ) : localSlots.length === 0 ? (
                   <div className="py-6 text-center bg-amber-50 dark:bg-amber-500/10 rounded-lg border border-dashed border-amber-200 dark:border-amber-800">
                     <Clock className="w-6 h-6 text-amber-400 mx-auto mb-1" />
                     <p className="text-xs font-bold text-amber-700 dark:text-amber-400 mb-0">No hay turnos disponibles este día</p>
                   </div>
                 ) : (
                   <div className="grid grid-cols-3 sm:grid-cols-4 gap-2 max-h-48 overflow-y-auto pr-1 scrollbar-fino">
-                    {availableTimeSlots.map((slot) => (
+                    {localSlots.map((slot) => (
                       <button
                         key={slot}
                         type="button"

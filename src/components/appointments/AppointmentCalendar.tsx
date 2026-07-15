@@ -1,4 +1,4 @@
-import React, { useState, useRef, useEffect, useCallback } from 'react';
+import React, { useState, useRef, useEffect, useCallback, useMemo } from 'react';
 import {
   format,
   startOfMonth,
@@ -74,28 +74,31 @@ const AppointmentCalendar: React.FC<AppointmentCalendarProps> = ({
   const dragRef = useRef<DragState | null>(null);
   const lastHoveredCell = useRef<string | null>(null);
 
-  const monthStart = startOfMonth(currentMonth);
-  const monthEnd = endOfMonth(currentMonth);
-  const calStart = startOfWeek(monthStart, { weekStartsOn: 1 });
-  const calEnd = endOfWeek(monthEnd, { weekStartsOn: 1 });
-  const days = eachDayOfInterval({ start: calStart, end: calEnd });
-
   const dayHeaders = ['Lun', 'Mar', 'Mié', 'Jun', 'Vie', 'Sáb', 'Dom'];
 
   const prevMonth = () => setCurrentMonth(subMonths(currentMonth, 1));
   const nextMonth = () => setCurrentMonth(addMonths(currentMonth, 1));
 
-  const getAppointmentsForDay = (day: Date) =>
-    appointments.filter(a => isSameDay(new Date(a.start_time), day));
+  const calendarDays = useMemo(() => {
+    const monthStart = startOfMonth(currentMonth);
+    const monthEnd = endOfMonth(currentMonth);
+    const calStart = startOfWeek(monthStart, { weekStartsOn: 1 });
+    const calEnd = endOfWeek(monthEnd, { weekStartsOn: 1 });
+    return eachDayOfInterval({ start: calStart, end: calEnd });
+  }, [currentMonth]);
 
-  const statusCounts = (day: Date) => {
+  const getAppointmentsForDay = useCallback((day: Date) =>
+    appointments.filter(a => isSameDay(new Date(a.start_time), day)),
+  [appointments]);
+
+  const statusCounts = useCallback((day: Date) => {
     const dayAppts = getAppointmentsForDay(day);
     const counts: Record<string, number> = {};
     dayAppts.forEach(a => {
       counts[a.status] = (counts[a.status] || 0) + 1;
     });
     return counts;
-  };
+  }, [getAppointmentsForDay]);
 
   const allStatuses: AppointmentStatus[] = ['pending', 'confirmed', 'completed', 'cancelled'];
   const statusOrder: AppointmentStatus[] = ['pending', 'confirmed', 'completed', 'cancelled'];
@@ -239,8 +242,11 @@ const AppointmentCalendar: React.FC<AppointmentCalendarProps> = ({
     setDraggingId(appointment.id);
   };
 
-  const today = new Date();
-  const selectedDayAppts = selectedDate ? getAppointmentsForDay(selectedDate) : [];
+  const today = useMemo(() => { const d = new Date(); d.setHours(0, 0, 0, 0); return d; }, []);
+  const selectedDayAppts = useMemo(
+    () => selectedDate ? getAppointmentsForDay(selectedDate) : [],
+    [selectedDate, getAppointmentsForDay]
+  );
 
   return (
     <div className="space-y-5">
@@ -280,7 +286,7 @@ const AppointmentCalendar: React.FC<AppointmentCalendarProps> = ({
             </div>
 
             <div className="grid grid-cols-7">
-              {days.map((day, i) => {
+              {calendarDays.map((day, i) => {
                 const dayStr = format(day, 'yyyy-MM-dd');
                 const isCurrentMonth = isSameMonth(day, currentMonth);
                 const isToday = isSameDay(day, today);

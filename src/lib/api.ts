@@ -269,6 +269,8 @@ export async function getBusinessAppointments(businessId: string) {
       .from('agendaya_appointments')
       .select('*')
       .eq('business_id', businessId)
+      .neq('status', 'cancelled')
+      .neq('status', 'completed')
       .order('start_time', { ascending: true });
     if (error) throw error;
     const appointments = (data || []) as Appointment[];
@@ -280,25 +282,30 @@ export async function getBusinessAppointments(businessId: string) {
     const userIds = [...new Set(appointments.map(a => a.user_id).filter(Boolean))];
     const serviceIds = [...new Set(appointments.map(a => a.service_id).filter(Boolean))];
 
-    const [profilesRes, servicesRes] = await Promise.all([
-      userIds.length > 0
-        ? supabase.from('agendaya_profiles').select('id, full_name, phone').in('id', userIds)
-        : { data: [] },
-      serviceIds.length > 0
-        ? supabase.from('agendaya_services').select('id, name, duration, price, min_cancellation_hours, min_reschedule_hours, cancellation_policy_text, reschedule_policy_text').in('id', serviceIds)
-        : { data: [] },
-    ]);
+    let enriched = appointments as Appointment[];
+    try {
+      const [profilesRes, servicesRes] = await Promise.all([
+        userIds.length > 0
+          ? supabase.from('agendaya_profiles').select('id, full_name, phone').in('id', userIds)
+          : { data: [] },
+        serviceIds.length > 0
+          ? supabase.from('agendaya_services').select('id, name, duration, price, min_cancellation_hours, min_reschedule_hours, cancellation_policy_text, reschedule_policy_text').in('id', serviceIds)
+          : { data: [] },
+      ]);
 
-    const profileMap = new Map((profilesRes.data || []).map((p: any) => [p.id, p]));
-    const serviceMap = new Map((servicesRes.data || []).map((s: any) => [s.id, s]));
+      const profileMap = new Map((profilesRes.data || []).map((p: any) => [p.id, p]));
+      const serviceMap = new Map((servicesRes.data || []).map((s: any) => [s.id, s]));
 
-    const enriched = appointments.map(a => ({
-      ...a,
-      profiles: profileMap.get(a.user_id) || null,
-      services: serviceMap.get(a.service_id) || null,
-    }));
+      enriched = appointments.map(a => ({
+        ...a,
+        profiles: profileMap.get(a.user_id) || null,
+        services: serviceMap.get(a.service_id) || null,
+      })) as Appointment[];
+    } catch {
+      console.warn('[getBusinessAppointments] Enrichment failed, returning raw data');
+    }
 
-    return { success: true, data: enriched as Appointment[], error: null };
+    return { success: true, data: enriched, error: null };
   } catch (err: unknown) {
     console.error('[getBusinessAppointments] Error:', err);
     return { success: false, data: null, error: getErrorMessage(err) || 'Error al cargar citas del negocio' };
