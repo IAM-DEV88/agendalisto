@@ -8,6 +8,7 @@ import {
   isSameMonth, addMonths, subMonths,
 } from 'date-fns';
 import { es } from 'date-fns/locale';
+import { useLockBodyScroll } from '../../hooks/useLockBodyScroll';
 
 interface Props {
   isOpen: boolean;
@@ -17,6 +18,7 @@ interface Props {
 }
 
 export default function CancelRescheduleModal({ isOpen, onClose, appointment, isOwner }: Props) {
+  useLockBodyScroll(isOpen);
   const [mode, setMode] = useState<'cancel' | 'reschedule' | null>(null);
   const [reason, setReason] = useState('');
   const [newDate, setNewDate] = useState('');
@@ -146,7 +148,7 @@ export default function CancelRescheduleModal({ isOpen, onClose, appointment, is
   return (
     <div className="fixed inset-0 z-50 flex items-start sm:items-center justify-center px-2 pt-16 sm:pt-0 sm:p-4 bg-black/50 backdrop-blur-sm animate-in fade-in duration-200" onClick={onClose}>
       <div
-        className="relative w-full sm:max-w-md max-h-[calc(100dvh-5rem)] sm:max-h-[85vh] bg-white dark:bg-slate-900 rounded-3xl shadow-2xl overflow-hidden animate-in sm:zoom-in-95 duration-300"
+        className="relative w-full sm:max-w-md max-h-[calc(100dvh-5rem)] sm:max-h-[85vh] bg-white dark:bg-slate-900 rounded-3xl shadow-2xl overflow-hidden flex flex-col animate-in sm:zoom-in-95 duration-300"
         onClick={e => e.stopPropagation()}
       >
         {/* Drag handle (mobile) */}
@@ -177,7 +179,7 @@ export default function CancelRescheduleModal({ isOpen, onClose, appointment, is
           </div>
         </div>
 
-        <div className="overflow-y-auto px-4 sm:px-5 py-4 space-y-4">
+        <div className="overflow-y-auto flex-1 min-h-0 px-4 sm:px-5 py-4 space-y-4">
           {/* Appointment summary */}
           <div className="flex items-center gap-3 p-3 bg-slate-50 dark:bg-slate-800/50 rounded-xl border border-slate-100 dark:border-slate-800">
             <div className="w-10 h-10 rounded-xl bg-primary-50 dark:bg-primary-500/10 flex items-center justify-center flex-shrink-0">

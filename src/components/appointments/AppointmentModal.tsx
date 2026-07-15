@@ -7,6 +7,7 @@ import {
   X, User, Calendar, Clock, MessageSquareText,
   CheckCircle, XCircle, Phone, Mail, Star, CalendarClock,
 } from 'lucide-react';
+import { useLockBodyScroll } from '../../hooks/useLockBodyScroll';
 
 interface AppointmentModalProps {
   isOpen: boolean;
@@ -48,6 +49,7 @@ const AppointmentModal: React.FC<AppointmentModalProps> = ({
   onReschedule,
   showReviewSection = false,
 }) => {
+  useLockBodyScroll(isOpen && !!appointment);
   if (!isOpen || !appointment) return null;
 
   const cfg = statusConfig[appointment.status] || statusConfig.pending;

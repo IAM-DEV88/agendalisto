@@ -11,6 +11,7 @@ import { BookingForm } from '../components/business/public';
 import { ArrowLeft, X, Calendar, Eye, Store } from 'lucide-react';
 import EmptyState from '../components/ui/EmptyState';
 import SEO from '../components/SEO';
+import { useLockBodyScroll } from '../hooks/useLockBodyScroll';
 
 
 function BookingPageSkeleton() {
@@ -41,11 +42,11 @@ function BookingPage() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [user, setUser] = useState<any>(null);
-  const [guestMode, setGuestMode] = useState(false);
   const [onlineBookable, setOnlineBookable] = useState(true);
 
   const [activeImageIndex, setActiveImageIndex] = useState(0);
   const [fullscreenImage, setFullscreenImage] = useState<string | null>(null);
+  useLockBodyScroll(!!fullscreenImage);
 
   const isOwner = !!user && !!businessData && user.id === businessData.owner_id;
 
@@ -56,7 +57,6 @@ function BookingPage() {
         setLoading(true);
         const { data: { user } } = await supabase.auth.getUser();
         setUser(user);
-        setGuestMode(!user);
 
         const { success: bS, business, error: bE } = await getBusinessBySlug(slug);
         if (!bS || !business) { setError(bE || 'Negocio no encontrado'); return; }
@@ -71,6 +71,11 @@ function BookingPage() {
     };
     fetchData();
   }, [slug, serviceId]);
+
+  const handleUserRegistered = async () => {
+    const { data: { user: freshUser } } = await supabase.auth.getUser();
+    if (freshUser) setUser(freshUser);
+  };
 
   const images = service?.image_urls
     ? (Array.isArray(service.image_urls) ? service.image_urls : [])
@@ -163,15 +168,8 @@ function BookingPage() {
             onFullscreenImage={setFullscreenImage}
             cancellationPolicy={service.cancellation_policy_text}
             reschedulePolicy={service.reschedule_policy_text}
+            onUserRegistered={handleUserRegistered}
           />
-          {guestMode && (
-            <p className="text-xs text-slate-400 text-center mt-4">
-              ¿Ya tienes cuenta?{' '}
-              <a href={`/login?redirect=/${slug}/book/${serviceId}`} className="font-bold text-primary-600 hover:text-primary-500">
-                Inicia sesión
-              </a>
-            </p>
-          )}
         </div>
       </div>
 

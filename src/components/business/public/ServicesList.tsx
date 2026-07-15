@@ -1,13 +1,13 @@
 import React, { useState, useEffect } from 'react';
-import { Clock, ChevronLeft, ChevronRight, X, Heart, LogIn, Check, Gift } from 'lucide-react';
+import { useNavigate } from 'react-router-dom';
+import { Clock, ChevronLeft, ChevronRight, X, Heart, Gift } from 'lucide-react';
 import { Service, toggleLike, checkIfLiked } from '../../../lib/api';
 import { toast } from 'react-hot-toast';
 import ShareButton from '../../ui/ShareButton';
+import { useLockBodyScroll } from '../../../hooks/useLockBodyScroll';
 
 interface ServicesListProps {
   services: Service[];
-  selectedService: string | null;
-  onSelectService: (serviceId: string) => void;
   currentUser: import('@supabase/supabase-js').User | null;
   businessOwnerId: string;
   showcaseOnly?: boolean;
@@ -15,8 +15,6 @@ interface ServicesListProps {
 
 const ServiceCard: React.FC<{
   service: Service;
-  selectedService: string | null;
-  onSelectService: (serviceId: string) => void;
   currentUser: import('@supabase/supabase-js').User | null;
   businessOwnerId: string;
   handlePrevImage: (e: React.MouseEvent, serviceId: string, max: number) => void;
@@ -24,7 +22,7 @@ const ServiceCard: React.FC<{
   openFullscreen: (e: React.MouseEvent, url: string) => void;
   currentImgIdx: number;
   showcaseOnly?: boolean;
-}> = ({ service, selectedService, onSelectService, currentUser, businessOwnerId, handlePrevImage, handleNextImage, openFullscreen, currentImgIdx, showcaseOnly }) => {
+}> = ({ service, currentUser, businessOwnerId, handlePrevImage, handleNextImage, openFullscreen, currentImgIdx, showcaseOnly }) => {
   const [isLiked, setIsLiked] = useState(false);
   const [likesCount, setLikesCount] = useState(service.likes_count || 0);
   const [isLiking, setIsLiking] = useState(false);
@@ -61,16 +59,13 @@ const ServiceCard: React.FC<{
   const hasImages = images.length > 0;
   const canBook = service.permitir_reservas_online !== false;
   const isOwner = currentUser && currentUser.id === businessOwnerId;
+  const navigate = useNavigate();
 
   return (
     <div
-      onClick={() => onSelectService(service.id)}
-      className={`relative flex flex-col rounded-2xl border transition-all overflow-hidden cursor-pointer group ${
-        isOwner ? 'ring-1 ring-primary-300 dark:ring-primary-700' : ''
-      } ${
-        selectedService === service.id
-          ? 'border-primary-500 bg-primary-50/30 dark:bg-primary-900/20 shadow-xl shadow-primary-500/10'
-          : 'border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 hover:border-primary-300 dark:hover:border-primary-700 hover:shadow-2xl'
+      onClick={() => navigate(`/${window.location.pathname.split('/')[1]}/book/${service.id}`)}
+      className={`relative flex flex-col rounded-2xl border transition-all overflow-hidden cursor-pointer group border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 hover:border-primary-300 dark:hover:border-primary-700 hover:shadow-2xl ${
+        isOwner ? 'ring-2 ring-primary-300 dark:ring-primary-700' : ''
       }`}
     >
       {/* Gallery */}
@@ -105,9 +100,7 @@ const ServiceCard: React.FC<{
       {/* Content */}
       <div className="p-5 flex flex-col flex-1">
         <div className="flex items-start justify-between gap-3 mb-2">
-          <h4 className={`font-black text-lg tracking-tight ${
-            selectedService === service.id ? 'text-primary-700 dark:text-primary-300' : 'text-slate-900 dark:text-white'
-          }`}>
+          <h4 className="font-black text-lg tracking-tight text-slate-900 dark:text-white">
             {service.name}
           </h4>
           {service.mostrar_precios !== false && service.price ? (
@@ -162,26 +155,12 @@ const ServiceCard: React.FC<{
           </div>
         </div>
 
-        {selectedService === service.id && (
-          <div className="mt-3 flex items-center gap-1.5 text-[11px] font-black text-primary-600 dark:text-primary-400 animate-in fade-in duration-200">
-            <Check className="w-3.5 h-3.5" />
-            Seleccionado
-          </div>
-        )}
-
-        {showcaseOnly || !canBook ? (
-          <div className="mt-3 pt-3 border-t border-slate-100 dark:border-slate-800">
-            <a href={`/${window.location.pathname.split('/')[1]}/book/${service.id}`}
-              className="flex items-center justify-center gap-1.5 px-4 py-2 bg-primary-50 dark:bg-primary-900/20 text-primary-700 dark:text-primary-300 text-[11px] font-bold rounded-xl hover:bg-primary-100 dark:hover:bg-primary-900/40 transition-all active:scale-[0.98]">
-              Ver información <ChevronRight className="w-3.5 h-3.5" />
-            </a>
-          </div>
-        ) : !currentUser ? (
-          <div className="mt-3 pt-3 border-t border-slate-100 dark:border-slate-800 flex items-center justify-center gap-1.5 text-[10px] font-black uppercase tracking-widest text-amber-600 dark:text-amber-400">
-            <LogIn className="w-3 h-3" />
-            Inicia sesión para reservar
-          </div>
-        ) : null}
+        <div className="mt-3 pt-3 border-t border-slate-100 dark:border-slate-800">
+          <a href={`/${window.location.pathname.split('/')[1]}/book/${service.id}`}
+            className="flex items-center justify-center gap-1.5 px-4 py-2 bg-primary-50 dark:bg-primary-900/20 text-primary-700 dark:text-primary-300 text-[11px] font-bold rounded-xl hover:bg-primary-100 dark:hover:bg-primary-900/40 transition-all active:scale-[0.98]">
+            {showcaseOnly || !canBook ? 'Ver información' : 'Reservar ahora'} <ChevronRight className="w-3.5 h-3.5" />
+          </a>
+        </div>
 
         {isOwner && (
           <div className="mt-3 pt-3 border-t border-slate-100 dark:border-slate-800 text-center text-[10px] font-black uppercase tracking-widest text-primary-500">
@@ -194,10 +173,11 @@ const ServiceCard: React.FC<{
 };
 
 const ServicesList: React.FC<ServicesListProps> = ({
-  services, selectedService, onSelectService, currentUser, businessOwnerId, showcaseOnly,
+  services, currentUser, businessOwnerId, showcaseOnly,
 }) => {
   const [activeImageIndex, setActiveImageIndex] = useState<Record<string, number>>({});
   const [fullscreenImage, setFullscreenImage] = useState<string | null>(null);
+  useLockBodyScroll(!!fullscreenImage);
 
   if (!services || services.length === 0) {
     return (
@@ -227,8 +207,6 @@ const ServicesList: React.FC<ServicesListProps> = ({
             <ServiceCard
               key={service.id}
               service={service}
-              selectedService={selectedService}
-              onSelectService={onSelectService}
               currentUser={currentUser}
               businessOwnerId={businessOwnerId}
               handlePrevImage={handlePrevImage}

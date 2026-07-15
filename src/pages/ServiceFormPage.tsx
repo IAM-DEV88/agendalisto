@@ -7,6 +7,7 @@ import { getMaxServices, getMaxImages, PLAN_LABELS } from '../lib/roles';
 import { notifySuccess, notifyError } from '../lib/toast';
 import SEO from '../components/SEO';
 import type { RootState } from '../store';
+import { useLockBodyScroll } from '../hooks/useLockBodyScroll';
 import {
   ArrowLeft, ChevronLeft, ChevronRight, X, Store,
   Clock, User, Loader2, Image as ImageIcon, Plus,
@@ -84,6 +85,7 @@ export default function ServiceFormPage() {
 
   const [activeImageIndex, setActiveImageIndex] = useState(0);
   const [fullscreenImage, setFullscreenImage] = useState<string | null>(null);
+  useLockBodyScroll(!!fullscreenImage);
 
   useEffect(() => {
     const init = async () => {

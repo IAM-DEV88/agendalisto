@@ -6,6 +6,7 @@ import { supabase } from '../lib/supabase';
 import { toast } from 'react-hot-toast';
 import SEO from '../components/SEO';
 import EmptyState from '../components/ui/EmptyState';
+import { useLockBodyScroll } from '../hooks/useLockBodyScroll';
 
 function PostSkeleton() {
   return (
@@ -30,6 +31,7 @@ const Blog = () => {
   const [page, setPage] = useState(0);
   const [hasMore, setHasMore] = useState(true);
   const [newsletterOpen, setNewsletterOpen] = useState(false);
+  useLockBodyScroll(newsletterOpen);
 
   const observer = useRef<IntersectionObserver | null>(null);
   const lastPostElementRef = useCallback((node: HTMLDivElement | null) => {

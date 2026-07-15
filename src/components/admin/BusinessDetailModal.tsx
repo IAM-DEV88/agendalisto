@@ -4,6 +4,7 @@ import { adminUpdateBusiness, getBusinessCategories } from '../../lib/api';
 import type { AdminBusiness, BusinessCategory } from '../../lib/api';
 import { notifySuccess, notifyError } from '../../lib/toast';
 import { X, Building2 } from 'lucide-react';
+import { useLockBodyScroll } from '../../hooks/useLockBodyScroll';
 
 interface BusinessDetailModalProps {
   business: AdminBusiness;
@@ -12,6 +13,7 @@ interface BusinessDetailModalProps {
 }
 
 const BusinessDetailModal = ({ business, onClose, onUpdated }: BusinessDetailModalProps) => {
+  useLockBodyScroll(true);
   const [name, setName] = useState(business.name);
   const [description, setDescription] = useState(business.description);
   const [address, setAddress] = useState(business.address);

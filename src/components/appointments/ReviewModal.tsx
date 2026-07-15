@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { Star, X, Send, Heart, Camera, MessageSquareText } from 'lucide-react';
 import { Appointment } from '../../types/appointment';
 import { uploadImage } from '../../lib/storage';
+import { useLockBodyScroll } from '../../hooks/useLockBodyScroll';
 
 interface ReviewModalProps {
   isOpen: boolean;
@@ -18,6 +19,7 @@ const ReviewModal: React.FC<ReviewModalProps> = ({
   onSubmit,
   userId,
 }) => {
+  useLockBodyScroll(isOpen);
   const [rating, setRating] = useState(5);
   const [comment, setComment] = useState('');
   const [loading, setLoading] = useState(false);

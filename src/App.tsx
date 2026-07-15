@@ -311,11 +311,7 @@ function App() {
                 <ReviewPage />
               </ProtectedRoute>
             } />
-            <Route path="/:slug/book/:serviceId" element={
-              <ProtectedRoute user={user} userProfile={userProfile} requiredRole="client">
-                <BookingPage />
-              </ProtectedRoute>
-            } />
+            <Route path="/:slug/book/:serviceId" element={<BookingPage />} />
             <Route path="/:slug" element={<BusinessPublicPage />} />
             <Route path="*" element={<NotFound />} />
           </Routes>

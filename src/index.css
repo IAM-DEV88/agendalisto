@@ -81,11 +81,7 @@
   h5 { font-size: 1.125rem; line-height: 1.5rem; }
   h6 { font-size: 1rem; line-height: 1.5rem; }
 
-  p {
-    color: var(--color-text);
-    line-height: 1.6;
-    margin-bottom: 1rem;
-  }
+ c
 
   @media (max-width: 639px) {
     p {

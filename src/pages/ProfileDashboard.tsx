@@ -3,6 +3,7 @@ import { Link, useNavigate } from 'react-router-dom';
 import { useSelector } from 'react-redux';
 import { supabase } from '../lib/supabase';
 import { dispatchUserProfileUpdated } from '../lib/events';
+import { useLockBodyScroll } from '../hooks/useLockBodyScroll';
 import UserProfileSection from '../components/profile/UserProfileSection';
 import { useAppDispatch } from '../hooks/useAppDispatch';
 import { setUserProfile } from '../store/userSlice';
@@ -152,6 +153,7 @@ const ProfileDashboard = ({ user }: ProfileDashboardProps) => {
   const [selectedAppointmentForCancel, setSelectedAppointmentForCancel] = useState<Appointment | null>(null);
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
   const [deleting, setDeleting] = useState(false);
+  useLockBodyScroll(showDeleteConfirm);
 
   const confirmedAppointments = useMemo(
     () => appointments.filter(a => a.status === 'confirmed'),

@@ -13,6 +13,7 @@ export default function BlogManagementSection() {
   const [editing, setEditing] = useState<BlogPost | null>(null);
   const [previewOpen, setPreviewOpen] = useState(false);
   const [previewPost, setPreviewPost] = useState<BlogPost | null>(null);
+  useLockBodyScroll(modalOpen || previewOpen);
   const [saving, setSaving] = useState(false);
   const [userId, setUserId] = useState<string>('');
   const [form, setForm] = useState({ title: '', content: '', excerpt: '', author_name: '', image_url: '' });

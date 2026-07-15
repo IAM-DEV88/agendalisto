@@ -10,6 +10,7 @@ import SectionHeader from '../ui/SectionHeader';
 import { toast } from 'react-hot-toast';
 import { setBusinesses, setActiveBusinessId } from '../../store/userSlice';
 import type { RootState } from '../../store';
+import { useLockBodyScroll } from '../../hooks/useLockBodyScroll';
 
 interface BusinessConfigSectionProps {
   config: BusinessConfig;
@@ -46,6 +47,7 @@ export const BusinessConfigSection: React.FC<BusinessConfigSectionProps> = ({
   const { itemsPerPage, setItemsPerPageValue, saveItemsPerPage } = useUIConfig(user?.id);
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
   const [deleting, setDeleting] = useState(false);
+  useLockBodyScroll(showDeleteConfirm);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();

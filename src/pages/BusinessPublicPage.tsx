@@ -46,7 +46,6 @@ function BusinessPublicPage() {
   const [services, setServices] = useState<Service[]>([]);
   const [businessHours, setBusinessHours] = useState<BusinessHours[]>([]);
   const [loading, setLoading] = useState(true);
-  const [selectedService, setSelectedService] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [activeTab, setActiveTab] = useState('services');
   const [user, setUser] = useState<import('@supabase/supabase-js').User | null>(null);
@@ -72,7 +71,6 @@ function BusinessPublicPage() {
         if (sS && sD) {
           const active = sD.filter(s => s.is_active !== false);
           setServices(active);
-          if (active.length > 0) setSelectedService(active[0].id);
         }
 
         try { setBusinessHours(await getBusinessHours(business.id)); } catch (err) {
@@ -105,12 +103,6 @@ function BusinessPublicPage() {
       if (svcId) navigate(`/${slug}/book/${svcId}`);
     }
   }, [location.search, navigate, slug]);
-
-  const handleServiceSelection = (serviceId: string) => {
-    setSelectedService(serviceId);
-    if (!user) { navigate(`/login?redirect=/${slug}/book/${serviceId}`); }
-    else { navigate(`/${slug}/book/${serviceId}`); }
-  };
 
   const businessSchema = businessData ? {
     "@context": "https://schema.org",
@@ -262,8 +254,6 @@ function BusinessPublicPage() {
                 <h2 className="text-xl font-black text-slate-900 dark:text-white mb-6">Servicios Disponibles</h2>
                 <ServicesList
                   services={services}
-                  selectedService={selectedService}
-                  onSelectService={handleServiceSelection}
                   currentUser={user}
                   businessOwnerId={businessData?.owner_id}
                   showcaseOnly={!!businessData?.showcase_only}
@@ -327,21 +317,6 @@ function BusinessPublicPage() {
                   </Link>
                 )}
               </div>
-
-              {/* Confirmation required */}
-              {services.find(s => s.id === selectedService)?.requiere_confirmacion !== false && (
-                <div className="bg-amber-50/50 dark:bg-amber-500/5 rounded-2xl border border-amber-200/50 dark:border-amber-800/30 p-5">
-                  <div className="flex items-start gap-3">
-                    <Clock className="w-4 h-4 text-amber-500 flex-shrink-0 mt-0.5" />
-                    <div>
-                      <p className="text-sm font-bold text-amber-800 dark:text-amber-300">Confirmación manual</p>
-                      <p className="text-xs text-amber-600/80 dark:text-amber-400/80 mt-0.5">
-                        Las reservas requieren confirmación del negocio antes de ser agendadas.
-                      </p>
-                    </div>
-                  </div>
-                </div>
-              )}
 
               {/* Location */}
               {businessData?.config?.mostrar_direccion && (

@@ -5,6 +5,7 @@ import type { Role } from '../../lib/roles';
 import { adminUpdateUser } from '../../lib/api';
 import { notifySuccess, notifyError } from '../../lib/toast';
 import { X } from 'lucide-react';
+import { useLockBodyScroll } from '../../hooks/useLockBodyScroll';
 
 interface UserDetailModalProps {
   user: UserProfile;
@@ -13,6 +14,7 @@ interface UserDetailModalProps {
 }
 
 const UserDetailModal = ({ user, onClose, onUpdated }: UserDetailModalProps) => {
+  useLockBodyScroll(true);
   const [role, setRole] = useState(user.role);
   const [plan, setPlan] = useState(user.plan);
   const [saving, setSaving] = useState(false);

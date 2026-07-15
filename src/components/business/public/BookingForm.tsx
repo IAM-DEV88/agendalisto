@@ -1,14 +1,15 @@
 import React, { useState, useEffect, useMemo } from 'react';
-import { Clock, CheckCircle, ArrowLeft, Send, AlertCircle, Gift, Check, X, Lock, FileText, Eye, CalendarDays, Info, Download, Store, User, ChevronLeft, ChevronRight, ChevronDown } from 'lucide-react';
+import { Clock, CheckCircle, ArrowLeft, Send, AlertCircle, Gift, Check, X, Lock, FileText, Eye, CalendarDays, Download, Store, User, ChevronLeft, ChevronRight, ChevronDown } from 'lucide-react';
 import CrossPromotion from '../CrossPromotion';
 import AvailabilityCalendar from './AvailabilityCalendar';
 import { createAppointment, Service, getBusinessHours, getBusinessAppointments, BusinessHours, Appointment, validateGiftCode, redeemGiftCode } from '../../../lib/api';
 import type { GuestInfo, GiftCode } from '../../../lib/api';
+import { signUp } from '../../../lib/supabase';
 import { notifyError, notifyLoading, dismissToast } from '../../../lib/toast';
 import { toast } from 'react-hot-toast';
 import { Link } from 'react-router-dom';
 import PaymentMethodSelector from '../../PaymentMethodSelector';
-import { trackEvent } from '../../../lib/analytics';
+
 import { downloadIcs } from '../../../utils/icsUtils';
 
 interface BusinessContact {
@@ -43,6 +44,7 @@ interface BookingFormProps {
   activeImageIndex?: number;
   onImageChange?: (index: number) => void;
   onFullscreenImage?: (url: string) => void;
+  onUserRegistered?: () => void;
   cancellationPolicy?: string | null;
   reschedulePolicy?: string | null;
 }
@@ -72,6 +74,7 @@ const BookingForm: React.FC<BookingFormProps> = ({
   activeImageIndex: controlledImageIndex,
   onImageChange,
   onFullscreenImage,
+  onUserRegistered,
   cancellationPolicy,
   reschedulePolicy,
 }) => {
@@ -79,6 +82,9 @@ const BookingForm: React.FC<BookingFormProps> = ({
   const imageIndex = controlledImageIndex ?? localImageIndex;
   const handleImageChange = onImageChange ?? setLocalImageIndex;
   const [localGuestInfo, setLocalGuestInfo] = useState<GuestInfo>(guestInfo || { name: '', email: '', phone: '' });
+  const [guestPassword, setGuestPassword] = useState('');
+  const [registering, setRegistering] = useState(false);
+  const [registeredUserId, setRegisteredUserId] = useState<string | null>(null);
   const [confirmationChecked, setConfirmationChecked] = useState(!requireConfirmation);
   const [formData, setFormData] = useState({ date: '', time: '', notes: '' });
   const [submitting, setSubmitting] = useState(false);
@@ -206,10 +212,6 @@ const BookingForm: React.FC<BookingFormProps> = ({
   const [loadingSlots, setLoadingSlots] = useState(true);
 
   useEffect(() => {
-    trackEvent('booking_page_viewed', { business_id: businessId, service_id: serviceId });
-  }, [businessId, serviceId]);
-
-  useEffect(() => {
     const fetchSchedule = async () => {
       try {
         setLoadingSlots(true);
@@ -325,8 +327,8 @@ const BookingForm: React.FC<BookingFormProps> = ({
       setError('Faltan datos para la reserva');
       return;
     }
-    if (!userId && (!localGuestInfo.name.trim() || !localGuestInfo.email.trim())) {
-      setError('Completa tu nombre y correo para reservar');
+    if (!userId && (!localGuestInfo.name.trim() || !localGuestInfo.email.trim() || !guestPassword.trim())) {
+      setError('Completa tu nombre, correo y contraseña para crear tu cuenta');
       return;
     }
     if (!formData.date || !formData.time) {
@@ -339,30 +341,69 @@ const BookingForm: React.FC<BookingFormProps> = ({
       return;
     }
 
-    if (!showSummary) {
+    if (!showSummary && userId) {
       setShowSummary(true);
       return;
     }
 
     let toastId = '';
     try {
-      toastId = notifyLoading('Enviando solicitud...');
       setSubmitting(true);
       setError(null);
 
-      const result = await doCreateAppointment();
+      // Register user if guest
+      let effectiveUserId = userId || '';
+      if (!effectiveUserId) {
+        setRegistering(true);
+        toastId = notifyLoading('Creando tu cuenta...');
+        const signupRes = await signUp(localGuestInfo.email, guestPassword, localGuestInfo.name);
+        if (signupRes.error) {
+          dismissToast(toastId);
+          setError(signupRes.error.message || 'Error al crear la cuenta');
+          setRegistering(false);
+          setSubmitting(false);
+          return;
+        }
+        effectiveUserId = signupRes.data?.user?.id;
+        if (!effectiveUserId) {
+          dismissToast(toastId);
+          setError('No se pudo crear la cuenta. Verifica tu correo.');
+          setRegistering(false);
+          setSubmitting(false);
+          return;
+        }
+        setRegisteredUserId(effectiveUserId);
+        dismissToast(toastId);
+        onUserRegistered?.();
+        setRegistering(false);
+        // Wait for auth session to propagate
+        await new Promise(r => setTimeout(r, 1000));
+      }
+
+      toastId = notifyLoading('Enviando solicitud...');
+      setError(null);
+
+      const result = await createAppointment({
+        business_id: businessId,
+        service_id: serviceId,
+        user_id: effectiveUserId,
+        start_time: new Date(`${formData.date}T${formData.time}`).toISOString(),
+        end_time: new Date(new Date(`${formData.date}T${formData.time}`).getTime() + (service?.duration || 0) * 60000).toISOString(),
+        status: requireConfirmation ? 'pending' as const : 'confirmed' as const,
+        notes: formData.notes || null,
+        is_guest: false,
+        guest_info: null,
+        payment_status: undefined,
+        payment_provider: undefined,
+        payment_id: undefined,
+        payment_amount: undefined,
+      });
 
       dismissToast(toastId);
       if (result) {
         if (giftApplied) {
           await redeemGiftCode(giftApplied.code);
         }
-        trackEvent('booking_submitted', {
-          business_id: businessId,
-          service_id: serviceId,
-          is_guest: !userId,
-          has_payment: false,
-        });
         setBookingSuccess(true);
       } else {
         const msg = 'Error al enviar la solicitud. Intenta de nuevo.';
@@ -376,6 +417,7 @@ const BookingForm: React.FC<BookingFormProps> = ({
       notifyError(msg);
     } finally {
       setSubmitting(false);
+      setRegistering(false);
     }
   };
 
@@ -435,12 +477,6 @@ const BookingForm: React.FC<BookingFormProps> = ({
       if (giftApplied) {
         await redeemGiftCode(giftApplied.code);
       }
-      trackEvent('booking_submitted', {
-        business_id: businessId,
-        service_id: serviceId,
-        is_guest: !userId,
-        has_payment: true,
-      });
       setBookingSuccess(true);
     } catch (err: unknown) {
       dismissToast(toastId);
@@ -497,12 +533,10 @@ const BookingForm: React.FC<BookingFormProps> = ({
 
   const handleDateSelect = (date: string) => {
     setFormData(prev => ({ ...prev, date, time: '' }));
-    trackEvent('date_selected', { business_id: businessId, service_id: serviceId, date });
   };
 
   const handleTimeSelect = (time: string) => {
     setFormData(prev => ({ ...prev, time }));
-    trackEvent('time_selected', { business_id: businessId, service_id: serviceId, time });
   };
 
   const resetForm = () => {
@@ -510,6 +544,7 @@ const BookingForm: React.FC<BookingFormProps> = ({
     setError(null);
     setBookingSuccess(false);
     setShowSummary(false);
+    setRegisteredUserId(null);
   };
 
   if (bookingSuccess) {
@@ -556,27 +591,12 @@ const BookingForm: React.FC<BookingFormProps> = ({
           <Download className="w-4 h-4" />
           Agregar a mi calendario
         </button>
-        {!userId && (
-          <div className="mt-4 p-4 bg-primary-50 dark:bg-primary-900/20 rounded-2xl border border-primary-200 dark:border-primary-800/50">
-            <p className="text-sm font-bold text-primary-800 dark:text-primary-300 mb-1">
-              Quieres guardar tus reservas?
-            </p>
-            <p className="text-xs text-primary-600 dark:text-primary-400 mb-3">
-              Crea una cuenta gratis para ver el historial y recibir notificaciones.
-            </p>
-            <a href="/register" className="inline-flex items-center gap-2 px-5 py-2.5 bg-primary-600 hover:bg-primary-700 text-white font-bold text-xs rounded-xl transition-all">
-              Registrarme ahora
-            </a>
-          </div>
-        )}
         <div className="flex flex-col sm:flex-row items-center justify-center gap-3 mt-8">
-          {userId && (
-            <Link to="/dashboard" className="w-full sm:w-auto inline-flex items-center justify-center gap-2 px-6 py-3 bg-primary-600 hover:bg-primary-700 text-white font-bold rounded-xl transition-all shadow-lg shadow-primary-500/25 active:scale-[0.98]">
-              Ver mis reservas
-            </Link>
-          )}
+          <Link to="/dashboard" className="w-full sm:w-auto inline-flex items-center justify-center gap-2 px-6 py-3 bg-primary-600 hover:bg-primary-700 text-white font-bold rounded-xl transition-all shadow-lg shadow-primary-500/25 active:scale-[0.98]">
+            Ver mis reservas
+          </Link>
           <button onClick={() => { resetForm(); onClose(); }} className="w-full sm:w-auto inline-flex items-center justify-center gap-2 px-6 py-3 bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300 font-bold rounded-xl hover:bg-slate-200 dark:hover:bg-slate-700 transition-all active:scale-[0.98]">
-            {userId ? 'Cerrar' : 'Volver'}
+            Cerrar
           </button>
         </div>
         {businessAddress && (
@@ -588,21 +608,6 @@ const BookingForm: React.FC<BookingFormProps> = ({
 
   return (
     <div className="animate-in slide-in-from-bottom-4 duration-500">
-      {!userId && (
-        <div className="mb-5 p-4 bg-primary-50 dark:bg-primary-900/20 rounded-2xl border border-primary-200 dark:border-primary-800/50 flex items-start gap-3">
-          <div className="w-8 h-8 rounded-lg bg-primary-100 dark:bg-primary-800/50 flex items-center justify-center flex-shrink-0 mt-0.5">
-            <Info className="w-4 h-4 text-primary-600 dark:text-primary-400" />
-          </div>
-          <div className="min-w-0">
-            <p className="text-sm font-bold text-primary-800 dark:text-primary-300">Crea una cuenta para gestionar tus reservas</p>
-            <p className="text-xs text-primary-600 dark:text-primary-400 mt-0.5">
-              Historial, reagendamiento y notificaciones.{' '}
-              <a href="/register" className="font-bold underline hover:text-primary-500">Registrarme</a>
-            </p>
-          </div>
-        </div>
-      )}
-
       {/* ─── Hero: gallery + info combinados ─── */}
       <div className={`mb-6 overflow-hidden bg-white dark:bg-slate-900 rounded-xl border border-slate-200 dark:border-slate-700 ${images && images.length > 0 ? 'md:grid md:grid-cols-5' : 'p-5 sm:p-6'}`}>
         {images && images.length > 0 && (
@@ -681,28 +686,6 @@ const BookingForm: React.FC<BookingFormProps> = ({
           )}
         </div>
       </div>
-
-      {/* Guest info inline */}
-      {!userId && (
-        <div className="mb-5 p-4 bg-white dark:bg-slate-900 rounded-2xl border border-slate-200 dark:border-slate-800">
-          <p className="text-xs font-black text-slate-500 dark:text-slate-400 uppercase tracking-wider mb-3">Tus datos</p>
-          <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
-            <input type="text" value={localGuestInfo.name} onChange={(e) => setLocalGuestInfo(p => ({ ...p, name: e.target.value }))}
-              placeholder="Nombre" className="w-full px-4 py-2.5 text-sm rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 focus:ring-2 focus:ring-primary-500/20 focus:border-primary-500 outline-none transition-all" />
-            <input type="email" value={localGuestInfo.email} onChange={(e) => setLocalGuestInfo(p => ({ ...p, email: e.target.value }))}
-              placeholder="Correo" className="w-full px-4 py-2.5 text-sm rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 focus:ring-2 focus:ring-primary-500/20 focus:border-primary-500 outline-none transition-all" />
-            <input type="tel" value={localGuestInfo.phone} onChange={(e) => setLocalGuestInfo(p => ({ ...p, phone: e.target.value }))}
-              placeholder="Teléfono" className="w-full px-4 py-2.5 text-sm rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 focus:ring-2 focus:ring-primary-500/20 focus:border-primary-500 outline-none transition-all" />
-          </div>
-        </div>
-      )}
-
-      {error && (
-        <div className="flex items-start gap-2.5 px-4 py-3 mb-5 bg-red-50 dark:bg-red-500/10 border border-red-200 dark:border-red-800 rounded-2xl animate-in fade-in slide-in-from-top-2 duration-300">
-          <AlertCircle className="w-4 h-4 text-red-500 flex-shrink-0 mt-0.5" />
-          <p className="text-sm font-bold text-red-700 dark:text-red-400">{error}</p>
-        </div>
-      )}
 
       {!onlineBookable && !isOwnerPreview ? (
         <div className="mb-6 p-5 sm:p-6 bg-white dark:bg-slate-900 rounded-2xl border border-slate-200 dark:border-slate-700 space-y-4">
@@ -889,17 +872,42 @@ const BookingForm: React.FC<BookingFormProps> = ({
 
         {!showPayment && (
           <>
+            {!userId && (
+              <div className="p-4 bg-white dark:bg-slate-900 rounded-2xl border border-slate-200 dark:border-slate-800">
+                <p className="text-xs font-black text-slate-500 dark:text-slate-400 uppercase tracking-wider mb-3">Crea tu cuenta gratis</p>
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                  <input type="text" value={localGuestInfo.name} onChange={(e) => setLocalGuestInfo(p => ({ ...p, name: e.target.value }))}
+                    placeholder="Nombre" className="w-full px-4 py-2.5 text-sm rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 focus:ring-2 focus:ring-primary-500/20 focus:border-primary-500 outline-none transition-all" />
+                  <input type="email" value={localGuestInfo.email} onChange={(e) => setLocalGuestInfo(p => ({ ...p, email: e.target.value }))}
+                    placeholder="Correo" className="w-full px-4 py-2.5 text-sm rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 focus:ring-2 focus:ring-primary-500/20 focus:border-primary-500 outline-none transition-all" />
+                </div>
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 mt-3">
+                  <input type="tel" value={localGuestInfo.phone} onChange={(e) => setLocalGuestInfo(p => ({ ...p, phone: e.target.value }))}
+                    placeholder="Teléfono (opcional)" className="w-full px-4 py-2.5 text-sm rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 focus:ring-2 focus:ring-primary-500/20 focus:border-primary-500 outline-none transition-all" />
+                  <input type="password" value={guestPassword} onChange={(e) => setGuestPassword(e.target.value)}
+                    placeholder="Contraseña" className="w-full px-4 py-2.5 text-sm rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 focus:ring-2 focus:ring-primary-500/20 focus:border-primary-500 outline-none transition-all" />
+                </div>
+              </div>
+            )}
+            {error && (
+              <div className="flex items-start gap-2.5 px-4 py-3 bg-red-50 dark:bg-red-500/10 border border-red-200 dark:border-red-800 rounded-2xl animate-in fade-in slide-in-from-top-2 duration-300">
+                <AlertCircle className="w-4 h-4 text-red-500 flex-shrink-0 mt-0.5" />
+                <p className="text-sm font-bold text-red-700 dark:text-red-400">{error}</p>
+              </div>
+            )}
             <div className="flex flex-col sm:flex-row gap-3 pt-2">
               <button type="button" onClick={onClose}
                 className="flex-1 inline-flex items-center justify-center gap-2 px-6 py-3.5 bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300 font-bold rounded-xl hover:bg-slate-200 dark:hover:bg-slate-700 transition-all active:scale-[0.98]">
                 <ArrowLeft className="w-4 h-4" /> Cancelar
               </button>
-              <button type="submit" disabled={!formData.date || !formData.time || submitting || isOwnerPreview}
+              <button type="submit" disabled={!formData.date || !formData.time || submitting || registering || isOwnerPreview}
                 className="flex-[2] inline-flex items-center justify-center gap-2 px-6 py-3.5 bg-primary-600 hover:bg-primary-700 text-white font-bold rounded-xl shadow-lg shadow-primary-500/25 transition-all hover:-translate-y-0.5 active:translate-y-0 disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:-translate-y-0">
-                {submitting ? (
-                  <><div className="animate-spin rounded-full h-4 w-4 border-2 border-white border-t-transparent" /> Procesando...</>
+                {submitting || registering ? (
+                  <><div className="animate-spin rounded-full h-4 w-4 border-2 border-white border-t-transparent" /> {registering ? 'Creando cuenta...' : 'Procesando...'}</>
                 ) : isOwnerPreview ? (
                   <><Eye className="w-4 h-4" /> Vista previa</>
+                ) : !userId && !registeredUserId ? (
+                  <><Send className="w-4 h-4" /> Crear cuenta y reservar</>
                 ) : showSummary ? (
                   <><Send className="w-4 h-4" /> Confirmar reserva</>
                 ) : (
