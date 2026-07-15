@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useMemo } from 'react';
-import { Clock, CheckCircle, ArrowLeft, Send, AlertCircle, Gift, Check, X, Lock, FileText, Eye, CalendarDays, Download, Store, User, ChevronLeft, ChevronRight } from 'lucide-react';
+import { Clock, CheckCircle, ArrowLeft, Send, AlertCircle, Gift, Check, X, Lock, FileText, Eye, CalendarDays, Download, Store, User, ChevronLeft, ChevronRight, Info, Phone, Mail, MessageCircle } from 'lucide-react';
 import CrossPromotion from '../CrossPromotion';
 import AvailabilityCalendar from './AvailabilityCalendar';
 import { createAppointment, Service, getBusinessHours, getBusinessAppointments, BusinessHours, Appointment, validateGiftCode, redeemGiftCode } from '../../../lib/api';
@@ -676,9 +676,86 @@ const BookingForm: React.FC<BookingFormProps> = ({
                   : <><CheckCircle className="w-2.5 h-2.5" /> Reserva inmediata</>}
               </span>
             )}
+            {(!isOwnerPreview || service?.can_be_gifted || service?.requires_payment || minCancellationHours > 0 || minRescheduleHours > 0) && (
+              <div className="flex flex-wrap gap-1.5 mt-1.5">
+                {minCancellationHours > 0 && (
+                  <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded text-[10px] font-bold bg-slate-100 dark:bg-slate-800 text-slate-500 dark:text-slate-400 group relative cursor-help">
+                    <Info className="w-2.5 h-2.5" />
+                    Cancelación {minCancellationHours}h
+                    {cancellationPolicy && (
+                      <span className="absolute bottom-full left-1/2 -translate-x-1/2 mb-1 px-2 py-1 rounded bg-slate-800 dark:bg-slate-700 text-white text-[10px] whitespace-nowrap opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none z-10 shadow-lg">
+                        {cancellationPolicy}
+                      </span>
+                    )}
+                  </span>
+                )}
+                {minRescheduleHours > 0 && (
+                  <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded text-[10px] font-bold bg-slate-100 dark:bg-slate-800 text-slate-500 dark:text-slate-400 group relative cursor-help">
+                    <Info className="w-2.5 h-2.5" />
+                    Reagendamiento {minRescheduleHours}h
+                    {reschedulePolicy && (
+                      <span className="absolute bottom-full left-1/2 -translate-x-1/2 mb-1 px-2 py-1 rounded bg-slate-800 dark:bg-slate-700 text-white text-[10px] whitespace-nowrap opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none z-10 shadow-lg">
+                        {reschedulePolicy}
+                      </span>
+                    )}
+                  </span>
+                )}
+                {service?.can_be_gifted && (
+                  <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded text-[10px] font-bold bg-rose-50 dark:bg-rose-500/10 text-rose-600 dark:text-rose-400">
+                    <Gift className="w-2.5 h-2.5" />
+                    Regalable
+                  </span>
+                )}
+                {service?.requires_payment && (
+                  <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded text-[10px] font-bold bg-amber-50 dark:bg-amber-500/10 text-amber-600 dark:text-amber-400">
+                    <Lock className="w-2.5 h-2.5" />
+                    Pago: {service?.payment_percentage ?? 100}%
+                  </span>
+                )}
+              </div>
+            )}
+            {!isOwnerPreview && (businessContact?.phone || businessContact?.whatsapp || businessContact?.email) && (
+              <div className="flex items-center flex-wrap gap-x-3 gap-y-1 mt-2 pt-2 border-t border-slate-100 dark:border-slate-800">
+                {businessContact?.whatsapp && (
+                  <a href={`https://wa.me/${businessContact.whatsapp.replace(/[^0-9]/g, '')}?text=${encodeURIComponent(`Hola! Quiero agendar: ${service?.name || ''}`)}`}
+                    target="_blank" rel="noopener noreferrer"
+                    className="inline-flex items-center gap-1 text-[10px] font-bold text-emerald-600 dark:text-emerald-400 hover:text-emerald-700 transition-colors">
+                    <MessageCircle className="w-3 h-3" /> WhatsApp
+                  </a>
+                )}
+                {businessContact?.phone && (
+                  <a href={`tel:${businessContact.phone}`}
+                    className="inline-flex items-center gap-1 text-[10px] font-bold text-slate-500 dark:text-slate-400 hover:text-primary-600 transition-colors">
+                    <Phone className="w-3 h-3" /> {businessContact.phone}
+                  </a>
+                )}
+                {businessContact?.email && (
+                  <a href={`mailto:${businessContact.email}`}
+                    className="inline-flex items-center gap-1 text-[10px] font-bold text-slate-500 dark:text-slate-400 hover:text-primary-600 transition-colors">
+                    <Mail className="w-3 h-3" /> {businessContact.email}
+                  </a>
+                )}
+              </div>
+            )}
+            {(cancellationPolicy || reschedulePolicy) && (
+              <div className="flex flex-wrap gap-x-4 gap-y-1 mt-2 pt-2 border-t border-slate-100 dark:border-slate-800 text-[10px] text-slate-500 dark:text-slate-400">
+                {cancellationPolicy && (
+                  <div className="flex-1 min-w-0">
+                    <span className="font-bold text-slate-600 dark:text-slate-300">Cancelación:</span>{' '}
+                    <span className="line-clamp-1">{cancellationPolicy}</span>
+                  </div>
+                )}
+                {reschedulePolicy && (
+                  <div className="flex-1 min-w-0">
+                    <span className="font-bold text-slate-600 dark:text-slate-300">Reagendamiento:</span>{' '}
+                    <span className="line-clamp-1">{reschedulePolicy}</span>
+                  </div>
+                )}
+              </div>
+            )}
           </div>
           {service?.description && (
-            <p className="text-xs text-slate-500 dark:text-slate-400 leading-relaxed mt-2 line-clamp-2 whitespace-pre-line">{service.description}</p>
+            <p className="text-xs text-slate-500 dark:text-slate-400 leading-relaxed mt-2 whitespace-pre-line">{service.description}</p>
           )}
         </div>
       </div>
@@ -849,23 +926,6 @@ const BookingForm: React.FC<BookingFormProps> = ({
                   </p>
                 </div>
               </label>
-            )}
-            {!isOwnerPreview && (cancellationPolicy || reschedulePolicy) && (
-              <div className="pt-2 border-t border-slate-100 dark:border-slate-800">
-                <p className="text-[10px] font-bold text-slate-400 uppercase tracking-wider mb-1.5">Políticas del servicio</p>
-                <div className="space-y-1.5">
-                  {cancellationPolicy && (
-                    <p className="text-xs text-slate-500 dark:text-slate-400 leading-relaxed">
-                      <span className="font-medium text-slate-600 dark:text-slate-300">Cancelación:</span> {cancellationPolicy}
-                    </p>
-                  )}
-                  {reschedulePolicy && (
-                    <p className="text-xs text-slate-500 dark:text-slate-400 leading-relaxed">
-                      <span className="font-medium text-slate-600 dark:text-slate-300">Reagendamiento:</span> {reschedulePolicy}
-                    </p>
-                  )}
-                </div>
-              </div>
             )}
           </div>
         </div>
