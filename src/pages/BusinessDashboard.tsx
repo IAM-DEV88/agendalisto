@@ -89,6 +89,7 @@ export const BusinessDashboard: React.FC = () => {
   const [activeTab, setActiveTab] = useState('appointments');
   const [activeAppointmentTab, setActiveAppointmentTab] = useState('calendar');
   const [activeSettingsTab, setActiveSettingsTab] = useState('profile');
+  const [activeActivasTab, setActiveActivasTab] = useState('pending');
   const contentRef = useRef<HTMLDivElement>(null);
 
   const loadBusinessData = useCallback(async (businessId?: string) => {
@@ -333,8 +334,7 @@ export const BusinessDashboard: React.FC = () => {
 
   const appointmentTabs: Tab[] = [
     { id: 'calendar', label: 'Calendario' },
-    { id: 'pending', label: 'Pendientes', count: pendingAppointments.length },
-    { id: 'confirmed', label: 'Confirmadas', count: confirmedAppointments.length },
+    { id: 'activas', label: 'Activas', count: activeAppointmentsCount },
     { id: 'history', label: 'Historial', count: pastAppointments.length },
     { id: 'clients', label: 'Clientes', count: businessClients.length },
   ];
@@ -449,56 +449,81 @@ export const BusinessDashboard: React.FC = () => {
                 </div>
 
                 <div className="animate-in fade-in zoom-in-95 duration-300">
-                  {activeAppointmentTab === 'pending' && (
-                    pendingAppointments.length === 0 ? (
-                      <EmptyState
-                        icon={<CalendarClock className="w-8 h-8" />}
-                        title="Sin citas pendientes"
-                        description="No hay solicitudes de reserva pendientes de confirmación."
-                      />
-                    ) : (
-                      <div className="space-y-4">
-                        <BusinessAppointmentList
-                          appointments={pagedPending}
-                          onStatusChange={handleUpdateAppointmentStatus}
-                          onReschedule={(appt) => setAppointmentToReschedule(appt)}
-                          showReviewSection={false}
-                        />
-                        {pendingAppointments.length > pagination.pending.perPage && (
-                          <Pagination
-                            currentPage={pagination.pending.page}
-                            totalPages={Math.ceil(pendingAppointments.length / pagination.pending.perPage)}
-                            onPageChange={(page) => handlePageChange('pending', page)}
-                          />
-                        )}
+                  {activeAppointmentTab === 'activas' && (
+                    <div className="space-y-4">
+                      <div className="flex items-center gap-2">
+                        <button
+                          onClick={() => setActiveActivasTab('pending')}
+                          className={`px-3 py-1.5 text-xs font-bold rounded-lg transition-all ${
+                            activeActivasTab === 'pending'
+                              ? 'bg-primary-600 text-white shadow-sm'
+                              : 'bg-slate-100 dark:bg-slate-800 text-slate-500 dark:text-slate-400 hover:bg-slate-200 dark:hover:bg-slate-700'
+                          }`}
+                        >
+                          Pendientes ({pendingAppointments.length})
+                        </button>
+                        <button
+                          onClick={() => setActiveActivasTab('confirmed')}
+                          className={`px-3 py-1.5 text-xs font-bold rounded-lg transition-all ${
+                            activeActivasTab === 'confirmed'
+                              ? 'bg-primary-600 text-white shadow-sm'
+                              : 'bg-slate-100 dark:bg-slate-800 text-slate-500 dark:text-slate-400 hover:bg-slate-200 dark:hover:bg-slate-700'
+                          }`}
+                        >
+                          Confirmadas ({confirmedAppointments.length})
+                        </button>
                       </div>
-                    )
-                  )}
-
-                  {activeAppointmentTab === 'confirmed' && (
-                    confirmedAppointments.length === 0 ? (
-                      <EmptyState
-                        icon={<CalendarCheck className="w-8 h-8" />}
-                        title="Sin citas confirmadas"
-                        description="Las citas confirmadas aparecerán aquí."
-                      />
-                    ) : (
-                      <div className="space-y-4">
-                        <BusinessAppointmentList
-                          appointments={pagedConfirmed}
-                          onStatusChange={handleUpdateAppointmentStatus}
-                          onReschedule={(appt) => setAppointmentToReschedule(appt)}
-                          showReviewSection={false}
-                        />
-                        {confirmedAppointments.length > pagination.confirmed.perPage && (
-                          <Pagination
-                            currentPage={pagination.confirmed.page}
-                            totalPages={Math.ceil(confirmedAppointments.length / pagination.confirmed.perPage)}
-                            onPageChange={(page) => handlePageChange('confirmed', page)}
+                      {activeActivasTab === 'pending' && (
+                        pendingAppointments.length === 0 ? (
+                          <EmptyState
+                            icon={<CalendarClock className="w-8 h-8" />}
+                            title="Sin citas pendientes"
+                            description="No hay solicitudes de reserva pendientes de confirmación."
                           />
-                        )}
-                      </div>
-                    )
+                        ) : (
+                          <div className="space-y-4">
+                            <BusinessAppointmentList
+                              appointments={pagedPending}
+                              onStatusChange={handleUpdateAppointmentStatus}
+                              onReschedule={(appt) => setAppointmentToReschedule(appt)}
+                              showReviewSection={false}
+                            />
+                            {pendingAppointments.length > pagination.pending.perPage && (
+                              <Pagination
+                                currentPage={pagination.pending.page}
+                                totalPages={Math.ceil(pendingAppointments.length / pagination.pending.perPage)}
+                                onPageChange={(page) => handlePageChange('pending', page)}
+                              />
+                            )}
+                          </div>
+                        )
+                      )}
+                      {activeActivasTab === 'confirmed' && (
+                        confirmedAppointments.length === 0 ? (
+                          <EmptyState
+                            icon={<CalendarCheck className="w-8 h-8" />}
+                            title="Sin citas confirmadas"
+                            description="Las citas confirmadas aparecerán aquí."
+                          />
+                        ) : (
+                          <div className="space-y-4">
+                            <BusinessAppointmentList
+                              appointments={pagedConfirmed}
+                              onStatusChange={handleUpdateAppointmentStatus}
+                              onReschedule={(appt) => setAppointmentToReschedule(appt)}
+                              showReviewSection={false}
+                            />
+                            {confirmedAppointments.length > pagination.confirmed.perPage && (
+                              <Pagination
+                                currentPage={pagination.confirmed.page}
+                                totalPages={Math.ceil(confirmedAppointments.length / pagination.confirmed.perPage)}
+                                onPageChange={(page) => handlePageChange('confirmed', page)}
+                              />
+                            )}
+                          </div>
+                        )
+                      )}
+                    </div>
                   )}
 
                   {activeAppointmentTab === 'calendar' && (

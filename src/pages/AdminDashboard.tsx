@@ -53,7 +53,7 @@ const AdminDashboard = ({ user }: AdminDashboardProps) => {
   const [activeTab, setActiveTab] = useState('overview');
   const [activeUsersTab, setActiveUsersTab] = useState('users');
   const [activeBusinessesTab, setActiveBusinessesTab] = useState('businesses');
-  const [activeMarketingTab, setActiveMarketingTab] = useState('marketing');
+  const [activeContentTab, setActiveContentTab] = useState('blog');
 
   const [referralStats, setReferralStats] = useState<{ total_referrals: number; unique_referrers: number } | null>(null);
   const [topReferrers, setTopReferrers] = useState<ReferralStat[]>([]);
@@ -65,8 +65,7 @@ const AdminDashboard = ({ user }: AdminDashboardProps) => {
     { id: 'overview', label: 'Resumen' },
     { id: 'users', label: 'Usuarios' },
     { id: 'businesses', label: 'Negocios' },
-    { id: 'blog', label: 'Blog' },
-    { id: 'marketing', label: 'Marketing' },
+    { id: 'content', label: 'Contenido' },
   ];
 
   const loadData = useCallback(async () => {
@@ -407,19 +406,19 @@ const AdminDashboard = ({ user }: AdminDashboardProps) => {
             </div>
           )}
 
-          {activeTab === 'blog' && <BlogManagementSection />}
-
-          {activeTab === 'marketing' && (
+          {activeTab === 'content' && (
             <div className="space-y-5">
               <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pb-3 border-b border-slate-100 dark:border-slate-800">
-                <SectionHeader title="Marketing" description="Campañas y referidos" />
+                <SectionHeader title="Contenido" description="Blog y campañas de marketing" />
                 <TabNav tabs={[
+                  { id: 'blog', label: 'Blog' },
                   { id: 'marketing', label: 'Marketing' },
                   { id: 'referrals', label: 'Referidos' },
-                ]} activeTabId={activeMarketingTab} onTabChange={setActiveMarketingTab} variant="pill" />
+                ]} activeTabId={activeContentTab} onTabChange={setActiveContentTab} variant="pill" />
               </div>
-              {activeMarketingTab === 'marketing' && <MarketingSection />}
-              {activeMarketingTab === 'referrals' && (
+              {activeContentTab === 'blog' && <BlogManagementSection />}
+              {activeContentTab === 'marketing' && <MarketingSection />}
+              {activeContentTab === 'referrals' && (
                 <div className="animate-in fade-in zoom-in-95 duration-300 space-y-6">
                   {referralLoading ? (
                     <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
