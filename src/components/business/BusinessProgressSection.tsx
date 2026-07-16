@@ -47,57 +47,59 @@ export default function BusinessProgressSection({ businessData }: { businessData
   const total = items.length;
   const percent = Math.round((doneCount / total) * 100);
   const allDone = doneCount === total;
+  const [visible, setVisible] = useState(false);
 
-  if (allDone && !loading) return null;
+  useEffect(() => {
+    if (!loading && !allDone) {
+      const id = requestAnimationFrame(() => setVisible(true));
+      return () => cancelAnimationFrame(id);
+    }
+  }, [loading, allDone]);
 
   return (
-    <div className="bg-white dark:bg-slate-900 rounded-lg border border-slate-200 dark:border-slate-800 p-5 sm:p-6 animate-in fade-in duration-300">
-      <div className="flex items-center justify-between mb-4">
-        <div>
-          <h3 className="font-black text-slate-900 dark:text-white text-sm">Progreso de configuración</h3>
-          <p className="text-xs text-slate-500 dark:text-slate-400 mt-0.5">{doneCount} de {total} completado</p>
+    <div className={`transition-all duration-500 ease-out ${!loading && !allDone && visible ? 'opacity-100 max-h-[500px] mb-0' : 'opacity-0 max-h-0 mb-0 overflow-hidden'}`}>
+      <div className="bg-white dark:bg-slate-900 rounded-lg border border-slate-200 dark:border-slate-800 p-5 sm:p-6">
+        <div className="flex items-center justify-between mb-4">
+          <div>
+            <h3 className="font-black text-slate-900 dark:text-white text-sm">Progreso de configuración</h3>
+            <p className="text-xs text-slate-500 dark:text-slate-400 mt-0.5">{doneCount} de {total} completado</p>
+          </div>
+          <div className="relative w-10 h-10">
+            <svg className="w-10 h-10 -rotate-90" viewBox="0 0 36 36">
+              <circle cx="18" cy="18" r="16" fill="none" stroke="currentColor" strokeWidth="3" className="text-slate-200 dark:text-slate-700" />
+              <circle
+                cx="18" cy="18" r="16" fill="none" stroke="currentColor" strokeWidth="3"
+                strokeDasharray={`${percent * 1.005} 100.5`}
+                className={`${percent < 50 ? 'text-amber-500' : percent < 80 ? 'text-primary-500' : 'text-emerald-500'}`}
+              />
+            </svg>
+            <span className="absolute inset-0 flex items-center justify-center text-[9px] font-black text-slate-600 dark:text-slate-300">
+              {percent}%
+            </span>
+          </div>
         </div>
-        <div className="flex items-center gap-2">
-          {loading ? (
-            <div className="w-10 h-10 rounded-full bg-slate-100 dark:bg-slate-800 animate-pulse" />
-          ) : (
-            <div className="relative w-10 h-10">
-              <svg className="w-10 h-10 -rotate-90" viewBox="0 0 36 36">
-                <circle cx="18" cy="18" r="16" fill="none" stroke="currentColor" strokeWidth="3" className="text-slate-200 dark:text-slate-700" />
-                <circle
-                  cx="18" cy="18" r="16" fill="none" stroke="currentColor" strokeWidth="3"
-                  strokeDasharray={`${percent * 1.005} 100.5`}
-                  className={`${percent < 50 ? 'text-amber-500' : percent < 80 ? 'text-primary-500' : 'text-emerald-500'}`}
-                />
-              </svg>
-              <span className="absolute inset-0 flex items-center justify-center text-[9px] font-black text-slate-600 dark:text-slate-300">
-                {percent}%
-              </span>
-            </div>
-          )}
-        </div>
-      </div>
 
-      <div className="space-y-1.5">
-        {items.map(item => (
-          <Link
-            key={item.id}
-            to={item.link}
-            className={`flex items-center gap-3 p-2.5 rounded-lg transition-all text-sm ${
-              item.done
-                ? 'text-slate-400 dark:text-slate-500'
-                : 'text-slate-700 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-800/50'
-            }`}
-          >
-            {item.done ? (
-              <CheckCircle2 className="w-5 h-5 text-emerald-500 flex-shrink-0" />
-            ) : (
-              <Circle className="w-5 h-5 text-slate-300 dark:text-slate-600 flex-shrink-0" />
-            )}
-            <span className={item.done ? 'line-through' : ''}>{item.label}</span>
-            {!item.done && <AlertCircle className="w-3.5 h-3.5 text-amber-500 ml-auto flex-shrink-0" />}
-          </Link>
-        ))}
+        <div className="space-y-1.5">
+          {items.map(item => (
+            <Link
+              key={item.id}
+              to={item.link}
+              className={`flex items-center gap-3 p-2.5 rounded-lg transition-all text-sm ${
+                item.done
+                  ? 'text-slate-400 dark:text-slate-500'
+                  : 'text-slate-700 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-800/50'
+              }`}
+            >
+              {item.done ? (
+                <CheckCircle2 className="w-5 h-5 text-emerald-500 flex-shrink-0" />
+              ) : (
+                <Circle className="w-5 h-5 text-slate-300 dark:text-slate-600 flex-shrink-0" />
+              )}
+              <span className={item.done ? 'line-through' : ''}>{item.label}</span>
+              {!item.done && <AlertCircle className="w-3.5 h-3.5 text-amber-500 ml-auto flex-shrink-0" />}
+            </Link>
+          ))}
+        </div>
       </div>
     </div>
   );

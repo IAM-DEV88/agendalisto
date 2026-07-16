@@ -266,10 +266,16 @@ pnpm netlify-build    # Build para Netlify (instala + build + sitemap + prerende
 
 ## Developing with an Agent (opencode)
 
-- **Commits al finalizar la sesión:** Antes de cerrar la sesión de trabajo, hacer commit de todos los cambios funcionales completados. Usar `git add -A` y commits atómicos (un cambio lógico por commit). Mensajes descriptivos en español.
-- **Verificación pre-commit:** Ejecutar `pnpm type-check` luego `pnpm build` antes de cada commit para verificar que no hay errores. Si el build falla por errores preexistentes (no causados por tus cambios), documentarlo en el commit.
+- **Commits con permiso:** Antes de hacer commit, presentar un resumen de cambios, una lista de comprobación, y preguntar explícitamente si se desea proceder con el commit. No commitear sin autorización.
+- **Resumen de cambios:** Describir cada archivo modificado, qué cambió y por qué.
+- **Lista de comprobación de los cambios realizados:**
+  1. `pnpm type-check` — sin errores nuevos (solo preexistentes documentados).
+  2. Revisar `git diff --stat` para confirmar que solo se incluyen los archivos previstos.
+  3. Confirmar que no hay secretos, claves o datos sensibles en el diff.
+  4. Verificar que el comportamiento esperado se cumple (navegación, renderizado, datos correctos).
+  5. Mensaje descriptivo en español, un cambio lógico por commit.
 - Read files before editing. Understand conventions before writing code.
 - Prefer editing existing files over creating new ones unless clearly warranted.
-- After edits, run `pnpm type-check` then `pnpm build` to verify.
+- After edits, run `pnpm type-check` to verify no new errors.
 - **Remember: tables are `agendaya_profiles` NOT `profiles`.**
 - **SQL compartido:** Si modificas `handle_new_user()`, hacerlo en `../supabase-shared/handle_new_user.sql`. Nunca redefinirlo en archivos SQL del proyecto.
