@@ -57,11 +57,6 @@ const BusinessAppointmentList: React.FC<BusinessAppointmentListProps> = ({
   return (
     <>
       <div className="space-y-4">
-        {appointments.length > 0 && (
-          <p className="text-xs font-bold text-slate-400 uppercase tracking-wider">
-            {appointments.length} {appointments.length === 1 ? 'cita' : 'citas'}
-          </p>
-        )}
         {appointments.map((appointment, index) => {
           const styles = statusStyles[appointment.status] || statusStyles.pending;
           const date = new Date(appointment.start_time);
