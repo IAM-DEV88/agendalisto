@@ -376,54 +376,56 @@ const ProfileDashboard = ({ user }: ProfileDashboardProps) => {
                 </div>
 
                 {/* Right: Actions */}
-                <div className="flex items-center gap-2 flex-wrap shrink-0 justify-end">
-                  <button
-                    onClick={() => setActiveTab('settings')}
-                    className="inline-flex items-center justify-center p-2 bg-white dark:bg-slate-900 text-slate-500 hover:text-primary-600 dark:hover:text-primary-400 rounded-lg border border-slate-200 dark:border-slate-800 hover:border-primary-300 dark:hover:border-primary-700 active:scale-95 transition-all shadow-sm"
-                    title="Configuración"
-                  >
-                    <Settings className="w-4 h-4" />
-                  </button>
-                  {isVisitor ? (
+                <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-2 shrink-0 w-full sm:w-auto">
+                  <div className="flex items-center gap-2 flex-wrap flex-1 min-w-0">
                     <button
-                      onClick={handleActivateClient}
-                      className="inline-flex items-center gap-1.5 px-4 py-2 bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-bold rounded-lg transition-all shadow-lg shadow-emerald-500/25 active:scale-95"
+                      onClick={() => setActiveTab('settings')}
+                      className="inline-flex items-center justify-center w-9 h-9 p-0 bg-white dark:bg-slate-900 text-slate-500 hover:text-primary-600 dark:hover:text-primary-400 rounded-lg border border-slate-200 dark:border-slate-800 hover:border-primary-300 dark:hover:border-primary-700 active:scale-95 transition-all shadow-sm shrink-0"
+                      title="Configuración"
                     >
-                      <UserPlus className="w-3.5 h-3.5" />
-                      <span className="hidden sm:inline">Activar cuenta</span>
-                      <span className="sm:hidden">Activar</span>
+                      <Settings className="w-4 h-4" />
                     </button>
-                  ) : null}
-                  {hasBusiness ? (
-                    <>
+                    {isVisitor ? (
+                      <button
+                        onClick={handleActivateClient}
+                        className="inline-flex items-center justify-center gap-1.5 px-4 h-9 bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-bold rounded-lg transition-all shadow-lg shadow-emerald-500/25 active:scale-95"
+                      >
+                        <UserPlus className="w-3.5 h-3.5" />
+                        <span className="hidden sm:inline">Activar cuenta</span>
+                        <span className="sm:hidden">Activar</span>
+                      </button>
+                    ) : null}
+                    {hasBusiness ? (
+                      <>
+                        <Link
+                          to="/business/dashboard"
+                          className="inline-flex items-center justify-center gap-1.5 px-4 h-9 bg-primary-600 hover:bg-primary-700 text-white text-xs font-bold rounded-lg transition-all shadow-lg shadow-primary-500/25 active:scale-95"
+                        >
+                          <Store className="w-3.5 h-3.5" />
+                          <span className="hidden sm:inline">Mi Negocio</span>
+                          <span className="sm:hidden">Negocio</span>
+                        </Link>
+                        {canCreateMore && (
+                          <Link
+                            to="/business/register"
+                            className="inline-flex items-center justify-center gap-1.5 px-3 h-9 bg-white dark:bg-slate-900 text-primary-600 dark:text-primary-400 text-xs font-bold rounded-lg border border-primary-200 dark:border-primary-800 hover:bg-primary-50 dark:hover:bg-primary-900/20 active:scale-95 transition-all shadow-sm"
+                          >
+                            <Plus className="w-3.5 h-3.5 shrink-0" />
+                            <span className="hidden sm:inline">Crear otro</span>
+                          </Link>
+                        )}
+                      </>
+                    ) : !isVisitor ? (
                       <Link
-                        to="/business/dashboard"
-                        className="inline-flex items-center gap-1.5 px-4 py-2 bg-primary-600 hover:bg-primary-700 text-white text-xs font-bold rounded-lg transition-all shadow-lg shadow-primary-500/25 active:scale-95"
+                        to="/business/register"
+                        className="inline-flex items-center justify-center gap-1.5 px-4 h-9 bg-white dark:bg-slate-900 text-primary-600 dark:text-primary-400 text-xs font-bold rounded-lg border border-primary-200 dark:border-primary-800 hover:bg-primary-50 dark:hover:bg-primary-900/20 active:scale-95 transition-all shadow-sm"
                       >
                         <Store className="w-3.5 h-3.5" />
-                        <span className="hidden sm:inline">Mi Negocio</span>
-                        <span className="sm:hidden">Negocio</span>
+                        <span className="hidden sm:inline">Registrar mi negocio</span>
+                        <span className="sm:hidden">Registrar</span>
                       </Link>
-                      {canCreateMore && (
-                        <Link
-                          to="/business/register"
-                          className="inline-flex items-center gap-1.5 px-4 py-2 bg-white dark:bg-slate-900 text-primary-600 dark:text-primary-400 text-xs font-bold rounded-lg border border-primary-200 dark:border-primary-800 hover:bg-primary-50 dark:hover:bg-primary-900/20 active:scale-95 transition-all shadow-sm"
-                        >
-                          <Plus className="w-3.5 h-3.5" />
-                          <span className="hidden sm:inline">Crear otro</span>
-                        </Link>
-                      )}
-                    </>
-                  ) : !isVisitor ? (
-                    <Link
-                      to="/business/register"
-                      className="inline-flex items-center gap-1.5 px-4 py-2 bg-white dark:bg-slate-900 text-primary-600 dark:text-primary-400 text-xs font-bold rounded-lg border border-primary-200 dark:border-primary-800 hover:bg-primary-50 dark:hover:bg-primary-900/20 active:scale-95 transition-all shadow-sm"
-                    >
-                      <Store className="w-3.5 h-3.5" />
-                      <span className="hidden sm:inline">Registrar mi negocio</span>
-                      <span className="sm:hidden">Registrar</span>
-                    </Link>
-                  ) : null}
+                    ) : null}
+                  </div>
                 </div>
               </div>
             </div>
