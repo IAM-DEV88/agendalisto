@@ -355,42 +355,37 @@ export const BusinessDashboard: React.FC = () => {
             <div className="bg-white dark:bg-slate-900 rounded-lg border border-slate-200 dark:border-slate-800 shadow-sm p-4">
               <div className="flex flex-col sm:flex-row sm:items-center gap-3 sm:gap-4">
                 {/* Left: Business Info */}
-                <div className="flex items-center gap-3 min-w-0 flex-1 relative">
-                  {/* Content */}
-                  <div className={`transition-opacity duration-500 ${businessData ? 'opacity-100' : 'opacity-0 absolute pointer-events-none'}`}>
-                    {businessData && (
-                      <Link to={`/${businessData.slug}`} className="flex items-center gap-3 group min-w-0 flex-1">
-                        <div className="relative shrink-0">
-                          <div className="h-12 w-12 sm:h-14 sm:w-14 rounded-lg overflow-hidden ring-2 ring-white dark:ring-slate-800 shadow-lg transition-transform duration-300 group-hover:scale-105">
-                            <img
-                              src={businessData.logo_url || 'https://upload.wikimedia.org/wikipedia/commons/8/89/Portrait_Placeholder.png'}
-                              alt={`${businessData.name} logo`}
-                              className="h-full w-full object-contain"
-                            />
-                          </div>
-                          <div className="absolute -bottom-0.5 -right-0.5 w-3.5 h-3.5 bg-emerald-500 border-[3px] border-white dark:border-slate-900 rounded-full shadow" />
+                <div className="flex items-center gap-3 min-w-0 flex-1">
+                  {businessData ? (
+                    <Link to={`/${businessData.slug}`} className="flex items-center gap-3 group min-w-0 flex-1">
+                      <div className="relative shrink-0">
+                        <div className="h-12 w-12 sm:h-14 sm:w-14 rounded-lg overflow-hidden ring-2 ring-white dark:ring-slate-800 shadow-lg transition-transform duration-300 group-hover:scale-105">
+                          <img
+                            src={businessData.logo_url || 'https://upload.wikimedia.org/wikipedia/commons/8/89/Portrait_Placeholder.png'}
+                            alt={`${businessData.name} logo`}
+                            className="h-full w-full object-contain"
+                          />
                         </div>
-                        <div className="min-w-0">
-                          <div className="flex items-center gap-1.5 flex-wrap">
-                            <h1 className="text-lg sm:text-xl font-black text-slate-900 dark:text-white tracking-tight truncate group-hover:text-primary-600 dark:group-hover:text-primary-400 transition-colors mb-0">
-                              {businessData.name}
-                            </h1>
-                            {planBadge && (
-                              <span className={`px-2 py-0.5 text-[10px] font-bold rounded-full uppercase tracking-wider shrink-0 ${planBadge.className}`}>
-                                {planBadge.text}
-                              </span>
-                            )}
-                          </div>
-                          <p className="text-xs sm:text-sm font-medium text-slate-500 dark:text-slate-400 flex items-center gap-1.5 truncate mb-0">
-                            <Store className="w-3.5 h-3.5 shrink-0" />
-                            Panel de Administración
-                          </p>
+                        <div className="absolute -bottom-0.5 -right-0.5 w-3.5 h-3.5 bg-emerald-500 border-[3px] border-white dark:border-slate-900 rounded-full shadow" />
+                      </div>
+                      <div className="min-w-0">
+                        <div className="flex items-center gap-1.5 flex-wrap">
+                          <h1 className="text-lg sm:text-xl font-black text-slate-900 dark:text-white tracking-tight truncate group-hover:text-primary-600 dark:group-hover:text-primary-400 transition-colors mb-0">
+                            {businessData.name}
+                          </h1>
+                          {planBadge && (
+                            <span className={`px-2 py-0.5 text-[10px] font-bold rounded-full uppercase tracking-wider shrink-0 ${planBadge.className}`}>
+                              {planBadge.text}
+                            </span>
+                          )}
                         </div>
-                      </Link>
-                    )}
-                  </div>
-                  {/* Skeleton */}
-                  <div className={`transition-opacity duration-500 ${businessData ? 'opacity-0' : 'opacity-100'}`}>
+                        <p className="text-xs sm:text-sm font-medium text-slate-500 dark:text-slate-400 flex items-center gap-1.5 truncate mb-0">
+                          <Store className="w-3.5 h-3.5 shrink-0" />
+                          Panel de Administración
+                        </p>
+                      </div>
+                    </Link>
+                  ) : (
                     <div className="flex items-center gap-3">
                       <div className="h-12 w-12 sm:h-14 sm:w-14 rounded-lg bg-slate-200 dark:bg-slate-800 animate-pulse" />
                       <div className="space-y-2">
@@ -398,7 +393,7 @@ export const BusinessDashboard: React.FC = () => {
                         <div className="h-3 bg-slate-200 dark:bg-slate-800 rounded-lg w-28 animate-pulse" />
                       </div>
                     </div>
-                  </div>
+                  )}
                 </div>
 
                 {/* Right: Actions */}
