@@ -119,13 +119,14 @@ const ModeratorDashboard = ({ user }: ModeratorDashboardProps) => {
         <div className="mt-8">
           {activeTab === 'overview' && (
             <div className="space-y-5">
-              <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pb-3 border-b border-slate-100 dark:border-slate-800">
-                <h3 className="text-lg font-black text-slate-900 dark:text-white mb-0">Resumen</h3>
-                <TabNav tabs={[
-                  { id: 'overview', label: 'General' },
-                  { id: 'referrals', label: 'Referidos' },
-                ]} activeTabId={activeOverviewTab} onTabChange={setActiveOverviewTab} variant="pill" />
+              <div className="mb-4 md:mb-6">
+                <h3 className="text-lg font-black text-slate-900 dark:text-white">Resumen</h3>
               </div>
+              <TabNav tabs={[
+                { id: 'overview', label: 'General' },
+                { id: 'referrals', label: 'Referidos' },
+              ]} activeTabId={activeOverviewTab} onTabChange={setActiveOverviewTab} variant="pill" connected />
+              <div className="bg-white dark:bg-slate-900 rounded-b-lg border border-slate-100 dark:border-slate-800 p-4 md:p-6 -mt-px">
               {activeOverviewTab === 'overview' && (
                 <div className="bg-white dark:bg-slate-900 rounded-lg border border-slate-200 dark:border-slate-800 p-6">
                   <h3 className="text-lg font-black text-slate-900 dark:text-white mb-2">Moderación General</h3>
@@ -179,6 +180,7 @@ const ModeratorDashboard = ({ user }: ModeratorDashboardProps) => {
                   )}
                 </div>
               )}
+              </div>
             </div>
           )}
 

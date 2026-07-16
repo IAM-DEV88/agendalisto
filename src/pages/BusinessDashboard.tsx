@@ -443,17 +443,15 @@ export const BusinessDashboard: React.FC = () => {
 
           {/* ─── CITAS ─── */}
           {activeTab === 'appointments' && (
-            <div className="space-y-5">
-              <div
-                className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pb-3 border-b border-slate-100 dark:border-slate-800"
-                onTouchStart={(e) => e.stopPropagation()}
-                onMouseDown={(e) => e.stopPropagation()}
-              >
+            <div>
+              <div className="mb-4 md:mb-6">
                 <SectionHeader title="Gestión de Citas" description="Administra tus reservas activas" />
-                <TabNav tabs={appointmentTabs} activeTabId={activeAppointmentTab} onTabChange={setActiveAppointmentTab} variant="pill" sticky />
               </div>
 
-              <div className="animate-in fade-in zoom-in-95 duration-300">
+              <TabNav tabs={appointmentTabs} activeTabId={activeAppointmentTab} onTabChange={setActiveAppointmentTab} variant="pill" sticky connected />
+
+              <div className="bg-white dark:bg-slate-900 rounded-b-lg border border-slate-100 dark:border-slate-800 p-4 md:p-6 -mt-px">
+                <div className="animate-in fade-in zoom-in-95 duration-300">
                 {activeAppointmentTab === 'activas' && (
                   <div className="space-y-4">
                     <div className="flex items-center gap-2">
@@ -584,6 +582,7 @@ export const BusinessDashboard: React.FC = () => {
                     </div>
                   )
                 )}
+                </div>
               </div>
             </div>
           )}
@@ -650,13 +649,15 @@ export const BusinessDashboard: React.FC = () => {
 
           {/* ─── CONFIGURACIÓN ─── */}
           {activeTab === 'settings' && businessData && (
-            <div className="space-y-5">
-              <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pb-3 border-b border-slate-100 dark:border-slate-800">
+            <div>
+              <div className="mb-4 md:mb-6">
                 <SectionHeader title="Configuración" description="Perfil y comportamiento de la página" />
-                <TabNav tabs={settingsTabs} activeTabId={activeSettingsTab} onTabChange={setActiveSettingsTab} variant="pill" sticky />
               </div>
 
-              <div className="animate-in fade-in zoom-in-95 duration-300">
+              <TabNav tabs={settingsTabs} activeTabId={activeSettingsTab} onTabChange={setActiveSettingsTab} variant="pill" sticky connected />
+
+              <div className="bg-white dark:bg-slate-900 rounded-b-lg border border-slate-100 dark:border-slate-800 p-4 md:p-6 -mt-px">
+                <div className="animate-in fade-in zoom-in-95 duration-300">
                 {activeSettingsTab === 'profile' && (
                   <BusinessProfileSection
                     businessData={businessData}
@@ -682,6 +683,7 @@ export const BusinessDashboard: React.FC = () => {
                     businessId={businessData?.id || ''}
                   />
                 )}
+                </div>
               </div>
             </div>
           )}

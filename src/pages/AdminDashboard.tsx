@@ -389,15 +389,16 @@ const AdminDashboard = ({ user }: AdminDashboardProps) => {
             </div>
           )}
           {activeTab === 'content' && (
-            <div className="space-y-5">
-              <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pb-3 border-b border-slate-100 dark:border-slate-800">
+            <div>
+              <div className="mb-4 md:mb-6">
                 <SectionHeader title="Contenido" description="Blog y campañas de marketing" />
-                <TabNav tabs={[
-                  { id: 'blog', label: 'Blog' },
-                  { id: 'marketing', label: 'Marketing' },
-                  { id: 'referrals', label: 'Referidos' },
-                ]} activeTabId={activeContentTab} onTabChange={setActiveContentTab} variant="pill" />
               </div>
+              <TabNav tabs={[
+                { id: 'blog', label: 'Blog' },
+                { id: 'marketing', label: 'Marketing' },
+                { id: 'referrals', label: 'Referidos' },
+              ]} activeTabId={activeContentTab} onTabChange={setActiveContentTab} variant="pill" connected />
+              <div className="bg-white dark:bg-slate-900 rounded-b-lg border border-slate-100 dark:border-slate-800 p-4 md:p-6 -mt-px">
               {activeContentTab === 'blog' && <BlogManagementSection />}
               {activeContentTab === 'marketing' && <MarketingSection />}
               {activeContentTab === 'referrals' && (
@@ -513,6 +514,7 @@ const AdminDashboard = ({ user }: AdminDashboardProps) => {
                   )}
                 </div>
               )}
+              </div>
             </div>
           )}
         </div>

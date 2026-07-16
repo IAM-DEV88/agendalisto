@@ -23,19 +23,21 @@ interface FavoritesSectionProps {
 export default function FavoritesSection({ user }: FavoritesSectionProps) {
   const [activeTab, setActiveTab] = useState('businesses');
   return (
-    <div className="space-y-5">
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pb-3 border-b border-slate-100 dark:border-slate-800">
+    <div>
+      <div className="mb-4 md:mb-6">
         <SectionHeader
           title="Mis Favoritos"
           description="Negocios, servicios y publicaciones que has guardado"
         />
-        <TabNav tabs={FAVORITE_TABS} activeTabId={activeTab} onTabChange={setActiveTab} variant="pill" sticky />
       </div>
+      <TabNav tabs={FAVORITE_TABS} activeTabId={activeTab} onTabChange={setActiveTab} variant="pill" sticky connected />
 
-      <div className="animate-in fade-in zoom-in-95 duration-300">
-        {activeTab === 'businesses' && <BusinessFavorites userId={user.id} />}
-        {activeTab === 'services' && <ServiceFavorites userId={user.id} />}
-        {activeTab === 'posts' && <BlogFavorites userId={user.id} />}
+      <div className="bg-white dark:bg-slate-900 rounded-b-lg border border-slate-100 dark:border-slate-800 p-4 md:p-6 -mt-px">
+        <div className="animate-in fade-in zoom-in-95 duration-300">
+          {activeTab === 'businesses' && <BusinessFavorites userId={user.id} />}
+          {activeTab === 'services' && <ServiceFavorites userId={user.id} />}
+          {activeTab === 'posts' && <BlogFavorites userId={user.id} />}
+        </div>
       </div>
     </div>
   );

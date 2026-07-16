@@ -461,26 +461,25 @@ const ProfileDashboard = ({ user }: ProfileDashboardProps) => {
 
           {/* ═══ CITAS TAB ═══ */}
           {activeTab === 'appointments' && (
-            <div className="space-y-5">
-              <div
-                className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pb-3 border-b border-slate-100 dark:border-slate-800"
-                onTouchStart={(e) => e.stopPropagation()}
-                onMouseDown={(e) => e.stopPropagation()}
-              >
+            <div>
+              <div className="mb-4 md:mb-6">
                 <SectionHeader
                   title="Mis Reservas"
                   description="Gestiona tus citas y revisa tu historial"
                 />
-                <TabNav
-                  tabs={appointmentTabs}
-                  activeTabId={activeAppointmentTab}
-                  onTabChange={setActiveAppointmentTab}
-                  variant="pill"
-                  sticky
-                />
               </div>
 
-              <div className="animate-in fade-in zoom-in-95 duration-300">
+              <TabNav
+                tabs={appointmentTabs}
+                activeTabId={activeAppointmentTab}
+                onTabChange={setActiveAppointmentTab}
+                variant="pill"
+                sticky
+                connected
+              />
+
+              <div className="bg-white dark:bg-slate-900 rounded-b-lg border border-slate-100 dark:border-slate-800 p-4 md:p-6 -mt-px">
+                <div className="animate-in fade-in zoom-in-95 duration-300">
                 {/* Calendario */}
                 {activeAppointmentTab === 'calendar' && (
                   <AppointmentCalendar
@@ -585,6 +584,7 @@ const ProfileDashboard = ({ user }: ProfileDashboardProps) => {
                 )}
               </div>
             </div>
+          </div>
           )}
 
           {/* ═══ FAVORITES TAB ═══ */}
@@ -596,18 +596,21 @@ const ProfileDashboard = ({ user }: ProfileDashboardProps) => {
 
           {/* ═══ STATS TAB ═══ */}
           {activeTab === 'stats' && (
-            <div className="animate-in fade-in zoom-in-95 duration-300 space-y-5">
-              <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pb-3 border-b border-slate-100 dark:border-slate-800">
+            <div>
+              <div className="mb-4 md:mb-6">
                 <SectionHeader
                   title="Estadísticas"
                   description="Resumen de tu actividad como cliente"
                 />
-                <TabNav tabs={[
-                  { id: 'overview', label: 'Resumen' },
-                  { id: 'referrals', label: 'Referidos' },
-                ]} activeTabId={activeStatsTab} onTabChange={setActiveStatsTab} variant="pill" />
               </div>
 
+              <TabNav tabs={[
+                { id: 'overview', label: 'Resumen' },
+                { id: 'referrals', label: 'Referidos' },
+              ]} activeTabId={activeStatsTab} onTabChange={setActiveStatsTab} variant="pill" connected />
+
+              <div className="bg-white dark:bg-slate-900 rounded-b-lg border border-slate-100 dark:border-slate-800 p-4 md:p-6 -mt-px">
+                <div className="animate-in fade-in zoom-in-95 duration-300 space-y-5">
               {activeStatsTab === 'overview' && (<>
                 {user && appointments.length > 0 && (
                   <VisitStreaks userId={user.id} businessId={appointments.filter(a => a.businesses?.name).reduce((acc, a) => {
@@ -672,27 +675,32 @@ const ProfileDashboard = ({ user }: ProfileDashboardProps) => {
                   <ReferralSection userId={user.id} />
                 </div>
               )}
+                </div>
+              </div>
             </div>
           )}
 
           {/* ═══ SETTINGS TAB ═══ */}
           {activeTab === 'settings' && (
-            <div className="space-y-5">
-              <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pb-3 border-b border-slate-100 dark:border-slate-800">
+            <div>
+              <div className="mb-4 md:mb-6">
                 <SectionHeader
                   title="Configuración"
                   description="Actualiza tu perfil y preferencias"
                 />
-                <TabNav
-                  tabs={settingsTabs}
-                  activeTabId={activeSettingsTab}
-                  onTabChange={setActiveSettingsTab}
-                  variant="pill"
-                  sticky
-                />
               </div>
 
-              <div className="animate-in fade-in zoom-in-95 duration-300">
+              <TabNav
+                tabs={settingsTabs}
+                activeTabId={activeSettingsTab}
+                onTabChange={setActiveSettingsTab}
+                variant="pill"
+                sticky
+                connected
+              />
+
+              <div className="bg-white dark:bg-slate-900 rounded-b-lg border border-slate-100 dark:border-slate-800 p-4 md:p-6 -mt-px">
+                <div className="animate-in fade-in zoom-in-95 duration-300">
                 {activeSettingsTab === 'profile' && (
                   <UserProfileSection
                     profileData={profileData}
@@ -777,6 +785,7 @@ const ProfileDashboard = ({ user }: ProfileDashboardProps) => {
                     </div>
                   </div>
                 )}
+                </div>
               </div>
             </div>
           )}
