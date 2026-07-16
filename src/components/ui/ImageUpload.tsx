@@ -11,7 +11,6 @@ interface ImageUploadProps {
   onDelete?: () => void;
   accept?: string;
   maxSizeMB?: number;
-  aspectRatio?: string;
 }
 
 export default function ImageUpload({
@@ -83,7 +82,7 @@ export default function ImageUpload({
           <img
             src={displayUrl}
             alt="Preview"
-            className="w-full h-48 object-cover"
+            className="w-full h-48 object-contain bg-slate-50 dark:bg-slate-800/50"
           />
           <div className="absolute inset-0 bg-black/0 group-hover:bg-black/40 transition-all flex items-center justify-center gap-2">
             <button

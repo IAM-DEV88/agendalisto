@@ -3,6 +3,7 @@ import { supabase } from '../../lib/supabase';
 import { Camera, Check, User, Mail } from 'lucide-react';
 import PhoneInput from '../../components/ui/PhoneInput';
 import FormInput from '../../components/ui/FormInput';
+import { FALLBACK_AVATAR } from '../../lib/config';
 
 interface UserProfileSectionProps {
   profileData: {
@@ -16,8 +17,6 @@ interface UserProfileSectionProps {
   onSave: (e: FormEvent<HTMLFormElement>) => Promise<void>;
   onChange: (e: ChangeEvent<HTMLInputElement>) => void;
 }
-
-const FALLBACK_AVATAR = 'https://upload.wikimedia.org/wikipedia/commons/8/89/Portrait_Placeholder.png';
 
 const UserProfileSection: React.FC<UserProfileSectionProps> = ({
   profileData,

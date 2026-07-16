@@ -10,8 +10,9 @@ export const BASE_URL = import.meta.env.VITE_BASE_URL || window.location.origin;
 // App settings
 export const APP_NAME = 'AgendaYa';
 export const APP_DESCRIPTION = 'Plataforma para la gestion de reservas y citas para negocios y servicios.';
-export const DEFAULT_AVATAR = 'https://via.placeholder.com/150?text=Usuario';
-export const DEFAULT_BUSINESS_LOGO = 'https://via.placeholder.com/300?text=Negocio';
+export const FALLBACK_AVATAR = 'https://upload.wikimedia.org/wikipedia/commons/8/89/Portrait_Placeholder.png';
+export const FALLBACK_BUSINESS_LOGO = 'https://upload.wikimedia.org/wikipedia/commons/8/89/Portrait_Placeholder.png';
+export const FALLBACK_BLOG_IMG = 'https://images.unsplash.com/photo-1499750310107-5fef28a66643?w=400&q=80';
 
 // Validation settings
 export const MIN_PASSWORD_LENGTH = 8;
@@ -27,8 +28,9 @@ export default {
   BASE_URL,
   APP_NAME,
   APP_DESCRIPTION,
-  DEFAULT_AVATAR,
-  DEFAULT_BUSINESS_LOGO,
+  FALLBACK_AVATAR,
+  FALLBACK_BUSINESS_LOGO,
+  FALLBACK_BLOG_IMG,
   MIN_PASSWORD_LENGTH,
   PHONE_REGEX
 }; 

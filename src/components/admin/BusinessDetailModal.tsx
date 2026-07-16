@@ -101,7 +101,7 @@ const BusinessDetailModal = ({ business, onClose, onUpdated }: BusinessDetailMod
           <div className="flex items-center gap-4">
             <div className="h-14 w-14 rounded-full bg-emerald-100 dark:bg-emerald-900/50 flex items-center justify-center flex-shrink-0">
               {business.logo_url ? (
-                <img src={business.logo_url} alt="" className="h-14 w-14 rounded-full object-cover" />
+                <img src={business.logo_url} alt="" className="h-14 w-14 rounded-full object-contain" />
               ) : (
                 <Building2 className="h-6 w-6 text-emerald-600 dark:text-emerald-400" />
               )}

@@ -5,11 +5,9 @@ import toast from 'react-hot-toast';
 import SEO from '../components/SEO';
 import { CityHero, CityCategories, AgricultureSection, BusinessLeadForm } from '../components/city';
 import { getBusinesses, getBusinessCategories, insertLandingLead } from '../lib/api';
-import { AGENDAYA_WHATSAPP } from '../lib/config';
+import { AGENDAYA_WHATSAPP, FALLBACK_BUSINESS_LOGO } from '../lib/config';
 import { getCityConfig } from '../lib/cities';
 import type { Business, BusinessCategory } from '../lib/api';
-
-const FALLBACK_LOGO = 'https://upload.wikimedia.org/wikipedia/commons/8/89/Portrait_Placeholder.png';
 
 export default function CityLandingPage() {
   const { city: citySlug } = useParams<{ city: string }>();
@@ -174,10 +172,10 @@ export default function CityLandingPage() {
                 >
                   <div className="h-48 bg-slate-100 dark:bg-slate-800 overflow-hidden">
                     <img
-                      src={business.logo_url || FALLBACK_LOGO}
+                      src={business.logo_url || FALLBACK_BUSINESS_LOGO}
                       alt={business.name}
-                      className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500"
-                      onError={(e) => { (e.target as HTMLImageElement).src = FALLBACK_LOGO; }}
+                      className="w-full h-full object-contain group-hover:scale-110 transition-transform duration-500"
+                      onError={(e) => { (e.target as HTMLImageElement).src = FALLBACK_BUSINESS_LOGO; }}
                     />
                   </div>
                   <div className="p-5">

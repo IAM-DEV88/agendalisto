@@ -8,9 +8,7 @@ import { TabNav } from '../ui/TabNav';
 import SectionHeader from '../ui/SectionHeader';
 import EmptyState from '../ui/EmptyState';
 import { notifySuccess, notifyError } from '../../lib/toast';
-
-const FALLBACK_LOGO = 'https://upload.wikimedia.org/wikipedia/commons/8/89/Portrait_Placeholder.png';
-const FALLBACK_BLOG_IMG = 'https://images.unsplash.com/photo-1499750310107-5fef28a66643?w=400&q=80';
+import { FALLBACK_BUSINESS_LOGO, FALLBACK_BLOG_IMG } from '../../lib/config';
 
 const FAVORITE_TABS = [
   { id: 'businesses', label: 'Negocios' },
@@ -97,10 +95,10 @@ function FavoriteBusinessCard({ fav, removingId, onRemove }: { fav: FavoriteItem
       <Link to={`/${fav.slug}`} className="flex flex-col flex-1">
         <div className="h-40 bg-slate-100 dark:bg-slate-800 relative overflow-hidden flex-shrink-0">
           <img
-            src={fav.logo_url || FALLBACK_LOGO}
+            src={fav.logo_url || FALLBACK_BUSINESS_LOGO}
             alt={fav.name}
-            className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500"
-            onError={(e) => { e.currentTarget.src = FALLBACK_LOGO; }}
+            className="w-full h-full object-contain group-hover:scale-110 transition-transform duration-500"
+            onError={(e) => { e.currentTarget.src = FALLBACK_BUSINESS_LOGO; }}
           />
           <div className="absolute top-3 left-3 px-2.5 py-1 bg-white/90 dark:bg-slate-900/90 backdrop-blur-sm text-slate-700 dark:text-slate-300 rounded-lg text-[10px] font-black uppercase tracking-wider shadow-sm">
             Favorito
@@ -195,7 +193,7 @@ function ServiceFavorites({ userId }: { userId: string }) {
 }
 
 function FavoriteServiceCard({ fav, removingId, onRemove }: { fav: ServiceFavoriteItem; removingId: string | null; onRemove: (fav: ServiceFavoriteItem) => void }) {
-  const previewImage = fav.image_urls?.[0] || FALLBACK_LOGO;
+  const previewImage = fav.image_urls?.[0] || FALLBACK_BUSINESS_LOGO;
 
   return (
     <div className="group bg-white dark:bg-slate-900 rounded-lg border border-slate-200 dark:border-slate-800 overflow-hidden hover:border-primary-300 dark:hover:border-primary-700 hover:shadow-2xl transition-all duration-300 hover:-translate-y-1 flex flex-col">
@@ -204,8 +202,8 @@ function FavoriteServiceCard({ fav, removingId, onRemove }: { fav: ServiceFavori
           <img
             src={previewImage}
             alt={fav.name}
-            className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500"
-            onError={(e) => { e.currentTarget.src = FALLBACK_LOGO; }}
+            className="w-full h-full object-contain group-hover:scale-110 transition-transform duration-500"
+            onError={(e) => { e.currentTarget.src = FALLBACK_BUSINESS_LOGO; }}
           />
           <div className="absolute top-3 left-3 px-2.5 py-1 bg-white/90 dark:bg-slate-900/90 backdrop-blur-sm text-slate-700 dark:text-slate-300 rounded-lg text-[10px] font-black uppercase tracking-wider shadow-sm">
             {fav.business_name}

@@ -3,8 +3,7 @@ import { Link } from 'react-router-dom';
 import { getBusinesses } from '../../lib/api';
 import { Store, MapPin, ArrowRight } from 'lucide-react';
 import { parseCoordinatesFromAddress } from '../../utils/coordinates';
-
-const FALLBACK = 'https://upload.wikimedia.org/wikipedia/commons/8/89/Portrait_Placeholder.png';
+import { FALLBACK_BUSINESS_LOGO } from '../../lib/config';
 
 function haversineDistance(lat1: number, lng1: number, lat2: number, lng2: number): number {
   const R = 6371;
@@ -73,7 +72,7 @@ export default function CrossPromotion({ businessId, businessAddress, excludeId 
           <Link key={b.id} to={`/${b.slug}`}
             className="flex items-center gap-3 p-2.5 bg-white dark:bg-slate-800 rounded-lg hover:bg-amber-50 dark:hover:bg-amber-900/20 transition-all"
           >
-            <img src={b.logo_url || FALLBACK} alt="" className="w-10 h-10 rounded-lg object-cover bg-slate-100" onError={e => { (e.target as HTMLImageElement).src = FALLBACK; }} />
+            <img src={b.logo_url || FALLBACK_BUSINESS_LOGO} alt="" className="w-10 h-10 rounded-lg object-cover bg-slate-100" onError={e => { (e.target as HTMLImageElement).src = FALLBACK_BUSINESS_LOGO; }} />
             <div className="flex-1 min-w-0">
               <p className="font-bold text-sm text-slate-800 dark:text-slate-200 truncate">{b.name}</p>
               <p className="text-xs text-slate-400 truncate"><MapPin className="w-3 h-3 inline" /> {b.address || `${b._dist?.toFixed(1) || '?'} km`}</p>

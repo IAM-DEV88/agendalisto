@@ -10,10 +10,9 @@ import EmptyState from '../components/ui/EmptyState';
 import SelectMenu from '../components/ui/SelectMenu';
 import ShareButton from '../components/ui/ShareButton';
 import ReferralBadge from '../components/ui/ReferralBadge';
+import { FALLBACK_BUSINESS_LOGO } from '../lib/config';
 
 const BusinessMap = lazy(() => import('../components/ui/BusinessMap'));
-
-const FALLBACK_LOGO = 'https://upload.wikimedia.org/wikipedia/commons/8/89/Portrait_Placeholder.png';
 const PAGE_SIZE = 12;
 
 const BusinessCard = ({ business, categories, isLiked: initialLiked, currentUser, onToggleLike, referralCount }: {
@@ -56,11 +55,11 @@ const BusinessCard = ({ business, categories, isLiked: initialLiked, currentUser
     >
       <div className="w-full h-48 sm:h-52 bg-slate-100 dark:bg-slate-800 relative overflow-hidden flex-shrink-0">
         <img
-          src={business.logo_url || FALLBACK_LOGO}
+          src={business.logo_url || FALLBACK_BUSINESS_LOGO}
           alt={business.name}
           loading="lazy"
           className="block w-full h-full object-contain group-hover:scale-110 transition-transform duration-500"
-          onError={(e) => { e.currentTarget.src = FALLBACK_LOGO; }}
+          onError={(e) => { e.currentTarget.src = FALLBACK_BUSINESS_LOGO; }}
         />
         <div className="absolute inset-0 bg-gradient-to-t from-black/50 via-transparent to-transparent opacity-0 group-hover:opacity-100 group-focus-within:opacity-100 transition-opacity flex items-end p-4">
           <div className="flex gap-2">

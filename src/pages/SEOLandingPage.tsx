@@ -5,8 +5,7 @@ import type { Business, BusinessCategory } from '../lib/api';
 import SEO from '../components/SEO';
 import EmptyState from '../components/ui/EmptyState';
 import { Store, MapPin, ArrowRight } from 'lucide-react';
-
-const FALLBACK_LOGO = 'https://upload.wikimedia.org/wikipedia/commons/8/89/Portrait_Placeholder.png';
+import { FALLBACK_BUSINESS_LOGO } from '../lib/config';
 
 export default function SEOLandingPage() {
   const { city, category } = useParams<{ city?: string; category?: string }>();
@@ -113,9 +112,9 @@ export default function SEOLandingPage() {
                 className="group bg-white dark:bg-slate-900 rounded-lg border border-slate-200 dark:border-slate-800 overflow-hidden hover:border-primary-300 dark:hover:border-primary-700 hover:shadow-2xl transition-all duration-300 hover:-translate-y-1"
               >
                 <div className="h-48 bg-slate-100 dark:bg-slate-800 overflow-hidden">
-                  <img src={business.logo_url || FALLBACK_LOGO} alt={business.name}
-                    className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500"
-                    onError={e => { (e.target as HTMLImageElement).src = FALLBACK_LOGO; }} />
+                  <img src={business.logo_url || FALLBACK_BUSINESS_LOGO} alt={business.name}
+                    className="w-full h-full object-contain group-hover:scale-110 transition-transform duration-500"
+                    onError={e => { (e.target as HTMLImageElement).src = FALLBACK_BUSINESS_LOGO; }} />
                 </div>
                 <div className="p-5">
                   <h3 className="font-black text-lg text-slate-900 dark:text-white group-hover:text-primary-600 transition-colors line-clamp-1">{business.name}</h3>

@@ -43,9 +43,8 @@ import {
 } from 'lucide-react';
 import { ROLE_LABELS, PLAN_BADGE, PLAN_LABELS, getMaxBusinesses } from '../lib/roles';
 import { updateProfileRole, deleteAccount } from '../lib/api';
+import { FALLBACK_AVATAR } from '../lib/config';
 import VisitStreaks from '../components/business/VisitStreaks';
-
-const FALLBACK_AVATAR = 'https://upload.wikimedia.org/wikipedia/commons/8/89/Portrait_Placeholder.png';
 
 function getGreeting(): string {
   const hour = new Date().getHours();
