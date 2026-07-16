@@ -262,6 +262,39 @@
   display: none;
 }
 
+/* ─── TabNav x-scroll: hidden on mobile, 12px on md+ ─── */
+.tabnav-x-scroll {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+}
+.tabnav-x-scroll::-webkit-scrollbar {
+  display: none;
+}
+@media (min-width: 768px) {
+  .tabnav-x-scroll {
+    -ms-overflow-style: auto;
+    scrollbar-width: thin;
+  }
+  .tabnav-x-scroll::-webkit-scrollbar {
+    display: block;
+    width: 12px;
+    height: 12px;
+  }
+  .tabnav-x-scroll::-webkit-scrollbar-track {
+    background: transparent;
+  }
+  .tabnav-x-scroll::-webkit-scrollbar-thumb {
+    background: #cbd5e1;
+    border-radius: 999px;
+  }
+  .tabnav-x-scroll::-webkit-scrollbar-thumb:hover {
+    background: #94a3b8;
+  }
+  .dark .tabnav-x-scroll::-webkit-scrollbar-thumb {
+    background: #475569;
+  }
+}
+
 /* ------------------------------ Timeline -------------------------------- */
   .timeline {
     @apply space-y-4 ml-4 border-l border-gray-200 dark:border-gray-700;

@@ -134,7 +134,7 @@ export const TabNav: React.FC<TabNavProps> = ({
   }
 
   const nav = (
-    <nav className="flex overflow-x-auto scrollbar-fino gap-1">
+    <nav className="flex overflow-x-auto no-scrollbar tabnav-x-scroll gap-1">
       {tabs.map((tab) => (
         <button
           key={tab.id}
