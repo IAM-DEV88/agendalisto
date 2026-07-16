@@ -5,6 +5,7 @@ import { Plus, Edit2, Trash2, Eye, X, Loader2, Save, FileText, User, MessageSqua
 import EmptyState from '../ui/EmptyState';
 import ImageUpload from '../ui/ImageUpload';
 import { supabase } from '../../lib/supabase';
+import { useLockBodyScroll } from '../../hooks/useLockBodyScroll';
 
 export default function BlogManagementSection() {
   const [posts, setPosts] = useState<BlogPost[]>([]);
