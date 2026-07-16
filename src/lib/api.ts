@@ -270,7 +270,6 @@ export async function getBusinessAppointments(businessId: string) {
       .select('*')
       .eq('business_id', businessId)
       .neq('status', 'cancelled')
-      .neq('status', 'completed')
       .order('start_time', { ascending: true });
     if (error) throw error;
     const appointments = (data || []) as Appointment[];
