@@ -80,7 +80,7 @@ export const TabNav: React.FC<TabNavProps> = ({
             key={tab.id}
             id={`tab-${tab.id}`}
             onClick={() => onTabChange(tab.id)}
-            className={`inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-bold rounded-lg transition-all whitespace-nowrap ${
+            className={`inline-flex items-center gap-1.5 px-1.5 md:px-3 py-1.5 text-xs font-bold rounded-lg transition-all whitespace-nowrap ${
               activeTabId === tab.id
                 ? 'bg-white dark:bg-slate-900 shadow-sm text-primary-600 dark:text-primary-400'
                 : 'text-slate-500 hover:text-slate-700 dark:text-slate-400 dark:hover:text-slate-300'
@@ -134,13 +134,13 @@ export const TabNav: React.FC<TabNavProps> = ({
   }
 
   const nav = (
-    <nav className="flex overflow-x-auto no-scrollbar gap-1">
+    <nav className="flex overflow-x-auto scrollbar-fino gap-1">
       {tabs.map((tab) => (
         <button
           key={tab.id}
           id={`tab-${tab.id}`}
           onClick={() => onTabChange(tab.id)}
-          className={`group relative flex items-center gap-2 py-3 sm:py-3 px-4 sm:px-4 text-sm sm:text-sm font-bold whitespace-nowrap transition-all ${
+          className={`group relative flex items-center gap-2 py-3 sm:py-3 px-2 md:px-4 text-sm sm:text-sm font-bold whitespace-nowrap transition-all ${
             activeTabId === tab.id
               ? 'text-primary-600 dark:text-primary-400'
               : 'text-slate-500 hover:text-slate-700 dark:text-slate-400 dark:hover:text-slate-300'
@@ -157,7 +157,7 @@ export const TabNav: React.FC<TabNavProps> = ({
             </span>
           )}
           {activeTabId === tab.id && (
-            <div className="absolute bottom-0 left-2 right-2 h-0.5 bg-primary-600 dark:bg-primary-400 rounded-full animate-in fade-in slide-in-from-bottom-0.5 duration-200" />
+            <div className="absolute bottom-0 left-0 right-0 h-0.5 bg-primary-600 dark:bg-primary-400 rounded-full animate-in fade-in slide-in-from-bottom-0.5 duration-200" />
           )}
         </button>
       ))}
@@ -168,10 +168,10 @@ export const TabNav: React.FC<TabNavProps> = ({
     return (
       <div data-underline-nav className={`sticky top-16 z-40 transition-colors duration-150 ${
         stuck
-          ? 'bg-white/80 dark:bg-slate-900/80 backdrop-blur-md shadow-sm border-b border-slate-200/50 dark:border-slate-800/50 sm:w-[100vw] sm:ml-[calc(-50vw+50%)] sm:pl-[calc(50vw-50%)] sm:pr-[calc(50vw-50%)]'
+          ? 'bg-white/80 dark:bg-slate-900/80 backdrop-blur-md shadow-sm border-b border-slate-200/50 dark:border-slate-800/50 w-[100vw] ml-[calc(-50vw+50%)] pl-[calc(50vw-50%)] pr-[calc(50vw-50%)]'
           : 'bg-transparent border-b border-slate-200/50 dark:border-slate-800/50'
       }`}>
-        <div className="px-4 sm:px-0">{nav}</div>
+        <div>{nav}</div>
       </div>
     );
   }

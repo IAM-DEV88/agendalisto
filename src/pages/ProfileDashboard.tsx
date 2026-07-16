@@ -328,8 +328,8 @@ const ProfileDashboard = ({ user }: ProfileDashboardProps) => {
 
   return (
     <div className="min-h-screen bg-gradient-to-b from-slate-50 to-white dark:from-slate-950 dark:to-slate-900 transition-colors duration-200 overflow-x-clip">
-      <div className="max-w-7xl mx-auto sm:px-6 lg:px-8">
-        <div className="p-4 space-y-5 sm:space-y-6">
+      <div className="max-w-7xl mx-auto px-4">
+        <div className="py-4 space-y-5 sm:space-y-6">
 
           {/* ─── HEADER ─── */}
           <div className="animate-in fade-in slide-in-from-top-4 duration-500">
@@ -348,10 +348,16 @@ const ProfileDashboard = ({ user }: ProfileDashboardProps) => {
                     <div className="absolute -bottom-0.5 -right-0.5 w-3.5 h-3.5 bg-emerald-500 border-[3px] border-white dark:border-slate-900 rounded-full shadow" />
                   </div>
                   <div className="min-w-0">
-                    <div className="flex items-center gap-1.5 flex-wrap">
-                      <h1 className="text-lg sm:text-xl font-black text-slate-900 dark:text-white tracking-tight truncate mb-0">
-                        {greeting}, {username}
-                      </h1>
+                    <h1 className="text-lg sm:text-xl font-black text-slate-900 dark:text-white tracking-tight truncate mb-0">
+                      {greeting}, {username}
+                    </h1>
+
+                    <p className="text-xs sm:text-sm font-medium text-slate-500 dark:text-slate-400 truncate mb-0">
+                      {activeAppointmentsCount > 0
+                        ? `Tienes ${activeAppointmentsCount} ${activeAppointmentsCount === 1 ? 'cita activa' : 'citas activas'}`
+                        : 'Gestiona tus citas y configura tu perfil'}
+                    </p>
+                    <div>
                       {user?.role && user.role !== 'visitor' && (
                         <span className="px-2 py-0.5 text-[11px] font-bold rounded-full bg-primary-100 text-primary-700 dark:bg-primary-900/30 dark:text-primary-400 shrink-0">
                           {ROLE_LABELS[user.role as keyof typeof ROLE_LABELS] || user.role}
@@ -367,11 +373,6 @@ const ProfileDashboard = ({ user }: ProfileDashboardProps) => {
                         ) : null;
                       })()}
                     </div>
-                    <p className="text-xs sm:text-sm font-medium text-slate-500 dark:text-slate-400 truncate mb-0">
-                      {activeAppointmentsCount > 0
-                        ? `Tienes ${activeAppointmentsCount} ${activeAppointmentsCount === 1 ? 'cita activa' : 'citas activas'}`
-                        : 'Gestiona tus citas y configura tu perfil'}
-                    </p>
                   </div>
                 </div>
 
@@ -457,158 +458,158 @@ const ProfileDashboard = ({ user }: ProfileDashboardProps) => {
           {/* ─── MAIN TABS ─── (outside space-y-8 to couple with Nav) */}
         </div>
         <TabNav tabs={tabs} activeTabId={activeTab} onTabChange={(tab) => setActiveTab(tab as 'appointments' | 'favorites' | 'stats' | 'settings')} sticky />
-        <div ref={contentRef} className="px-4 md:p-4 md:pt-8 pt-8 pb-16 space-y-6">
+        <div ref={contentRef} className="py-4 md:p-4 md:pt-8 pt-8 pb-16 space-y-6">
 
           {/* ═══ CITAS TAB ═══ */}
-            {activeTab === 'appointments' && (
-              <div className="space-y-5">
-                <div
-                  className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pb-3 border-b border-slate-100 dark:border-slate-800"
-                  onTouchStart={(e) => e.stopPropagation()}
-                  onMouseDown={(e) => e.stopPropagation()}
-                >
-                  <SectionHeader
-                    title="Mis Reservas"
-                    description="Gestiona tus citas y revisa tu historial"
-                  />
-                  <TabNav
-                    tabs={appointmentTabs}
-                    activeTabId={activeAppointmentTab}
-                    onTabChange={setActiveAppointmentTab}
-                    variant="pill"
-                    sticky
-                  />
-                </div>
-
-                <div className="animate-in fade-in zoom-in-95 duration-300">
-                  {/* Calendario */}
-                  {activeAppointmentTab === 'calendar' && (
-                    <AppointmentCalendar
-                      appointments={appointments}
-                      onReschedule={handleDirectReschedule}
-                      onCancel={(appt) => setSelectedAppointmentForCancel(appt)}
-                      isOwner={false}
-                    />
-                  )}
-
-                  {/* Próximas */}
-                  {activeAppointmentTab === 'upcoming' && (
-                    appointmentsLoading ? (
-                      <div className="space-y-4">
-                        <SkeletonCard />
-                        <SkeletonCard />
-                      </div>
-                    ) : pagedUpcoming.length === 0 ? (
-                      <EmptyState
-                        icon={<CalendarCheck className="w-8 h-8" />}
-                        title="No tienes citas próximas"
-                        description="Aún no has agendado ninguna cita. Explora los negocios disponibles y reserva tu primera cita."
-                        action={{ label: 'Explorar negocios', to: '/explore' }}
-                      />
-                    ) : (
-                      <div className="space-y-4">
-                        <UserAppointmentList
-                          appointments={pagedUpcoming}
-                          onReschedule={handleReschedule}
-                          onCancel={handleCancel}
-                        />
-                        {confirmedAppointments.length > pagination.upcoming.perPage && (
-                          <Pagination
-                            currentPage={pagination.upcoming.page}
-                            totalPages={Math.ceil(confirmedAppointments.length / pagination.upcoming.perPage)}
-                            onPageChange={(page) => handlePageChange('upcoming', page)}
-                          />
-                        )}
-                      </div>
-                    )
-                  )}
-
-                  {/* Pendientes */}
-                  {activeAppointmentTab === 'pending' && (
-                    appointmentsLoading ? (
-                      <div className="space-y-4">
-                        <SkeletonCard />
-                      </div>
-                    ) : pagedPending.length === 0 ? (
-                      <EmptyState
-                        icon={<CalendarClock className="w-8 h-8" />}
-                        title="Sin citas pendientes"
-                        description="No tienes solicitudes de cita pendientes. Cuando reserves un servicio, aparecerá aquí hasta que el negocio lo confirme."
-                      />
-                    ) : (
-                      <div className="space-y-4">
-                        <UserAppointmentList
-                          appointments={pagedPending}
-                          onReschedule={handleReschedule}
-                          onCancel={handleCancel}
-                        />
-                        {pendingAppointments.length > pagination.pending.perPage && (
-                          <Pagination
-                            currentPage={pagination.pending.page}
-                            totalPages={Math.ceil(pendingAppointments.length / pagination.pending.perPage)}
-                            onPageChange={(page) => handlePageChange('pending', page)}
-                          />
-                        )}
-                      </div>
-                    )
-                  )}
-
-                  {/* Historial */}
-                  {activeAppointmentTab === 'history' && (
-                    appointmentsLoading ? (
-                      <div className="space-y-4">
-                        <SkeletonCard />
-                        <SkeletonCard />
-                      </div>
-                    ) : paginatedPastAppointments.length === 0 ? (
-                      <EmptyState
-                        icon={<Clock className="w-8 h-8" />}
-                        title="Historial vacío"
-                        description="Aún no has completado ninguna cita. Una vez que tengas citas pasadas, aparecerán aquí."
-                      />
-                    ) : (
-                      <div className="space-y-4">
-                        <UserAppointmentList
-                          appointments={paginatedPastAppointments}
-                          onReschedule={handleReschedule}
-                          onReview={handleReview}
-                        />
-                        {pastAppointments.length > pagination.history.perPage && (
-                          <Pagination
-                            currentPage={pagination.history.page}
-                            totalPages={Math.ceil(pastAppointments.length / pagination.history.perPage)}
-                            onPageChange={(page) => handlePageChange('history', page)}
-                          />
-                        )}
-                      </div>
-                    )
-                  )}
-                </div>
+          {activeTab === 'appointments' && (
+            <div className="space-y-5">
+              <div
+                className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pb-3 border-b border-slate-100 dark:border-slate-800"
+                onTouchStart={(e) => e.stopPropagation()}
+                onMouseDown={(e) => e.stopPropagation()}
+              >
+                <SectionHeader
+                  title="Mis Reservas"
+                  description="Gestiona tus citas y revisa tu historial"
+                />
+                <TabNav
+                  tabs={appointmentTabs}
+                  activeTabId={activeAppointmentTab}
+                  onTabChange={setActiveAppointmentTab}
+                  variant="pill"
+                  sticky
+                />
               </div>
-            )}
 
-            {/* ═══ FAVORITES TAB ═══ */}
-            {activeTab === 'favorites' && (
               <div className="animate-in fade-in zoom-in-95 duration-300">
-                {user && <FavoritesSection user={user} />}
-              </div>
-            )}
-
-            {/* ═══ STATS TAB ═══ */}
-            {activeTab === 'stats' && (
-              <div className="animate-in fade-in zoom-in-95 duration-300 space-y-5">
-                <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pb-3 border-b border-slate-100 dark:border-slate-800">
-                  <SectionHeader
-                    title="Estadísticas"
-                    description="Resumen de tu actividad como cliente"
+                {/* Calendario */}
+                {activeAppointmentTab === 'calendar' && (
+                  <AppointmentCalendar
+                    appointments={appointments}
+                    onReschedule={handleDirectReschedule}
+                    onCancel={(appt) => setSelectedAppointmentForCancel(appt)}
+                    isOwner={false}
                   />
-                  <TabNav tabs={[
-                    { id: 'overview', label: 'Resumen' },
-                    { id: 'referrals', label: 'Referidos' },
-                  ]} activeTabId={activeStatsTab} onTabChange={setActiveStatsTab} variant="pill" />
-                </div>
+                )}
 
-                {activeStatsTab === 'overview' && (<>
+                {/* Próximas */}
+                {activeAppointmentTab === 'upcoming' && (
+                  appointmentsLoading ? (
+                    <div className="space-y-4">
+                      <SkeletonCard />
+                      <SkeletonCard />
+                    </div>
+                  ) : pagedUpcoming.length === 0 ? (
+                    <EmptyState
+                      icon={<CalendarCheck className="w-8 h-8" />}
+                      title="No tienes citas próximas"
+                      description="Aún no has agendado ninguna cita. Explora los negocios disponibles y reserva tu primera cita."
+                      action={{ label: 'Explorar negocios', to: '/explore' }}
+                    />
+                  ) : (
+                    <div className="space-y-4">
+                      <UserAppointmentList
+                        appointments={pagedUpcoming}
+                        onReschedule={handleReschedule}
+                        onCancel={handleCancel}
+                      />
+                      {confirmedAppointments.length > pagination.upcoming.perPage && (
+                        <Pagination
+                          currentPage={pagination.upcoming.page}
+                          totalPages={Math.ceil(confirmedAppointments.length / pagination.upcoming.perPage)}
+                          onPageChange={(page) => handlePageChange('upcoming', page)}
+                        />
+                      )}
+                    </div>
+                  )
+                )}
+
+                {/* Pendientes */}
+                {activeAppointmentTab === 'pending' && (
+                  appointmentsLoading ? (
+                    <div className="space-y-4">
+                      <SkeletonCard />
+                    </div>
+                  ) : pagedPending.length === 0 ? (
+                    <EmptyState
+                      icon={<CalendarClock className="w-8 h-8" />}
+                      title="Sin citas pendientes"
+                      description="No tienes solicitudes de cita pendientes. Cuando reserves un servicio, aparecerá aquí hasta que el negocio lo confirme."
+                    />
+                  ) : (
+                    <div className="space-y-4">
+                      <UserAppointmentList
+                        appointments={pagedPending}
+                        onReschedule={handleReschedule}
+                        onCancel={handleCancel}
+                      />
+                      {pendingAppointments.length > pagination.pending.perPage && (
+                        <Pagination
+                          currentPage={pagination.pending.page}
+                          totalPages={Math.ceil(pendingAppointments.length / pagination.pending.perPage)}
+                          onPageChange={(page) => handlePageChange('pending', page)}
+                        />
+                      )}
+                    </div>
+                  )
+                )}
+
+                {/* Historial */}
+                {activeAppointmentTab === 'history' && (
+                  appointmentsLoading ? (
+                    <div className="space-y-4">
+                      <SkeletonCard />
+                      <SkeletonCard />
+                    </div>
+                  ) : paginatedPastAppointments.length === 0 ? (
+                    <EmptyState
+                      icon={<Clock className="w-8 h-8" />}
+                      title="Historial vacío"
+                      description="Aún no has completado ninguna cita. Una vez que tengas citas pasadas, aparecerán aquí."
+                    />
+                  ) : (
+                    <div className="space-y-4">
+                      <UserAppointmentList
+                        appointments={paginatedPastAppointments}
+                        onReschedule={handleReschedule}
+                        onReview={handleReview}
+                      />
+                      {pastAppointments.length > pagination.history.perPage && (
+                        <Pagination
+                          currentPage={pagination.history.page}
+                          totalPages={Math.ceil(pastAppointments.length / pagination.history.perPage)}
+                          onPageChange={(page) => handlePageChange('history', page)}
+                        />
+                      )}
+                    </div>
+                  )
+                )}
+              </div>
+            </div>
+          )}
+
+          {/* ═══ FAVORITES TAB ═══ */}
+          {activeTab === 'favorites' && (
+            <div className="animate-in fade-in zoom-in-95 duration-300">
+              {user && <FavoritesSection user={user} />}
+            </div>
+          )}
+
+          {/* ═══ STATS TAB ═══ */}
+          {activeTab === 'stats' && (
+            <div className="animate-in fade-in zoom-in-95 duration-300 space-y-5">
+              <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pb-3 border-b border-slate-100 dark:border-slate-800">
+                <SectionHeader
+                  title="Estadísticas"
+                  description="Resumen de tu actividad como cliente"
+                />
+                <TabNav tabs={[
+                  { id: 'overview', label: 'Resumen' },
+                  { id: 'referrals', label: 'Referidos' },
+                ]} activeTabId={activeStatsTab} onTabChange={setActiveStatsTab} variant="pill" />
+              </div>
+
+              {activeStatsTab === 'overview' && (<>
                 {user && appointments.length > 0 && (
                   <VisitStreaks userId={user.id} businessId={appointments.filter(a => a.businesses?.name).reduce((acc, a) => {
                     if (!acc.find(x => x.id === a.business_id)) acc.push({ id: a.business_id, name: a.businesses?.name || '' });
@@ -665,122 +666,121 @@ const ProfileDashboard = ({ user }: ProfileDashboardProps) => {
                     </div>
                   </div>
                 )}
-                </>)}
+              </>)}
 
-                {activeStatsTab === 'referrals' && user && (
-                  <div className="animate-in fade-in zoom-in-95 duration-300">
-                    <ReferralSection userId={user.id} />
+              {activeStatsTab === 'referrals' && user && (
+                <div className="animate-in fade-in zoom-in-95 duration-300">
+                  <ReferralSection userId={user.id} />
+                </div>
+              )}
+            </div>
+          )}
+
+          {/* ═══ SETTINGS TAB ═══ */}
+          {activeTab === 'settings' && (
+            <div className="space-y-5">
+              <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pb-3 border-b border-slate-100 dark:border-slate-800">
+                <SectionHeader
+                  title="Configuración"
+                  description="Actualiza tu perfil y preferencias"
+                />
+                <TabNav
+                  tabs={settingsTabs}
+                  activeTabId={activeSettingsTab}
+                  onTabChange={setActiveSettingsTab}
+                  variant="pill"
+                  sticky
+                />
+              </div>
+
+              <div className="animate-in fade-in zoom-in-95 duration-300">
+                {activeSettingsTab === 'profile' && (
+                  <UserProfileSection
+                    profileData={profileData}
+                    onChange={handleProfileChange}
+                    onSave={handleProfileSubmit}
+                    saving={saving}
+                    message={profileMessage}
+                  />
+                )}
+
+                {activeSettingsTab === 'general' && (
+                  <div className="space-y-4">
+                    {/* Preferencias */}
+                    <div className="bg-white dark:bg-slate-900 rounded-lg border border-slate-200 dark:border-slate-800 p-6 space-y-6">
+                      <div className="flex items-center gap-3 pb-4 border-b border-slate-100 dark:border-slate-800">
+                        <div className="p-2.5 bg-amber-50 dark:bg-amber-500/10 rounded-lg">
+                          <Settings className="w-5 h-5 text-amber-600 dark:text-amber-400" />
+                        </div>
+                        <div>
+                          <h3 className="text-lg font-black text-slate-900 dark:text-white">Preferencias</h3>
+                          <p className="text-xs font-medium text-slate-500 dark:text-slate-400">Personaliza tu experiencia</p>
+                        </div>
+                      </div>
+
+                      <div className="space-y-3">
+                        <label className="block text-sm font-bold text-slate-700 dark:text-slate-300">
+                          Registros por página
+                        </label>
+                        <div className="flex items-center gap-3">
+                          <div className="relative">
+                            <ListOrdered className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400 pointer-events-none" />
+                            <input
+                              type="number"
+                              min="1"
+                              max="50"
+                              value={itemsPerPage}
+                              onChange={(e) => handleItemsPerPageChange(parseInt(e.target.value) || 1)}
+                              className="w-24 pl-10 pr-4 py-2.5 rounded-lg border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 focus:ring-2 focus:ring-primary-500/20 focus:border-primary-500 outline-none transition-all font-bold text-center"
+                            />
+                          </div>
+                          <button
+                            onClick={handleSaveItemsPerPage}
+                            className="px-6 py-2.5 bg-primary-600 hover:bg-primary-700 text-white text-sm font-bold rounded-lg transition-all shadow-lg shadow-primary-500/25 active:scale-95"
+                          >
+                            Guardar
+                          </button>
+                        </div>
+                        <p className="text-xs text-slate-500 dark:text-slate-400">
+                          Ajusta cuántos elementos ver por página en tus listados.
+                        </p>
+                      </div>
+
+                      {itemsPerPageMessage && (
+                        <div className={`flex items-center gap-2 px-4 py-3 rounded-lg text-sm font-bold ${itemsPerPageMessage.type === 'success'
+                            ? 'bg-emerald-50 dark:bg-emerald-500/10 text-emerald-700 dark:text-emerald-400'
+                            : 'bg-red-50 dark:bg-red-500/10 text-red-700 dark:text-red-400'
+                          }`}>
+                          {itemsPerPageMessage.text}
+                        </div>
+                      )}
+                    </div>
+
+                    {/* Cuenta */}
+                    <div className="bg-white dark:bg-slate-900 rounded-lg border border-slate-200 dark:border-slate-800 p-6 space-y-4">
+                      <div className="flex items-center gap-3 pb-4 border-b border-slate-100 dark:border-slate-800">
+                        <div className="p-2.5 bg-slate-100 dark:bg-slate-800 rounded-lg">
+                          <Shield className="w-5 h-5 text-slate-600 dark:text-slate-400" />
+                        </div>
+                        <div>
+                          <h3 className="text-lg font-black text-slate-900 dark:text-white">Cuenta</h3>
+                          <p className="text-xs font-medium text-slate-500 dark:text-slate-400">Seguridad y sesión</p>
+                        </div>
+                      </div>
+
+                      <button
+                        onClick={() => setShowDeleteConfirm(true)}
+                        className="inline-flex items-center gap-2 px-5 py-2.5 bg-red-50 hover:bg-red-100 dark:bg-red-500/10 dark:hover:bg-red-500/20 text-red-600 dark:text-red-400 text-sm font-bold rounded-lg transition-all active:scale-95"
+                      >
+                        <Trash2 className="w-4 h-4" />
+                        Eliminar cuenta
+                      </button>
+                    </div>
                   </div>
                 )}
               </div>
-            )}
-
-            {/* ═══ SETTINGS TAB ═══ */}
-            {activeTab === 'settings' && (
-              <div className="space-y-5">
-                <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pb-3 border-b border-slate-100 dark:border-slate-800">
-                  <SectionHeader
-                    title="Configuración"
-                    description="Actualiza tu perfil y preferencias"
-                  />
-                  <TabNav
-                    tabs={settingsTabs}
-                    activeTabId={activeSettingsTab}
-                    onTabChange={setActiveSettingsTab}
-                    variant="pill"
-                    sticky
-                  />
-                </div>
-
-                <div className="animate-in fade-in zoom-in-95 duration-300">
-                  {activeSettingsTab === 'profile' && (
-                    <UserProfileSection
-                      profileData={profileData}
-                      onChange={handleProfileChange}
-                      onSave={handleProfileSubmit}
-                      saving={saving}
-                      message={profileMessage}
-                    />
-                  )}
-
-                  {activeSettingsTab === 'general' && (
-                    <div className="space-y-4">
-                      {/* Preferencias */}
-                      <div className="bg-white dark:bg-slate-900 rounded-lg border border-slate-200 dark:border-slate-800 p-6 space-y-6">
-                        <div className="flex items-center gap-3 pb-4 border-b border-slate-100 dark:border-slate-800">
-                          <div className="p-2.5 bg-amber-50 dark:bg-amber-500/10 rounded-lg">
-                            <Settings className="w-5 h-5 text-amber-600 dark:text-amber-400" />
-                          </div>
-                          <div>
-                            <h3 className="text-lg font-black text-slate-900 dark:text-white">Preferencias</h3>
-                            <p className="text-xs font-medium text-slate-500 dark:text-slate-400">Personaliza tu experiencia</p>
-                          </div>
-                        </div>
-
-                        <div className="space-y-3">
-                          <label className="block text-sm font-bold text-slate-700 dark:text-slate-300">
-                            Registros por página
-                          </label>
-                          <div className="flex items-center gap-3">
-                            <div className="relative">
-                              <ListOrdered className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400 pointer-events-none" />
-                              <input
-                                type="number"
-                                min="1"
-                                max="50"
-                                value={itemsPerPage}
-                                onChange={(e) => handleItemsPerPageChange(parseInt(e.target.value) || 1)}
-                                className="w-24 pl-10 pr-4 py-2.5 rounded-lg border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 focus:ring-2 focus:ring-primary-500/20 focus:border-primary-500 outline-none transition-all font-bold text-center"
-                              />
-                            </div>
-                            <button
-                              onClick={handleSaveItemsPerPage}
-                              className="px-6 py-2.5 bg-primary-600 hover:bg-primary-700 text-white text-sm font-bold rounded-lg transition-all shadow-lg shadow-primary-500/25 active:scale-95"
-                            >
-                              Guardar
-                            </button>
-                          </div>
-                          <p className="text-xs text-slate-500 dark:text-slate-400">
-                            Ajusta cuántos elementos ver por página en tus listados.
-                          </p>
-                        </div>
-
-                        {itemsPerPageMessage && (
-                          <div className={`flex items-center gap-2 px-4 py-3 rounded-lg text-sm font-bold ${
-                            itemsPerPageMessage.type === 'success'
-                              ? 'bg-emerald-50 dark:bg-emerald-500/10 text-emerald-700 dark:text-emerald-400'
-                              : 'bg-red-50 dark:bg-red-500/10 text-red-700 dark:text-red-400'
-                          }`}>
-                            {itemsPerPageMessage.text}
-                          </div>
-                        )}
-                      </div>
-
-                      {/* Cuenta */}
-                      <div className="bg-white dark:bg-slate-900 rounded-lg border border-slate-200 dark:border-slate-800 p-6 space-y-4">
-                        <div className="flex items-center gap-3 pb-4 border-b border-slate-100 dark:border-slate-800">
-                          <div className="p-2.5 bg-slate-100 dark:bg-slate-800 rounded-lg">
-                            <Shield className="w-5 h-5 text-slate-600 dark:text-slate-400" />
-                          </div>
-                          <div>
-                            <h3 className="text-lg font-black text-slate-900 dark:text-white">Cuenta</h3>
-                            <p className="text-xs font-medium text-slate-500 dark:text-slate-400">Seguridad y sesión</p>
-                          </div>
-                        </div>
-
-                        <button
-                          onClick={() => setShowDeleteConfirm(true)}
-                          className="inline-flex items-center gap-2 px-5 py-2.5 bg-red-50 hover:bg-red-100 dark:bg-red-500/10 dark:hover:bg-red-500/20 text-red-600 dark:text-red-400 text-sm font-bold rounded-lg transition-all active:scale-95"
-                        >
-                          <Trash2 className="w-4 h-4" />
-                          Eliminar cuenta
-                        </button>
-                      </div>
-                    </div>
-                  )}
-                </div>
-              </div>
-            )}
+            </div>
+          )}
 
         </div>
       </div>

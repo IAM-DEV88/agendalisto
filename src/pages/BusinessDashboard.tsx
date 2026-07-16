@@ -192,8 +192,8 @@ export const BusinessDashboard: React.FC = () => {
       if (response.success) {
         const statusText =
           newStatus === 'confirmed' ? 'confirmada' :
-          newStatus === 'completed' ? 'completada' :
-          newStatus === 'cancelled' ? 'cancelada' : 'actualizada';
+            newStatus === 'completed' ? 'completada' :
+              newStatus === 'cancelled' ? 'cancelada' : 'actualizada';
         notifySuccess(`Cita ${statusText} correctamente`);
         await refreshAppointments();
       } else {
@@ -347,8 +347,8 @@ export const BusinessDashboard: React.FC = () => {
   return (
     <div className="min-h-screen bg-gradient-to-b from-slate-50 to-white dark:from-slate-950 dark:to-slate-900 transition-colors duration-200 overflow-x-clip">
       <SEO title={businessData?.name ? `${businessData.name} — Panel` : 'Panel del negocio'} />
-      <div className="max-w-7xl mx-auto sm:px-6 lg:px-8">
-        <div className="p-4 space-y-5 sm:space-y-6">
+      <div className="max-w-7xl mx-auto px-4">
+        <div className="py-4 space-y-5 sm:space-y-6">
 
           {/* ═══ HEADER ═══ */}
           <div className="animate-in fade-in slide-in-from-top-4 duration-500">
@@ -359,7 +359,7 @@ export const BusinessDashboard: React.FC = () => {
                   {businessData ? (
                     <Link to={`/${businessData.slug}`} className="flex items-center gap-3 group min-w-0 flex-1">
                       <div className="relative shrink-0">
-                        <div className="h-12 w-12 sm:h-14 sm:w-14 rounded-lg overflow-hidden ring-2 ring-white dark:ring-slate-800 shadow-lg transition-transform duration-300 group-hover:scale-105">
+                        <div className="h-16 w-16 sm:h-14 sm:w-14 rounded-lg overflow-hidden ring-2 ring-white dark:ring-slate-800 shadow-lg transition-transform duration-300 group-hover:scale-105">
                           <img
                             src={businessData.logo_url || 'https://upload.wikimedia.org/wikipedia/commons/8/89/Portrait_Placeholder.png'}
                             alt={`${businessData.name} logo`}
@@ -369,20 +369,21 @@ export const BusinessDashboard: React.FC = () => {
                         <div className="absolute -bottom-0.5 -right-0.5 w-3.5 h-3.5 bg-emerald-500 border-[3px] border-white dark:border-slate-900 rounded-full shadow" />
                       </div>
                       <div className="min-w-0">
-                        <div className="flex items-center gap-1.5 flex-wrap">
-                          <h1 className="text-lg sm:text-xl font-black text-slate-900 dark:text-white tracking-tight truncate group-hover:text-primary-600 dark:group-hover:text-primary-400 transition-colors mb-0">
-                            {businessData.name}
-                          </h1>
+                        <h1 className="text-lg sm:text-xl font-black text-slate-900 dark:text-white tracking-tight truncate group-hover:text-primary-600 dark:group-hover:text-primary-400 transition-colors mb-0">
+                          {businessData.name}
+                        </h1>
+
+                        <p className="text-xs sm:text-sm font-medium text-slate-500 dark:text-slate-400 flex items-center gap-1.5 truncate mb-0">
+                          <Store className="w-3.5 h-3.5 shrink-0" />
+                          Panel de Administración
+                        </p>
+                        <div>
                           {planBadge && (
                             <span className={`px-2 py-0.5 text-[10px] font-bold rounded-full uppercase tracking-wider shrink-0 ${planBadge.className}`}>
                               {planBadge.text}
                             </span>
                           )}
                         </div>
-                        <p className="text-xs sm:text-sm font-medium text-slate-500 dark:text-slate-400 flex items-center gap-1.5 truncate mb-0">
-                          <Store className="w-3.5 h-3.5 shrink-0" />
-                          Panel de Administración
-                        </p>
                       </div>
                     </Link>
                   ) : (
@@ -436,256 +437,254 @@ export const BusinessDashboard: React.FC = () => {
           {/* ═══ TABS ═══ (outside space-y-8 to couple with Nav on scroll) */}
         </div>
         <TabNav tabs={tabs} activeTabId={activeTab} onTabChange={setActiveTab} sticky />
-        <div ref={contentRef} className="px-4 md:p-4 md:pt-8 pt-8 pb-16 space-y-6">
+        <div ref={contentRef} className="py-4 md:pt-8 pt-8 pb-16 space-y-6">
 
           {/* ═══ CONTENT ═══ */}
 
-            {/* ─── CITAS ─── */}
-            {activeTab === 'appointments' && (
-              <div className="space-y-5">
-                <div
-                  className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pb-3 border-b border-slate-100 dark:border-slate-800"
-                  onTouchStart={(e) => e.stopPropagation()}
-                  onMouseDown={(e) => e.stopPropagation()}
-                >
-                  <SectionHeader title="Gestión de Citas" description="Administra tus reservas activas" />
-                  <TabNav tabs={appointmentTabs} activeTabId={activeAppointmentTab} onTabChange={setActiveAppointmentTab} variant="pill" sticky />
-                </div>
+          {/* ─── CITAS ─── */}
+          {activeTab === 'appointments' && (
+            <div className="space-y-5">
+              <div
+                className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pb-3 border-b border-slate-100 dark:border-slate-800"
+                onTouchStart={(e) => e.stopPropagation()}
+                onMouseDown={(e) => e.stopPropagation()}
+              >
+                <SectionHeader title="Gestión de Citas" description="Administra tus reservas activas" />
+                <TabNav tabs={appointmentTabs} activeTabId={activeAppointmentTab} onTabChange={setActiveAppointmentTab} variant="pill" sticky />
+              </div>
 
-                <div className="animate-in fade-in zoom-in-95 duration-300">
-                  {activeAppointmentTab === 'activas' && (
-                    <div className="space-y-4">
-                      <div className="flex items-center gap-2">
-                        <button
-                          onClick={() => setActiveActivasTab('pending')}
-                          className={`px-3 py-1.5 text-xs font-bold rounded-lg transition-all ${
-                            activeActivasTab === 'pending'
-                              ? 'bg-primary-600 text-white shadow-sm'
-                              : 'bg-slate-100 dark:bg-slate-800 text-slate-500 dark:text-slate-400 hover:bg-slate-200 dark:hover:bg-slate-700'
+              <div className="animate-in fade-in zoom-in-95 duration-300">
+                {activeAppointmentTab === 'activas' && (
+                  <div className="space-y-4">
+                    <div className="flex items-center gap-2">
+                      <button
+                        onClick={() => setActiveActivasTab('pending')}
+                        className={`px-3 py-1.5 text-xs font-bold rounded-lg transition-all ${activeActivasTab === 'pending'
+                            ? 'bg-primary-600 text-white shadow-sm'
+                            : 'bg-slate-100 dark:bg-slate-800 text-slate-500 dark:text-slate-400 hover:bg-slate-200 dark:hover:bg-slate-700'
                           }`}
-                        >
-                          Pendientes ({pendingAppointments.length})
-                        </button>
-                        <button
-                          onClick={() => setActiveActivasTab('confirmed')}
-                          className={`px-3 py-1.5 text-xs font-bold rounded-lg transition-all ${
-                            activeActivasTab === 'confirmed'
-                              ? 'bg-primary-600 text-white shadow-sm'
-                              : 'bg-slate-100 dark:bg-slate-800 text-slate-500 dark:text-slate-400 hover:bg-slate-200 dark:hover:bg-slate-700'
+                      >
+                        Pendientes ({pendingAppointments.length})
+                      </button>
+                      <button
+                        onClick={() => setActiveActivasTab('confirmed')}
+                        className={`px-3 py-1.5 text-xs font-bold rounded-lg transition-all ${activeActivasTab === 'confirmed'
+                            ? 'bg-primary-600 text-white shadow-sm'
+                            : 'bg-slate-100 dark:bg-slate-800 text-slate-500 dark:text-slate-400 hover:bg-slate-200 dark:hover:bg-slate-700'
                           }`}
-                        >
-                          Confirmadas ({confirmedAppointments.length})
-                        </button>
-                      </div>
-                      {activeActivasTab === 'pending' && (
-                        pendingAppointments.length === 0 ? (
-                          <EmptyState
-                            icon={<CalendarClock className="w-8 h-8" />}
-                            title="Sin citas pendientes"
-                            description="No hay solicitudes de reserva pendientes de confirmación."
-                          />
-                        ) : (
-                          <div className="space-y-4">
-                            <BusinessAppointmentList
-                              appointments={pagedPending}
-                              onStatusChange={handleUpdateAppointmentStatus}
-                              onReschedule={(appt) => setAppointmentToReschedule(appt)}
-                              showReviewSection={false}
-                            />
-                            {pendingAppointments.length > pagination.pending.perPage && (
-                              <Pagination
-                                currentPage={pagination.pending.page}
-                                totalPages={Math.ceil(pendingAppointments.length / pagination.pending.perPage)}
-                                onPageChange={(page) => handlePageChange('pending', page)}
-                              />
-                            )}
-                          </div>
-                        )
-                      )}
-                      {activeActivasTab === 'confirmed' && (
-                        confirmedAppointments.length === 0 ? (
-                          <EmptyState
-                            icon={<CalendarCheck className="w-8 h-8" />}
-                            title="Sin citas confirmadas"
-                            description="Las citas confirmadas aparecerán aquí."
-                          />
-                        ) : (
-                          <div className="space-y-4">
-                            <BusinessAppointmentList
-                              appointments={pagedConfirmed}
-                              onStatusChange={handleUpdateAppointmentStatus}
-                              onReschedule={(appt) => setAppointmentToReschedule(appt)}
-                              showReviewSection={false}
-                            />
-                            {confirmedAppointments.length > pagination.confirmed.perPage && (
-                              <Pagination
-                                currentPage={pagination.confirmed.page}
-                                totalPages={Math.ceil(confirmedAppointments.length / pagination.confirmed.perPage)}
-                                onPageChange={(page) => handlePageChange('confirmed', page)}
-                              />
-                            )}
-                          </div>
-                        )
-                      )}
+                      >
+                        Confirmadas ({confirmedAppointments.length})
+                      </button>
                     </div>
-                  )}
-
-                  {activeAppointmentTab === 'calendar' && (
-                    <AppointmentCalendar
-                      appointments={appointments}
-                      onStatusChange={handleUpdateAppointmentStatus}
-                      onReschedule={handleReschedule}
-                      onCancel={(appt) => setAppointmentToReschedule(appt)}
-                      isOwner
-                      businessHours={businessHours}
-                    />
-                  )}
-
-                  {activeAppointmentTab === 'clients' && (
-                    <div className="animate-in fade-in zoom-in-95 duration-300">
-                      <ClientsSection
-                        clients={pagedClients}
-                        loading={loadingBusinessClients}
-                        message={clientsMessage}
-                      />
-                      {businessClients.length > pagination.clients.perPage && (
-                        <div className="mt-6">
-                          <Pagination
-                            currentPage={pagination.clients.page}
-                            totalPages={Math.ceil(businessClients.length / pagination.clients.perPage)}
-                            onPageChange={(page) => handlePageChange('clients', page)}
-                          />
-                        </div>
-                      )}
-                    </div>
-                  )}
-
-                  {activeAppointmentTab === 'history' && (
-                    pastAppointments.length === 0 ? (
-                      <EmptyState
-                        icon={<Clock className="w-8 h-8" />}
-                        title="Historial vacío"
-                        description="Las citas completadas o canceladas aparecerán aquí."
-                      />
-                    ) : (
-                      <div className="space-y-4">
-                        <BusinessAppointmentList
-                          appointments={pagedPast}
-                          onStatusChange={handleUpdateAppointmentStatus}
-                          onReschedule={(appt) => setAppointmentToReschedule(appt)}
-                          showReviewSection={true}
+                    {activeActivasTab === 'pending' && (
+                      pendingAppointments.length === 0 ? (
+                        <EmptyState
+                          icon={<CalendarClock className="w-8 h-8" />}
+                          title="Sin citas pendientes"
+                          description="No hay solicitudes de reserva pendientes de confirmación."
                         />
-                        {pastAppointments.length > pagination.history.perPage && (
-                          <Pagination
-                            currentPage={pagination.history.page}
-                            totalPages={Math.ceil(pastAppointments.length / pagination.history.perPage)}
-                            onPageChange={(page) => handlePageChange('history', page)}
+                      ) : (
+                        <div className="space-y-4">
+                          <BusinessAppointmentList
+                            appointments={pagedPending}
+                            onStatusChange={handleUpdateAppointmentStatus}
+                            onReschedule={(appt) => setAppointmentToReschedule(appt)}
+                            showReviewSection={false}
                           />
-                        )}
+                          {pendingAppointments.length > pagination.pending.perPage && (
+                            <Pagination
+                              currentPage={pagination.pending.page}
+                              totalPages={Math.ceil(pendingAppointments.length / pagination.pending.perPage)}
+                              onPageChange={(page) => handlePageChange('pending', page)}
+                            />
+                          )}
+                        </div>
+                      )
+                    )}
+                    {activeActivasTab === 'confirmed' && (
+                      confirmedAppointments.length === 0 ? (
+                        <EmptyState
+                          icon={<CalendarCheck className="w-8 h-8" />}
+                          title="Sin citas confirmadas"
+                          description="Las citas confirmadas aparecerán aquí."
+                        />
+                      ) : (
+                        <div className="space-y-4">
+                          <BusinessAppointmentList
+                            appointments={pagedConfirmed}
+                            onStatusChange={handleUpdateAppointmentStatus}
+                            onReschedule={(appt) => setAppointmentToReschedule(appt)}
+                            showReviewSection={false}
+                          />
+                          {confirmedAppointments.length > pagination.confirmed.perPage && (
+                            <Pagination
+                              currentPage={pagination.confirmed.page}
+                              totalPages={Math.ceil(confirmedAppointments.length / pagination.confirmed.perPage)}
+                              onPageChange={(page) => handlePageChange('confirmed', page)}
+                            />
+                          )}
+                        </div>
+                      )
+                    )}
+                  </div>
+                )}
+
+                {activeAppointmentTab === 'calendar' && (
+                  <AppointmentCalendar
+                    appointments={appointments}
+                    onStatusChange={handleUpdateAppointmentStatus}
+                    onReschedule={handleReschedule}
+                    onCancel={(appt) => setAppointmentToReschedule(appt)}
+                    isOwner
+                    businessHours={businessHours}
+                  />
+                )}
+
+                {activeAppointmentTab === 'clients' && (
+                  <div className="animate-in fade-in zoom-in-95 duration-300">
+                    <ClientsSection
+                      clients={pagedClients}
+                      loading={loadingBusinessClients}
+                      message={clientsMessage}
+                    />
+                    {businessClients.length > pagination.clients.perPage && (
+                      <div className="mt-6">
+                        <Pagination
+                          currentPage={pagination.clients.page}
+                          totalPages={Math.ceil(businessClients.length / pagination.clients.perPage)}
+                          onPageChange={(page) => handlePageChange('clients', page)}
+                        />
                       </div>
-                    )
-                  )}
-                </div>
-              </div>
-            )}
+                    )}
+                  </div>
+                )}
 
-            {/* ─── SERVICIOS ─── */}
-            {activeTab === 'services' && businessData && (
-              <div className="animate-in fade-in zoom-in-95 duration-300">
-                <ServicesSection
-                  businessId={businessData.id}
-                  getServices={getBusinessServices}
-                  deleteService={deleteBusinessService}
-                  itemsPerPage={itemsPerPage}
-                  plan={plan}
-                />
-              </div>
-            )}
-
-            {/* ─── HORARIOS ─── */}
-            {activeTab === 'hours' && businessData && (
-              <div className="animate-in fade-in zoom-in-95 duration-300">
-                <BusinessHoursSection
-                  businessHours={businessHours}
-                  loading={loadingBusinessHours}
-                  saving={savingBusinessHours}
-                  message={hoursMessage}
-                  onSave={handleHoursSubmit}
-                  onHoursChange={handleHoursChange}
-                  days={days}
-                />
-              </div>
-            )}
-
-            {/* ─── ESTADÍSTICAS ─── */}
-            {activeTab === 'stats' && (
-              <div className="animate-in fade-in zoom-in-95 duration-300">
-                <StatsSection
-                  totalAppointments={appointments.length}
-                  upcomingAppointments={confirmedAppointments.length}
-                  pendingAppointments={pendingAppointments.length}
-                  completedAppointments={completedAppointments.length}
-                  totalClients={businessClients.length}
-                  totalServices={totalServices}
-                  plan={plan}
-                  totalRevenue={totalRevenue}
-                  confirmationRate={confirmationRate}
-                  cancellationRate={cancellationRate}
-                  avgDuration={avgDuration}
-                  avgPrice={avgPrice}
-                  topServiceName={topServiceName}
-                  topServiceCount={topServiceCount}
-                  peakDay={peakDayName}
-                  peakHour={peakHour}
-                  lifetimeValueAvg={lifetimeValueAvg}
-                  totalVisits={businessStats?.total_visits ?? 0}
-                  visitsToday={businessStats?.visits_today ?? 0}
-                  visitsWeek={businessStats?.visits_week ?? 0}
-                  visitsMonth={businessStats?.visits_month ?? 0}
-                  uniqueVisitors={businessStats?.unique_visitors ?? 0}
-                  totalBusinessLikes={businessStats?.total_business_likes ?? 0}
-                  totalServiceLikes={businessStats?.total_service_likes ?? 0}
-                />
-              </div>
-            )}
-
-            {/* ─── CONFIGURACIÓN ─── */}
-            {activeTab === 'settings' && businessData && (
-              <div className="space-y-5">
-                <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pb-3 border-b border-slate-100 dark:border-slate-800">
-                  <SectionHeader title="Configuración" description="Perfil y comportamiento de la página" />
-                  <TabNav tabs={settingsTabs} activeTabId={activeSettingsTab} onTabChange={setActiveSettingsTab} variant="pill" sticky />
-                </div>
-
-                <div className="animate-in fade-in zoom-in-95 duration-300">
-                  {activeSettingsTab === 'profile' && (
-                    <BusinessProfileSection
-                      businessData={businessData}
-                      onSave={handleBusinessSubmit}
-                      onChange={handleBusinessChange}
-                      saving={savingBusiness}
-                      message={businessMessage}
+                {activeAppointmentTab === 'history' && (
+                  pastAppointments.length === 0 ? (
+                    <EmptyState
+                      icon={<Clock className="w-8 h-8" />}
+                      title="Historial vacío"
+                      description="Las citas completadas o canceladas aparecerán aquí."
                     />
-                  )}
-
-                  {activeSettingsTab === 'config' && (
-                    <BusinessConfigSection
-                      config={businessConfig}
-                      loading={loadingBusinessConfig}
-                      saving={savingBusinessConfig}
-                      message={configMessage}
-                      onSave={handleConfigSave}
-                      onConfigChange={handleConfigChange}
-                      plan={plan}
-                      businessName={businessData?.name || ''}
-                      businessAddress={businessData?.address || ''}
-                      businessSlug={businessData?.slug || ''}
-                      businessId={businessData?.id || ''}
-                    />
-                  )}
-                </div>
+                  ) : (
+                    <div className="space-y-4">
+                      <BusinessAppointmentList
+                        appointments={pagedPast}
+                        onStatusChange={handleUpdateAppointmentStatus}
+                        onReschedule={(appt) => setAppointmentToReschedule(appt)}
+                        showReviewSection={true}
+                      />
+                      {pastAppointments.length > pagination.history.perPage && (
+                        <Pagination
+                          currentPage={pagination.history.page}
+                          totalPages={Math.ceil(pastAppointments.length / pagination.history.perPage)}
+                          onPageChange={(page) => handlePageChange('history', page)}
+                        />
+                      )}
+                    </div>
+                  )
+                )}
               </div>
-            )}
+            </div>
+          )}
+
+          {/* ─── SERVICIOS ─── */}
+          {activeTab === 'services' && businessData && (
+            <div className="animate-in fade-in zoom-in-95 duration-300">
+              <ServicesSection
+                businessId={businessData.id}
+                getServices={getBusinessServices}
+                deleteService={deleteBusinessService}
+                itemsPerPage={itemsPerPage}
+                plan={plan}
+              />
+            </div>
+          )}
+
+          {/* ─── HORARIOS ─── */}
+          {activeTab === 'hours' && businessData && (
+            <div className="animate-in fade-in zoom-in-95 duration-300">
+              <BusinessHoursSection
+                businessHours={businessHours}
+                loading={loadingBusinessHours}
+                saving={savingBusinessHours}
+                message={hoursMessage}
+                onSave={handleHoursSubmit}
+                onHoursChange={handleHoursChange}
+                days={days}
+              />
+            </div>
+          )}
+
+          {/* ─── ESTADÍSTICAS ─── */}
+          {activeTab === 'stats' && (
+            <div className="animate-in fade-in zoom-in-95 duration-300">
+              <StatsSection
+                totalAppointments={appointments.length}
+                upcomingAppointments={confirmedAppointments.length}
+                pendingAppointments={pendingAppointments.length}
+                completedAppointments={completedAppointments.length}
+                totalClients={businessClients.length}
+                totalServices={totalServices}
+                plan={plan}
+                totalRevenue={totalRevenue}
+                confirmationRate={confirmationRate}
+                cancellationRate={cancellationRate}
+                avgDuration={avgDuration}
+                avgPrice={avgPrice}
+                topServiceName={topServiceName}
+                topServiceCount={topServiceCount}
+                peakDay={peakDayName}
+                peakHour={peakHour}
+                lifetimeValueAvg={lifetimeValueAvg}
+                totalVisits={businessStats?.total_visits ?? 0}
+                visitsToday={businessStats?.visits_today ?? 0}
+                visitsWeek={businessStats?.visits_week ?? 0}
+                visitsMonth={businessStats?.visits_month ?? 0}
+                uniqueVisitors={businessStats?.unique_visitors ?? 0}
+                totalBusinessLikes={businessStats?.total_business_likes ?? 0}
+                totalServiceLikes={businessStats?.total_service_likes ?? 0}
+              />
+            </div>
+          )}
+
+          {/* ─── CONFIGURACIÓN ─── */}
+          {activeTab === 'settings' && businessData && (
+            <div className="space-y-5">
+              <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pb-3 border-b border-slate-100 dark:border-slate-800">
+                <SectionHeader title="Configuración" description="Perfil y comportamiento de la página" />
+                <TabNav tabs={settingsTabs} activeTabId={activeSettingsTab} onTabChange={setActiveSettingsTab} variant="pill" sticky />
+              </div>
+
+              <div className="animate-in fade-in zoom-in-95 duration-300">
+                {activeSettingsTab === 'profile' && (
+                  <BusinessProfileSection
+                    businessData={businessData}
+                    onSave={handleBusinessSubmit}
+                    onChange={handleBusinessChange}
+                    saving={savingBusiness}
+                    message={businessMessage}
+                  />
+                )}
+
+                {activeSettingsTab === 'config' && (
+                  <BusinessConfigSection
+                    config={businessConfig}
+                    loading={loadingBusinessConfig}
+                    saving={savingBusinessConfig}
+                    message={configMessage}
+                    onSave={handleConfigSave}
+                    onConfigChange={handleConfigChange}
+                    plan={plan}
+                    businessName={businessData?.name || ''}
+                    businessAddress={businessData?.address || ''}
+                    businessSlug={businessData?.slug || ''}
+                    businessId={businessData?.id || ''}
+                  />
+                )}
+              </div>
+            </div>
+          )}
 
         </div>
       </div>
