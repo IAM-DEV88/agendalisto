@@ -48,7 +48,12 @@ export default function BusinessProgressSection({ businessData }: { businessData
   const percent = Math.round((doneCount / total) * 100);
   const allDone = doneCount === total;
 
-  if (allDone && !loading) return null;
+  if (allDone && !loading) return (
+    <div className="flex items-center gap-2 px-4 py-2 bg-emerald-50 dark:bg-emerald-500/5 rounded-lg border border-emerald-200 dark:border-emerald-800/50 animate-in fade-in duration-300">
+      <CheckCircle2 className="w-4 h-4 text-emerald-500 shrink-0" />
+      <p className="text-xs font-bold text-emerald-700 dark:text-emerald-400">Configuración completa</p>
+    </div>
+  );
 
   return (
     <div className="bg-white dark:bg-slate-900 rounded-lg border border-slate-200 dark:border-slate-800 p-5 sm:p-6 animate-in fade-in duration-300">
