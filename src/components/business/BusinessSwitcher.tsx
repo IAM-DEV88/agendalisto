@@ -56,7 +56,7 @@ export default function BusinessSwitcher({ currentBusiness, businesses: propBusi
         type="button"
         onClick={() => setOpen(!open)}
         disabled={loading}
-        className="inline-flex items-center gap-2 px-3 py-1.5 text-sm font-bold text-slate-700 dark:text-slate-300 bg-white dark:bg-slate-900 rounded-lg border border-slate-200 dark:border-slate-800 hover:bg-slate-50 dark:hover:bg-slate-800 hover:border-slate-300 dark:hover:border-slate-700 transition-all max-w-[180px] sm:max-w-none"
+        className="inline-flex items-center gap-2 px-3 py-2 text-sm font-bold text-slate-700 dark:text-slate-300 bg-white dark:bg-slate-900 rounded-lg border border-slate-200 dark:border-slate-800 hover:bg-slate-50 dark:hover:bg-slate-800 hover:border-slate-300 dark:hover:border-slate-700 transition-all w-full"
       >
         <Store className="w-3.5 h-3.5 shrink-0" />
         <span className="truncate min-w-0">{currentBusiness?.name || 'Seleccionar negocio'}</span>

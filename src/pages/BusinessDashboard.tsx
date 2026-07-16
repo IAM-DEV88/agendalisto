@@ -397,23 +397,27 @@ export const BusinessDashboard: React.FC = () => {
                 </div>
 
                 {/* Right: Actions */}
-                <div className="flex items-center gap-2 flex-wrap shrink-0 justify-end">
-                  {businesses.length > 0 && (
-                    <BusinessSwitcher currentBusiness={businessData} onSwitch={handleBusinessSwitch} />
-                  )}
-                  {businessData && (
-                    <BusinessQrCode businessSlug={businessData.slug!} businessName={businessData.name} />
-                  )}
-                  <button
-                    onClick={() => setActiveTab('settings')}
-                    className="inline-flex items-center justify-center p-2 bg-white dark:bg-slate-900 text-slate-500 hover:text-primary-600 dark:hover:text-primary-400 rounded-lg border border-slate-200 dark:border-slate-800 hover:border-primary-300 dark:hover:border-primary-700 active:scale-95 transition-all shadow-sm"
-                    title="Configuración"
-                  >
-                    <Settings className="w-4 h-4" />
-                  </button>
+                <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-2 shrink-0 w-full sm:w-auto">
+                  <div className="flex items-center gap-2 flex-1 min-w-0">
+                    {businesses.length > 0 && (
+                      <div className="flex-1 min-w-0 sm:flex-none">
+                        <BusinessSwitcher currentBusiness={businessData} onSwitch={handleBusinessSwitch} />
+                      </div>
+                    )}
+                    {businessData && (
+                      <BusinessQrCode businessSlug={businessData.slug!} businessName={businessData.name} />
+                    )}
+                    <button
+                      onClick={() => setActiveTab('settings')}
+                      className="inline-flex items-center justify-center w-9 h-9 p-0 bg-white dark:bg-slate-900 text-slate-500 hover:text-primary-600 dark:hover:text-primary-400 rounded-lg border border-slate-200 dark:border-slate-800 hover:border-primary-300 dark:hover:border-primary-700 active:scale-95 transition-all shadow-sm shrink-0"
+                      title="Configuración"
+                    >
+                      <Settings className="w-4 h-4" />
+                    </button>
+                  </div>
                   <Link
                     to="/dashboard"
-                    className="inline-flex items-center gap-1.5 px-4 py-2 bg-white dark:bg-slate-900 text-slate-700 dark:text-slate-300 text-xs font-bold rounded-lg border border-slate-200 dark:border-slate-800 hover:bg-slate-50 dark:hover:bg-slate-800 active:scale-95 transition-all shadow-sm"
+                    className="inline-flex items-center justify-center gap-1.5 px-4 py-2 bg-white dark:bg-slate-900 text-slate-700 dark:text-slate-300 text-xs font-bold rounded-lg border border-slate-200 dark:border-slate-800 hover:bg-slate-50 dark:hover:bg-slate-800 active:scale-95 transition-all shadow-sm w-full sm:w-auto"
                   >
                     <ArrowLeft className="w-3.5 h-3.5" />
                     <span className="hidden sm:inline">Mi Perfil</span>
