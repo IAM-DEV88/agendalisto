@@ -4,7 +4,7 @@ import { es } from 'date-fns/locale';
 import { Link } from 'react-router-dom';
 import { Appointment } from '../../types/appointment';
 import { getStatusText } from '../../utils/appointmentUtils';
-import { Star, Clock, Calendar, MapPin, XCircle, RefreshCw, ChevronRight } from 'lucide-react';
+import { Star, Clock, Calendar, MapPin, XCircle, RefreshCw, ChevronRight, User } from 'lucide-react';
 
 interface UserAppointmentListProps {
   appointments: Appointment[];
@@ -91,6 +91,13 @@ const UserAppointmentList: React.FC<UserAppointmentListProps> = ({
                         )}
                       </div>
                     </div>
+
+                    {appointment.staff_member && (
+                      <div className="flex items-center gap-1.5 text-xs font-medium text-slate-500 dark:text-slate-400">
+                        <User className="w-3.5 h-3.5 text-primary-400" />
+                        <span>{appointment.staff_member.full_name}</span>
+                      </div>
+                    )}
                   </div>
 
                   <div className="flex items-center gap-1.5 text-xs font-bold text-slate-500 dark:text-slate-400">

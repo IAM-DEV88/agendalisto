@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useDispatch, useSelector } from 'react-redux';
-import { Eye, Bell, ListOrdered, Save, Loader2, CheckCircle2, AlertCircle, ChevronDown, Link as LinkIcon, Copy, Check, ExternalLink, Trash2, AlertTriangle, Clock, Timer, CalendarClock } from 'lucide-react';
+import { Eye, Bell, ListOrdered, Save, Loader2, CheckCircle2, AlertCircle, ChevronDown, Link as LinkIcon, Copy, Check, ExternalLink, Trash2, AlertTriangle, Lock } from 'lucide-react';
 import { BusinessConfig, deleteBusiness } from '../../lib/api';
 import { useAuth } from '../../hooks/useAuth';
 import { useUIConfig } from '../../hooks/useUIConfig';
@@ -102,90 +102,6 @@ export const BusinessConfigSection: React.FC<BusinessConfigSectionProps> = ({
       ) : (
         <form onSubmit={handleSubmit} className="space-y-6">
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-            {/* Configuración de Horarios */}
-            <div className="card p-6 space-y-6">
-              <div className="flex items-center gap-3 pb-4 border-b border-slate-100 dark:border-slate-800">
-                <div className="p-2 bg-amber-50 text-amber-600 dark:bg-amber-500/10 dark:text-amber-400 rounded-lg">
-                  <Clock className="w-5 h-5" />
-                </div>
-                <h3 className="text-lg font-black text-slate-900 dark:text-white tracking-tight">Horarios de Reserva</h3>
-              </div>
-
-              <div className="space-y-4">
-                <div>
-                  <label htmlFor="slot_interval_minutes" className="block text-sm font-bold text-slate-700 dark:text-slate-200 mb-1.5">
-                    Intervalo de slots
-                  </label>
-                  <div className="flex items-center gap-2">
-                    <Timer className="w-4 h-4 text-slate-400" />
-                    <select
-                      id="slot_interval_minutes"
-                      value={config.slot_interval_minutes ?? 30}
-                      onChange={(e) => onConfigChange('slot_interval_minutes', parseInt(e.target.value))}
-                      className="flex-1 px-3 py-2 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-lg text-sm font-bold text-slate-900 dark:text-white focus:ring-2 focus:ring-primary-500 focus:border-primary-500"
-                    >
-                      <option value={15}>15 minutos</option>
-                      <option value={30}>30 minutos</option>
-                      <option value={60}>1 hora</option>
-                    </select>
-                  </div>
-                  <p className="text-xs text-slate-500 dark:text-slate-400 mt-1">
-                    Cada cuánto tiempo se muestran los horarios disponibles.
-                  </p>
-                </div>
-
-                <div>
-                  <label htmlFor="buffer_minutes" className="block text-sm font-bold text-slate-700 dark:text-slate-200 mb-1.5">
-                    Tiempo de buffer
-                  </label>
-                  <div className="flex items-center gap-2">
-                    <Clock className="w-4 h-4 text-slate-400" />
-                    <select
-                      id="buffer_minutes"
-                      value={config.buffer_minutes ?? 0}
-                      onChange={(e) => onConfigChange('buffer_minutes', parseInt(e.target.value))}
-                      className="flex-1 px-3 py-2 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-lg text-sm font-bold text-slate-900 dark:text-white focus:ring-2 focus:ring-primary-500 focus:border-primary-500"
-                    >
-                      <option value={0}>Sin buffer</option>
-                      <option value={5}>5 minutos</option>
-                      <option value={10}>10 minutos</option>
-                      <option value={15}>15 minutos</option>
-                      <option value={30}>30 minutos</option>
-                    </select>
-                  </div>
-                  <p className="text-xs text-slate-500 dark:text-slate-400 mt-1">
-                    Tiempo libre entre citas para preparación.
-                  </p>
-                </div>
-
-                <div>
-                  <label htmlFor="max_advance_booking_days" className="block text-sm font-bold text-slate-700 dark:text-slate-200 mb-1.5">
-                    Reservar con anticipación
-                  </label>
-                  <div className="flex items-center gap-2">
-                    <CalendarClock className="w-4 h-4 text-slate-400" />
-                    <select
-                      id="max_advance_booking_days"
-                      value={config.max_advance_booking_days ?? 90}
-                      onChange={(e) => onConfigChange('max_advance_booking_days', parseInt(e.target.value))}
-                      className="flex-1 px-3 py-2 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-lg text-sm font-bold text-slate-900 dark:text-white focus:ring-2 focus:ring-primary-500 focus:border-primary-500"
-                    >
-                      <option value={7}>7 días</option>
-                      <option value={14}>14 días</option>
-                      <option value={30}>30 días</option>
-                      <option value={60}>60 días</option>
-                      <option value={90}>90 días</option>
-                      <option value={180}>180 días</option>
-                      <option value={365}>1 año</option>
-                    </select>
-                  </div>
-                  <p className="text-xs text-slate-500 dark:text-slate-400 mt-1">
-                    Cuántos días adelante los clientes pueden reservar.
-                  </p>
-                </div>
-              </div>
-            </div>
-
             {/* Información Visible */}
             <div className="card p-6 space-y-6">
               <div className="flex items-center gap-3 pb-4 border-b border-slate-100 dark:border-slate-800">
@@ -284,6 +200,65 @@ export const BusinessConfigSection: React.FC<BusinessConfigSectionProps> = ({
                   Número de elementos que se mostrarán en tablas y listados.
                 </p>
               </div>
+            </div>
+
+            {/* Protección por contraseña */}
+            <div className="card p-6 space-y-6">
+              <div className="flex items-center gap-3 pb-4 border-b border-slate-100 dark:border-slate-800">
+                <div className="p-2 bg-violet-50 text-violet-600 dark:bg-violet-500/10 dark:text-violet-400 rounded-lg">
+                  <Lock className="w-5 h-5" />
+                </div>
+                <h3 className="text-lg font-black text-slate-900 dark:text-white tracking-tight">Protección por Contraseña</h3>
+              </div>
+
+              <ConfigToggle
+                id="password_protection_enabled"
+                label="Activar protección por contraseña"
+                description="Requerir contraseña del perfil para realizar acciones sensibles en el negocio."
+                checked={!!config.password_protection_enabled}
+                onChange={(val) => onConfigChange('password_protection_enabled', val)}
+              />
+
+              {config.password_protection_enabled && (
+                <div className="space-y-1 pl-4 border-l-2 border-violet-200 dark:border-violet-800/50">
+                  <p className="text-[11px] font-bold text-violet-500 uppercase tracking-wider mb-2">Acciones protegidas</p>
+                  <ConfigToggle
+                    id="password_protect_staff"
+                    label="Gestión de encargados"
+                    description="Añadir, editar o eliminar personal del negocio."
+                    checked={!!config.password_protect_staff}
+                    onChange={(val) => onConfigChange('password_protect_staff', val)}
+                  />
+                  <ConfigToggle
+                    id="password_protect_hours"
+                    label="Modificar horarios"
+                    description="Cambiar jornadas, descansos y horarios de atención."
+                    checked={!!config.password_protect_hours}
+                    onChange={(val) => onConfigChange('password_protect_hours', val)}
+                  />
+                  <ConfigToggle
+                    id="password_protect_services"
+                    label="Gestión de servicios"
+                    description="Crear, editar o eliminar servicios del negocio."
+                    checked={!!config.password_protect_services}
+                    onChange={(val) => onConfigChange('password_protect_services', val)}
+                  />
+                  <ConfigToggle
+                    id="password_protect_appointments"
+                    label="Gestión de citas"
+                    description="Cancelar, reprogramar o modificar citas."
+                    checked={!!config.password_protect_appointments}
+                    onChange={(val) => onConfigChange('password_protect_appointments', val)}
+                  />
+                  <ConfigToggle
+                    id="password_protect_profile"
+                    label="Modificar perfil"
+                    description="Cambiar información del negocio, logo y datos de contacto."
+                    checked={!!config.password_protect_profile}
+                    onChange={(val) => onConfigChange('password_protect_profile', val)}
+                  />
+                </div>
+              )}
             </div>
           </div>
 

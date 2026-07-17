@@ -42,6 +42,10 @@ import {
   ArrowLeft,
   Clock,
   Settings,
+  Timer,
+  CheckCircle2,
+  AlertCircle,
+  Save,
 } from 'lucide-react';
 
 export const BusinessDashboard: React.FC = () => {
@@ -341,6 +345,7 @@ export const BusinessDashboard: React.FC = () => {
 
   const settingsTabs: Tab[] = [
     { id: 'profile', label: 'Perfil' },
+    { id: 'operation', label: 'Operación' },
     { id: 'config', label: 'Ajustes' },
   ];
 
@@ -489,6 +494,7 @@ export const BusinessDashboard: React.FC = () => {
                             onReschedule={(appt) => setAppointmentToReschedule(appt)}
                             showReviewSection={false}
                             indexOffset={(pagination.pending.page - 1) * pagination.pending.perPage}
+                            currentUserId={user?.id}
                           />
                           {pendingAppointments.length > pagination.pending.perPage && (
                             <Pagination
@@ -515,6 +521,7 @@ export const BusinessDashboard: React.FC = () => {
                             onReschedule={(appt) => setAppointmentToReschedule(appt)}
                             showReviewSection={false}
                             indexOffset={(pagination.confirmed.page - 1) * pagination.confirmed.perPage}
+                            currentUserId={user?.id}
                           />
                           {confirmedAppointments.length > pagination.confirmed.perPage && (
                             <Pagination
@@ -537,6 +544,7 @@ export const BusinessDashboard: React.FC = () => {
                     onCancel={(appt) => setAppointmentToReschedule(appt)}
                     isOwner
                     businessHours={businessHours}
+                    currentUserId={user?.id}
                   />
                 )}
 
@@ -576,6 +584,7 @@ export const BusinessDashboard: React.FC = () => {
                         onReschedule={(appt) => setAppointmentToReschedule(appt)}
                         showReviewSection={true}
                         indexOffset={(pagination.history.page - 1) * pagination.history.perPage}
+                        currentUserId={user?.id}
                       />
                       {pastAppointments.length > pagination.history.perPage && (
                         <Pagination
@@ -616,6 +625,10 @@ export const BusinessDashboard: React.FC = () => {
                 onSave={handleHoursSubmit}
                 onHoursChange={handleHoursChange}
                 days={days}
+                businessId={businessData?.id}
+                plan={plan}
+                passwordProtectionEnabled={businessConfig?.password_protection_enabled}
+                passwordProtectStaff={businessConfig?.password_protect_staff}
               />
             </div>
           )}
@@ -671,6 +684,94 @@ export const BusinessDashboard: React.FC = () => {
                     saving={savingBusiness}
                     message={businessMessage}
                   />
+                )}
+
+                {activeSettingsTab === 'operation' && (
+                  <div className="space-y-6">
+                    <div className="bg-white dark:bg-slate-900 rounded-lg border border-slate-200 dark:border-slate-800 p-6 space-y-6">
+                      <div className="flex items-center gap-3 pb-4 border-b border-slate-100 dark:border-slate-800">
+                        <div className="p-2 bg-amber-50 text-amber-600 dark:bg-amber-500/10 dark:text-amber-400 rounded-lg">
+                          <Clock className="w-5 h-5" />
+                        </div>
+                        <h3 className="text-lg font-black text-slate-900 dark:text-white tracking-tight">Horarios de Reserva</h3>
+                      </div>
+                      <div className="space-y-4">
+                        <div>
+                          <label htmlFor="slot_interval_minutes" className="block text-sm font-bold text-slate-700 dark:text-slate-200 mb-1.5">
+                            Intervalo de slots
+                          </label>
+                          <div className="flex items-center gap-2">
+                            <Timer className="w-4 h-4 text-slate-400" />
+                            <select id="slot_interval_minutes" value={businessConfig?.slot_interval_minutes ?? 30}
+                              onChange={(e) => handleConfigChange('slot_interval_minutes', parseInt(e.target.value))}
+                              className="flex-1 px-3 py-2 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-lg text-sm font-bold text-slate-900 dark:text-white focus:ring-2 focus:ring-primary-500 focus:border-primary-500"
+                            >
+                              <option value={15}>15 minutos</option>
+                              <option value={30}>30 minutos</option>
+                              <option value={60}>1 hora</option>
+                            </select>
+                          </div>
+                          <p className="text-xs text-slate-500 dark:text-slate-400 mt-1">Cada cuánto tiempo se muestran los horarios disponibles.</p>
+                        </div>
+                        <div>
+                          <label htmlFor="buffer_minutes" className="block text-sm font-bold text-slate-700 dark:text-slate-200 mb-1.5">
+                            Tiempo de buffer
+                          </label>
+                          <div className="flex items-center gap-2">
+                            <Clock className="w-4 h-4 text-slate-400" />
+                            <select id="buffer_minutes" value={businessConfig?.buffer_minutes ?? 0}
+                              onChange={(e) => handleConfigChange('buffer_minutes', parseInt(e.target.value))}
+                              className="flex-1 px-3 py-2 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-lg text-sm font-bold text-slate-900 dark:text-white focus:ring-2 focus:ring-primary-500 focus:border-primary-500"
+                            >
+                              <option value={0}>Sin buffer</option>
+                              <option value={5}>5 minutos</option>
+                              <option value={10}>10 minutos</option>
+                              <option value={15}>15 minutos</option>
+                              <option value={30}>30 minutos</option>
+                            </select>
+                          </div>
+                          <p className="text-xs text-slate-500 dark:text-slate-400 mt-1">Tiempo libre entre citas para preparación.</p>
+                        </div>
+                        <div>
+                          <label htmlFor="max_advance_booking_days" className="block text-sm font-bold text-slate-700 dark:text-slate-200 mb-1.5">
+                            Reservar con anticipación
+                          </label>
+                          <div className="flex items-center gap-2">
+                            <CalendarClock className="w-4 h-4 text-slate-400" />
+                            <select id="max_advance_booking_days" value={businessConfig?.max_advance_booking_days ?? 90}
+                              onChange={(e) => handleConfigChange('max_advance_booking_days', parseInt(e.target.value))}
+                              className="flex-1 px-3 py-2 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-lg text-sm font-bold text-slate-900 dark:text-white focus:ring-2 focus:ring-primary-500 focus:border-primary-500"
+                            >
+                              <option value={7}>7 días</option>
+                              <option value={14}>14 días</option>
+                              <option value={30}>30 días</option>
+                              <option value={60}>60 días</option>
+                              <option value={90}>90 días</option>
+                              <option value={180}>180 días</option>
+                              <option value={365}>1 año</option>
+                            </select>
+                          </div>
+                          <p className="text-xs text-slate-500 dark:text-slate-400 mt-1">Cuántos días adelante los clientes pueden reservar.</p>
+                        </div>
+                      </div>
+                    </div>
+
+                    {configMessage && (
+                      <div className={`alert ${configMessage.type === 'success' ? 'alert-success' : 'alert-error'} flex items-center gap-3`}>
+                        {configMessage.type === 'success' ? <CheckCircle2 className="w-5 h-5" /> : <AlertCircle className="w-5 h-5" />}
+                        <p className="font-bold">{configMessage.text}</p>
+                      </div>
+                    )}
+
+                    <div className="flex justify-end">
+                      <button type="button" onClick={handleConfigSave}
+                        className="inline-flex items-center px-8 py-3 bg-primary-600 hover:bg-primary-700 text-white font-bold rounded-lg transition-all shadow-lg shadow-primary-500/25 gap-2 disabled:opacity-50"
+                      >
+                        <Save className="w-5 h-5" />
+                        Guardar
+                      </button>
+                    </div>
+                  </div>
                 )}
 
                 {activeSettingsTab === 'config' && (

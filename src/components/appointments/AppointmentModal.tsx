@@ -16,6 +16,7 @@ interface AppointmentModalProps {
   onStatusChange?: (status: AppointmentStatus) => void;
   onReschedule?: (appointment: Appointment) => void;
   showReviewSection?: boolean;
+  currentUserId?: string;
 }
 
 const statusConfig: Record<string, { dot: string; bg: string; text: string; border: string; icon: React.ReactNode }> = {
@@ -48,6 +49,7 @@ const AppointmentModal: React.FC<AppointmentModalProps> = ({
   onStatusChange,
   onReschedule,
   showReviewSection = false,
+  currentUserId,
 }) => {
   useLockBodyScroll(isOpen && !!appointment);
   if (!isOpen || !appointment) return null;
@@ -108,10 +110,12 @@ const AppointmentModal: React.FC<AppointmentModalProps> = ({
                 </div>
                 <div className="min-w-0">
                   <p className="text-sm font-bold text-slate-900 dark:text-white truncate mb-0">
-                    {appointment.profiles?.full_name || appointment.guest_info?.name || 'Desconocido'}
+                    {currentUserId && appointment.user_id === currentUserId
+                      ? 'Tú'
+                      : appointment.profiles?.full_name || appointment.guest_info?.name || (appointment.is_guest ? 'Invitado' : 'Cliente')}
                   </p>
                   <p className="text-[11px] font-medium text-slate-400 mb-0">
-                    {appointment.is_guest ? 'Reserva sin cuenta' : 'Cliente'}
+                    {appointment.is_guest ? 'Reserva sin cuenta' : currentUserId && appointment.user_id === currentUserId ? 'Tú' : 'Cliente'}
                   </p>
                 </div>
               </div>
@@ -154,6 +158,15 @@ const AppointmentModal: React.FC<AppointmentModalProps> = ({
                 </div>
               )}
 
+              <div className="flex items-center gap-2 p-2.5 bg-slate-50 dark:bg-slate-800/50 rounded-lg border border-slate-100 dark:border-slate-800">
+                <User className="w-3.5 h-3.5 text-primary-400 flex-shrink-0" />
+                <div className="min-w-0">
+                  <p className="text-[10px] font-bold uppercase tracking-wider text-slate-400 mb-0">Encargado</p>
+                  <p className="text-xs font-bold text-slate-900 dark:text-white truncate">
+                    {appointment.staff_member?.full_name || appointment.services?.provider || 'No asignado'}
+                  </p>
+                </div>
+              </div>
               {appointment.services?.price !== undefined && appointment.services.price > 0 && (
                 <div className="flex items-center gap-2 p-2.5 bg-slate-50 dark:bg-slate-800/50 rounded-lg border border-slate-100 dark:border-slate-800">
                   <div className="flex-shrink-0 w-3.5 h-3.5 flex items-center justify-center">

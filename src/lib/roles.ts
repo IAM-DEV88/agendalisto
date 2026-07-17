@@ -164,3 +164,10 @@ export function canUseWhatsApp(plan: Plan | string): boolean {
 export function canCustomBranding(plan: Plan | string): boolean {
   return (plan as Plan) === 'pro' || (plan as Plan) === 'premium';
 }
+
+export function getMaxStaff(plan: Plan | string): number {
+  const p = plan as Plan;
+  if (p === 'starter') return 1;
+  if (p === 'pro') return 5;
+  return 10;
+}

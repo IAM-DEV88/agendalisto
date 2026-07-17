@@ -12,6 +12,7 @@ interface BusinessAppointmentListProps {
   onReschedule?: (appointment: Appointment) => void;
   showReviewSection?: boolean;
   indexOffset?: number;
+  currentUserId?: string;
 }
 
 const statusConfig: Record<string, { dot: string; label: string }> = {
@@ -27,6 +28,7 @@ const BusinessAppointmentList: React.FC<BusinessAppointmentListProps> = ({
   onReschedule,
   showReviewSection = false,
   indexOffset = 0,
+  currentUserId,
 }) => {
   const [selectedAppointment, setSelectedAppointment] = useState<Appointment | null>(null);
 
@@ -83,6 +85,13 @@ const BusinessAppointmentList: React.FC<BusinessAppointmentListProps> = ({
                       </div>
                     </div>
 
+                    {appointment.staff_member && (
+                      <div className="flex items-center gap-1.5 text-xs font-medium text-slate-500 dark:text-slate-400">
+                        <User className="w-3.5 h-3.5 text-primary-400" />
+                        <span>{appointment.staff_member.full_name}</span>
+                      </div>
+                    )}
+
                     <div className="flex items-center gap-1.5 text-xs font-bold text-slate-500 dark:text-slate-400">
                       <Calendar className="w-3.5 h-3.5" />
                       <span>{format(date, "EEEE d 'de' MMMM", { locale: es })}</span>
@@ -121,6 +130,7 @@ const BusinessAppointmentList: React.FC<BusinessAppointmentListProps> = ({
         onStatusChange={handleStatusChange}
         onReschedule={onReschedule}
         showReviewSection={showReviewSection}
+        currentUserId={currentUserId}
       />
     </>
   );

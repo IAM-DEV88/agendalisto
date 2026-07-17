@@ -1,7 +1,8 @@
 import { useState, useEffect } from 'react';
-import { X, AlertCircle, Calendar as CalendarIcon, ChevronLeft, ChevronRight, Clock } from 'lucide-react';
+import { X, AlertCircle, Calendar as CalendarIcon, ChevronLeft, ChevronRight, Clock, User } from 'lucide-react';
 import { Appointment } from '../../types/appointment';
-import { cancelAppointment, rescheduleAppointment, getBusinessHours, getBusinessAppointments, getBusinessConfig, BusinessHours, Appointment as ApiAppointment } from '../../lib/api';
+import { cancelAppointment, rescheduleAppointment, getBusinessHours, getBusinessAppointments, getBusinessConfig, getBusinessStaff, BusinessHours, Appointment as ApiAppointment } from '../../lib/api';
+import type { Staff } from '../../lib/api';
 import { toast } from 'react-hot-toast';
 import {
   format,   startOfMonth, endOfMonth, eachDayOfInterval, startOfWeek, endOfWeek,
@@ -31,6 +32,9 @@ export default function CancelRescheduleModal({ isOpen, onClose, appointment, is
   const [bufferMinutes, setBufferMinutes] = useState(0);
   const [calendarMonth, setCalendarMonth] = useState(new Date());
   const [localSlots, setLocalSlots] = useState<string[]>([]);
+  const [staffList, setStaffList] = useState<Staff[]>([]);
+  const [rescheduleStaff, setRescheduleStaff] = useState('');
+  const currentStaffName = staffList.find(s => s.id === appointment?.staff_id)?.full_name;
 
   const minCancellationHours = appointment?.services?.min_cancellation_hours ?? 48;
   const minRescheduleHours = appointment?.services?.min_reschedule_hours ?? 48;
@@ -59,6 +63,10 @@ export default function CancelRescheduleModal({ isOpen, onClose, appointment, is
         if (configRes.success && configRes.config) {
           setSlotInterval(configRes.config.slot_interval_minutes ?? 30);
           setBufferMinutes(configRes.config.buffer_minutes ?? 0);
+        }
+        const staffRes = await getBusinessStaff(appointment.business_id);
+        if (staffRes.success && staffRes.data) {
+          setStaffList(staffRes.data.filter(s => s.id !== 'admin'));
         }
       } catch { /* ignore */ }
       finally { setLoadingSlots(false); }
@@ -89,15 +97,19 @@ export default function CancelRescheduleModal({ isOpen, onClose, appointment, is
       slots.push(`${String(h).padStart(2, '0')}:${String(m).padStart(2, '0')}`);
     }
 
+    const activeStaffCount = staffList.filter(s => s.is_active).length;
+
     const available = slots.filter(slot => {
       const slotTime = new Date(`${newDate}T${slot}`).getTime();
       const now = Date.now();
       if (slotTime <= now) return false;
       const slotEnd = slotTime + serviceDuration * 60000;
       const slotEndWithBuffer = slotEnd + bufferMinutes * 60000;
-      return !appointments.some(appt => {
+
+      const conflicting = appointments.filter(appt => {
         if (!appt.start_time || !appt.end_time) return false;
         if (appt.status === 'cancelled' || appt.status === 'completed') return false;
+        if (rescheduleStaff && appt.staff_id && appt.staff_id !== rescheduleStaff) return false;
         const apptStartDate = new Date(appt.start_time);
         const apptEndDate = new Date(appt.end_time);
         const aStart = apptStartDate.getTime();
@@ -107,11 +119,20 @@ export default function CancelRescheduleModal({ isOpen, onClose, appointment, is
         if (apptLocalDate !== newDate) return false;
         return slotTime < aEnd && slotEndWithBuffer > aStart;
       });
+
+      if (rescheduleStaff) return conflicting.length === 0;
+
+      if (activeStaffCount > 0) {
+        const busyStaff = conflicting.filter(a => a.staff_id).length;
+        return busyStaff < activeStaffCount;
+      }
+
+      return conflicting.length === 0;
     });
 
     const id = requestAnimationFrame(() => setLocalSlots(available));
     return () => cancelAnimationFrame(id);
-  }, [newDate, loadingSlots, businessHours, appointments, appointment, serviceDuration, slotInterval, bufferMinutes]);
+  }, [newDate, loadingSlots, businessHours, appointments, appointment, serviceDuration, slotInterval, bufferMinutes, rescheduleStaff, staffList]);
 
   if (!isOpen || !appointment) return null;
 
@@ -143,7 +164,7 @@ export default function CancelRescheduleModal({ isOpen, onClose, appointment, is
     if (startTime <= new Date()) { toast.error('La nueva fecha y hora no puede estar en el pasado'); return; }
     setLoading(true);
     toast.loading('Reprogramando cita...', { id: 'reschedule' });
-    const res = await rescheduleAppointment(appointment.id, startTime.toISOString(), endTime.toISOString());
+    const res = await rescheduleAppointment(appointment.id, startTime.toISOString(), endTime.toISOString(), rescheduleStaff || undefined);
     setLoading(false);
     if (res.success) {
       toast.success('Cita reprogramada correctamente', { id: 'reschedule' });
@@ -298,6 +319,22 @@ export default function CancelRescheduleModal({ isOpen, onClose, appointment, is
             </div>
           ) : (
             <div className="space-y-4">
+              {staffList.length > 0 && (
+                <div>
+                  <label className="block text-xs font-bold text-slate-500 dark:text-slate-400 mb-2">Encargado (opcional)</label>
+                  <div className="relative">
+                    <User className="absolute left-3 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-slate-400 pointer-events-none" />
+                    <select value={rescheduleStaff} onChange={e => setRescheduleStaff(e.target.value)}
+                      className="w-full pl-9 pr-3 py-2.5 text-sm font-bold rounded-lg border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 text-slate-900 dark:text-white focus:ring-2 focus:ring-primary-500/20 focus:border-primary-500 outline-none transition-all appearance-none"
+                    >
+                      <option value="">{currentStaffName ? `${currentStaffName} (actual)` : 'No asignado'}</option>
+                      {staffList.filter(s => s.is_active && s.id !== appointment?.staff_id).map(s => (
+                        <option key={s.id} value={s.id}>{s.full_name}</option>
+                      ))}
+                    </select>
+                  </div>
+                </div>
+              )}
               <div>
                 <label className="block text-xs font-bold text-slate-700 dark:text-slate-300 mb-2">Nueva fecha</label>
                 <div className="bg-white dark:bg-slate-900 rounded-lg border border-slate-200 dark:border-slate-700 overflow-hidden">

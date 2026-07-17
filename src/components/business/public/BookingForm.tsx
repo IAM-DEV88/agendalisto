@@ -2,7 +2,8 @@ import React, { useState, useEffect, useMemo } from 'react';
 import { Clock, CheckCircle, ArrowLeft, Send, AlertCircle, Gift, Check, X, Lock, FileText, Eye, CalendarDays, Download, Store, User, ChevronLeft, ChevronRight, Info, Phone, Mail, MessageCircle } from 'lucide-react';
 import CrossPromotion from '../CrossPromotion';
 import AvailabilityCalendar from './AvailabilityCalendar';
-import { createAppointment, Service, getBusinessHours, getBusinessAppointments, BusinessHours, Appointment, validateGiftCode, redeemGiftCode } from '../../../lib/api';
+import { createAppointment, Service, getBusinessHours, getBusinessAppointments, getBusinessStaff, BusinessHours, Appointment, validateGiftCode, redeemGiftCode } from '../../../lib/api';
+import type { Staff } from '../../../lib/api';
 import type { GuestInfo, GiftCode } from '../../../lib/api';
 import { signUp } from '../../../lib/supabase';
 import { notifyError, notifyLoading, dismissToast } from '../../../lib/toast';
@@ -210,6 +211,8 @@ const BookingForm: React.FC<BookingFormProps> = ({
   const [businessHours, setBusinessHours] = useState<BusinessHours[]>([]);
   const [appointments, setAppointments] = useState<Appointment[]>([]);
   const [loadingSlots, setLoadingSlots] = useState(true);
+  const [staffList, setStaffList] = useState<Staff[]>([]);
+  const [selectedStaff, setSelectedStaff] = useState<string>('');
 
   useEffect(() => {
     const fetchSchedule = async () => {
@@ -230,6 +233,8 @@ const BookingForm: React.FC<BookingFormProps> = ({
         });
         setBusinessHours(fullWeek);
         setAppointments(apptsRes.success && apptsRes.data ? apptsRes.data : []);
+        const staffRes = await getBusinessStaff(businessId);
+        setStaffList(staffRes.success && staffRes.data ? staffRes.data.filter(s => s.id !== 'admin') : []);
       } catch { /* ignore */ }
       finally { setLoadingSlots(false); }
     };
@@ -271,21 +276,34 @@ const BookingForm: React.FC<BookingFormProps> = ({
       slots.push(`${String(h).padStart(2, '0')}:${String(m).padStart(2, '0')}`);
     }
 
+    const activeStaffCount = staffList.filter(s => s.is_active).length;
+
     return slots.filter(slot => {
       const slotTime = new Date(`${formData.date}T${slot}`).getTime();
       const now = Date.now();
       if (slotTime <= now) return false;
       const slotEnd = slotTime + service.duration * 60000;
       const slotEndWithBuffer = slotEnd + buffer * 60000;
-      return !appointments.some(appt => {
+
+      const conflicting = appointments.filter(appt => {
         const apptDate = appt.start_time.split('T')[0];
         if (apptDate !== formData.date || appt.status === 'cancelled') return false;
+        if (selectedStaff && appt.staff_id && appt.staff_id !== selectedStaff) return false;
         const aStart = new Date(appt.start_time).getTime();
         const aEnd = new Date(appt.end_time).getTime();
         return slotTime < aEnd && slotEndWithBuffer > aStart;
       });
+
+      if (selectedStaff) return conflicting.length === 0;
+
+      if (activeStaffCount > 0) {
+        const busyStaff = conflicting.filter(a => a.staff_id).length;
+        return busyStaff < activeStaffCount;
+      }
+
+      return conflicting.length === 0;
     });
-  }, [formData.date, loadingSlots, businessHours, appointments, service, slotIntervalMinutes, bufferMinutes]);
+  }, [formData.date, loadingSlots, businessHours, appointments, service, slotIntervalMinutes, bufferMinutes, selectedStaff, staffList]);
 
   const paymentAmount = service?.payment_percentage != null
     ? Math.round((service.price * service.payment_percentage) / 100)
@@ -310,6 +328,7 @@ const BookingForm: React.FC<BookingFormProps> = ({
       payment_provider: paymentProvider || undefined,
       payment_id: paymentId || undefined,
       payment_amount: paymentAmt || undefined,
+      staff_id: selectedStaff || null,
     });
   };
 
@@ -909,6 +928,24 @@ const BookingForm: React.FC<BookingFormProps> = ({
             </div>
           </div>
           <div className="p-4 sm:p-5 space-y-3">
+            {userId && staffList.length > 0 && (
+              <div>
+                <label className="block text-xs font-bold text-slate-500 dark:text-slate-400 mb-2">Elige un encargado (opcional)</label>
+                <div className="relative">
+                  <User className="absolute left-3 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-slate-400 pointer-events-none" />
+                  <select value={selectedStaff} onChange={e => setSelectedStaff(e.target.value)}
+                    className="w-full pl-9 pr-3 py-2.5 text-sm font-bold rounded-lg border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 text-slate-900 dark:text-white focus:ring-2 focus:ring-primary-500/20 focus:border-primary-500 outline-none transition-all appearance-none"
+                  >
+                    <option value="">Cualquier encargado disponible</option>
+                    {staffList.filter(s => s.is_active).map(s => (
+                      <option key={s.id} value={s.id}>
+                        {s.id === 'admin' ? 'Administrador' : s.full_name}
+                      </option>
+                    ))}
+                  </select>
+                </div>
+              </div>
+            )}
             <div className="relative">
               <FileText className="absolute top-3 left-3 w-3.5 h-3.5 text-slate-400 pointer-events-none" />
               <textarea id="notes" value={formData.notes} onChange={(e) => setFormData({ ...formData, notes: e.target.value })}

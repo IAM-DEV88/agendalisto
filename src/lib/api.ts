@@ -84,6 +84,23 @@ export interface BusinessConfig {
   slot_interval_minutes?: number;
   buffer_minutes?: number;
   max_advance_booking_days?: number;
+  password_protection_enabled?: boolean;
+  password_protect_staff?: boolean;
+  password_protect_hours?: boolean;
+  password_protect_services?: boolean;
+  password_protect_appointments?: boolean;
+  password_protect_profile?: boolean;
+}
+
+export interface Staff {
+  id: string;
+  business_id: string;
+  full_name: string;
+  email?: string | null;
+  phone?: string | null;
+  is_active: boolean;
+  created_at: string;
+  updated_at: string;
 }
 
 // Helper to create URL-friendly slug from business name
@@ -244,6 +261,9 @@ export async function getUserAppointments(userId: string) {
           cancellation_policy_text,
           reschedule_policy_text
         ),
+        staff_member:agendaya_staff (
+          full_name
+        ),
         review:agendaya_reviews!appointment_id (
           id,
           rating,
@@ -257,7 +277,29 @@ export async function getUserAppointments(userId: string) {
       .eq('user_id', userId)
       .order('start_time', { ascending: true });
     if (error) throw error;
-    return { success: true, data: data as Appointment[], error: null };
+
+    let enriched = (data || []) as Appointment[];
+    try {
+      const profileIds = [...new Set(enriched.map(a => a.user_id).filter(Boolean))];
+      const staffIds = [...new Set(enriched.map(a => a.staff_id).filter(Boolean))];
+      const [profilesRes, staffRes] = await Promise.all([
+        profileIds.length > 0
+          ? supabase.from('agendaya_profiles').select('id, full_name, phone').in('id', profileIds)
+          : { data: [] },
+        staffIds.length > 0
+          ? supabase.from('agendaya_staff').select('id, full_name').in('id', staffIds)
+          : { data: [] },
+      ]);
+      const profileMap = new Map((profilesRes.data || []).map((p: any) => [p.id, p]));
+      const staffMap = new Map((staffRes.data || []).map((s: any) => [s.id, { full_name: s.full_name }]));
+      enriched = enriched.map(a => ({
+        ...a,
+        profiles: profileMap.get(a.user_id) || null,
+        staff_member: a.staff_id ? (staffMap.get(a.staff_id) || null) : undefined,
+      })) as Appointment[];
+    } catch { /* enrichment non-critical */ }
+
+    return { success: true, data: enriched, error: null };
   } catch (err: unknown) {
     return { success: false, data: null, error: getErrorMessage(err) || 'Error al cargar citas' };
   }
@@ -280,25 +322,31 @@ export async function getBusinessAppointments(businessId: string) {
 
     const userIds = [...new Set(appointments.map(a => a.user_id).filter(Boolean))];
     const serviceIds = [...new Set(appointments.map(a => a.service_id).filter(Boolean))];
+    const staffIds = [...new Set(appointments.map(a => a.staff_id).filter(Boolean))];
 
     let enriched = appointments as Appointment[];
     try {
-      const [profilesRes, servicesRes] = await Promise.all([
+      const [profilesRes, servicesRes, staffRes] = await Promise.all([
         userIds.length > 0
           ? supabase.from('agendaya_profiles').select('id, full_name, phone').in('id', userIds)
           : { data: [] },
         serviceIds.length > 0
           ? supabase.from('agendaya_services').select('id, name, duration, price, min_cancellation_hours, min_reschedule_hours, cancellation_policy_text, reschedule_policy_text').in('id', serviceIds)
           : { data: [] },
+        staffIds.length > 0
+          ? supabase.from('agendaya_staff').select('id, full_name').in('id', staffIds)
+          : { data: [] },
       ]);
 
       const profileMap = new Map((profilesRes.data || []).map((p: any) => [p.id, p]));
       const serviceMap = new Map((servicesRes.data || []).map((s: any) => [s.id, s]));
+      const staffMap = new Map((staffRes.data || []).map((s: any) => [s.id, { full_name: s.full_name }]));
 
       enriched = appointments.map(a => ({
         ...a,
         profiles: profileMap.get(a.user_id) || null,
         services: serviceMap.get(a.service_id) || null,
+        staff_member: a.staff_id ? (staffMap.get(a.staff_id) || null) : undefined,
       })) as Appointment[];
     } catch {
       console.warn('[getBusinessAppointments] Enrichment failed, returning raw data');
@@ -461,6 +509,7 @@ export const createAppointment = async (appointment: Omit<Appointment, 'id' | 'c
     p_payment_provider: appointment.payment_provider || null,
     p_payment_id: appointment.payment_id || null,
     p_payment_amount: appointment.payment_amount || null,
+    p_staff_id: appointment.staff_id || null,
   });
 
   if (error) throw error;
@@ -498,12 +547,13 @@ export const cancelAppointment = async (id: string, reason?: string): Promise<{ 
   }
 };
 
-export const rescheduleAppointment = async (id: string, startTime: string, endTime: string): Promise<{ success: boolean; error?: string; new_status?: string }> => {
+export const rescheduleAppointment = async (id: string, startTime: string, endTime: string, staffId?: string | null): Promise<{ success: boolean; error?: string; new_status?: string }> => {
   try {
     const { data, error } = await supabase.rpc('reschedule_appointment_safe', {
       p_appointment_id: id,
       p_new_start: startTime,
       p_new_end: endTime,
+      p_new_staff_id: staffId || null,
     });
     if (error) throw error;
     if (!data?.success) return { success: false, error: data?.error || 'Error al reprogramar' };
@@ -547,12 +597,13 @@ export interface AvailableSlot {
   available: boolean;
 }
 
-export async function getAvailableSlots(businessId: string, serviceId: string, date: string): Promise<{ success: boolean; slots?: AvailableSlot[]; closed?: boolean; error?: string }> {
+export async function getAvailableSlots(businessId: string, serviceId: string, date: string, staffId?: string | null): Promise<{ success: boolean; slots?: AvailableSlot[]; closed?: boolean; error?: string }> {
   try {
     const { data, error } = await supabase.rpc('get_available_slots', {
       p_business_id: businessId,
       p_service_id: serviceId,
       p_date: date,
+      p_staff_id: staffId || null,
     });
     if (error) throw error;
     return { success: true, slots: data?.slots || [], closed: data?.closed || false };
@@ -1218,7 +1269,79 @@ export async function getService(serviceId: string): Promise<{ success: boolean;
   }
 }
 
-// API functions for reviews
+// ─── Staff (Encargados) ───
+
+export async function getBusinessStaff(businessId: string): Promise<{ success: boolean; data?: Staff[]; error?: string }> {
+  try {
+    const { data, error } = await supabase
+      .from('agendaya_staff')
+      .select('*')
+      .eq('business_id', businessId)
+      .order('created_at', { ascending: true });
+    if (error) throw error;
+    return { success: true, data: data as Staff[] };
+  } catch (err: unknown) {
+    return { success: false, error: getErrorMessage(err) || 'Error al obtener el personal' };
+  }
+}
+
+export async function createStaff(businessId: string, params: { full_name: string; email?: string; phone?: string }): Promise<{ success: boolean; data?: Staff; error?: string }> {
+  try {
+    const { data, error } = await supabase
+      .from('agendaya_staff')
+      .insert({ business_id: businessId, ...params })
+      .select()
+      .single();
+    if (error) throw error;
+    return { success: true, data: data as Staff };
+  } catch (err: unknown) {
+    return { success: false, error: getErrorMessage(err) || 'Error al crear el encargado' };
+  }
+}
+
+export async function updateStaff(staffId: string, params: { full_name?: string; email?: string; phone?: string; is_active?: boolean }): Promise<{ success: boolean; data?: Staff; error?: string }> {
+  try {
+    const { data, error } = await supabase
+      .from('agendaya_staff')
+      .update(params)
+      .eq('id', staffId)
+      .select()
+      .single();
+    if (error) throw error;
+    return { success: true, data: data as Staff };
+  } catch (err: unknown) {
+    return { success: false, error: getErrorMessage(err) || 'Error al actualizar el encargado' };
+  }
+}
+
+export async function deleteStaff(staffId: string): Promise<{ success: boolean; error?: string }> {
+  try {
+    const { error } = await supabase
+      .from('agendaya_staff')
+      .delete()
+      .eq('id', staffId);
+    if (error) throw error;
+    return { success: true };
+  } catch (err: unknown) {
+    return { success: false, error: getErrorMessage(err) || 'Error al eliminar el encargado' };
+  }
+}
+
+// ─── Password verification ───
+
+export async function verifyPassword(password: string): Promise<{ success: boolean; error?: string }> {
+  try {
+    const { data: { user } } = await supabase.auth.getUser();
+    if (!user?.email) return { success: false, error: 'No se pudo obtener el usuario' };
+    const { error } = await supabase.auth.signInWithPassword({ email: user.email, password });
+    if (error) throw error;
+    return { success: true };
+  } catch (err: unknown) {
+    return { success: false, error: getErrorMessage(err) || 'Contraseña incorrecta' };
+  }
+}
+
+// ─── Reviews ───
 export async function getBusinessReviews(businessId: string): Promise<{ success: boolean; data: Review[]; error?: string }> {
   try {
     const { data, error } = await supabase

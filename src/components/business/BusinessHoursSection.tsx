@@ -1,10 +1,11 @@
 import React, { useState } from 'react';
-import { Clock, Save, Loader2, CalendarX, Coffee, UserPlus } from 'lucide-react';
+import { Clock, Save, Loader2, CalendarX, Coffee } from 'lucide-react';
 import { BusinessHours } from '../../lib/api';
 import SectionHeader from '../ui/SectionHeader';
 import TabNav from '../ui/TabNav';
 import EmptyState from '../ui/EmptyState';
 import type { Tab } from '../ui/TabNav';
+import StaffSection from './StaffSection';
 
 interface BusinessHoursSectionProps {
   businessHours: BusinessHours[];
@@ -14,6 +15,10 @@ interface BusinessHoursSectionProps {
   onSave: (e: React.FormEvent) => Promise<boolean | void>;
   onHoursChange: (index: number, field: keyof Omit<BusinessHours, 'id'>, value: any) => void;
   days: string[];
+  businessId?: string;
+  plan?: 'starter' | 'pro' | 'premium';
+  passwordProtectionEnabled?: boolean;
+  passwordProtectStaff?: boolean;
 }
 
 const BusinessHoursSection: React.FC<BusinessHoursSectionProps> = ({
@@ -22,7 +27,11 @@ const BusinessHoursSection: React.FC<BusinessHoursSectionProps> = ({
   saving,
   onSave,
   onHoursChange,
-  days
+  days,
+  businessId,
+  plan = 'starter',
+  passwordProtectionEnabled,
+  passwordProtectStaff
 }) => {
   const [activeHoursTab, setActiveHoursTab] = useState('jornadas');
 
@@ -129,12 +138,8 @@ const BusinessHoursSection: React.FC<BusinessHoursSectionProps> = ({
             />
           )}
 
-          {activeHoursTab === 'encargados' && (
-            <EmptyState
-              icon={<UserPlus className="w-8 h-8" />}
-              title="Sin encargados registrados"
-              description="Agrega encargados para asignar profesionales o personal a los servicios y horarios de tu negocio."
-            />
+          {activeHoursTab === 'encargados' && businessId && (
+            <StaffSection businessId={businessId} plan={plan} passwordProtectionEnabled={passwordProtectionEnabled} passwordProtectStaff={passwordProtectStaff} />
           )}
 
         </div>

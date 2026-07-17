@@ -58,6 +58,8 @@ export interface Appointment {
   start_time: string;
   end_time: string;
   status: AppointmentStatus;
+  staff_id?: string | null;
+  staff_member?: { full_name: string } | null;
   services?: Service;
   profiles?: Profile;
   review?: Review;
