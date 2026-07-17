@@ -20,6 +20,7 @@ interface UserAppointmentListProps {
   onCancel?: (appointment: Appointment) => void;
   onReview?: (appointment: Appointment) => void;
   showActions?: boolean;
+  indexOffset?: number;
 }
 
 const statusStyles: Record<string, { dot: string; bg: string; text: string; border: string; icon: React.ReactNode }> = {
@@ -59,6 +60,7 @@ const UserAppointmentList: React.FC<UserAppointmentListProps> = ({
   onCancel,
   onReview,
   showActions = true,
+  indexOffset = 0,
 }) => {
   return (
     <div className="space-y-4">
@@ -79,8 +81,11 @@ const UserAppointmentList: React.FC<UserAppointmentListProps> = ({
                 {/* Info section */}
                 <div className="flex-1 min-w-0 space-y-3">
                   {/* Business name + status */}
-                  <div className="flex items-start justify-between gap-3">
-                    <div className="min-w-0">
+                  <div className="flex items-start gap-2">
+                    <span className="w-5 h-5 rounded-md bg-slate-100 dark:bg-slate-800 flex items-center justify-center text-[10px] font-black text-slate-400 dark:text-slate-500 flex-shrink-0 mt-0.5">
+                      {indexOffset + index + 1}
+                    </span>
+                    <div className="min-w-0 flex-1">
                       <h4 className="text-lg font-black text-slate-900 dark:text-white truncate">
                         <Link
                           to={`/${appointment.businesses?.slug || ''}`}

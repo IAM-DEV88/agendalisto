@@ -510,6 +510,7 @@ const ProfileDashboard = ({ user }: ProfileDashboardProps) => {
                         appointments={pagedUpcoming}
                         onReschedule={handleReschedule}
                         onCancel={handleCancel}
+                        indexOffset={(pagination.upcoming.page - 1) * pagination.upcoming.perPage}
                       />
                       {confirmedAppointments.length > pagination.upcoming.perPage && (
                         <Pagination
@@ -540,6 +541,7 @@ const ProfileDashboard = ({ user }: ProfileDashboardProps) => {
                         appointments={pagedPending}
                         onReschedule={handleReschedule}
                         onCancel={handleCancel}
+                        indexOffset={(pagination.pending.page - 1) * pagination.pending.perPage}
                       />
                       {pendingAppointments.length > pagination.pending.perPage && (
                         <Pagination
@@ -571,6 +573,7 @@ const ProfileDashboard = ({ user }: ProfileDashboardProps) => {
                         appointments={paginatedPastAppointments}
                         onReschedule={handleReschedule}
                         onReview={handleReview}
+                        indexOffset={(pagination.history.page - 1) * pagination.history.perPage}
                       />
                       {pastAppointments.length > pagination.history.perPage && (
                         <Pagination

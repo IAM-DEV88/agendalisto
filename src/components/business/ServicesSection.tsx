@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import { Link } from 'react-router-dom';
-import { Plus, Edit2, Trash2, Clock, DollarSign, User, Info, CheckCircle, XCircle, Loader2, Sparkles, AlertTriangle } from 'lucide-react';
+import { Plus, Edit2, Trash2, Clock, User, Info, CheckCircle, XCircle, Loader2, Sparkles, AlertTriangle } from 'lucide-react';
 import type { Service } from '../../lib/api';
 import { notifySuccess, notifyError } from '../../lib/toast';
 import { useLockBodyScroll } from '../../hooks/useLockBodyScroll';
@@ -154,87 +154,116 @@ const ServicesSection: React.FC<ServicesSectionProps> = ({
       ) : (
         <>
           <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6">
-            {pagedServices.map((service) => (
+            {pagedServices.map((service, index) => {
+              const serviceNumber = (currentPage - 1) * itemsPerPage + index + 1;
+              return (
               <div
                 key={service.id}
-                className={`card group flex flex-col h-full transition-all hover:border-primary-500/30 ${
-                  !service.is_active ? 'opacity-70 grayscale-[0.3]' : ''
+                className={`card overflow-hidden flex flex-col h-full transition-all hover:border-primary-500/30 ${
+                  !service.is_active ? 'opacity-60' : ''
                 }`}
               >
-                <div className="p-6 flex-grow">
-                  <div className="flex items-start justify-between gap-4 mb-4">
-                    <div className="min-w-0">
-                      <h3 className="text-lg font-black text-slate-900 dark:text-white truncate tracking-tight">
-                        {service.name}
-                      </h3>
-                      <p className="text-sm font-medium text-slate-500 dark:text-slate-400 mt-1 line-clamp-2">
-                        {service.description}
-                      </p>
-                    </div>
-                    <div className={`flex-shrink-0 w-10 h-10 rounded-lg flex items-center justify-center ${
-                      service.is_active 
-                        ? 'bg-emerald-50 text-emerald-600 dark:bg-emerald-500/10 dark:text-emerald-400' 
-                        : 'bg-slate-100 text-slate-400 dark:bg-slate-800 dark:text-slate-600'
-                    }`}>
-                      {service.is_active ? <CheckCircle className="w-6 h-6" /> : <XCircle className="w-6 h-6" />}
-                    </div>
-                  </div>
-
-                  <div className="space-y-3 pt-4 border-t border-slate-100 dark:border-slate-800">
-                    <div className="flex items-center justify-between text-sm">
-                      <div className="flex items-center gap-2 text-slate-500 dark:text-slate-400">
-                        <Clock className="w-4 h-4" />
-                        <span>Duracion</span>
-                      </div>
-                      <span className="font-bold text-slate-900 dark:text-white">{service.duration} min</span>
-                    </div>
-                    <div className="flex items-center justify-between text-sm">
-                      <div className="flex items-center gap-2 text-slate-500 dark:text-slate-400">
-                        <DollarSign className="w-4 h-4" />
-                        <span>Precio</span>
-                      </div>
-                      <span className="font-black text-lg text-primary-600 dark:text-primary-400">${service.price.toFixed(2)}</span>
-                    </div>
-                    {service.provider && (
-                      <div className="flex items-center justify-between text-sm">
-                        <div className="flex items-center gap-2 text-slate-500 dark:text-slate-400">
-                          <User className="w-4 h-4" />
-                          <span>Encargado</span>
-                        </div>
-                        <span className="font-bold text-slate-900 dark:text-white truncate max-w-[120px]">{service.provider}</span>
-                      </div>
+                <div className="flex items-center gap-2 px-4 py-2.5 bg-slate-50 dark:bg-slate-800/50 border-b border-slate-100 dark:border-slate-800">
+                  <span className="w-6 h-6 rounded-md bg-slate-200 dark:bg-slate-700 flex items-center justify-center text-[11px] font-black text-slate-500 dark:text-slate-300 flex-shrink-0">
+                    {serviceNumber}
+                  </span>
+                  <span className="flex items-center gap-1.5 text-[10px] font-bold uppercase tracking-widest">
+                    {service.is_active ? (
+                      <span className="inline-flex items-center gap-1 px-2 py-0.5 bg-emerald-50 dark:bg-emerald-500/10 text-emerald-700 dark:text-emerald-400 rounded-md border border-emerald-200 dark:border-emerald-800/50">
+                        <CheckCircle className="w-2.5 h-2.5" /> Activo
+                      </span>
+                    ) : (
+                      <span className="inline-flex items-center gap-1 px-2 py-0.5 bg-slate-100 dark:bg-slate-800 text-slate-400 rounded-md">
+                        <XCircle className="w-2.5 h-2.5" /> Inactivo
+                      </span>
                     )}
-                    {service.can_be_gifted && (
-                      <div className="flex items-center gap-1.5 text-xs font-bold text-rose-500">
-                        <span>🎁</span> Se puede regalar
-                      </div>
-                    )}
-                    {service.requires_payment && (
-                      <div className="flex items-center gap-1.5 text-xs font-bold text-amber-500">
-                        <span>🔒</span> Pago online ({service.payment_percentage || 100}%)
-                      </div>
-                    )}
+                  </span>
+                  <div className="ml-auto flex items-center gap-2">
+                    <Link
+                      to={`/business/service/${service.id}/edit`}
+                      className="p-1.5 text-slate-400 hover:text-primary-600 dark:hover:text-primary-400 transition-colors rounded-lg hover:bg-white dark:hover:bg-slate-800"
+                      title="Editar"
+                    >
+                      <Edit2 className="w-4 h-4" />
+                    </Link>
+                    <button
+                      onClick={() => setServiceToDelete(service)}
+                      className="p-1.5 text-slate-400 hover:text-red-500 transition-colors rounded-lg hover:bg-white dark:hover:bg-slate-800"
+                      title="Eliminar"
+                    >
+                      <Trash2 className="w-4 h-4" />
+                    </button>
                   </div>
                 </div>
-
-                <div className="px-6 py-4 bg-slate-50/50 dark:bg-slate-800/50 border-t border-slate-100 dark:border-slate-800 flex justify-end gap-3">
-                  <Link
-                    to={`/business/service/${service.id}/edit`}
-                    className="p-2 text-slate-400 hover:text-primary-600 dark:hover:text-primary-400 transition-colors"
-                    title="Editar"
-                  >
-                    <Edit2 className="w-5 h-5" />
-                  </Link>
-                  <button
-                    onClick={() => setServiceToDelete(service)}
-                    className="p-2 text-slate-400 hover:text-red-500 transition-colors"
-                    title="Eliminar"
-                  >
-                    <Trash2 className="w-5 h-5" />
-                  </button>
+                <div className="flex flex-col sm:flex-row flex-1 min-w-0">
+                  {service.image_urls && service.image_urls.length > 0 && (
+                    <div className="sm:w-28 lg:w-32 flex-shrink-0 bg-slate-100 dark:bg-slate-800 border-b sm:border-b-0 sm:border-r border-slate-200 dark:border-slate-700">
+                      <div className="relative aspect-[4/3] sm:aspect-square">
+                        <img
+                          src={service.image_urls[0]}
+                          alt={service.name}
+                          className="w-full h-full object-contain p-2"
+                        />
+                      </div>
+                    </div>
+                  )}
+                  <div className="flex-1 p-4 sm:p-5 space-y-2 min-w-0">
+                    <div className="flex items-start justify-between gap-3">
+                      <div className="min-w-0 flex-1">
+                        <h3 className="text-base sm:text-lg font-black text-slate-900 dark:text-white truncate mb-0">
+                          {service.name}
+                        </h3>
+                        {service.description && (
+                          <p className="text-xs sm:text-sm text-slate-500 dark:text-slate-400 mt-1 line-clamp-2 leading-relaxed">
+                            {service.description}
+                          </p>
+                        )}
+                      </div>
+                      <span className="text-lg font-black text-primary-600 dark:text-primary-400 flex-shrink-0">
+                        ${service.price.toFixed(2)}
+                      </span>
+                    </div>
+                    <div className="flex items-center flex-wrap gap-x-4 gap-y-1 text-xs font-bold text-slate-400 pt-1">
+                      <span className="flex items-center gap-1">
+                        <Clock className="w-3 h-3 text-primary-400" /> {service.duration} min
+                      </span>
+                      {service.provider && (
+                        <span className="flex items-center gap-1">
+                          <User className="w-3 h-3 text-primary-400" /> {service.provider}
+                        </span>
+                      )}
+                      {service.can_be_gifted && <span className="text-rose-400">🎁 Regalable</span>}
+                      {service.requires_payment && (
+                        <span className="text-amber-500">🔒 Pago online ({service.payment_percentage || 100}%)</span>
+                      )}
+                      {(service.min_cancellation_hours ?? 0) > 0 && (
+                        <span>⏳ Cancelación: {service.min_cancellation_hours}h</span>
+                      )}
+                      {(service.min_reschedule_hours ?? 0) > 0 && (
+                        <span>🔄 Reagendamiento: {service.min_reschedule_hours}h</span>
+                      )}
+                    </div>
+                    {(service.cancellation_policy_text || service.reschedule_policy_text) && (
+                      <div className="flex flex-wrap gap-3 pt-2 border-t border-slate-100 dark:border-slate-800 text-[10px] text-slate-400">
+                        {service.cancellation_policy_text && (
+                          <div className="flex-1 min-w-0">
+                            <span className="font-bold text-slate-500">Cancelación:</span>{' '}
+                            <span className="line-clamp-1">{service.cancellation_policy_text}</span>
+                          </div>
+                        )}
+                        {service.reschedule_policy_text && (
+                          <div className="flex-1 min-w-0">
+                            <span className="font-bold text-slate-500">Reagendamiento:</span>{' '}
+                            <span className="line-clamp-1">{service.reschedule_policy_text}</span>
+                          </div>
+                        )}
+                      </div>
+                    )}
+                  </div>
                 </div>
               </div>
-            ))}
+            );
+            })}
           </div>
           
           <Pagination 

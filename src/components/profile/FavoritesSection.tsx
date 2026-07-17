@@ -84,18 +84,21 @@ function BusinessFavorites({ userId }: { userId: string }) {
 
   return (
     <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
-      {favorites.map(fav => (
-        <FavoriteBusinessCard key={fav.like_id} fav={fav} removingId={removingId} onRemove={handleRemove} />
+      {favorites.map((fav, index) => (
+        <FavoriteBusinessCard key={fav.like_id} fav={fav} index={index} removingId={removingId} onRemove={handleRemove} />
       ))}
     </div>
   );
 }
 
-function FavoriteBusinessCard({ fav, removingId, onRemove }: { fav: FavoriteItem; removingId: string | null; onRemove: (fav: FavoriteItem) => void }) {
+function FavoriteBusinessCard({ fav, index, removingId, onRemove }: { fav: FavoriteItem; index: number; removingId: string | null; onRemove: (fav: FavoriteItem) => void }) {
   return (
     <div className="group bg-white dark:bg-slate-900 rounded-lg border border-slate-200 dark:border-slate-800 overflow-hidden hover:border-primary-300 dark:hover:border-primary-700 hover:shadow-2xl transition-all duration-300 hover:-translate-y-1 flex flex-col">
       <Link to={`/${fav.slug}`} className="flex flex-col flex-1">
         <div className="h-40 bg-slate-100 dark:bg-slate-800 relative overflow-hidden flex-shrink-0">
+          <span className="absolute top-3 right-3 w-6 h-6 rounded-md bg-slate-900/60 backdrop-blur-sm flex items-center justify-center text-[10px] font-black text-white z-10">
+            {index + 1}
+          </span>
           <img
             src={fav.logo_url || FALLBACK_BUSINESS_LOGO}
             alt={fav.name}
@@ -187,20 +190,23 @@ function ServiceFavorites({ userId }: { userId: string }) {
 
   return (
     <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
-      {favorites.map(fav => (
-        <FavoriteServiceCard key={fav.like_id} fav={fav} removingId={removingId} onRemove={handleRemove} />
+      {favorites.map((fav, index) => (
+        <FavoriteServiceCard key={fav.like_id} fav={fav} index={index} removingId={removingId} onRemove={handleRemove} />
       ))}
     </div>
   );
 }
 
-function FavoriteServiceCard({ fav, removingId, onRemove }: { fav: ServiceFavoriteItem; removingId: string | null; onRemove: (fav: ServiceFavoriteItem) => void }) {
+function FavoriteServiceCard({ fav, index, removingId, onRemove }: { fav: ServiceFavoriteItem; index: number; removingId: string | null; onRemove: (fav: ServiceFavoriteItem) => void }) {
   const previewImage = fav.image_urls?.[0] || FALLBACK_BUSINESS_LOGO;
 
   return (
     <div className="group bg-white dark:bg-slate-900 rounded-lg border border-slate-200 dark:border-slate-800 overflow-hidden hover:border-primary-300 dark:hover:border-primary-700 hover:shadow-2xl transition-all duration-300 hover:-translate-y-1 flex flex-col">
       <Link to={`/${fav.business_slug}/book/${fav.service_id}`} className="flex flex-col flex-1">
         <div className="h-40 bg-slate-100 dark:bg-slate-800 relative overflow-hidden flex-shrink-0">
+          <span className="absolute top-3 right-3 w-6 h-6 rounded-md bg-slate-900/60 backdrop-blur-sm flex items-center justify-center text-[10px] font-black text-white z-10">
+            {index + 1}
+          </span>
           <img
             src={previewImage}
             alt={fav.name}
@@ -293,18 +299,21 @@ function BlogFavorites({ userId }: { userId: string }) {
 
   return (
     <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
-      {favorites.map(fav => (
-        <FavoriteBlogCard key={fav.like_id} fav={fav} removingId={removingId} onRemove={handleRemove} />
+      {favorites.map((fav, index) => (
+        <FavoriteBlogCard key={fav.like_id} fav={fav} index={index} removingId={removingId} onRemove={handleRemove} />
       ))}
     </div>
   );
 }
 
-function FavoriteBlogCard({ fav, removingId, onRemove }: { fav: BlogPostFavoriteItem; removingId: string | null; onRemove: (fav: BlogPostFavoriteItem) => void }) {
+function FavoriteBlogCard({ fav, index, removingId, onRemove }: { fav: BlogPostFavoriteItem; index: number; removingId: string | null; onRemove: (fav: BlogPostFavoriteItem) => void }) {
   return (
     <div className="group bg-white dark:bg-slate-900 rounded-lg border border-slate-200 dark:border-slate-800 overflow-hidden hover:border-primary-300 dark:hover:border-primary-700 hover:shadow-2xl transition-all duration-300 hover:-translate-y-1 flex flex-col">
       <Link to={`/blog/${fav.post_id}`} className="flex flex-col flex-1">
         <div className="h-40 bg-slate-100 dark:bg-slate-800 relative overflow-hidden flex-shrink-0">
+          <span className="absolute top-3 right-3 w-6 h-6 rounded-md bg-slate-900/60 backdrop-blur-sm flex items-center justify-center text-[10px] font-black text-white z-10">
+            {index + 1}
+          </span>
           <img
             src={fav.image_url || FALLBACK_BLOG_IMG}
             alt={fav.title}

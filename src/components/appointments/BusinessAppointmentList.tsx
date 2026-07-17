@@ -11,6 +11,7 @@ interface BusinessAppointmentListProps {
   onStatusChange?: (id: string, status: AppointmentStatus) => void;
   onReschedule?: (appointment: Appointment) => void;
   showReviewSection?: boolean;
+  indexOffset?: number;
 }
 
 const statusStyles: Record<string, { dot: string; bg: string; text: string; border: string }> = {
@@ -45,6 +46,7 @@ const BusinessAppointmentList: React.FC<BusinessAppointmentListProps> = ({
   onStatusChange,
   onReschedule,
   showReviewSection = false,
+  indexOffset = 0,
 }) => {
   const [selectedAppointment, setSelectedAppointment] = useState<Appointment | null>(null);
 
@@ -74,8 +76,11 @@ const BusinessAppointmentList: React.FC<BusinessAppointmentListProps> = ({
                 <div className="flex flex-col sm:flex-row sm:items-start gap-4">
                   <div className="flex-1 min-w-0 space-y-3">
                     {/* Service + Status */}
-                    <div className="flex items-start justify-between gap-3">
-                      <div className="min-w-0">
+                    <div className="flex items-start gap-2">
+                      <span className="w-5 h-5 rounded-md bg-slate-100 dark:bg-slate-800 flex items-center justify-center text-[10px] font-black text-slate-400 dark:text-slate-500 flex-shrink-0 mt-0.5">
+                        {indexOffset + index + 1}
+                      </span>
+                      <div className="min-w-0 flex-1">
                         <h4 className="text-lg font-black text-slate-900 dark:text-white truncate">
                           {appointment.services?.name}
                         </h4>

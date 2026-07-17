@@ -488,6 +488,7 @@ export const BusinessDashboard: React.FC = () => {
                             onStatusChange={handleUpdateAppointmentStatus}
                             onReschedule={(appt) => setAppointmentToReschedule(appt)}
                             showReviewSection={false}
+                            indexOffset={(pagination.pending.page - 1) * pagination.pending.perPage}
                           />
                           {pendingAppointments.length > pagination.pending.perPage && (
                             <Pagination
@@ -513,6 +514,7 @@ export const BusinessDashboard: React.FC = () => {
                             onStatusChange={handleUpdateAppointmentStatus}
                             onReschedule={(appt) => setAppointmentToReschedule(appt)}
                             showReviewSection={false}
+                            indexOffset={(pagination.confirmed.page - 1) * pagination.confirmed.perPage}
                           />
                           {confirmedAppointments.length > pagination.confirmed.perPage && (
                             <Pagination
@@ -571,6 +573,7 @@ export const BusinessDashboard: React.FC = () => {
                         onStatusChange={handleUpdateAppointmentStatus}
                         onReschedule={(appt) => setAppointmentToReschedule(appt)}
                         showReviewSection={true}
+                        indexOffset={(pagination.history.page - 1) * pagination.history.perPage}
                       />
                       {pastAppointments.length > pagination.history.perPage && (
                         <Pagination
