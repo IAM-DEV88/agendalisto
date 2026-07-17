@@ -394,7 +394,7 @@ const AppointmentCalendar: React.FC<AppointmentCalendarProps> = ({
               </div>
 
               <div className="space-y-2">
-                {selectedDayAppts.map((appt) => {
+                {selectedDayAppts.map((appt, index) => {
                   const date = new Date(appt.start_time);
                   const canDrag = !!onReschedule && appt.status !== 'cancelled' && appt.status !== 'completed';
                   return (
@@ -405,7 +405,10 @@ const AppointmentCalendar: React.FC<AppointmentCalendarProps> = ({
                         canDrag ? 'cursor-grab active:cursor-grabbing' : 'cursor-pointer'
                       } ${draggingId === appt.id ? 'opacity-40' : ''}`}
                     >
-                      <div className="flex items-start gap-3 p-3 sm:p-4">
+                      <div className="flex items-start gap-2 p-3 sm:p-4">
+                        <span className="w-5 h-5 rounded-md bg-slate-100 dark:bg-slate-800 flex items-center justify-center text-[10px] font-black text-slate-400 dark:text-slate-500 flex-shrink-0 mt-0.5">
+                          {index + 1}
+                        </span>
                         {canDrag && (
                           <div
                             data-swipe-block
