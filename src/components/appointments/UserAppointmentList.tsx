@@ -60,7 +60,7 @@ const UserAppointmentList: React.FC<UserAppointmentListProps> = ({
             </div>
 
             <div className="p-4 sm:p-5">
-              <div className="flex flex-col sm:flex-row sm:items-start gap-4">
+              <div className="flex flex-row sm:items-start gap-4">
                 <div className="flex-1 min-w-0 space-y-2">
                   {appointment.businesses?.address && (
                     <div className="flex items-center gap-1.5 text-xs font-medium text-slate-400 dark:text-slate-500">

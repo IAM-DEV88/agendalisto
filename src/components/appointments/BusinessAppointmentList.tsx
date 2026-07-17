@@ -64,7 +64,7 @@ const BusinessAppointmentList: React.FC<BusinessAppointmentListProps> = ({
               </div>
 
               <div className="p-4 sm:p-5">
-                <div className="flex flex-col sm:flex-row sm:items-start gap-4">
+                <div className="flex flex-row sm:items-start gap-4">
                   <div className="flex-1 min-w-0 space-y-2">
                     <div className="flex items-start gap-2.5">
                       <div className="w-8 h-8 rounded-lg bg-primary-50 dark:bg-primary-500/10 flex items-center justify-center flex-shrink-0">
