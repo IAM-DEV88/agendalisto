@@ -135,10 +135,10 @@ export default function ServiceFormPage() {
           const userBizs = businesses || [];
           if (userBizs.length === 0) { navigate('/business/dashboard'); return; }
 
-          const primaryBiz = userBizs[0];
-          setBusinessId(primaryBiz.id);
-          setBusinessName(primaryBiz.name);
-          setBusinessLogo(primaryBiz.logo_url || '');
+          const targetBiz = userBizs.find(b => b.id === userProfile?.business_id) || userBizs[0];
+          setBusinessId(targetBiz.id);
+          setBusinessName(targetBiz.name);
+          setBusinessLogo(targetBiz.logo_url || '');
         }
       } catch {
         setError('Error al cargar la información');
