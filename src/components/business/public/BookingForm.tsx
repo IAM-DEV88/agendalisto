@@ -305,6 +305,55 @@ const BookingForm: React.FC<BookingFormProps> = ({
     });
   }, [formData.date, loadingSlots, businessHours, appointments, service, slotIntervalMinutes, bufferMinutes, selectedStaff, staffList]);
 
+  const fullyBookedDates = useMemo(() => {
+    if (!service || loadingSlots) return new Set<string>();
+    const result = new Set<string>();
+    const maxDays = maxAdvanceBookingDays || 90;
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+    const activeCount = staffList.filter(s => s.is_active).length;
+
+    for (let d = 0; d < maxDays; d++) {
+      const date = new Date(today.getTime() + d * 86400000);
+      const dateStr = date.toISOString().split('T')[0];
+      const jsDay = date.getDay();
+      const bizDay = (jsDay + 6) % 7;
+      const todaysHours = businessHours.find(h => h.day_of_week === bizDay);
+      if (!todaysHours || todaysHours.is_closed) continue;
+
+      const [startH, startM] = todaysHours.start_time.replace('.', ':').split(':').map(Number);
+      const [endH, endM] = todaysHours.end_time.replace('.', ':').split(':').map(Number);
+      let businessStart = startH * 60 + startM;
+      let businessEnd = endH * 60 + endM;
+      if (businessEnd <= businessStart) businessEnd += 24 * 60;
+      const interval = slotIntervalMinutes || 30;
+      const buffer = bufferMinutes || 0;
+      let hasAnySlot = false;
+
+      for (let mins = businessStart; mins + service.duration <= businessEnd && !hasAnySlot; mins += interval) {
+        const slotTime = new Date(`${dateStr}T${String(mins / 60 | 0).padStart(2, '0')}:${String(mins % 60).padStart(2, '0')}`);
+        if (slotTime.getTime() <= today.getTime()) continue;
+        const slotEnd = slotTime.getTime() + service.duration * 60000;
+        const slotEndWithBuf = slotEnd + buffer * 60000;
+
+        const conflicting = appointments.filter(appt => {
+          const aDate = appt.start_time.split('T')[0];
+          if (aDate !== dateStr || appt.status === 'cancelled') return false;
+          const aStart = new Date(appt.start_time).getTime();
+          const aEnd = new Date(appt.end_time).getTime();
+          return slotTime.getTime() < aEnd && slotEndWithBuf > aStart;
+        });
+
+        if (activeCount > 0) {
+          if (conflicting.filter(a => a.staff_id).length < activeCount) hasAnySlot = true;
+        } else if (conflicting.length === 0) hasAnySlot = true;
+      }
+
+      if (!hasAnySlot) result.add(dateStr);
+    }
+    return result;
+  }, [businessHours, appointments, service, slotIntervalMinutes, bufferMinutes, staffList, maxAdvanceBookingDays, loadingSlots]);
+
   const paymentAmount = service?.payment_percentage != null
     ? Math.round((service.price * service.payment_percentage) / 100)
     : service?.price || 0;
@@ -876,6 +925,7 @@ const BookingForm: React.FC<BookingFormProps> = ({
                   maxAdvanceDays={maxAdvanceBookingDays}
                   selectedDate={formData.date}
                   onSelectDate={handleDateSelect}
+                  fullyBookedDates={fullyBookedDates}
                 />
               </div>
               <div className="flex flex-col">

@@ -15,6 +15,7 @@ interface AvailabilityCalendarProps {
   maxAdvanceDays?: number;
   selectedDate: string;
   onSelectDate: (date: string) => void;
+  fullyBookedDates?: Set<string>;
 }
 
 function jsDayToBusiness(jsDay: number): number {
@@ -26,6 +27,7 @@ export default function AvailabilityCalendar({
   maxAdvanceDays = 90,
   selectedDate,
   onSelectDate,
+  fullyBookedDates,
 }: AvailabilityCalendarProps) {
   const [currentMonth, setCurrentMonth] = useState(new Date());
   const today = startOfDay(new Date());
@@ -132,7 +134,9 @@ export default function AvailabilityCalendar({
                   selected
                     ? 'bg-white'
                     : open
-                      ? 'bg-emerald-400'
+                      ? fullyBookedDates?.has(dateStr)
+                        ? 'bg-orange-400'
+                        : 'bg-emerald-400'
                       : 'bg-red-300 dark:bg-red-600'
                 }`} />
               )}
@@ -146,6 +150,10 @@ export default function AvailabilityCalendar({
         <div className="flex items-center gap-1.5">
           <span className="w-2 h-2 rounded-full bg-emerald-400" />
           <span className="text-[10px] font-bold text-slate-400">Disponible</span>
+        </div>
+        <div className="flex items-center gap-1.5">
+          <span className="w-2 h-2 rounded-full bg-orange-400" />
+          <span className="text-[10px] font-bold text-slate-400">Sin turnos</span>
         </div>
         <div className="flex items-center gap-1.5">
           <span className="w-2 h-2 rounded-full bg-red-300" />

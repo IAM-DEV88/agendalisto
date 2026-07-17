@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useMemo } from 'react';
 import { X, AlertCircle, Calendar as CalendarIcon, ChevronLeft, ChevronRight, Clock, User } from 'lucide-react';
 import { Appointment } from '../../types/appointment';
 import { cancelAppointment, rescheduleAppointment, getBusinessHours, getBusinessAppointments, getBusinessConfig, getBusinessStaff, BusinessHours, Appointment as ApiAppointment } from '../../lib/api';
@@ -78,6 +78,7 @@ export default function CancelRescheduleModal({ isOpen, onClose, appointment, is
 
   useEffect(() => {
     if (!newDate || loadingSlots || !appointment) { setLocalSlots([]); return; }
+    const allAppts = appointment ? [...appointments, appointment] : appointments;
     const jsDay = new Date(`${newDate}T00:00`).getDay();
     const selectedDay = (jsDay + 6) % 7;
     const todaysHours = businessHours.find(h => h.day_of_week === selectedDay);
@@ -106,7 +107,7 @@ export default function CancelRescheduleModal({ isOpen, onClose, appointment, is
       const slotEnd = slotTime + serviceDuration * 60000;
       const slotEndWithBuffer = slotEnd + bufferMinutes * 60000;
 
-      const conflicting = appointments.filter(appt => {
+      const conflicting = allAppts.filter(appt => {
         if (!appt.start_time || !appt.end_time) return false;
         if (appt.status === 'cancelled' || appt.status === 'completed') return false;
         if (rescheduleStaff && appt.staff_id && appt.staff_id !== rescheduleStaff) return false;
@@ -133,6 +134,59 @@ export default function CancelRescheduleModal({ isOpen, onClose, appointment, is
     const id = requestAnimationFrame(() => setLocalSlots(available));
     return () => cancelAnimationFrame(id);
   }, [newDate, loadingSlots, businessHours, appointments, appointment, serviceDuration, slotInterval, bufferMinutes, rescheduleStaff, staffList]);
+
+  const cancelFullyBookedDates = useMemo(() => {
+    if (!appointment) return new Set<string>();
+    const allAppts = appointment ? [...appointments, appointment] : appointments;
+    const result = new Set<string>();
+    const maxDays = 90;
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+    const activeCount = staffList.filter(s => s.is_active).length;
+
+    for (let d = 0; d < maxDays; d++) {
+      const date = new Date(today.getTime() + d * 86400000);
+      const dateStr = format(date, 'yyyy-MM-dd');
+      const bizDay = (date.getDay() + 6) % 7;
+      const dayHours = businessHours.find(h => h.day_of_week === bizDay);
+      if (!dayHours || dayHours.is_closed) continue;
+
+      const [startH, startM] = dayHours.start_time.replace('.', ':').split(':').map(Number);
+      const [endH, endM] = dayHours.end_time.replace('.', ':').split(':').map(Number);
+      let businessStart = startH * 60 + startM;
+      let businessEnd = endH * 60 + endM;
+      if (businessEnd <= businessStart) businessEnd += 24 * 60;
+      const interval = Math.max(slotInterval, 15);
+      const buffer = bufferMinutes;
+      let hasAnySlot = false;
+
+      for (let mins = businessStart; mins + serviceDuration <= businessEnd && !hasAnySlot; mins += interval) {
+        const slotDate = new Date(date);
+        slotDate.setHours(mins / 60 | 0, mins % 60, 0, 0);
+        if (slotDate.getTime() <= today.getTime()) continue;
+        const slotEnd = slotDate.getTime() + serviceDuration * 60000;
+        const slotEndBuf = slotEnd + buffer * 60000;
+
+        const conflicting = allAppts.filter(appt => {
+          if (!appt.start_time || !appt.end_time) return false;
+          if (appt.status === 'cancelled' || appt.status === 'completed') return false;
+          const aDate = new Date(appt.start_time).toLocaleDateString('sv-SE');
+          if (aDate !== dateStr) return false;
+          const aStart = new Date(appt.start_time).getTime();
+          const aEnd = new Date(appt.end_time).getTime();
+          if (isNaN(aStart) || isNaN(aEnd)) return false;
+          return slotDate.getTime() < aEnd && slotEndBuf > aStart;
+        });
+
+        if (activeCount > 0) {
+          if (conflicting.filter(a => a.staff_id).length < activeCount) hasAnySlot = true;
+        } else if (conflicting.length === 0) hasAnySlot = true;
+      }
+
+      if (!hasAnySlot) result.add(dateStr);
+    }
+    return result;
+  }, [businessHours, appointments, appointment, serviceDuration, slotInterval, bufferMinutes, staffList]);
 
   if (!isOpen || !appointment) return null;
 
@@ -403,7 +457,9 @@ export default function CancelRescheduleModal({ isOpen, onClose, appointment, is
                                   ? 'bg-white'
                                   : isClosed
                                     ? 'bg-red-400'
-                                    : 'bg-emerald-400'
+                                    : cancelFullyBookedDates.has(dayStr)
+                                      ? 'bg-orange-400'
+                                      : 'bg-emerald-400'
                               }`} />
                             )}
                           </button>
@@ -414,10 +470,13 @@ export default function CancelRescheduleModal({ isOpen, onClose, appointment, is
                   {businessHours.length > 0 && (
                     <div className="flex items-center gap-3 px-2 py-1.5 border-t border-slate-100 dark:border-slate-800">
                       <span className="flex items-center gap-1 text-[10px] font-bold text-slate-400">
-                        <span className="w-2 h-2 rounded-full bg-red-400" /> Cerrado
+                        <span className="w-2 h-2 rounded-full bg-emerald-400" /> Disponible
                       </span>
                       <span className="flex items-center gap-1 text-[10px] font-bold text-slate-400">
-                        <span className="w-2 h-2 rounded-full bg-emerald-400" /> Disponible
+                        <span className="w-2 h-2 rounded-full bg-orange-400" /> Sin turnos
+                      </span>
+                      <span className="flex items-center gap-1 text-[10px] font-bold text-slate-400">
+                        <span className="w-2 h-2 rounded-full bg-red-400" /> Cerrado
                       </span>
                     </div>
                   )}
