@@ -81,8 +81,6 @@
   h5 { font-size: 1.125rem; line-height: 1.5rem; }
   h6 { font-size: 1rem; line-height: 1.5rem; }
 
- c
-
   @media (max-width: 639px) {
     p {
       margin-bottom: 0.75rem;
@@ -113,7 +111,7 @@
   input[type='search'],
   input[type='tel'],
   select {
-    @apply appearance-none block w-full pl-10 py-4 w-full bg-slate-50 rounded-lg text-slate-900 font-medium pr-0 dark:bg-slate-800 dark:text-white;
+    @apply appearance-none block w-full pl-10 py-4 bg-slate-50 rounded-lg text-slate-900 font-medium pr-0 dark:bg-slate-800 dark:text-white;
   }
 
   textarea {
@@ -175,7 +173,7 @@
 
   /* --------------------------------- Cards --------------------------------- */
   .card {
-    @apply bg-white dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700 shadow-sm hover:shadow-md transition-all duration-200;
+    @apply bg-white dark:bg-slate-900 rounded-lg border border-slate-200 dark:border-slate-800 shadow-sm hover:shadow-md transition-all duration-200;
   }
 
   /* -------------------------------- Alerts --------------------------------- */
@@ -205,19 +203,19 @@
   }
 
   .modal-container {
-    @apply bg-white dark:bg-gray-800 rounded-lg shadow-xl w-full max-w-2xl mx-4 max-h-[90vh] overflow-y-auto;
+    @apply bg-white dark:bg-slate-900 rounded-lg shadow-xl w-full max-w-2xl mx-4 max-h-[90vh] overflow-y-auto;
   }
 
   .modal-header {
-    @apply px-6 py-4 border-b border-gray-200 dark:border-gray-700 flex items-center justify-between sticky top-0 bg-white dark:bg-gray-800 z-10;
+    @apply px-6 py-4 border-b border-slate-200 dark:border-slate-700 flex items-center justify-between sticky top-0 bg-white dark:bg-slate-900 z-10;
   }
 
   .modal-title {
-    @apply text-lg font-semibold text-gray-900 dark:text-white;
+    @apply text-lg font-semibold text-slate-900 dark:text-white;
   }
 
   .modal-close {
-    @apply text-gray-400 hover:text-gray-500 dark:hover:text-gray-300 transition-colors duration-200;
+    @apply text-slate-400 hover:text-slate-500 dark:hover:text-slate-300 transition-colors duration-200;
   }
 
   .modal-content {
@@ -225,19 +223,19 @@
   }
 
   .modal-section {
-    @apply border-b border-gray-200 dark:border-gray-700 pb-4 last:border-0 last:pb-0;
+    @apply border-b border-slate-200 dark:border-slate-700 pb-4 last:border-0 last:pb-0;
   }
 
   .modal-section-title {
-    @apply text-sm font-medium text-gray-700 dark:text-gray-300 mb-2;
+    @apply text-sm font-medium text-slate-700 dark:text-slate-300 mb-2;
   }
 
   .modal-section-content {
-    @apply text-sm text-gray-900 dark:text-white;
+    @apply text-sm text-slate-900 dark:text-white;
   }
 
   .modal-footer {
-    @apply px-6 py-4 border-t border-gray-200 dark:border-gray-700 flex justify-end space-x-2 sticky bottom-0 bg-white dark:bg-gray-800;
+    @apply px-6 py-4 border-t border-slate-200 dark:border-slate-700 flex justify-end space-x-2 sticky bottom-0 bg-white dark:bg-slate-900;
   }
 
   /* ---------------------------- Info Grid --------------------------------- */
@@ -246,11 +244,11 @@
   }
 
   .info-grid-label {
-    @apply text-gray-500 dark:text-gray-400;
+    @apply text-slate-500 dark:text-slate-400;
   }
 
   .info-grid-value {
-    @apply text-gray-900 dark:text-white font-medium;
+    @apply text-slate-900 dark:text-white font-medium;
   }
 
   /* -------------------------------- Utils --------------------------------- */
@@ -297,7 +295,7 @@
 
 /* ------------------------------ Timeline -------------------------------- */
   .timeline {
-    @apply space-y-4 ml-4 border-l border-gray-200 dark:border-gray-700;
+    @apply space-y-4 ml-4 border-l border-slate-200 dark:border-slate-700;
   }
 
   .timeline-item {
@@ -305,16 +303,16 @@
   }
 
   .timeline-dot {
-    @apply absolute -left-2 mt-1.5 w-4 h-4 rounded-full border-2 border-white dark:border-gray-800 bg-gray-200 dark:bg-gray-700;
+    @apply absolute -left-2 mt-1.5 w-4 h-4 rounded-full border-2 border-white dark:border-slate-800 bg-slate-200 dark:bg-slate-700;
   }
 
   .timeline-content {
-    @apply text-sm text-gray-600 dark:text-gray-400;
+    @apply text-sm text-slate-600 dark:text-slate-400;
   }
 
   /* --------------------- Business Appointment Entry ----------------------- */
   .business-appointment-entry {
-    @apply flex items-center justify-between px-4 py-3 hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors duration-200 border border-gray-200 dark:border-gray-700 mb-4 rounded-lg cursor-pointer gap-x-2;
+    @apply flex items-center justify-between px-4 py-3 hover:bg-slate-50 dark:hover:bg-slate-800 transition-colors duration-200 border border-slate-200 dark:border-slate-700 mb-4 rounded-lg cursor-pointer gap-x-2;
   }
 
   .business-appointment-content {
@@ -326,15 +324,15 @@
   }
 
   .business-appointment-title {
-    @apply text-sm font-medium text-gray-900 dark:text-white truncate;
+    @apply text-sm font-medium text-slate-900 dark:text-white truncate;
   }
 
   .business-appointment-subtitle {
-    @apply text-xs text-gray-500 dark:text-gray-400 truncate;
+    @apply text-xs text-slate-500 dark:text-slate-400 truncate;
   }
 
   .business-appointment-time {
-    @apply text-xs text-gray-500 md:self-center dark:text-gray-400 whitespace-nowrap;
+    @apply text-xs text-slate-500 md:self-center dark:text-slate-400 whitespace-nowrap;
   }
 
   .business-appointment-actions {
@@ -343,7 +341,7 @@
 
   /* ------------------------ User Appointment Entry ------------------------ */
   .user-appointment-entry {
-    @apply px-4 py-3 hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors duration-200 gap-x-2 rounded-lg border border-gray-200 dark:border-gray-700 mb-4;
+    @apply px-4 py-3 hover:bg-slate-50 dark:hover:bg-slate-800 transition-colors duration-200 gap-x-2 rounded-lg border border-slate-200 dark:border-slate-700 mb-4;
   }
 
   .user-appointment-content {
@@ -355,15 +353,15 @@
   }
 
   .user-appointment-title {
-    @apply text-base font-semibold text-gray-900 dark:text-white truncate;
+    @apply text-base font-semibold text-slate-900 dark:text-white truncate;
   }
 
   .user-appointment-subtitle {
-    @apply text-sm text-gray-600 dark:text-gray-300 truncate;
+    @apply text-sm text-slate-600 dark:text-slate-300 truncate;
   }
 
   .user-appointment-time {
-    @apply text-sm text-gray-500 md:self-center dark:text-gray-400 whitespace-nowrap mt-1;
+    @apply text-sm text-slate-500 md:self-center dark:text-slate-400 whitespace-nowrap mt-1;
   }
 
   .user-appointment-actions {
