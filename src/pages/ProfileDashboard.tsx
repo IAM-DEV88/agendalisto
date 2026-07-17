@@ -607,7 +607,7 @@ const ProfileDashboard = ({ user }: ProfileDashboardProps) => {
               <TabNav tabs={[
                 { id: 'overview', label: 'Resumen' },
                 { id: 'referrals', label: 'Referidos' },
-              ]} activeTabId={activeStatsTab} onTabChange={setActiveStatsTab} variant="pill" connected />
+              ]} activeTabId={activeStatsTab} onTabChange={setActiveStatsTab} variant="pill" sticky connected />
 
               <div className="bg-white dark:bg-slate-900 rounded-b-lg border border-slate-100 dark:border-slate-800 p-4 md:p-6 -mt-px">
                 <div className="animate-in fade-in zoom-in-95 duration-300 space-y-5">

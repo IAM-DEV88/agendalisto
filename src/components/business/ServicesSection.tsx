@@ -98,8 +98,10 @@ const ServicesSection: React.FC<ServicesSectionProps> = ({
         }
       />
 
+      <div className="bg-white dark:bg-slate-900 rounded-lg border border-slate-200 dark:border-slate-800 shadow-sm p-4 md:p-6">
+
       {maxServices !== Infinity && services.length >= maxServices && (
-        <div className="flex items-center justify-between p-4 bg-amber-50 dark:bg-amber-950/30 border border-amber-200 dark:border-amber-800 rounded-lg">
+        <div className="flex items-center justify-between p-4 bg-amber-50 dark:bg-amber-950/30 border border-amber-200 dark:border-amber-800 rounded-lg mb-6">
           <div className="flex items-center gap-3">
             <Sparkles className="w-5 h-5 text-amber-600 dark:text-amber-400 flex-shrink-0" />
             <p className="text-sm font-bold text-amber-800 dark:text-amber-200">
@@ -128,7 +130,7 @@ const ServicesSection: React.FC<ServicesSectionProps> = ({
           <p className="text-slate-500 font-medium">Cargando servicios...</p>
         </div>
       ) : services.length === 0 ? (
-        <div className="card p-12 flex flex-col items-center text-center max-w-lg mx-auto">
+        <div className="flex flex-col items-center text-center py-12">
           <div className="w-16 h-16 rounded-lg bg-slate-50 dark:bg-slate-800 flex items-center justify-center mb-6 text-slate-400">
             <Plus className="w-8 h-8" />
           </div>
@@ -175,7 +177,7 @@ const ServicesSection: React.FC<ServicesSectionProps> = ({
                     <div className="flex items-center justify-between text-sm">
                       <div className="flex items-center gap-2 text-slate-500 dark:text-slate-400">
                         <Clock className="w-4 h-4" />
-                        <span>Duración</span>
+                        <span>Duracion</span>
                       </div>
                       <span className="font-bold text-slate-900 dark:text-white">{service.duration} min</span>
                     </div>
@@ -236,7 +238,7 @@ const ServicesSection: React.FC<ServicesSectionProps> = ({
         </>
       )}
 
-
+      </div>
     </div>
   );
 };

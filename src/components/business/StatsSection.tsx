@@ -1,6 +1,9 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { DollarSign, Calendar, Users, TrendingUp, Award, CalendarCheck, CalendarClock, Star, ListChecks, Eye, Heart } from 'lucide-react';
 import { canAccessAdvancedAnalytics } from '../../lib/roles';
+import SectionHeader from '../ui/SectionHeader';
+import TabNav from '../ui/TabNav';
+import type { Tab } from '../ui/TabNav';
 
 interface StatsSectionProps {
   totalAppointments: number;
@@ -160,52 +163,66 @@ const StatsSection: React.FC<StatsSectionProps> = ({
     },
   ];
 
+  const [activeStatsTab, setActiveStatsTab] = useState('resumen');
+
+  const statsTabs: Tab[] = [
+    { id: 'resumen', label: 'Resumen' },
+    { id: 'visitas', label: 'Visitas' },
+    { id: 'rendimiento', label: 'Rendimiento' },
+    ...(hasAdvanced ? [{ id: 'avanzado' as const, label: 'Avanzado' }] : []),
+  ];
+
   return (
-    <div className="space-y-6">
-      <div>
-        <h2 className="text-xl font-black text-slate-900 dark:text-white mb-0">Estadísticas del negocio</h2>
-        <p className="text-sm font-medium text-slate-500 dark:text-slate-400 mt-0.5 mb-0">
-          {hasAdvanced ? 'Resumen de rendimiento y métricas clave' : 'Métricas básicas de tu negocio'}
-          {!hasAdvanced && (
-            <span className="text-amber-600 dark:text-amber-400"> — Actualiza a Premium para ver analytics avanzados.</span>
-          )}
-        </p>
+    <div>
+      <div className="mb-4 md:mb-6">
+        <SectionHeader
+          title="Estadísticas del negocio"
+          description={hasAdvanced ? 'Resumen de rendimiento y métricas clave' : 'Métricas básicas de tu negocio'}
+        />
+
+        {!hasAdvanced && (
+          <p className="text-sm font-medium text-amber-600 dark:text-amber-400 mt-2">
+            Actualiza a Premium para ver analytics avanzados.
+          </p>
+        )}
       </div>
 
-      <div className="space-y-6">
-        <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 sm:gap-4">
-          {countCards.map((s, i) => (
-            <StatCard key={`count-${i}`} {...s} />
-          ))}
-        </div>
+      <TabNav tabs={statsTabs} activeTabId={activeStatsTab} onTabChange={setActiveStatsTab} variant="pill" sticky connected />
 
-        <div className="border-t border-slate-100 dark:border-slate-800 pt-4">
-          <p className="text-xs font-bold text-slate-400 dark:text-slate-500 uppercase tracking-wider mb-3">Visitas y Popularidad</p>
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
-            {visitCards.map((s, i) => (
-              <StatCard key={`visit-${i}`} {...s} />
-            ))}
-          </div>
-        </div>
-
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
-          {basicStats.map((s, i) => (
-            <StatCard key={`basic-${i}`} {...s} />
-          ))}
-        </div>
-
-        {hasAdvanced && (
-          <>
-            <div className="border-t border-slate-100 dark:border-slate-800 pt-4">
-              <p className="text-xs font-bold text-slate-400 dark:text-slate-500 uppercase tracking-wider mb-3">Analytics Avanzados</p>
-              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
-                {advancedStats.map((s, i) => (
-                  <StatCard key={`adv-${i}`} {...s} />
-                ))}
-              </div>
+      <div className="bg-white dark:bg-slate-900 rounded-b-lg border border-slate-100 dark:border-slate-800 p-4 md:p-6 -mt-px min-h-[200px]">
+        <div className="animate-in fade-in zoom-in-95 duration-300">
+          {activeStatsTab === 'resumen' && (
+            <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 sm:gap-4">
+              {countCards.map((s, i) => (
+                <StatCard key={`count-${i}`} {...s} />
+              ))}
             </div>
-          </>
-        )}
+          )}
+
+          {activeStatsTab === 'visitas' && (
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+              {visitCards.map((s, i) => (
+                <StatCard key={`visit-${i}`} {...s} />
+              ))}
+            </div>
+          )}
+
+          {activeStatsTab === 'rendimiento' && (
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+              {basicStats.map((s, i) => (
+                <StatCard key={`basic-${i}`} {...s} />
+              ))}
+            </div>
+          )}
+
+          {activeStatsTab === 'avanzado' && hasAdvanced && (
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+              {advancedStats.map((s, i) => (
+                <StatCard key={`adv-${i}`} {...s} />
+              ))}
+            </div>
+          )}
+        </div>
       </div>
     </div>
   );
