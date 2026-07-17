@@ -3,8 +3,16 @@ import { useEffect } from 'react';
 export function useLockBodyScroll(locked: boolean) {
   useEffect(() => {
     if (!locked) return;
-    const original = document.body.style.overflow;
+    const originalOverflow = document.body.style.overflow;
+    const originalTouchAction = document.body.style.touchAction;
+    const originalOverscroll = document.body.style.overscrollBehavior;
     document.body.style.overflow = 'hidden';
-    return () => { document.body.style.overflow = original; };
+    document.body.style.touchAction = 'none';
+    document.body.style.overscrollBehavior = 'none';
+    return () => {
+      document.body.style.overflow = originalOverflow;
+      document.body.style.touchAction = originalTouchAction;
+      document.body.style.overscrollBehavior = originalOverscroll;
+    };
   }, [locked]);
 }

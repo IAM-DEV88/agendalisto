@@ -1,8 +1,9 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { Link } from 'react-router-dom';
-import { Plus, Edit2, Trash2, Clock, DollarSign, User, Info, CheckCircle, XCircle, Loader2, Sparkles } from 'lucide-react';
+import { Plus, Edit2, Trash2, Clock, DollarSign, User, Info, CheckCircle, XCircle, Loader2, Sparkles, AlertTriangle } from 'lucide-react';
 import type { Service } from '../../lib/api';
 import { notifySuccess, notifyError } from '../../lib/toast';
+import { useLockBodyScroll } from '../../hooks/useLockBodyScroll';
 import SectionHeader from '../ui/SectionHeader';
 import { Pagination } from '../ui/Pagination';
 import { getMaxServices, PLAN_LABELS } from '../../lib/roles';
@@ -27,6 +28,9 @@ const ServicesSection: React.FC<ServicesSectionProps> = ({
   const [currentPage, setCurrentPage] = useState(1);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [serviceToDelete, setServiceToDelete] = useState<Service | null>(null);
+  const [deleting, setDeleting] = useState(false);
+  useLockBodyScroll(!!serviceToDelete);
 
   useEffect(() => {
     if (businessId) {
@@ -34,7 +38,7 @@ const ServicesSection: React.FC<ServicesSectionProps> = ({
     }
   }, [businessId]);
 
-  const loadServices = async () => {
+  const loadServices = useCallback(async () => {
     try {
       setLoading(true);
       setError(null);
@@ -49,27 +53,30 @@ const ServicesSection: React.FC<ServicesSectionProps> = ({
     } finally {
       setLoading(false);
     }
-  };
+  }, [businessId, getServices]);
 
-  const handleDelete = async (id: string) => {
-    if (!window.confirm('¿Estás seguro de que deseas eliminar este servicio?')) {
-      return;
-    }
-
+  const handleConfirmDelete = async () => {
+    if (!serviceToDelete) return;
+    setDeleting(true);
     try {
-      const response = await deleteService(id);
+      const response = await deleteService(serviceToDelete.id);
       if (response.success) {
+        setServiceToDelete(null);
         await loadServices();
         notifySuccess('Servicio eliminado correctamente');
       } else {
         const errMsg = response.error || 'Error al eliminar el servicio';
         setError(errMsg);
         notifyError(errMsg);
+        setServiceToDelete(null);
       }
     } catch (err: any) {
       const errMsg = err.message || 'Error al eliminar el servicio';
       setError(errMsg);
       notifyError(errMsg);
+      setServiceToDelete(null);
+    } finally {
+      setDeleting(false);
     }
   };
 
@@ -219,7 +226,7 @@ const ServicesSection: React.FC<ServicesSectionProps> = ({
                     <Edit2 className="w-5 h-5" />
                   </Link>
                   <button
-                    onClick={() => handleDelete(service.id)}
+                    onClick={() => setServiceToDelete(service)}
                     className="p-2 text-slate-400 hover:text-red-500 transition-colors"
                     title="Eliminar"
                   >
@@ -239,6 +246,39 @@ const ServicesSection: React.FC<ServicesSectionProps> = ({
       )}
 
       </div>
+
+      {serviceToDelete && (
+        <div data-swipe-block className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50 backdrop-blur-sm animate-in fade-in duration-200">
+          <div className="bg-white dark:bg-slate-900 rounded-lg shadow-2xl max-w-md w-full p-6 animate-in zoom-in-95 duration-200">
+            <div className="flex items-center gap-3 mb-4">
+              <div className="p-2 bg-red-100 dark:bg-red-900/40 rounded-full">
+                <AlertTriangle className="w-6 h-6 text-red-600 dark:text-red-400" />
+              </div>
+              <h3 className="text-xl font-black text-slate-900 dark:text-white">¿Eliminar servicio?</h3>
+            </div>
+              <p className="text-sm text-slate-600 dark:text-slate-400 leading-relaxed mb-6">
+                Esta acción eliminará permanentemente <strong className="text-slate-800 dark:text-slate-200">{serviceToDelete.name}</strong>{' '}y no podrá recuperarse.
+              </p>
+            <div className="flex gap-3 justify-end">
+              <button
+                onClick={() => setServiceToDelete(null)}
+                disabled={deleting}
+                className="px-5 py-2.5 text-sm font-bold text-slate-700 dark:text-slate-300 bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 rounded-lg transition-all"
+              >
+                Cancelar
+              </button>
+              <button
+                onClick={handleConfirmDelete}
+                disabled={deleting}
+                className="inline-flex items-center gap-2 px-5 py-2.5 text-sm font-bold text-white bg-red-600 hover:bg-red-700 rounded-lg transition-all disabled:opacity-50"
+              >
+                {deleting ? <Loader2 className="w-4 h-4 animate-spin" /> : <Trash2 className="w-4 h-4" />}
+                {deleting ? 'Eliminando...' : 'Sí, eliminar'}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 };
