@@ -37,7 +37,7 @@ const BusinessHoursSection: React.FC<BusinessHoursSectionProps> = ({
       <div className="mb-4 md:mb-6">
         <SectionHeader 
           title="Horario de Atención" 
-          description="Define los días y horas en los que tu negocio está disponible para recibir citas"
+          description="Configura jornadas laborales, descansos y encargados del negocio"
         />
       </div>
 

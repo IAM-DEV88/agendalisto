@@ -603,7 +603,7 @@ const ProfileDashboard = ({ user }: ProfileDashboardProps) => {
               <div className="mb-4 md:mb-6">
                 <SectionHeader
                   title="Estadísticas"
-                  description="Resumen de tu actividad como cliente"
+                  description="Resumen de tu actividad y programa de referidos"
                 />
               </div>
 

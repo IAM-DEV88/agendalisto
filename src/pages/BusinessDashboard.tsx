@@ -445,7 +445,7 @@ export const BusinessDashboard: React.FC = () => {
           {activeTab === 'appointments' && (
             <div>
               <div className="mb-4 md:mb-6">
-                <SectionHeader title="Gestión de Citas" description="Administra tus reservas activas" />
+                <SectionHeader title="Gestión de Citas" description="Administra reservas, consulta el historial y gestiona tus clientes" />
               </div>
 
               <TabNav tabs={appointmentTabs} activeTabId={activeAppointmentTab} onTabChange={setActiveAppointmentTab} variant="pill" sticky connected />
@@ -546,6 +546,8 @@ export const BusinessDashboard: React.FC = () => {
                       clients={pagedClients}
                       loading={loadingBusinessClients}
                       message={clientsMessage}
+                      appointments={appointments}
+                      indexOffset={(pagination.clients.page - 1) * pagination.clients.perPage}
                     />
                     {businessClients.length > pagination.clients.perPage && (
                       <div className="mt-6">
