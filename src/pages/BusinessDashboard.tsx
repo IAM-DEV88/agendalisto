@@ -16,6 +16,7 @@ import { useBusinessClients } from '../hooks/useBusinessClients';
 import { canAccessAnalytics, PLAN_BADGE } from '../lib/roles';
 import type { RootState } from '../store';
 import { useSwipeable } from '../hooks/useSwipeable';
+import PasswordVerifyModal from '../components/ui/PasswordVerifyModal';
 
 import TabNav, { Tab } from '../components/ui/TabNav';
 import SectionHeader from '../components/ui/SectionHeader';
@@ -73,6 +74,37 @@ export const BusinessDashboard: React.FC = () => {
   const [appointmentToReschedule, setAppointmentToReschedule] = useState<Appointment | null>(null);
   const [categories, setCategories] = useState<BusinessCategory[]>([]);
   const days = ['Lunes', 'Martes', 'Miércoles', 'Jueves', 'Viernes', 'Sábado', 'Domingo'];
+
+  // Password verification for sensitive actions
+  const [showPasswordModal, setShowPasswordModal] = useState(false);
+  const [passwordAction, setPasswordAction] = useState<(() => Promise<void>) | null>(null);
+  const [passwordDescription, setPasswordDescription] = useState('');
+
+  const requestPassword = useCallback(async (action: () => Promise<any>, featureFlag: boolean | undefined, description: string): Promise<any> => {
+    const needsPassword = businessConfig?.password_protection_enabled && featureFlag;
+    if (!needsPassword) {
+      await action();
+      return;
+    }
+    return new Promise<void | boolean>((resolve, reject) => {
+      setPasswordDescription(description);
+      setPasswordAction(async () => {
+        try {
+          await action();
+          resolve();
+        } catch (e) {
+          reject(e);
+        }
+      });
+      setShowPasswordModal(true);
+    });
+  }, [businessConfig?.password_protection_enabled]);
+
+  const handlePasswordVerified = useCallback(async () => {
+    if (passwordAction) {
+      await passwordAction();
+    }
+  }, [passwordAction]);
 
   const [pagination, setPagination] = useState({
     pending: { page: 1, perPage: itemsPerPage },
@@ -198,31 +230,36 @@ export const BusinessDashboard: React.FC = () => {
   }, [businessData?.id, refreshAppointments]);
 
   const handleUpdateAppointmentStatus = async (id: string, newStatus: AppointmentStatus) => {
-    try {
-      const response = await updateAppointmentStatus(id, newStatus);
-      if (response.success) {
-        const statusText =
-          newStatus === 'confirmed' ? 'confirmada' :
-            newStatus === 'completed' ? 'completada' :
-              newStatus === 'cancelled' ? 'cancelada' : 'actualizada';
-        notifySuccess(`Cita ${statusText} correctamente`);
-        await refreshAppointments();
-      } else {
-        notifyError(response.error || 'Error al actualizar el estado de la cita');
+    requestPassword(async () => {
+      try {
+        const response = await updateAppointmentStatus(id, newStatus);
+        if (response.success) {
+          const statusText =
+            newStatus === 'confirmed' ? 'confirmada' :
+              newStatus === 'completed' ? 'completada' :
+                newStatus === 'cancelled' ? 'cancelada' : 'actualizada';
+          notifySuccess(`Cita ${statusText} correctamente`);
+          await refreshAppointments();
+        } else {
+          notifyError(response.error || 'Error al actualizar el estado de la cita');
+        }
+      } catch (err: unknown) {
+        notifyError(err instanceof Error ? err.message : 'Error al actualizar el estado de la cita');
       }
-    } catch (err: unknown) {
-      notifyError(err instanceof Error ? err.message : 'Error al actualizar el estado de la cita');
-    }
+    }, businessConfig?.password_protect_appointments, 'Modificar estado de la cita');
   };
 
   const handleReschedule = async (id: string, startTime: string, endTime: string) => {
-    const result = await rescheduleAppointment(id, startTime, endTime);
-    if (result.success) {
-      notifySuccess('Cita reprogramada correctamente');
-      await refreshAppointments();
-    } else {
-      notifyError(result.error || 'Error al reprogramar la cita');
-    }
+    let result: { success: boolean; error?: string; new_status?: string } = { success: false };
+    await requestPassword(async () => {
+      result = await rescheduleAppointment(id, startTime, endTime);
+      if (result.success) {
+        notifySuccess('Cita reprogramada correctamente');
+        await refreshAppointments();
+      } else {
+        notifyError(result.error || 'Error al reprogramar la cita');
+      }
+    }, businessConfig?.password_protect_appointments, 'Reprogramar cita');
     return result;
   };
 
@@ -232,38 +269,52 @@ export const BusinessDashboard: React.FC = () => {
     setBusinessData(prev => prev ? ({ ...prev, [name]: val } as Business) : prev);
   };
 
+  const handleHoursSubmitWithPassword = useCallback(async (e: React.FormEvent) => {
+    return requestPassword(async () => {
+      return handleHoursSubmit(e);
+    }, businessConfig?.password_protect_hours, 'Modificar horarios del negocio');
+  }, [handleHoursSubmit, requestPassword, businessConfig?.password_protect_hours]);
+
+  const handleConfigSaveWithPassword = useCallback(async (e: React.FormEvent) => {
+    return requestPassword(async () => {
+      return handleConfigSave(e);
+    }, businessConfig?.password_protection_enabled, 'Guardar configuración del negocio');
+  }, [handleConfigSave, requestPassword, businessConfig?.password_protection_enabled]);
+
   const handleBusinessSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!businessData) return;
-    setSavingBusiness(true);
-    setBusinessMessage(null);
-    try {
-      const response = await updateBusiness(businessData.id, {
-        name: businessData.name,
-        description: businessData.description,
-        address: businessData.address,
-        phone: businessData.phone,
-        whatsapp: businessData.whatsapp,
-        instagram: businessData.instagram,
-        facebook: businessData.facebook,
-        email: businessData.email,
-        category_id: businessData.category_id,
-        website: businessData.website,
-        lat: businessData.lat,
-        lng: businessData.lng,
-        showcase_only: businessData.showcase_only ?? false,
-      });
-      setBusinessData(response);
-      dispatch(updateBusinessInStore(response));
-      setBusinessMessage({ text: 'Datos del negocio actualizados', type: 'success' });
-      notifySuccess('Datos del negocio actualizados');
-    } catch (err: unknown) {
-      const msg = err instanceof Error ? err.message : 'Error al actualizar';
-      setBusinessMessage({ text: msg, type: 'error' });
-      notifyError(msg);
-    } finally {
-      setSavingBusiness(false);
-    }
+    requestPassword(async () => {
+      setSavingBusiness(true);
+      setBusinessMessage(null);
+      try {
+        const response = await updateBusiness(businessData.id, {
+          name: businessData.name,
+          description: businessData.description,
+          address: businessData.address,
+          phone: businessData.phone,
+          whatsapp: businessData.whatsapp,
+          instagram: businessData.instagram,
+          facebook: businessData.facebook,
+          email: businessData.email,
+          category_id: businessData.category_id,
+          website: businessData.website,
+          lat: businessData.lat,
+          lng: businessData.lng,
+          showcase_only: businessData.showcase_only ?? false,
+        });
+        setBusinessData(response);
+        dispatch(updateBusinessInStore(response));
+        setBusinessMessage({ text: 'Datos del negocio actualizados', type: 'success' });
+        notifySuccess('Datos del negocio actualizados');
+      } catch (err: unknown) {
+        const msg = err instanceof Error ? err.message : 'Error al actualizar';
+        setBusinessMessage({ text: msg, type: 'error' });
+        notifyError(msg);
+      } finally {
+        setSavingBusiness(false);
+      }
+    }, businessConfig?.password_protect_profile, 'Modificar perfil del negocio');
   };
 
   const hasAnalytics = canAccessAnalytics(plan);
@@ -670,7 +721,13 @@ export const BusinessDashboard: React.FC = () => {
               <ServicesSection
                 businessId={businessData.id}
                 getServices={getBusinessServices}
-                deleteService={deleteBusinessService}
+                deleteService={async (id: string) => {
+                  let result: { success: boolean; error?: string } = { success: false };
+                  await requestPassword(async () => {
+                    result = await deleteBusinessService(id);
+                  }, businessConfig?.password_protect_services, 'Eliminar servicio');
+                  return result;
+                }}
                 itemsPerPage={itemsPerPage}
                 plan={plan}
               />
@@ -685,13 +742,17 @@ export const BusinessDashboard: React.FC = () => {
                 loading={loadingBusinessHours}
                 saving={savingBusinessHours}
                 message={hoursMessage}
-                onSave={handleHoursSubmit}
+                onSave={handleHoursSubmitWithPassword}
                 onHoursChange={handleHoursChange}
                 days={days}
                 businessId={businessData?.id}
                 plan={plan}
                 passwordProtectionEnabled={businessConfig?.password_protection_enabled}
                 passwordProtectStaff={businessConfig?.password_protect_staff}
+                passwordProtectHours={businessConfig?.password_protect_hours}
+                passwordProtectServices={businessConfig?.password_protect_services}
+                passwordProtectAppointments={businessConfig?.password_protect_appointments}
+                passwordProtectProfile={businessConfig?.password_protect_profile}
               />
             </div>
           )}
@@ -827,7 +888,7 @@ export const BusinessDashboard: React.FC = () => {
                     )}
 
                     <div className="flex justify-end">
-                      <button type="button" onClick={handleConfigSave}
+                      <button type="button" onClick={handleConfigSaveWithPassword}
                         className="inline-flex items-center px-8 py-3 bg-primary-600 hover:bg-primary-700 text-white font-bold rounded-lg transition-all shadow-lg shadow-primary-500/25 gap-2 disabled:opacity-50"
                       >
                         <Save className="w-5 h-5" />
@@ -843,7 +904,7 @@ export const BusinessDashboard: React.FC = () => {
                     loading={loadingBusinessConfig}
                     saving={savingBusinessConfig}
                     message={configMessage}
-                    onSave={handleConfigSave}
+                    onSave={handleConfigSaveWithPassword}
                     onConfigChange={handleConfigChange}
                     plan={plan}
                     businessName={businessData?.name || ''}
@@ -866,6 +927,14 @@ export const BusinessDashboard: React.FC = () => {
         onClose={() => setAppointmentToReschedule(null)}
         appointment={appointmentToReschedule}
         isOwner
+      />
+
+      <PasswordVerifyModal
+        isOpen={showPasswordModal}
+        onClose={() => { setShowPasswordModal(false); setPasswordAction(null); setPasswordDescription(''); }}
+        onVerified={handlePasswordVerified}
+        title="Confirmar contraseña"
+        description={passwordDescription || 'Ingresa tu contraseña para continuar con esta acción.'}
       />
     </div>
   );

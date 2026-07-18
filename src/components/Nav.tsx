@@ -15,7 +15,6 @@ type NavProps = {
 const NAV_LINKS = [
   { to: '/', label: 'Inicio' },
   { to: '/explore', label: 'Explorar' },
-  { to: '/plans', label: 'Planes' },
   { to: '/blog', label: 'Blog' },
 ] as const;
 

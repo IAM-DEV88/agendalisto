@@ -19,6 +19,10 @@ interface BusinessHoursSectionProps {
   plan?: 'starter' | 'pro' | 'premium';
   passwordProtectionEnabled?: boolean;
   passwordProtectStaff?: boolean;
+  passwordProtectHours?: boolean;
+  passwordProtectServices?: boolean;
+  passwordProtectAppointments?: boolean;
+  passwordProtectProfile?: boolean;
 }
 
 const BusinessHoursSection: React.FC<BusinessHoursSectionProps> = ({
@@ -31,7 +35,11 @@ const BusinessHoursSection: React.FC<BusinessHoursSectionProps> = ({
   businessId,
   plan = 'starter',
   passwordProtectionEnabled,
-  passwordProtectStaff
+  passwordProtectStaff,
+  passwordProtectHours: _passwordProtectHours,
+  passwordProtectServices: _passwordProtectServices,
+  passwordProtectAppointments: _passwordProtectAppointments,
+  passwordProtectProfile: _passwordProtectProfile,
 }) => {
   const [activeHoursTab, setActiveHoursTab] = useState('jornadas');
 
