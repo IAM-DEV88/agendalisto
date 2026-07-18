@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useMemo } from 'react';
 import { useParams, Link, useNavigate, useLocation } from 'react-router-dom';
 import { getBusinessBySlug, getBusinessServices, getBusinessHours, getBusinessReviews, recordBusinessVisit, getReferralCounts, Service, BusinessHours, Review, Business } from '../lib/api';
 import { supabase } from '../lib/supabase';
@@ -104,6 +104,15 @@ function BusinessPublicPage() {
     }
   }, [location.search, navigate, slug]);
 
+  const priceRange = useMemo(() => {
+    if (services.length === 0) return undefined;
+    const prices = services.filter((s): s is Service & { price: number } => !!s.price);
+    if (prices.length === 0) return undefined;
+    const min = Math.min(...prices.map(s => s.price));
+    const max = Math.max(...prices.map(s => s.price));
+    return `$${min} - $${max}`;
+  }, [services]);
+
   const businessSchema = businessData ? {
     "@context": "https://schema.org",
     "@type": "LocalBusiness",
@@ -113,7 +122,7 @@ function BusinessPublicPage() {
     "address": { "@type": "PostalAddress", "streetAddress": businessData.address },
     "telephone": businessData.phone,
     "url": window.location.href,
-    "priceRange": services.length > 0 ? `$${Math.min(...services.filter(s => s.price).map(s => s.price!))} - $${Math.max(...services.filter(s => s.price).map(s => s.price!))}` : undefined,
+    "priceRange": priceRange,
     "openingHoursSpecification": businessHours.length > 0 ? businessHours.map(h => ({
       "@type": "OpeningHoursSpecification",
       "dayOfWeek": ["Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"][h.day_of_week],

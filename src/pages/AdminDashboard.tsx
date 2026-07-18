@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect } from 'react';
 import type { UserProfile } from '../lib/supabase';
 import { ROLE_LABELS } from '../lib/roles';
 import type { Role } from '../lib/roles';
@@ -67,34 +67,23 @@ const AdminDashboard = ({ user }: AdminDashboardProps) => {
     { id: 'content', label: 'Contenido' },
   ];
 
-  const loadData = useCallback(async () => {
-    const [statsRes, reviewStatsRes, pendingRes] = await Promise.all([
+  useEffect(() => {
+    Promise.allSettled([
       getAdminStats(),
       getReviewStats(),
       getPendingReviews(),
-    ]);
-    if (statsRes.success && statsRes.data) setStats(statsRes.data);
-    if (reviewStatsRes.success && reviewStatsRes.data) setReviewCounts(reviewStatsRes.data);
-    if (pendingRes.success) setPendingReviews(pendingRes.data || []);
-  }, []);
-
-  useEffect(() => { loadData(); }, [loadData]);
-
-  useEffect(() => {
-    Promise.all([
       getAdminReferralStats(),
       getTopReferrers(10),
-    ]).then(([statsRes, topRes]) => {
-      if (statsRes.success && statsRes.data) setReferralStats(statsRes.data);
-      if (topRes.success && topRes.data) setTopReferrers(topRes.data);
-      setReferralLoading(false);
-    });
-  }, []);
-
-  useEffect(() => {
-    getAdminDashboardMetrics().then(res => {
-      if (res.success && res.data) setMetrics(res.data);
+      getAdminDashboardMetrics(),
+    ]).then(([statsRes, reviewStatsRes, pendingRes, refStatsRes, topRes, metricsRes]) => {
+      if (statsRes.status === 'fulfilled' && statsRes.value.success && statsRes.value.data) setStats(statsRes.value.data);
+      if (reviewStatsRes.status === 'fulfilled' && reviewStatsRes.value.success && reviewStatsRes.value.data) setReviewCounts(reviewStatsRes.value.data);
+      if (pendingRes.status === 'fulfilled' && pendingRes.value.success) setPendingReviews(pendingRes.value.data || []);
+      if (refStatsRes.status === 'fulfilled' && refStatsRes.value.success && refStatsRes.value.data) setReferralStats(refStatsRes.value.data);
+      if (topRes.status === 'fulfilled' && topRes.value.success && topRes.value.data) setTopReferrers(topRes.value.data);
+      if (metricsRes.status === 'fulfilled' && metricsRes.value.success && metricsRes.value.data) setMetrics(metricsRes.value.data);
       setMetricsLoading(false);
+      setReferralLoading(false);
     });
   }, []);
 

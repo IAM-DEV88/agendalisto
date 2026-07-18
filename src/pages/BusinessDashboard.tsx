@@ -259,18 +259,96 @@ export const BusinessDashboard: React.FC = () => {
     }
   };
 
-  const { pendingAppointments, confirmedAppointments, pastAppointments } = useMemo(() => {
+  const hasAnalytics = canAccessAnalytics(plan);
+
+  const {
+    pendingAppointments,
+    confirmedAppointments,
+    pastAppointments,
+    completedAppointments,
+    totalRevenue,
+    confirmationRate,
+    cancellationRate,
+    avgDuration,
+    avgPrice,
+    topServiceName,
+    topServiceCount,
+    peakDayName,
+    peakHour,
+    lifetimeValueAvg,
+  } = useMemo(() => {
     const now = new Date();
     const pending: Appointment[] = [];
     const confirmed: Appointment[] = [];
     const past: Appointment[] = [];
+    const completed: Appointment[] = [];
+    let totalRev = 0;
+    let totalDur = 0;
+    let confirmedCount = 0;
+    let cancelledCount = 0;
+    const svcCounts: Record<string, number> = {};
+    const dayCounts: Record<number, number> = {};
+    const hourCounts: Record<number, number> = {};
+
     for (const a of appointments) {
-      if (a.status === 'pending') pending.push(a);
-      else if (a.status === 'confirmed') confirmed.push(a);
-      else if (a.status === 'completed' || new Date(a.start_time) <= now) past.push(a);
+      if (a.status === 'pending') {
+        pending.push(a);
+      } else if (a.status === 'confirmed') {
+        confirmed.push(a);
+        confirmedCount++;
+      } else if (a.status === 'completed') {
+        completed.push(a);
+        past.push(a);
+        totalRev += a.services?.price ?? 0;
+        totalDur += a.services?.duration ?? 0;
+      } else if (a.status === 'cancelled') {
+        past.push(a);
+        cancelledCount++;
+      } else if (new Date(a.start_time) <= now) {
+        past.push(a);
+      }
+
+      if (hasAnalytics) {
+        const svcName = a.services?.name ?? '';
+        svcCounts[svcName] = (svcCounts[svcName] || 0) + 1;
+        if (a.start_time) {
+          const d = new Date(a.start_time);
+          dayCounts[d.getDay()] = (dayCounts[d.getDay()] || 0) + 1;
+          hourCounts[d.getHours()] = (hourCounts[d.getHours()] || 0) + 1;
+        }
+      }
     }
-    return { pendingAppointments: pending, confirmedAppointments: confirmed, pastAppointments: past };
-  }, [appointments]);
+
+    const completedLen = completed.length;
+    const apptLen = appointments.length;
+    const rev = hasAnalytics ? totalRev : 0;
+    const confRate = hasAnalytics && apptLen > 0 ? (confirmedCount / apptLen) * 100 : 0;
+    const cancRate = hasAnalytics && apptLen > 0 ? (cancelledCount / apptLen) * 100 : 0;
+    const avgDur = hasAnalytics && completedLen > 0 ? totalDur / completedLen : 0;
+    const avgP = hasAnalytics && completedLen > 0 ? rev / completedLen : 0;
+
+    const topSvc = Object.entries(svcCounts).sort((a, b) => b[1] - a[1])[0] || ['-', 0];
+    const peakDayIdx = Number(Object.entries(dayCounts).sort((a, b) => b[1] - a[1])[0]?.[0]) || 0;
+    const peakHr = Number(Object.entries(hourCounts).sort((a, b) => b[1] - a[1])[0]?.[0]) || 0;
+    const ltv = hasAnalytics && businessClients.length > 0 ? rev / businessClients.length : 0;
+
+    return {
+      pendingAppointments: pending,
+      confirmedAppointments: confirmed,
+      pastAppointments: past,
+      completedAppointments: completed,
+      totalRevenue: rev,
+      confirmationRate: confRate,
+      cancellationRate: cancRate,
+      avgDuration: avgDur,
+      avgPrice: avgP,
+      topServiceName: topSvc[0],
+      topServiceCount: topSvc[1],
+      peakDayName: days[peakDayIdx] || '-',
+      peakHour: peakHr,
+      lifetimeValueAvg: ltv,
+    };
+  }, [appointments, businessClients, hasAnalytics]);
 
   const getPaginatedItems = <T,>(items: T[], section: keyof typeof pagination): T[] => {
     const { page, perPage } = pagination[section];
@@ -282,48 +360,7 @@ export const BusinessDashboard: React.FC = () => {
   const pagedPast: Appointment[] = getPaginatedItems(pastAppointments, 'history');
   const pagedClients: UserProfile[] = getPaginatedItems(businessClients, 'clients');
 
-  const hasAnalytics = canAccessAnalytics(plan);
-  const completedAppointments = appointments.filter(a => a.status === 'completed');
-  const totalRevenue = hasAnalytics
-    ? completedAppointments.reduce((sum, a) => sum + (a.services?.price ?? 0), 0) : 0;
-  const confirmationRate = hasAnalytics && appointments.length > 0
-    ? (appointments.filter(a => a.status === 'confirmed').length / appointments.length) * 100 : 0;
-  const cancellationRate = hasAnalytics && appointments.length > 0
-    ? (appointments.filter(a => a.status === 'cancelled').length / appointments.length) * 100 : 0;
-  const avgDuration = hasAnalytics && completedAppointments.length > 0
-    ? completedAppointments.reduce((sum, a) => sum + (a.services?.duration ?? 0), 0) / completedAppointments.length : 0;
-  const avgPrice = hasAnalytics && completedAppointments.length > 0 ? totalRevenue / completedAppointments.length : 0;
-
-  const serviceCounts: Record<string, number> = {};
-  if (hasAnalytics) {
-    appointments.forEach(a => {
-      const name = a.services?.name ?? '';
-      serviceCounts[name] = (serviceCounts[name] || 0) + 1;
-    });
-  }
-  const [topServiceName, topServiceCount] = Object.entries(serviceCounts).sort((a, b) => b[1] - a[1])[0] || ['-', 0];
-
-  const dayCounts: Record<number, number> = {};
-  if (hasAnalytics) {
-    appointments.forEach(a => {
-      const idx = new Date(a.start_time).getDay();
-      dayCounts[idx] = (dayCounts[idx] || 0) + 1;
-    });
-  }
-  const peakDayIndex = Number(Object.entries(dayCounts).sort((a, b) => b[1] - a[1])[0]?.[0]) || 0;
-  const peakDayName = days[peakDayIndex] || '-';
-
-  const peakHourCounts: Record<number, number> = {};
-  if (hasAnalytics) {
-    appointments.forEach(a => {
-      const h = new Date(a.start_time).getHours();
-      peakHourCounts[h] = (peakHourCounts[h] || 0) + 1;
-    });
-  }
-  const peakHour = Number(Object.entries(peakHourCounts).sort((a, b) => b[1] - a[1])[0]?.[0]) || 0;
-  const lifetimeValueAvg = hasAnalytics && businessClients.length > 0 ? totalRevenue / businessClients.length : 0;
-
-  const canStats = canAccessAnalytics(plan);
+  const canStats = hasAnalytics;
   const planBadge = PLAN_BADGE[plan];
 
   useSwipeable(contentRef, {

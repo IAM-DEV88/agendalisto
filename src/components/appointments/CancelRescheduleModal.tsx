@@ -1,4 +1,4 @@
-import { useState, useEffect, useMemo } from 'react';
+import { useState, useEffect, useMemo, useCallback } from 'react';
 import { X, AlertCircle, Calendar as CalendarIcon, ChevronLeft, ChevronRight, Clock, User } from 'lucide-react';
 import { Appointment } from '../../types/appointment';
 import { cancelAppointment, rescheduleAppointment, getBusinessHours, getBusinessAppointments, getBusinessConfig, getBusinessStaff, BusinessHours, Appointment as ApiAppointment } from '../../lib/api';
@@ -76,9 +76,49 @@ export default function CancelRescheduleModal({ isOpen, onClose, appointment, is
 
   const serviceDuration = appointment?.services?.duration || 60;
 
+  // Index appointments by date for O(1) lookup
+  const cancelApptsByDate = useMemo(() => {
+    const map = new Map<string, ApiAppointment[]>();
+    for (const appt of appointments) {
+      if (!appt.start_time || appt.status === 'cancelled' || appt.status === 'completed') continue;
+      const dateKey = new Date(appt.start_time).toLocaleDateString('sv-SE');
+      let bucket = map.get(dateKey);
+      if (!bucket) { bucket = []; map.set(dateKey, bucket); }
+      bucket.push(appt);
+    }
+    if (appointment) {
+      const selfKey = new Date(appointment.start_time).toLocaleDateString('sv-SE');
+      let bucket = map.get(selfKey);
+      if (!bucket) { bucket = []; map.set(selfKey, bucket); }
+      if (!bucket.find(a => a.id === appointment.id)) bucket.push(appointment);
+    }
+    return map;
+  }, [appointments, appointment]);
+
+  const cancelGetConflicting = useCallback(
+    (dateStr: string, slotTime: number, slotEndWithBuf: number, staffId?: string): ApiAppointment[] => {
+      const dayAppts = cancelApptsByDate.get(dateStr);
+      if (!dayAppts) return [];
+      return dayAppts.filter(appt => {
+        if (!appt.start_time || !appt.end_time) return false;
+        if (appt.id === appointment?.id) return false;
+        if (staffId && appt.staff_id && appt.staff_id !== staffId) return false;
+        const aStart = new Date(appt.start_time).getTime();
+        const aEnd = new Date(appt.end_time).getTime();
+        if (isNaN(aStart) || isNaN(aEnd)) return false;
+        return slotTime < aEnd && slotEndWithBuf > aStart;
+      });
+    },
+    [cancelApptsByDate, appointment]
+  );
+
+  const cancelActiveStaffCount = useMemo(
+    () => staffList.filter(s => s.is_active).length,
+    [staffList]
+  );
+
   useEffect(() => {
     if (!newDate || loadingSlots || !appointment) { setLocalSlots([]); return; }
-    const allAppts = appointment ? [...appointments, appointment] : appointments;
     const jsDay = new Date(`${newDate}T00:00`).getDay();
     const selectedDay = (jsDay + 6) % 7;
     const todaysHours = businessHours.find(h => h.day_of_week === selectedDay);
@@ -98,54 +138,37 @@ export default function CancelRescheduleModal({ isOpen, onClose, appointment, is
       slots.push(`${String(h).padStart(2, '0')}:${String(m).padStart(2, '0')}`);
     }
 
-    const activeStaffCount = staffList.filter(s => s.is_active).length;
-
     const available = slots.filter(slot => {
       const slotTime = new Date(`${newDate}T${slot}`).getTime();
       const now = Date.now();
       if (slotTime <= now) return false;
       const slotEnd = slotTime + serviceDuration * 60000;
-      const slotEndWithBuffer = slotEnd + bufferMinutes * 60000;
+      const slotEndWithBuf = slotEnd + bufferMinutes * 60000;
 
-      const conflicting = allAppts.filter(appt => {
-        if (!appt.start_time || !appt.end_time) return false;
-        if (appt.status === 'cancelled' || appt.status === 'completed') return false;
-        if (rescheduleStaff && appt.staff_id && appt.staff_id !== rescheduleStaff) return false;
-        const apptStartDate = new Date(appt.start_time);
-        const apptEndDate = new Date(appt.end_time);
-        const aStart = apptStartDate.getTime();
-        const aEnd = apptEndDate.getTime();
-        if (isNaN(aStart) || isNaN(aEnd)) return false;
-        const apptLocalDate = apptStartDate.toLocaleDateString('sv-SE');
-        if (apptLocalDate !== newDate) return false;
-        return slotTime < aEnd && slotEndWithBuffer > aStart;
-      });
+      const conflicting = cancelGetConflicting(newDate, slotTime, slotEndWithBuf, rescheduleStaff || undefined);
 
       if (rescheduleStaff) return conflicting.length === 0;
-
-      if (activeStaffCount > 0) {
-        const busyStaff = conflicting.filter(a => a.staff_id).length;
-        return busyStaff < activeStaffCount;
+      if (cancelActiveStaffCount > 0) {
+        return conflicting.filter((a: ApiAppointment) => a.staff_id).length < cancelActiveStaffCount;
       }
-
       return conflicting.length === 0;
     });
 
     const id = requestAnimationFrame(() => setLocalSlots(available));
     return () => cancelAnimationFrame(id);
-  }, [newDate, loadingSlots, businessHours, appointments, appointment, serviceDuration, slotInterval, bufferMinutes, rescheduleStaff, staffList]);
+  }, [newDate, loadingSlots, businessHours, serviceDuration, slotInterval, bufferMinutes, rescheduleStaff, cancelGetConflicting, cancelActiveStaffCount, appointment]);
 
   const cancelFullyBookedDates = useMemo(() => {
     if (!appointment) return new Set<string>();
-    const allAppts = appointment ? [...appointments, appointment] : appointments;
     const result = new Set<string>();
     const maxDays = 90;
     const today = new Date();
     today.setHours(0, 0, 0, 0);
-    const activeCount = staffList.filter(s => s.is_active).length;
+    const todayMs = today.getTime();
 
     for (let d = 0; d < maxDays; d++) {
-      const date = new Date(today.getTime() + d * 86400000);
+      const dateMs = todayMs + d * 86400000;
+      const date = new Date(dateMs);
       const dateStr = format(date, 'yyyy-MM-dd');
       const bizDay = (date.getDay() + 6) % 7;
       const dayHours = businessHours.find(h => h.day_of_week === bizDay);
@@ -157,36 +180,26 @@ export default function CancelRescheduleModal({ isOpen, onClose, appointment, is
       let businessEnd = endH * 60 + endM;
       if (businessEnd <= businessStart) businessEnd += 24 * 60;
       const interval = Math.max(slotInterval, 15);
-      const buffer = bufferMinutes;
+      const buf = bufferMinutes;
       let hasAnySlot = false;
 
       for (let mins = businessStart; mins + serviceDuration <= businessEnd && !hasAnySlot; mins += interval) {
-        const slotDate = new Date(date);
-        slotDate.setHours(mins / 60 | 0, mins % 60, 0, 0);
-        if (slotDate.getTime() <= today.getTime()) continue;
-        const slotEnd = slotDate.getTime() + serviceDuration * 60000;
-        const slotEndBuf = slotEnd + buffer * 60000;
+        const slotMs = dateMs + mins * 60000;
+        if (slotMs <= todayMs) continue;
+        const slotEnd = slotMs + serviceDuration * 60000;
+        const slotEndBuf = slotEnd + buf * 60000;
 
-        const conflicting = allAppts.filter(appt => {
-          if (!appt.start_time || !appt.end_time) return false;
-          if (appt.status === 'cancelled' || appt.status === 'completed') return false;
-          const aDate = new Date(appt.start_time).toLocaleDateString('sv-SE');
-          if (aDate !== dateStr) return false;
-          const aStart = new Date(appt.start_time).getTime();
-          const aEnd = new Date(appt.end_time).getTime();
-          if (isNaN(aStart) || isNaN(aEnd)) return false;
-          return slotDate.getTime() < aEnd && slotEndBuf > aStart;
-        });
+        const conflicting = cancelGetConflicting(dateStr, slotMs, slotEndBuf);
 
-        if (activeCount > 0) {
-          if (conflicting.filter(a => a.staff_id).length < activeCount) hasAnySlot = true;
+        if (cancelActiveStaffCount > 0) {
+          if (conflicting.filter((a: ApiAppointment) => a.staff_id).length < cancelActiveStaffCount) hasAnySlot = true;
         } else if (conflicting.length === 0) hasAnySlot = true;
       }
 
       if (!hasAnySlot) result.add(dateStr);
     }
     return result;
-  }, [businessHours, appointments, appointment, serviceDuration, slotInterval, bufferMinutes, staffList]);
+  }, [businessHours, serviceDuration, slotInterval, bufferMinutes, cancelGetConflicting, cancelActiveStaffCount, appointment]);
 
   if (!isOpen || !appointment) return null;
 

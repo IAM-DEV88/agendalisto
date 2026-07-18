@@ -109,7 +109,7 @@ const UserAppointmentList: React.FC<UserAppointmentListProps> = ({
                   </div>
                 </div>
 
-                <div className="flex sm:flex-col items-center sm:items-stretch gap-2 sm:min-w-[130px]">
+                <div className="flex flex-col items-center sm:items-stretch gap-2 sm:min-w-[130px]">
                   {showActions && (
                     <>
                       {(appointment.status === 'pending' || appointment.status === 'confirmed') && onCancel && (

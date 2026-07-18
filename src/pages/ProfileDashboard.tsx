@@ -155,22 +155,49 @@ const ProfileDashboard = ({ user }: ProfileDashboardProps) => {
   const [deleting, setDeleting] = useState(false);
   useLockBodyScroll(showDeleteConfirm);
 
-  const confirmedAppointments = useMemo(
-    () => appointments.filter(a => a.status === 'confirmed'),
-    [appointments]
-  );
-  const pendingAppointments = useMemo(
-    () => appointments.filter(a => a.status === 'pending'),
-    [appointments]
-  );
-  const pastAppointments = useMemo(
-    () => appointments.filter(a =>
-      a.status === 'completed' ||
-      a.status === 'cancelled' ||
-      (new Date(a.start_time) < new Date() && !['pending', 'confirmed'].includes(a.status))
-    ),
-    [appointments]
-  );
+  const {
+    confirmedAppointments,
+    pendingAppointments,
+    pastAppointments,
+    completedCount,
+    cancelledCount,
+    uniqueBusinessCount,
+    completionRate,
+  } = useMemo(() => {
+    const confirmed: Appointment[] = [];
+    const pending: Appointment[] = [];
+    const past: Appointment[] = [];
+    let completed = 0;
+    let cancelled = 0;
+    const bizSet = new Set<string>();
+
+    for (const a of appointments) {
+      bizSet.add(a.business_id);
+      if (a.status === 'confirmed') {
+        confirmed.push(a);
+      } else if (a.status === 'pending') {
+        pending.push(a);
+      } else if (a.status === 'completed') {
+        past.push(a);
+        completed++;
+      } else if (a.status === 'cancelled') {
+        past.push(a);
+        cancelled++;
+      } else if (new Date(a.start_time) < new Date() && !['pending', 'confirmed'].includes(a.status)) {
+        past.push(a);
+      }
+    }
+
+    return {
+      confirmedAppointments: confirmed,
+      pendingAppointments: pending,
+      pastAppointments: past,
+      completedCount: completed,
+      cancelledCount: cancelled,
+      uniqueBusinessCount: bizSet.size,
+      completionRate: appointments.length > 0 ? Math.round((completed / appointments.length) * 100) : 0,
+    };
+  }, [appointments]);
 
   const upcomingCount = confirmedAppointments.length;
   const pendingCount = pendingAppointments.length;
@@ -617,10 +644,7 @@ const ProfileDashboard = ({ user }: ProfileDashboardProps) => {
                 <div className="animate-in fade-in zoom-in-95 duration-300 space-y-5">
               {activeStatsTab === 'overview' && (<>
                 {user && appointments.length > 0 && (
-                  <VisitStreaks userId={user.id} businessId={appointments.filter(a => a.businesses?.name).reduce((acc, a) => {
-                    if (!acc.find(x => x.id === a.business_id)) acc.push({ id: a.business_id, name: a.businesses?.name || '' });
-                    return acc;
-                  }, [] as { id: string; name: string }[])[0]?.id || ''} />
+                  <VisitStreaks userId={user.id} businessId={appointments.length > 0 ? appointments[0].business_id : ''} />
                 )}
 
                 <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 sm:gap-4">
@@ -639,7 +663,7 @@ const ProfileDashboard = ({ user }: ProfileDashboardProps) => {
                   <StatCard
                     icon={<Star className="w-6 h-6 text-primary-600 dark:text-primary-400" />}
                     label="Completadas"
-                    value={pastAppointments.filter(a => a.status === 'completed').length}
+                    value={completedCount}
                     color="bg-primary-50 dark:bg-primary-500/10"
                   />
                   <StatCard
@@ -655,19 +679,19 @@ const ProfileDashboard = ({ user }: ProfileDashboardProps) => {
                     <div className="bg-white dark:bg-slate-900 rounded-lg border border-slate-200 dark:border-slate-800 p-5">
                       <p className="text-xs font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider mb-1">Tasa de Finalización</p>
                       <p className="text-xl font-black text-slate-900 dark:text-white">
-                        {Math.round((pastAppointments.filter(a => a.status === 'completed').length / appointments.length) * 100)}%
+                        {completionRate}%
                       </p>
                     </div>
                     <div className="bg-white dark:bg-slate-900 rounded-lg border border-slate-200 dark:border-slate-800 p-5">
                       <p className="text-xs font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider mb-1">Canceladas</p>
                       <p className="text-xl font-black text-slate-900 dark:text-white">
-                        {appointments.filter(a => a.status === 'cancelled').length}
+                        {cancelledCount}
                       </p>
                     </div>
                     <div className="bg-white dark:bg-slate-900 rounded-lg border border-slate-200 dark:border-slate-800 p-5">
                       <p className="text-xs font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider mb-1">Negocios Visitados</p>
                       <p className="text-xl font-black text-slate-900 dark:text-white">
-                        {new Set(appointments.map(a => a.business_id)).size}
+                        {uniqueBusinessCount}
                       </p>
                     </div>
                   </div>

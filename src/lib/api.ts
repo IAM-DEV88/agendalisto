@@ -172,7 +172,7 @@ export const getBusinessServices = async (businessId: string) => {
   try {
     const { data, error } = await supabase
       .from('agendaya_services')
-      .select('*')
+      .select('id, name, description, duration, price, likes_count, is_active, provider, image_urls, can_be_gifted, requires_payment, payment_percentage, min_cancellation_hours, cancellation_policy_text, min_reschedule_hours, reschedule_policy_text, mostrar_precios, permitir_reservas_online, requiere_confirmacion, created_at, business_id')
       .eq('business_id', businessId)
       .order('name');
 
@@ -230,7 +230,7 @@ export const getBusinessHours = async (businessId: string) => {
   try {
     const { data, error } = await supabase
       .from('agendaya_business_hours')
-      .select('*')
+      .select('id, business_id, day_of_week, start_time, end_time, is_closed')
       .eq('business_id', businessId);
     if (error) throw error;
     return data as BusinessHours[];
@@ -1255,7 +1255,7 @@ export async function getBusinessStaff(businessId: string): Promise<{ success: b
   try {
     const { data, error } = await supabase
       .from('agendaya_staff')
-      .select('*')
+      .select('id, business_id, full_name, email, phone, is_active, created_at')
       .eq('business_id', businessId)
       .order('created_at', { ascending: true });
     if (error) throw error;
@@ -1326,7 +1326,7 @@ export async function getBusinessReviews(businessId: string): Promise<{ success:
   try {
     const { data, error } = await supabase
       .from('agendaya_reviews')
-      .select('*')
+      .select('id, rating, comment, created_at, appointment_id, business_id, user_id, status')
       .eq('business_id', businessId)
       .eq('status', 'approved')
       .order('created_at', { ascending: false });
@@ -1549,7 +1549,7 @@ export async function getBusinessCategories(): Promise<{ success: boolean; data:
   try {
     const { data, error } = await supabase
       .from('agendaya_business_categories')
-      .select('*');
+      .select('id, name, slug, description, icon');
     if (error) throw error;
     return { success: true, data: data as BusinessCategory[], error: null };
   } catch (err: unknown) {

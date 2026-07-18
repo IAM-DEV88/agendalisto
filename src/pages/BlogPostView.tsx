@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useMemo } from 'react';
 import { useParams, Link } from 'react-router-dom';
 import { MessageSquare, Heart, Clock, User, ArrowLeft, Send, Bot } from 'lucide-react';
 import { getBlogPost, getBlogComments, createBlogComment, toggleBlogLike, BlogPost, BlogComment, getBlogPosts } from '../lib/api';
@@ -10,25 +10,28 @@ import ShareButton from '../components/ui/ShareButton';
 
 // Función para parsear el contenido del mensaje (reutilizada del chat)
 const MessageContent = ({ content }: { content: string }) => {
-  const boldParts = content.split(/(\*\*.*?\*\*)/g);
-  const renderBold = (text: string, key: string) => {
-    const boldMatch = text.match(/\*\*(.*?)\*\*/);
-    if (boldMatch) return <strong key={key} className="font-black text-primary-700 dark:text-primary-300">{boldMatch[1]}</strong>;
-    const linkParts = text.split(/(\[.*?\]\(.*?\))/g);
-    return linkParts.map((part, i) => {
-      const match = part.match(/\[(.*?)\]\((.*?)\)/);
-      if (match) {
-        const linkText = match[1];
-        const url = match[2];
-        if (url.startsWith('/')) {
-          return <Link key={`${key}-${i}`} to={url} className="font-bold underline decoration-2 decoration-primary-400 hover:text-primary-500 transition-colors">{linkText}</Link>;
+  const rendered = useMemo(() => {
+    const boldParts = content.split(/(\*\*.*?\*\*)/g);
+    const renderBold = (text: string, key: string) => {
+      const boldMatch = text.match(/\*\*(.*?)\*\*/);
+      if (boldMatch) return <strong key={key} className="font-black text-primary-700 dark:text-primary-300">{boldMatch[1]}</strong>;
+      const linkParts = text.split(/(\[.*?\]\(.*?\))/g);
+      return linkParts.map((part, i) => {
+        const match = part.match(/\[(.*?)\]\((.*?)\)/);
+        if (match) {
+          const linkText = match[1];
+          const url = match[2];
+          if (url.startsWith('/')) {
+            return <Link key={`${key}-${i}`} to={url} className="font-bold underline decoration-2 decoration-primary-400 hover:text-primary-500 transition-colors">{linkText}</Link>;
+          }
+          return <a key={`${key}-${i}`} href={url} target="_blank" rel="noopener noreferrer" className="font-bold underline decoration-2 decoration-primary-400 hover:text-primary-500 transition-colors">{linkText}</a>;
         }
-        return <a key={`${key}-${i}`} href={url} target="_blank" rel="noopener noreferrer" className="font-bold underline decoration-2 decoration-primary-400 hover:text-primary-500 transition-colors">{linkText}</a>;
-      }
-      return part;
-    });
-  };
-  return <div className="whitespace-pre-wrap">{boldParts.map((part, i) => renderBold(part, i.toString()))}</div>;
+        return part;
+      });
+    };
+    return <div className="whitespace-pre-wrap">{boldParts.map((part, i) => renderBold(part, i.toString()))}</div>;
+  }, [content]);
+  return rendered;
 };
 
 const BlogPostView = () => {
