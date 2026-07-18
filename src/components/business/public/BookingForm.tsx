@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useMemo } from 'react';
+import React, { useState, useEffect, useMemo, useCallback } from 'react';
 import { Clock, CheckCircle, ArrowLeft, Send, AlertCircle, Gift, Check, X, Lock, FileText, Eye, CalendarDays, Download, Store, User, ChevronLeft, ChevronRight, Info, Phone, Mail, MessageCircle } from 'lucide-react';
 import CrossPromotion from '../CrossPromotion';
 import AvailabilityCalendar from './AvailabilityCalendar';
@@ -254,6 +254,39 @@ const BookingForm: React.FC<BookingFormProps> = ({
     }
   }, [formData.date, businessHours]);
 
+  // Index appointments by date for O(1) lookup instead of O(n) filter per slot
+  const appointmentsByDate = useMemo(() => {
+    const map = new Map<string, Appointment[]>();
+    for (const appt of appointments) {
+      if (appt.status === 'cancelled') continue;
+      const dateKey = appt.start_time.split('T')[0];
+      let bucket = map.get(dateKey);
+      if (!bucket) {
+        bucket = [];
+        map.set(dateKey, bucket);
+      }
+      bucket.push(appt);
+    }
+    return map;
+  }, [appointments]);
+
+  // Shared conflict check: returns conflicting appointments for a given time window
+  const getConflictingAppointments = useCallback(
+    (dateStr: string, slotTime: number, slotEndWithBuf: number, staffId?: string): Appointment[] => {
+      const dayAppts = appointmentsByDate.get(dateStr);
+      if (!dayAppts) return [];
+      return dayAppts.filter(appt => {
+        if (staffId && appt.staff_id && appt.staff_id !== staffId) return false;
+        const aStart = new Date(appt.start_time).getTime();
+        const aEnd = new Date(appt.end_time).getTime();
+        return slotTime < aEnd && slotEndWithBuf > aStart;
+      });
+    },
+    [appointmentsByDate]
+  );
+
+  const activeStaffCount = useMemo(() => staffList.filter(s => s.is_active).length, [staffList]);
+
   const availableTimeSlots = useMemo(() => {
     if (!formData.date || loadingSlots || !service) return [];
     const jsDay = new Date(`${formData.date}T00:00`).getDay();
@@ -268,7 +301,7 @@ const BookingForm: React.FC<BookingFormProps> = ({
     if (businessEnd <= businessStart) businessEnd += 24 * 60;
 
     const interval = slotIntervalMinutes || 30;
-    const buffer = bufferMinutes || 0;
+    const buf = bufferMinutes || 0;
     const slots: string[] = [];
     for (let mins = businessStart; mins + service.duration <= businessEnd; mins += interval) {
       const h = Math.floor(mins / 60);
@@ -276,34 +309,22 @@ const BookingForm: React.FC<BookingFormProps> = ({
       slots.push(`${String(h).padStart(2, '0')}:${String(m).padStart(2, '0')}`);
     }
 
-    const activeStaffCount = staffList.filter(s => s.is_active).length;
-
     return slots.filter(slot => {
       const slotTime = new Date(`${formData.date}T${slot}`).getTime();
       const now = Date.now();
       if (slotTime <= now) return false;
       const slotEnd = slotTime + service.duration * 60000;
-      const slotEndWithBuffer = slotEnd + buffer * 60000;
+      const slotEndWithBuf = slotEnd + buf * 60000;
 
-      const conflicting = appointments.filter(appt => {
-        const apptDate = appt.start_time.split('T')[0];
-        if (apptDate !== formData.date || appt.status === 'cancelled') return false;
-        if (selectedStaff && appt.staff_id && appt.staff_id !== selectedStaff) return false;
-        const aStart = new Date(appt.start_time).getTime();
-        const aEnd = new Date(appt.end_time).getTime();
-        return slotTime < aEnd && slotEndWithBuffer > aStart;
-      });
+      const conflicting = getConflictingAppointments(formData.date, slotTime, slotEndWithBuf, selectedStaff || undefined);
 
       if (selectedStaff) return conflicting.length === 0;
-
       if (activeStaffCount > 0) {
-        const busyStaff = conflicting.filter(a => a.staff_id).length;
-        return busyStaff < activeStaffCount;
+        return conflicting.filter((a: Appointment) => a.staff_id).length < activeStaffCount;
       }
-
       return conflicting.length === 0;
     });
-  }, [formData.date, loadingSlots, businessHours, appointments, service, slotIntervalMinutes, bufferMinutes, selectedStaff, staffList]);
+  }, [formData.date, loadingSlots, businessHours, service, slotIntervalMinutes, bufferMinutes, selectedStaff, activeStaffCount, getConflictingAppointments]);
 
   const fullyBookedDates = useMemo(() => {
     if (!service || loadingSlots) return new Set<string>();
@@ -311,13 +332,15 @@ const BookingForm: React.FC<BookingFormProps> = ({
     const maxDays = maxAdvanceBookingDays || 90;
     const today = new Date();
     today.setHours(0, 0, 0, 0);
-    const activeCount = staffList.filter(s => s.is_active).length;
+    const todayMs = today.getTime();
+    const interval = slotIntervalMinutes || 30;
+    const buf = bufferMinutes || 0;
 
     for (let d = 0; d < maxDays; d++) {
-      const date = new Date(today.getTime() + d * 86400000);
+      const dateMs = todayMs + d * 86400000;
+      const date = new Date(dateMs);
       const dateStr = date.toISOString().split('T')[0];
-      const jsDay = date.getDay();
-      const bizDay = (jsDay + 6) % 7;
+      const bizDay = (date.getDay() + 6) % 7;
       const todaysHours = businessHours.find(h => h.day_of_week === bizDay);
       if (!todaysHours || todaysHours.is_closed) continue;
 
@@ -326,60 +349,31 @@ const BookingForm: React.FC<BookingFormProps> = ({
       let businessStart = startH * 60 + startM;
       let businessEnd = endH * 60 + endM;
       if (businessEnd <= businessStart) businessEnd += 24 * 60;
-      const interval = slotIntervalMinutes || 30;
-      const buffer = bufferMinutes || 0;
+
       let hasAnySlot = false;
 
       for (let mins = businessStart; mins + service.duration <= businessEnd && !hasAnySlot; mins += interval) {
-        const slotTime = new Date(`${dateStr}T${String(mins / 60 | 0).padStart(2, '0')}:${String(mins % 60).padStart(2, '0')}`);
-        if (slotTime.getTime() <= today.getTime()) continue;
-        const slotEnd = slotTime.getTime() + service.duration * 60000;
-        const slotEndWithBuf = slotEnd + buffer * 60000;
+        const slotMs = dateMs + mins * 60000;
+        if (slotMs <= todayMs) continue;
+        const slotEnd = slotMs + service.duration * 60000;
+        const slotEndWithBuf = slotEnd + buf * 60000;
 
-        const conflicting = appointments.filter(appt => {
-          const aDate = appt.start_time.split('T')[0];
-          if (aDate !== dateStr || appt.status === 'cancelled') return false;
-          const aStart = new Date(appt.start_time).getTime();
-          const aEnd = new Date(appt.end_time).getTime();
-          return slotTime.getTime() < aEnd && slotEndWithBuf > aStart;
-        });
+        const conflicting = getConflictingAppointments(dateStr, slotMs, slotEndWithBuf);
 
-        if (activeCount > 0) {
-          if (conflicting.filter(a => a.staff_id).length < activeCount) hasAnySlot = true;
+        if (activeStaffCount > 0) {
+          if (conflicting.filter((a: Appointment) => a.staff_id).length < activeStaffCount) hasAnySlot = true;
         } else if (conflicting.length === 0) hasAnySlot = true;
       }
 
       if (!hasAnySlot) result.add(dateStr);
     }
     return result;
-  }, [businessHours, appointments, service, slotIntervalMinutes, bufferMinutes, staffList, maxAdvanceBookingDays, loadingSlots]);
+  }, [businessHours, service, slotIntervalMinutes, bufferMinutes, activeStaffCount, maxAdvanceBookingDays, loadingSlots, getConflictingAppointments]);
 
   const paymentAmount = service?.payment_percentage != null
     ? Math.round((service.price * service.payment_percentage) / 100)
     : service?.price || 0;
   const requiresPayment = !!service?.requires_payment && paymentAmount > 0 && !giftApplied;
-
-  const doCreateAppointment = async (paymentProvider?: string, paymentId?: string, paymentAmt?: number) => {
-    const startTime = new Date(`${formData.date}T${formData.time}`);
-    const endTime = new Date(startTime.getTime() + (service?.duration || 0) * 60000);
-
-    return await createAppointment({
-      business_id: businessId,
-      service_id: serviceId,
-      user_id: userId || '',
-      start_time: startTime.toISOString(),
-      end_time: endTime.toISOString(),
-      status: requireConfirmation ? 'pending' as const : 'confirmed' as const,
-      notes: formData.notes || null,
-      is_guest: !userId,
-      guest_info: !userId ? localGuestInfo : null,
-      payment_status: paymentProvider ? 'completed' : undefined,
-      payment_provider: paymentProvider || undefined,
-      payment_id: paymentId || undefined,
-      payment_amount: paymentAmt || undefined,
-      staff_id: selectedStaff || null,
-    });
-  };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -432,19 +426,19 @@ const BookingForm: React.FC<BookingFormProps> = ({
           setSubmitting(false);
           return;
         }
-        effectiveUserId = signupRes.data?.user?.id;
-        if (!effectiveUserId) {
+        const newId = signupRes.data?.user?.id;
+        if (!newId) {
           dismissToast(toastId);
           setError('No se pudo crear la cuenta. Verifica tu correo.');
           setRegistering(false);
           setSubmitting(false);
           return;
         }
+        effectiveUserId = newId;
         setRegisteredUserId(effectiveUserId);
         dismissToast(toastId);
         onUserRegistered?.();
         setRegistering(false);
-        // Wait for auth session to propagate
         await new Promise(r => setTimeout(r, 1000));
       }
 

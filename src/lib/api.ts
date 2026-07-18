@@ -785,29 +785,23 @@ export const checkIfLiked = async (userId: string, targetId: string, type: 'busi
 
 export const toggleLike = async (userId: string, targetId: string, type: 'business' | 'service') => {
   try {
-    const isLiked = await checkIfLiked(userId, targetId, type);
     const column = type === 'business' ? 'business_id' : 'service_id';
 
-    if (isLiked) {
-      const { error } = await supabase
-        .from('agendaya_user_likes')
-        .delete()
-        .eq('user_id', userId)
-        .eq(column, targetId);
-
-      if (error) throw error;
-      return { success: true, action: 'removed' };
-    }
-
-    const { error } = await supabase
+    const { error: insertError } = await supabase
       .from('agendaya_user_likes')
       .insert([{ user_id: userId, [column]: targetId }]);
 
-    if (error) {
-      if (error.code === '23505') {
-        return { success: true, action: 'added' };
+    if (insertError) {
+      if (insertError.code === '23505') {
+        const { error: delError } = await supabase
+          .from('agendaya_user_likes')
+          .delete()
+          .eq('user_id', userId)
+          .eq(column, targetId);
+        if (delError) throw delError;
+        return { success: true, action: 'removed' };
       }
-      throw error;
+      throw insertError;
     }
     return { success: true, action: 'added' };
   } catch (err: unknown) {
@@ -1011,73 +1005,59 @@ export const setBusinessHours = async (hours: Omit<BusinessHours, 'id'>[]): Prom
 };
 
 export const obtenerPerfilUsuario = async (userId: string): Promise<{ success: boolean; perfil: UserProfile | null; error: string | null; }> => {
-  const TIMEOUT_MS = 15000;
+  if (!userId) {
+    return { success: false, perfil: null, error: 'ID de usuario no proporcionado' };
+  }
 
-  const operation = async () => {
-    if (!userId) {
-      return { success: false, perfil: null, error: 'ID de usuario no proporcionado' };
+  const { data, error } = await supabase
+    .from('agendaya_profiles')
+    .select('*')
+    .eq('id', userId)
+    .single();
+
+  const perfilNoEncontrado = error?.code === 'PGRST116';
+
+  if (error && !perfilNoEncontrado) {
+    return { success: false, perfil: null, error: getErrorMessage(error) };
+  }
+
+  if (data && !perfilNoEncontrado) {
+    if (!data.business_id) {
+      const { data: biz } = await supabase
+        .from('agendaya_businesses')
+        .select('id')
+        .eq('owner_id', userId)
+        .maybeSingle();
+      if (biz?.id) {
+        data.business_id = biz.id;
+        await supabase.from('agendaya_profiles').update({ business_id: biz.id }).eq('id', userId);
+      }
     }
+    return { success: true, perfil: data as UserProfile, error: null };
+  }
 
-    const { data, error } = await supabase
+  try {
+    await supabase.rpc('ensure_user_app', {
+      p_user_id: userId,
+      p_app_slug: 'agendaya',
+    });
+
+    await new Promise(resolve => setTimeout(resolve, 500));
+
+    const { data: retryData } = await supabase
       .from('agendaya_profiles')
       .select('*')
       .eq('id', userId)
       .single();
 
-    const perfilNoEncontrado = error?.code === 'PGRST116';
-
-    if (error && !perfilNoEncontrado) {
-      return { success: false, perfil: null, error: getErrorMessage(error) };
+    if (retryData) {
+      return { success: true, perfil: retryData as UserProfile, error: null };
     }
-
-    if (data && !perfilNoEncontrado) {
-      if (!data.business_id) {
-        const { data: biz } = await supabase
-          .from('agendaya_businesses')
-          .select('id')
-          .eq('owner_id', userId)
-          .maybeSingle();
-        if (biz?.id) {
-          data.business_id = biz.id;
-          await supabase.from('agendaya_profiles').update({ business_id: biz.id }).eq('id', userId);
-        }
-      }
-      return { success: true, perfil: data, error: null };
-    }
-
-    try {
-      const { error: rpcError } = await supabase.rpc('ensure_user_app', {
-        p_user_id: userId,
-        p_app_slug: 'agendaya',
-      });
-      if (rpcError) throw rpcError;
-
-      await new Promise(resolve => setTimeout(resolve, 500));
-
-      const retryResponse = await supabase
-        .from('agendaya_profiles')
-        .select('*')
-        .eq('id', userId)
-        .single();
-
-      if (retryResponse.data) {
-        return { success: true, perfil: retryResponse.data as UserProfile, error: null };
-      }
-    } catch {
-      // Fallback silencioso
-    }
-
-    return { success: false, perfil: null, error: 'Perfil no encontrado' };
-  };
-
-  try {
-    const timeout = new Promise<{ success: false; perfil: null; error: string }>(
-      (_, reject) => setTimeout(() => reject(new Error('Timeout al obtener perfil de usuario')), TIMEOUT_MS)
-    );
-    return await Promise.race([operation(), timeout]);
-  } catch (err: unknown) {
-    return { success: false, perfil: null, error: getErrorMessage(err) };
+  } catch {
+    // Fallback silencioso
   }
+
+  return { success: false, perfil: null, error: 'Perfil no encontrado' };
 };
 
 export const updateUserProfile = async (userId: string, updates: Partial<UserProfile>): Promise<{ success: boolean; data?: UserProfile; error?: string }> => {
@@ -1474,18 +1454,21 @@ export async function rejectReview(reviewId: string): Promise<{ success: boolean
 
 export async function getReviewStats(): Promise<{ success: boolean; data?: { pending: number; approved: number; rejected: number; total: number }; error?: string }> {
   try {
-    const { data, error } = await supabase
-      .from('agendaya_reviews')
-      .select('status');
-    if (error) throw error;
-    const reviews = data || [];
-    const counts = { pending: 0, approved: 0, rejected: 0, total: reviews.length };
-    for (const r of reviews) {
-      if (r.status === 'pending') counts.pending++;
-      else if (r.status === 'approved') counts.approved++;
-      else if (r.status === 'rejected') counts.rejected++;
-    }
-    return { success: true, data: counts };
+    const [pendingRes, approvedRes, rejectedRes, totalRes] = await Promise.all([
+      supabase.from('agendaya_reviews').select('id', { count: 'exact', head: true }).eq('status', 'pending'),
+      supabase.from('agendaya_reviews').select('id', { count: 'exact', head: true }).eq('status', 'approved'),
+      supabase.from('agendaya_reviews').select('id', { count: 'exact', head: true }).eq('status', 'rejected'),
+      supabase.from('agendaya_reviews').select('id', { count: 'exact', head: true }),
+    ]);
+    return {
+      success: true,
+      data: {
+        pending: pendingRes.count ?? 0,
+        approved: approvedRes.count ?? 0,
+        rejected: rejectedRes.count ?? 0,
+        total: totalRes.count ?? 0,
+      },
+    };
   } catch (err: unknown) {
     return { success: false, error: getErrorMessage(err) };
   }
@@ -2307,21 +2290,11 @@ export const getGiftCodes = async (): Promise<{ success: boolean; data?: GiftCod
 
 export const getAdminLoyaltyStats = async (): Promise<{ success: boolean; data?: { total_entries: number; vip_count: number; frecuente_count: number; regular_count: number }; error?: string }> => {
   try {
-    const { data, error } = await supabase
-      .from('agendaya_loyalty')
-      .select('loyalty_level');
+    const { data, error } = await supabase.rpc('get_admin_loyalty_stats');
     if (error) throw error;
-
-    const rows = data as { loyalty_level: string }[];
-    return {
-      success: true,
-      data: {
-        total_entries: rows.length,
-        vip_count: rows.filter(r => r.loyalty_level === 'vip').length,
-        frecuente_count: rows.filter(r => r.loyalty_level === 'frecuente').length,
-        regular_count: rows.filter(r => r.loyalty_level === 'regular').length,
-      },
-    };
+    const arr = data as Array<{ total_entries: number; vip_count: number; frecuente_count: number; regular_count: number }>;
+    const stats = arr?.[0];
+    return { success: true, data: stats || { total_entries: 0, vip_count: 0, frecuente_count: 0, regular_count: 0 } };
   } catch (err: unknown) {
     return { success: false, error: getErrorMessage(err) };
   }

@@ -1,8 +1,8 @@
-import { useState, useEffect, useCallback, useRef } from 'react';
+import { useState, useEffect, useCallback, useRef, useMemo } from 'react';
 import { Link, useSearchParams } from 'react-router-dom';
 import { useSelector } from 'react-redux';
 import { Business, getBusinessStats, getBusinessById, getBusinessServices, getUserBusinesses, updateAppointmentStatus, rescheduleAppointment, updateBusiness, deleteBusinessService, BusinessStats } from '../lib/api';
-import { supabase } from '../lib/supabase';
+import { supabase, UserProfile } from '../lib/supabase';
 import { Appointment, AppointmentStatus } from '../types/appointment';
 import { useBusinessAppointments } from '../hooks/useBusinessAppointments';
 import { notifySuccess, notifyError } from '../lib/toast';
@@ -259,20 +259,28 @@ export const BusinessDashboard: React.FC = () => {
     }
   };
 
-  const now = new Date();
-  const pendingAppointments = appointments.filter(a => a.status === 'pending');
-  const confirmedAppointments = appointments.filter(a => a.status === 'confirmed');
-  const pastAppointments = appointments.filter(a => a.status === 'completed' || new Date(a.start_time) <= now);
+  const { pendingAppointments, confirmedAppointments, pastAppointments } = useMemo(() => {
+    const now = new Date();
+    const pending: Appointment[] = [];
+    const confirmed: Appointment[] = [];
+    const past: Appointment[] = [];
+    for (const a of appointments) {
+      if (a.status === 'pending') pending.push(a);
+      else if (a.status === 'confirmed') confirmed.push(a);
+      else if (a.status === 'completed' || new Date(a.start_time) <= now) past.push(a);
+    }
+    return { pendingAppointments: pending, confirmedAppointments: confirmed, pastAppointments: past };
+  }, [appointments]);
 
-  const getPaginatedItems = <T extends any>(items: T[], section: keyof typeof pagination) => {
+  const getPaginatedItems = <T,>(items: T[], section: keyof typeof pagination): T[] => {
     const { page, perPage } = pagination[section];
     return items.slice((page - 1) * perPage, page * perPage);
   };
 
-  const pagedPending = getPaginatedItems(pendingAppointments, 'pending');
-  const pagedConfirmed = getPaginatedItems(confirmedAppointments, 'confirmed');
-  const pagedPast = getPaginatedItems(pastAppointments, 'history');
-  const pagedClients = getPaginatedItems(businessClients, 'clients');
+  const pagedPending: Appointment[] = getPaginatedItems(pendingAppointments, 'pending');
+  const pagedConfirmed: Appointment[] = getPaginatedItems(confirmedAppointments, 'confirmed');
+  const pagedPast: Appointment[] = getPaginatedItems(pastAppointments, 'history');
+  const pagedClients: UserProfile[] = getPaginatedItems(businessClients, 'clients');
 
   const hasAnalytics = canAccessAnalytics(plan);
   const completedAppointments = appointments.filter(a => a.status === 'completed');

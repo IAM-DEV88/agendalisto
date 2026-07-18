@@ -22,6 +22,22 @@ export default defineConfig(({ mode }) => {
         }
       }
     },
+    build: {
+      target: 'es2020',
+      cssCodeSplit: true,
+      rollupOptions: {
+        output: {
+          manualChunks: {
+            vendor: ['react', 'react-dom', 'react-router-dom'],
+            supabase: ['@supabase/supabase-js'],
+            ui: ['leaflet', 'react-leaflet', 'swiper'],
+            state: ['@reduxjs/toolkit', 'react-redux', 'redux-persist'],
+            forms: ['react-hook-form', '@hookform/resolvers', 'zod'],
+            payments: ['@paypal/react-paypal-js'],
+          }
+        }
+      }
+    },
     define: {
       'process.env': {
         VITE_SUPABASE_URL: JSON.stringify(env.VITE_SUPABASE_URL),

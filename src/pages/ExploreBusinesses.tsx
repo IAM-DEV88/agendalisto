@@ -1,4 +1,4 @@
-import { useState, useEffect, useMemo, useCallback, useRef, lazy, Suspense } from 'react';
+import React, { useState, useEffect, useMemo, useCallback, useRef, lazy, Suspense } from 'react';
 import { Link, useSearchParams } from 'react-router-dom';
 import { MapPin, ArrowRight, Heart, Store, SlidersHorizontal, Search, X, Map, List, MessageCircle, Loader2 } from 'lucide-react';
 import { getBusinesses, getBusinessCategories, toggleLike, checkLikedBusinesses, getReferralCounts } from '../lib/api';
@@ -15,7 +15,7 @@ import { FALLBACK_BUSINESS_LOGO } from '../lib/config';
 const BusinessMap = lazy(() => import('../components/ui/BusinessMap'));
 const PAGE_SIZE = 12;
 
-const BusinessCard = ({ business, categories, isLiked: initialLiked, currentUser, onToggleLike, referralCount }: {
+const BusinessCard = React.memo(({ business, categories, isLiked: initialLiked, currentUser, onToggleLike, referralCount }: {
   business: Business;
   categories: BusinessCategory[];
   isLiked: boolean;
@@ -157,7 +157,7 @@ const BusinessCard = ({ business, categories, isLiked: initialLiked, currentUser
       </div>
     </Link>
   );
-};
+});
 
 function SkeletonCard() {
   return (
@@ -184,6 +184,9 @@ const ExploreBusinesses = () => {
   const [searchTerm, setSearchTerm] = useState(searchParams.get('search') || '');
   const [locationTerm, setLocationTerm] = useState(searchParams.get('location') || '');
   const [category, setCategory] = useState(searchParams.get('category') || 'all');
+
+  const [debouncedSearch, setDebouncedSearch] = useState(searchTerm);
+  const [debouncedLocation, setDebouncedLocation] = useState(locationTerm);
 
   const [error, setError] = useState<string | null>(null);
   const [categories, setCategories] = useState<BusinessCategory[]>([]);
@@ -213,6 +216,17 @@ const ExploreBusinesses = () => {
     setCategory(searchParams.get('category') || 'all');
   }, [searchParams]);
 
+  // Debounce search inputs before firing API calls
+  useEffect(() => {
+    const timer = setTimeout(() => setDebouncedSearch(searchTerm), 350);
+    return () => clearTimeout(timer);
+  }, [searchTerm]);
+
+  useEffect(() => {
+    const timer = setTimeout(() => setDebouncedLocation(locationTerm), 350);
+    return () => clearTimeout(timer);
+  }, [locationTerm]);
+
   useEffect(() => {
     const params = new URLSearchParams();
     if (searchTerm) params.set('search', searchTerm);
@@ -231,14 +245,14 @@ const ExploreBusinesses = () => {
     });
   }, []);
 
-  // Reset on filter change
+  // Reset on filter change (using debounced values for search/location)
   useEffect(() => {
     setPage(0);
     setBusinesses([]);
     setHasMore(true);
     setLikedIds(new Set());
     fetchPage(0, true);
-  }, [searchTerm, locationTerm, category]);
+  }, [debouncedSearch, debouncedLocation, category]);
 
   // Load next page
   useEffect(() => {
@@ -254,9 +268,9 @@ const ExploreBusinesses = () => {
 
     try {
       const data = await getBusinesses(
-        searchTerm || undefined,
+        debouncedSearch || undefined,
         category !== 'all' ? category : undefined,
-        locationTerm || undefined,
+        debouncedLocation || undefined,
         PAGE_SIZE,
         pageNum * PAGE_SIZE,
       );

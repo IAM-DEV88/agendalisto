@@ -1,37 +1,7 @@
 import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
-import { useEffect, useCallback, useRef } from 'react';
+import { useEffect, useCallback, useRef, lazy, Suspense } from 'react';
 import { supabase } from './lib/supabase';
 import { obtenerPerfilUsuario } from './lib/api';
-import Home from './pages/Home';
-import NotFound from './pages/NotFound';
-import Login from './pages/Login';
-import Register from './pages/Register';
-import ProfileDashboard from './pages/ProfileDashboard';
-import BusinessRegister from './pages/BusinessRegister';
-import BusinessDashboard from './pages/BusinessDashboard';
-import AdminDashboard from './pages/AdminDashboard';
-import ModeratorDashboard from './pages/ModeratorDashboard';
-import BusinessPublicPage from './pages/BusinessPublicPage';
-import BusinessOnboarding from './pages/BusinessOnboarding';
-import SEOLandingPage from './pages/SEOLandingPage';
-import CityLandingPage from './pages/CityLandingPage';
-import ForgotPassword from './pages/ForgotPassword';
-import ExploreBusinesses from './pages/ExploreBusinesses';
-import Crowdfunding from './pages/Crowdfunding';
-import FAQ from './pages/FAQ';
-import Plans from './pages/Plans';
-import PaymentSuccess from './pages/PaymentSuccess';
-import ServicePaymentSuccess from './pages/ServicePaymentSuccess';
-import GiftBooking from './pages/GiftBooking';
-import Embajadores from './pages/Embajadores';
-import CajasCompensacion from './pages/CajasCompensacion';
-import B2BHoteles from './pages/B2BHoteles';
-import EmbedWidget from './pages/EmbedWidget';
-import Blog from './pages/Blog';
-import BlogPostView from './pages/BlogPostView';
-import BookingPage from './pages/BookingPage';
-import ReviewPage from './pages/ReviewPage';
-import ServiceFormPage from './pages/ServiceFormPage';
 import ScrollToTop from './components/ScrollToTop';
 import Nav from './components/Nav';
 import Footer from './components/Footer';
@@ -46,71 +16,57 @@ import { getUserBusinesses } from './lib/api';
 import { Toaster } from 'react-hot-toast';
 import { notifySuccess } from './lib/toast';
 
+const Home = lazy(() => import('./pages/Home'));
+const Login = lazy(() => import('./pages/Login'));
+const Register = lazy(() => import('./pages/Register'));
+const ForgotPassword = lazy(() => import('./pages/ForgotPassword'));
+const ExploreBusinesses = lazy(() => import('./pages/ExploreBusinesses'));
+const Crowdfunding = lazy(() => import('./pages/Crowdfunding'));
+const FAQ = lazy(() => import('./pages/FAQ'));
+const Plans = lazy(() => import('./pages/Plans'));
+const PaymentSuccess = lazy(() => import('./pages/PaymentSuccess'));
+const ServicePaymentSuccess = lazy(() => import('./pages/ServicePaymentSuccess'));
+const GiftBooking = lazy(() => import('./pages/GiftBooking'));
+const EmbedWidget = lazy(() => import('./pages/EmbedWidget'));
+const Embajadores = lazy(() => import('./pages/Embajadores'));
+const CajasCompensacion = lazy(() => import('./pages/CajasCompensacion'));
+const B2BHoteles = lazy(() => import('./pages/B2BHoteles'));
+const Blog = lazy(() => import('./pages/Blog'));
+const BlogPostView = lazy(() => import('./pages/BlogPostView'));
+const ProfileDashboard = lazy(() => import('./pages/ProfileDashboard'));
+const BusinessRegister = lazy(() => import('./pages/BusinessRegister'));
+const BusinessOnboarding = lazy(() => import('./pages/BusinessOnboarding'));
+const BusinessDashboard = lazy(() => import('./pages/BusinessDashboard'));
+const ServiceFormPage = lazy(() => import('./pages/ServiceFormPage'));
+const ModeratorDashboard = lazy(() => import('./pages/ModeratorDashboard'));
+const AdminDashboard = lazy(() => import('./pages/AdminDashboard'));
+const CityLandingPage = lazy(() => import('./pages/CityLandingPage'));
+const SEOLandingPage = lazy(() => import('./pages/SEOLandingPage'));
+const ReviewPage = lazy(() => import('./pages/ReviewPage'));
+const BookingPage = lazy(() => import('./pages/BookingPage'));
+const BusinessPublicPage = lazy(() => import('./pages/BusinessPublicPage'));
+const NotFound = lazy(() => import('./pages/NotFound'));
+
 function App() {
   const dispatch = useAppDispatch();
   const user = useSelector((state: RootState) => state.user.user);
   const userProfile = useSelector((state: RootState) => state.user.userProfile);
   const authInitialized = useSelector((state: RootState) => state.user.authInitialized);
   const authInProgressRef = useRef(false);
-  const retryTimeoutRef = useRef<number | undefined>(undefined);
-  const profileLoadAttemptsRef = useRef(0);
-  const MAX_PROFILE_LOAD_ATTEMPTS = 3;
 
-  // Limpiar cualquier timeout pendiente al desmontar
-  useEffect(() => {
-    return () => {
-      if (retryTimeoutRef.current) {
-        window.clearTimeout(retryTimeoutRef.current);
-      }
-    };
-  }, []);
-
-  // Memoizar la función de carga de perfil para evitar recreaciones en cada render
-  const loadProfile = useCallback(async (userId: string, isRetry = false) => {
-    // No reintentar más allá del límite máximo
-    if (isRetry && profileLoadAttemptsRef.current >= MAX_PROFILE_LOAD_ATTEMPTS) {
-      return false;
-    }
+  const loadProfile = useCallback(async (userId: string) => {
+    const { success, perfil } = await obtenerPerfilUsuario(userId);
     
-    if (isRetry) {
-      profileLoadAttemptsRef.current++;
-    } else {
-      // Reiniciar contador para nuevas cargas (no reintentos)
-      profileLoadAttemptsRef.current = 0;
-    }
-
-    try {
-      const { success, perfil, error } = await obtenerPerfilUsuario(userId);
-      
-      if (success && perfil) {
-        dispatch(setUserProfile(perfil));
-        if (perfil.role === 'business_owner' || perfil.role === 'admin' || perfil.role === 'moderator') {
-          const bizRes = await getUserBusinesses(userId);
-          if (bizRes.success && bizRes.businesses) {
-            dispatch(setBusinesses(bizRes.businesses));
-          }
+    if (success && perfil) {
+      dispatch(setUserProfile(perfil));
+      if (perfil.role === 'business_owner' || perfil.role === 'admin' || perfil.role === 'moderator') {
+        const bizRes = await getUserBusinesses(userId);
+        if (bizRes.success && bizRes.businesses) {
+          dispatch(setBusinesses(bizRes.businesses));
         }
-        return true;
-      } else {
-        
-        // Si es timeout, programar reintento después de 2 segundos
-        if (error === 'Timeout al obtener perfil de usuario' && profileLoadAttemptsRef.current < MAX_PROFILE_LOAD_ATTEMPTS) {
-          if (retryTimeoutRef.current) {
-            window.clearTimeout(retryTimeoutRef.current);
-          }
-          
-          retryTimeoutRef.current = window.setTimeout(() => {
-            loadProfile(userId, true);
-          }, 2000);
-        } else {
-          // Error diferente de timeout o máximo de reintentos alcanzado
-          dispatch(setUserProfile(null));
-        }
-        return false;
       }
-    } catch (err) {
+    } else {
       dispatch(setUserProfile(null));
-      return false;
     }
   }, [dispatch]);
 
@@ -246,6 +202,7 @@ function App() {
       <div className="min-h-screen flex flex-col bg-gray-50 dark:bg-gray-900 text-gray-900 dark:text-gray-100">
           <Nav user={userProfile} />
         <main className="flex-grow pt-16 bg-gray-50 dark:bg-gray-800 shadow-md">
+          <Suspense fallback={<div className="flex h-full w-full items-center justify-center py-20"><p className="text-lg text-slate-400 font-medium">Cargando...</p></div>}>
           <Routes>
             <Route path="/" element={<Home />} />
             <Route path="/login" element={<Login />} />
@@ -315,6 +272,7 @@ function App() {
             <Route path="/:slug" element={<BusinessPublicPage />} />
             <Route path="*" element={<NotFound />} />
           </Routes>
+          </Suspense>
         </main>
         <Footer />
         <ChatGuia />
