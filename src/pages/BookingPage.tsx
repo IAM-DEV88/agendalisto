@@ -117,6 +117,8 @@ function BookingPage() {
             {businessData.logo_url && (
               <img
                 src={businessData.logo_url}
+                width={32}
+                height={32}
                 className="w-8 h-8 rounded-lg object-cover border border-slate-200 dark:border-slate-700"
                 alt={businessData.name}
               />
