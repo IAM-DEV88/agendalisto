@@ -378,12 +378,11 @@ const ProfileDashboard = ({ user }: ProfileDashboardProps) => {
                       {greeting}, {username}
                     </h1>
 
-                    <p className="text-xs sm:text-sm font-medium text-slate-500 dark:text-slate-400 truncate mb-0">
-                      {activeAppointmentsCount > 0
-                        ? `Tienes ${activeAppointmentsCount} ${activeAppointmentsCount === 1 ? 'cita activa' : 'citas activas'}`
-                        : 'Gestiona tus citas y configura tu perfil'}
+                    <p className="text-xs sm:text-sm font-medium text-slate-500 dark:text-slate-400 flex items-center gap-1.5 truncate mb-0">
+                      <Store className="w-3.5 h-3.5 shrink-0" />
+                      Panel de Usuario
                     </p>
-                    <div>
+                    <div className="flex items-center gap-2 mt-0.5">
                       {user?.role && user.role !== 'visitor' && (
                         <span className="px-2 py-0.5 text-[11px] font-bold rounded-full bg-primary-100 text-primary-700 dark:bg-primary-900/30 dark:text-primary-400 shrink-0">
                           {ROLE_LABELS[user.role as keyof typeof ROLE_LABELS] || user.role}
@@ -393,9 +392,9 @@ const ProfileDashboard = ({ user }: ProfileDashboardProps) => {
                         const p = user.plan as 'starter' | 'pro' | 'premium';
                         const badge = PLAN_BADGE[p];
                         return badge ? (
-                          <span className={`px-2 py-0.5 text-[10px] font-bold rounded-full uppercase tracking-wider shrink-0 ${badge.className}`}>
+                          <Link to="/plans" className={`px-2 py-0.5 text-[10px] font-bold rounded-full uppercase tracking-wider shrink-0 hover:opacity-80 transition-opacity ${badge.className}`}>
                             {PLAN_LABELS[p]}
-                          </span>
+                          </Link>
                         ) : null;
                       })()}
                     </div>
@@ -429,8 +428,7 @@ const ProfileDashboard = ({ user }: ProfileDashboardProps) => {
                           className="inline-flex items-center justify-center gap-1.5 px-4 h-9 bg-primary-600 hover:bg-primary-700 text-white text-xs font-bold rounded-lg transition-all shadow-lg shadow-primary-500/25 active:scale-95"
                         >
                           <Store className="w-3.5 h-3.5" />
-                          <span className="hidden sm:inline">Mi Negocio</span>
-                          <span className="sm:hidden">Negocio</span>
+                          Mi Negocio
                         </Link>
                         {canCreateMore && (
                           <Link
@@ -438,7 +436,7 @@ const ProfileDashboard = ({ user }: ProfileDashboardProps) => {
                             className="inline-flex items-center justify-center gap-1.5 px-3 h-9 bg-white dark:bg-slate-900 text-primary-600 dark:text-primary-400 text-xs font-bold rounded-lg border border-primary-200 dark:border-primary-800 hover:bg-primary-50 dark:hover:bg-primary-900/20 active:scale-95 transition-all shadow-sm"
                           >
                             <Plus className="w-3.5 h-3.5 shrink-0" />
-                            <span className="hidden sm:inline">Crear otro</span>
+                            Crear otro
                           </Link>
                         )}
                       </>
@@ -448,8 +446,7 @@ const ProfileDashboard = ({ user }: ProfileDashboardProps) => {
                         className="inline-flex items-center justify-center gap-1.5 px-4 h-9 bg-white dark:bg-slate-900 text-primary-600 dark:text-primary-400 text-xs font-bold rounded-lg border border-primary-200 dark:border-primary-800 hover:bg-primary-50 dark:hover:bg-primary-900/20 active:scale-95 transition-all shadow-sm"
                       >
                         <Store className="w-3.5 h-3.5" />
-                        <span className="hidden sm:inline">Registrar mi negocio</span>
-                        <span className="sm:hidden">Registrar</span>
+                        Registrar mi negocio
                       </Link>
                     ) : null}
                   </div>

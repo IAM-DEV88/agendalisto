@@ -1,7 +1,7 @@
 import { useState, useEffect, useCallback, useRef, useMemo } from 'react';
 import { Link, useSearchParams } from 'react-router-dom';
 import { useSelector } from 'react-redux';
-import { Business, getBusinessStats, getBusinessById, getBusinessServices, getUserBusinesses, updateAppointmentStatus, rescheduleAppointment, updateBusiness, deleteBusinessService, BusinessStats } from '../lib/api';
+import { Business, getBusinessStats, getBusinessById, getBusinessServices, getUserBusinesses, updateAppointmentStatus, rescheduleAppointment, updateBusiness, deleteBusinessService, BusinessStats, getBusinessCategories, BusinessCategory } from '../lib/api';
 import { supabase, UserProfile } from '../lib/supabase';
 import { Appointment, AppointmentStatus } from '../types/appointment';
 import { useBusinessAppointments } from '../hooks/useBusinessAppointments';
@@ -71,6 +71,7 @@ export const BusinessDashboard: React.FC = () => {
   const [totalServices, setTotalServices] = useState(0);
   const [businessStats, setBusinessStats] = useState<BusinessStats | null>(null);
   const [appointmentToReschedule, setAppointmentToReschedule] = useState<Appointment | null>(null);
+  const [categories, setCategories] = useState<BusinessCategory[]>([]);
   const days = ['Lunes', 'Martes', 'Miércoles', 'Jueves', 'Viernes', 'Sábado', 'Domingo'];
 
   const [pagination, setPagination] = useState({
@@ -128,6 +129,12 @@ export const BusinessDashboard: React.FC = () => {
   useEffect(() => {
     loadBusinessData();
   }, [loadBusinessData]);
+
+  useEffect(() => {
+    getBusinessCategories().then(res => {
+      if (res.success && res.data) setCategories(res.data);
+    });
+  }, []);
 
   const [searchParams] = useSearchParams();
 
@@ -362,6 +369,10 @@ export const BusinessDashboard: React.FC = () => {
 
   const canStats = hasAnalytics;
   const planBadge = PLAN_BADGE[plan];
+  const categoryName = useMemo(() => {
+    if (!businessData?.category_id || categories.length === 0) return null;
+    return categories.find(c => c.id === businessData.category_id)?.name || null;
+  }, [businessData?.category_id, categories]);
 
   useSwipeable(contentRef, {
     onSwipeLeft: () => {
@@ -407,7 +418,7 @@ export const BusinessDashboard: React.FC = () => {
                 {/* Left: Business Info */}
                 <div className="flex items-center gap-3 min-w-0 flex-1">
                   {businessData ? (
-                    <Link to={`/${businessData.slug}`} className="flex items-center gap-3 group min-w-0 flex-1">
+                    <div className="flex items-center gap-3 min-w-0 flex-1">
                       <div className="relative shrink-0">
                         <div className="h-16 w-16 sm:h-14 sm:w-14 rounded-lg overflow-hidden ring-2 ring-white dark:ring-slate-800 shadow-lg transition-transform duration-300 group-hover:scale-105">
                           <img
@@ -419,23 +430,30 @@ export const BusinessDashboard: React.FC = () => {
                         <div className="absolute -bottom-0.5 -right-0.5 w-3.5 h-3.5 bg-emerald-500 border-[3px] border-white dark:border-slate-900 rounded-full shadow" />
                       </div>
                       <div className="min-w-0">
-                        <h1 className="text-lg sm:text-xl font-black text-slate-900 dark:text-white tracking-tight truncate group-hover:text-primary-600 dark:group-hover:text-primary-400 transition-colors mb-0">
-                          {businessData.name}
-                        </h1>
+                        <Link to={`/${businessData.slug}`} className="group">
+                          <h1 className="text-lg sm:text-xl font-black text-slate-900 dark:text-white tracking-tight truncate group-hover:text-primary-600 dark:group-hover:text-primary-400 transition-colors mb-0">
+                            {businessData.name}
+                          </h1>
+                        </Link>
 
                         <p className="text-xs sm:text-sm font-medium text-slate-500 dark:text-slate-400 flex items-center gap-1.5 truncate mb-0">
                           <Store className="w-3.5 h-3.5 shrink-0" />
                           Panel de Administración
                         </p>
-                        <div>
-                          {planBadge && (
-                            <span className={`px-2 py-0.5 text-[10px] font-bold rounded-full uppercase tracking-wider shrink-0 ${planBadge.className}`}>
-                              {planBadge.text}
+                        <div className="mt-0.5 flex items-center gap-1.5 flex-wrap">
+                          {categoryName && (
+                            <span className="px-2 py-0.5 text-[10px] font-bold rounded-full bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-400 uppercase tracking-wider shrink-0">
+                              {categoryName}
                             </span>
+                          )}
+                          {planBadge && (
+                            <Link to="/plans" className={`px-2 py-0.5 text-[10px] font-bold rounded-full uppercase tracking-wider shrink-0 hover:opacity-80 transition-opacity ${planBadge.className}`}>
+                              {planBadge.text}
+                            </Link>
                           )}
                         </div>
                       </div>
-                    </Link>
+                    </div>
                   ) : (
                     <div className="flex items-center gap-3">
                       <div className="h-12 w-12 sm:h-14 sm:w-14 rounded-lg bg-slate-200 dark:bg-slate-800 animate-pulse" />
