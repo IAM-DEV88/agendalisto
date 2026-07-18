@@ -178,7 +178,7 @@ const Nav = ({ user }: NavProps) => {
                           Crear negocio
                         </Link>
                       )}
-                      <button onClick={() => { closeMenus(); handleLogout(); }} className="flex w-full items-center px-4 py-2 text-sm text-red-600 hover:bg-red-50 dark:hover:bg-red-900/20 transition-colors">
+                      <button type="button" onClick={() => { closeMenus(); handleLogout(); }} className="flex w-full items-center px-4 py-2 text-sm text-red-600 hover:bg-red-50 dark:hover:bg-red-900/20 transition-colors">
                         <svg className="mr-3 h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" /></svg>
                         Cerrar Sesión
                       </button>
@@ -272,7 +272,7 @@ const Nav = ({ user }: NavProps) => {
                       + Crear negocio
                     </Link>
                   )}
-                  <button onClick={() => { closeMenus(); handleLogout(); }} className="block w-full text-left px-4 py-3 text-base font-bold text-red-600 rounded-lg hover:bg-red-50 dark:hover:bg-red-900/20 transition-all">
+                  <button type="button" onClick={() => { closeMenus(); handleLogout(); }} className="block w-full text-left px-4 py-3 text-base font-bold text-red-600 rounded-lg hover:bg-red-50 dark:hover:bg-red-900/20 transition-all">
                     Cerrar Sesión
                   </button>
                 </div>

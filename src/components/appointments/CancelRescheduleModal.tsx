@@ -259,7 +259,7 @@ export default function CancelRescheduleModal({ isOpen, onClose, appointment, is
           <div className="flex items-center justify-between px-4 sm:px-5 py-3">
             <div className="flex items-center gap-2 min-w-0">
               {mode ? (
-                <button onClick={reset} className="flex items-center gap-1 text-xs font-bold text-slate-500 hover:text-primary-600 transition-all">
+                <button type="button" onClick={reset} className="flex items-center gap-1 text-xs font-bold text-slate-500 hover:text-primary-600 transition-all">
                   <ChevronLeft className="w-4 h-4" /> Volver
                 </button>
               ) : (
@@ -271,7 +271,7 @@ export default function CancelRescheduleModal({ isOpen, onClose, appointment, is
             <span className="text-[10px] font-bold uppercase tracking-wider text-slate-400">
               {mode === 'cancel' ? 'Cancelar cita' : mode === 'reschedule' ? 'Reprogramar' : 'Gestionar cita'}
             </span>
-            <button onClick={onClose} className="p-1.5 rounded-lg hover:bg-slate-100 dark:hover:bg-slate-800 text-slate-400 transition-all active:scale-90">
+            <button type="button" onClick={onClose} className="p-1.5 rounded-lg hover:bg-slate-100 dark:hover:bg-slate-800 text-slate-400 transition-all active:scale-90">
               <X className="w-4 h-4" />
             </button>
           </div>
@@ -326,7 +326,7 @@ export default function CancelRescheduleModal({ isOpen, onClose, appointment, is
           {/* Mode selection */}
           {!mode ? (
             <div className="space-y-2">
-              <button onClick={() => setMode('reschedule')}
+              <button type="button" onClick={() => setMode('reschedule')}
                 disabled={isRescheduleLocked}
                 className={`w-full flex items-center gap-3 p-3.5 rounded-lg border transition-all text-left active:scale-[0.99] ${
                   isRescheduleLocked
@@ -345,7 +345,7 @@ export default function CancelRescheduleModal({ isOpen, onClose, appointment, is
                   </p>
                 </div>
               </button>
-              <button onClick={() => setMode('cancel')}
+              <button type="button" onClick={() => setMode('cancel')}
                 disabled={isWithinMinTime}
                 className={`w-full flex items-center gap-3 p-3.5 rounded-lg border transition-all text-left active:scale-[0.99] ${
                   isWithinMinTime

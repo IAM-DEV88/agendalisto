@@ -52,7 +52,7 @@ export default function MarketingSection() {
           { id: 'loyalty', label: 'Fidelización', icon: Heart },
           { id: 'referrals', label: 'Referidos', icon: LinkIcon },
         ].map(t => (
-          <button key={t.id} onClick={() => setTab(t.id as any)}
+          <button key={t.id} type="button" onClick={() => setTab(t.id as any)}
             className={`flex items-center gap-1.5 px-4 py-2 rounded-lg text-xs font-bold transition-all ${
               tab === t.id ? 'bg-primary-100 dark:bg-primary-900/40 text-primary-700 dark:text-primary-300' : 'text-slate-500 hover:text-slate-700 dark:hover:text-slate-300'
             }`}
@@ -85,7 +85,7 @@ export default function MarketingSection() {
         <div className="space-y-3">
           <div className="flex gap-2">
             {(['all', 'active', 'redeemed'] as const).map(s => (
-              <button key={s} onClick={() => setActiveSubTab(s)}
+              <button key={s} type="button" onClick={() => setActiveSubTab(s)}
                 className={`px-3 py-1.5 rounded-lg text-xs font-bold transition-all ${
                   activeSubTab === s ? 'bg-slate-200 dark:bg-slate-700 text-slate-800 dark:text-slate-200' : 'text-slate-400 hover:text-slate-600'
                 }`}

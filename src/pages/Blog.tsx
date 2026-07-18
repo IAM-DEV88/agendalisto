@@ -210,7 +210,7 @@ const Blog = () => {
                         <div className="pt-4 border-t border-slate-100 dark:border-slate-800 flex items-center justify-between">
                           <div className="flex items-center gap-4">
                             <div className="flex items-center gap-1.5 text-slate-500 hover:text-rose-500 transition-colors text-xs font-bold">
-                              <button onClick={(e) => handleLike(e, post.id)} className="flex items-center gap-1.5">
+                              <button type="button" onClick={(e) => handleLike(e, post.id)} className="flex items-center gap-1.5">
                                 <Heart className={`w-4 h-4 ${post.likes_count > 0 ? 'fill-rose-500 text-rose-500' : ''}`} />
                                 {post.likes_count}
                               </button>

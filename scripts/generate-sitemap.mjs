@@ -8,11 +8,11 @@ const __dirname = dirname(fileURLToPath(import.meta.url));
 
 config({ path: resolve(__dirname, '..', '.env') });
 
-const SUPABASE_URL = process.env.VITE_SUPABASE_URL;
-const SUPABASE_ANON_KEY = process.env.VITE_SUPABASE_ANON_KEY;
+const SUPABASE_URL = process.env.VITE_SUPABASE_URL || process.env.SUPABASE_URL;
+const SUPABASE_ANON_KEY = process.env.VITE_SUPABASE_ANON_KEY || process.env.SUPABASE_ANON_KEY;
 
 if (!SUPABASE_URL || !SUPABASE_ANON_KEY) {
-  console.warn('[sitemap] ⚠️ VITE_SUPABASE_URL o VITE_SUPABASE_ANON_KEY no definidas — generando sitemap solo con rutas estáticas');
+  console.warn('[sitemap] ⚠️ SUPABASE_URL/ANON_KEY no definidas — generando sitemap solo con rutas estáticas');
   generateStaticOnly();
   process.exit(0);
 }

@@ -241,10 +241,10 @@ export default function BusinessOnboarding() {
                     {getDefaultServices(categoryName).length} servicios predeterminados (precios los completas tú).
                   </p>
                   <div className="flex gap-3">
-                    <button onClick={acceptDefaults} className="px-5 py-2.5 bg-primary-600 hover:bg-primary-700 text-white font-bold text-sm rounded-lg transition-all">
+                    <button type="button" onClick={acceptDefaults} className="px-5 py-2.5 bg-primary-600 hover:bg-primary-700 text-white font-bold text-sm rounded-lg transition-all">
                       Agregar sugeridos
                     </button>
-                    <button onClick={skipDefaults} className="px-5 py-2.5 bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-400 font-bold text-sm rounded-lg hover:bg-slate-200 dark:hover:bg-slate-700 transition-all">
+                    <button type="button" onClick={skipDefaults} className="px-5 py-2.5 bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-400 font-bold text-sm rounded-lg hover:bg-slate-200 dark:hover:bg-slate-700 transition-all">
                       Empezar vacío
                     </button>
                   </div>
@@ -258,7 +258,7 @@ export default function BusinessOnboarding() {
                     <p className="text-xs text-slate-500 mt-0.5">{svc.duration} min · {svc.description}</p>
                   </div>
                   {svc.price && <span className="text-sm font-black text-primary-600 mx-3">${parseFloat(svc.price).toLocaleString()}</span>}
-                  <button onClick={() => removeService(i)} className="p-1.5 rounded-lg hover:bg-red-50 dark:hover:bg-red-900/20 text-slate-400 hover:text-red-500 transition-all">
+                  <button type="button" onClick={() => removeService(i)} className="p-1.5 rounded-lg hover:bg-red-50 dark:hover:bg-red-900/20 text-slate-400 hover:text-red-500 transition-all">
                     <X className="w-4 h-4" />
                   </button>
                 </div>

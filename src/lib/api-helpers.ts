@@ -1,4 +1,5 @@
 import type { PostgrestError } from '@supabase/supabase-js';
+import { reportError } from './errors';
 
 export type ApiResult<T = void> =
   | { success: true; data?: T; error?: null }
@@ -17,9 +18,7 @@ export function getErrorMessage(err: unknown): string {
 
 export function handleApiError<T>(err: unknown, context?: string): ApiResult<T> {
   const message = context ? `${context}: ${getErrorMessage(err)}` : getErrorMessage(err);
-  if (import.meta.env.DEV) {
-    console.error(`[API] ${context || 'Error'}:`, err);
-  }
+  reportError(message, context || 'API', err);
   return { success: false, error: message };
 }
 

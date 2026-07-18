@@ -93,7 +93,7 @@ const BlogHomeSection = () => {
                     </p>
                     <div className="mt-auto pt-6 border-t border-slate-100 dark:border-slate-800 flex items-center justify-between">
                       <div className="flex items-center gap-6">
-                        <button onClick={(e) => handleLike(e, latestPost.id, 'post')} className="flex items-center gap-2 text-slate-500 hover:text-rose-500 transition-colors">
+                        <button type="button" onClick={(e) => handleLike(e, latestPost.id, 'post')} className="flex items-center gap-2 text-slate-500 hover:text-rose-500 transition-colors">
                           <Heart className={`w-5 h-5 ${latestPost.likes_count > 0 ? 'fill-rose-500 text-rose-500' : ''}`} />
                           <span className="font-bold">{latestPost.likes_count}</span>
                         </button>

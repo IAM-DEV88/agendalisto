@@ -22,7 +22,7 @@ export default function EmbedWidget() {
   return (
     <div style={{ fontFamily: 'system-ui, sans-serif', background: 'white', borderRadius: 16, border: '1px solid #e2e8f0', padding: 20, maxWidth: 360 }}>
       <div style={{ display: 'flex', alignItems: 'center', gap: 12, marginBottom: 16 }}>
-        {business.logo_url && <img src={business.logo_url} alt="" style={{ width: 40, height: 40, borderRadius: 10, objectFit: 'cover' }} />}
+        {business.logo_url && <img src={business.logo_url} alt={`${business.name} logo`} style={{ width: 40, height: 40, borderRadius: 10, objectFit: 'cover' }} />}
         <div>
           <div style={{ fontWeight: 800, fontSize: 16, color: '#1e293b' }}>{business.name}</div>
           {business.description && <div style={{ fontSize: 12, color: '#64748b', marginTop: 2 }}>{business.description.substring(0, 60)}</div>}

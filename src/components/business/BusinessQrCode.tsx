@@ -72,7 +72,7 @@ export default function BusinessQrCode({ businessSlug, businessName }: { busines
           <div className="space-y-2">
             <div className="flex items-center gap-2 p-2.5 bg-slate-50 dark:bg-slate-800 rounded-lg border border-slate-200 dark:border-slate-700 text-xs text-slate-500 truncate">
               <span className="truncate">{publicUrl}</span>
-              <button onClick={handleCopy} className={`flex-shrink-0 p-1.5 rounded-lg transition-all ${copied ? 'bg-emerald-100 text-emerald-600' : 'hover:bg-slate-200 dark:hover:bg-slate-700 text-slate-400'}`}>
+              <button type="button" onClick={handleCopy} className={`flex-shrink-0 p-1.5 rounded-lg transition-all ${copied ? 'bg-emerald-100 text-emerald-600' : 'hover:bg-slate-200 dark:hover:bg-slate-700 text-slate-400'}`}>
                 {copied ? <Check className="w-3.5 h-3.5" /> : <QrCode className="w-3.5 h-3.5" />}
               </button>
             </div>

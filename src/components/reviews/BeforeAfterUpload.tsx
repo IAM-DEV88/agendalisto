@@ -40,7 +40,7 @@ export default function BeforeAfterUpload({ userId, appointmentId: _appointmentI
             {(side === 'before' ? before : after) ? (
               <div className="relative group rounded-lg overflow-hidden border border-slate-200 dark:border-slate-700">
                 <img src={side === 'before' ? before! : after!} alt={side} className="w-full h-28 object-cover" />
-                <button onClick={() => { if (side === 'before') setBefore(null); else setAfter(null); }}
+                <button type="button" onClick={() => { if (side === 'before') setBefore(null); else setAfter(null); }}
                   className="absolute top-1 right-1 p-1 bg-black/50 rounded-lg text-white opacity-0 group-hover:opacity-100 transition-all">
                   <X className="w-3 h-3" />
                 </button>
@@ -56,7 +56,7 @@ export default function BeforeAfterUpload({ userId, appointmentId: _appointmentI
         ))}
       </div>
       {isComplete && (
-        <button onClick={() => onComplete(before!, after!)}
+        <button type="button" onClick={() => onComplete(before!, after!)}
           className="w-full py-2.5 bg-primary-600 hover:bg-primary-700 text-white font-bold text-sm rounded-lg transition-all">
           Publicar mi antes/después
         </button>

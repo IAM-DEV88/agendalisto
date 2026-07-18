@@ -322,7 +322,7 @@ const BlogPostView = () => {
 
           <div className="pt-8 border-t border-slate-100 dark:border-slate-800 flex items-center justify-between">
             <div className="flex items-center gap-8">
-              <button onClick={() => handleLike(post.id, 'post')} className="flex items-center gap-2 text-slate-500 hover:text-rose-500 transition-colors">
+              <button type="button" onClick={() => handleLike(post.id, 'post')} className="flex items-center gap-2 text-slate-500 hover:text-rose-500 transition-colors">
                 <Heart className={`w-6 h-6 ${post.likes_count > 0 ? 'fill-rose-500 text-rose-500' : ''}`} />
                 <span className="font-bold text-lg">{post.likes_count}</span>
               </button>

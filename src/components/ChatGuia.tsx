@@ -413,7 +413,7 @@ const ChatGuia = () => {
                 <div className="text-xs text-primary-100">En línea ahora</div>
               </div>
             </div>
-            <button onClick={() => setIsOpen(false)} className="hover:bg-white/10 p-1 rounded-full">
+            <button type="button" onClick={() => setIsOpen(false)} className="hover:bg-white/10 p-1 rounded-full">
               <X className="w-5 h-5" />
             </button>
           </div>

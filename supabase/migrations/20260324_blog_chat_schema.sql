@@ -84,7 +84,7 @@ BEGIN
     END IF;
     RETURN NULL;
 END;
-$$ LANGUAGE plpgsql SECURITY DEFINER;
+$$ LANGUAGE plpgsql SECURITY DEFINER SET search_path = '';
 
 CREATE TRIGGER on_blog_post_like_change
 AFTER INSERT OR DELETE ON public.agendaya_blog_likes
@@ -105,7 +105,7 @@ BEGIN
     END IF;
     RETURN NULL;
 END;
-$$ LANGUAGE plpgsql SECURITY DEFINER;
+$$ LANGUAGE plpgsql SECURITY DEFINER SET search_path = '';
 
 CREATE TRIGGER on_blog_comment_like_change
 AFTER INSERT OR DELETE ON public.agendaya_blog_likes

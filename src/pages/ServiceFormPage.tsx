@@ -304,7 +304,7 @@ export default function ServiceFormPage() {
           </div>
           <h2 className="text-xl font-black text-slate-900 dark:text-white mb-2">Error</h2>
           <p className="text-sm text-slate-500 mb-6">{error}</p>
-          <button onClick={() => navigate('/business/dashboard')} className="px-6 py-3 bg-primary-600 hover:bg-primary-700 text-white font-bold rounded-lg transition-all">
+          <button type="button" onClick={() => navigate('/business/dashboard')} className="px-6 py-3 bg-primary-600 hover:bg-primary-700 text-white font-bold rounded-lg transition-all">
             Volver al panel
           </button>
         </div>
@@ -327,7 +327,7 @@ export default function ServiceFormPage() {
       {/* Sticky Header */}
       <div className="bg-white/90 dark:bg-slate-900/90 backdrop-blur-md border-b border-slate-200 dark:border-slate-800 sticky top-0 z-30 shadow-sm">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between">
-          <button onClick={() => navigate('/business/dashboard?tab=services')}
+          <button type="button" onClick={() => navigate('/business/dashboard?tab=services')}
             className="inline-flex items-center gap-2 text-sm font-bold text-slate-500 hover:text-primary-600 transition-colors">
             <ArrowLeft className="w-4 h-4" />
             <span className="hidden sm:inline">Volver a servicios</span>
@@ -337,7 +337,7 @@ export default function ServiceFormPage() {
           </div>
           <div className="flex items-center">
             {businessLogo ? (
-              <img src={businessLogo} className="w-8 h-8 rounded-lg object-cover border border-slate-200 dark:border-slate-700" alt="" />
+              <img src={businessLogo} className="w-8 h-8 rounded-lg object-cover border border-slate-200 dark:border-slate-700" alt={formData.name || 'Logo del negocio'} />
             ) : (
               <div className="w-8 h-8 rounded-lg bg-primary-100 dark:bg-primary-900/30 flex items-center justify-center">
                 <Store className="w-4 h-4 text-primary-600 dark:text-primary-400" />
@@ -512,7 +512,7 @@ export default function ServiceFormPage() {
                     <div className="flex gap-2 overflow-x-auto no-scrollbar">
                       {images.map((url, i) => (
                         <div key={i} className={`relative w-16 h-16 rounded-lg overflow-hidden flex-shrink-0 border-2 transition-all ${i === activeImageIndex ? 'border-primary-500 ring-1 ring-primary-500/30' : 'border-slate-200 dark:border-slate-700'}`}>
-                          <img src={url} alt="" className="w-full h-full object-cover" />
+                          <img src={url} alt="Imagen del servicio" className="w-full h-full object-cover" />
                           <button type="button" onClick={() => removeImage(i)}
                             className="absolute top-0 right-0 p-0.5 bg-red-500 text-white rounded-bl-lg opacity-0 hover:opacity-100 transition-opacity text-[10px]">
                             <X className="w-3 h-3" />
@@ -788,10 +788,10 @@ export default function ServiceFormPage() {
       {/* Lightbox */}
       {fullscreenImage && (
         <div className="fixed inset-0 z-[100] flex items-center justify-center bg-black/95 backdrop-blur-xl p-4 animate-in fade-in duration-200" onClick={() => setFullscreenImage(null)}>
-          <button onClick={() => setFullscreenImage(null)} className="absolute top-5 right-5 p-2 text-white/50 hover:text-white transition-colors">
+          <button type="button" onClick={() => setFullscreenImage(null)} className="absolute top-5 right-5 p-2 text-white/50 hover:text-white transition-colors">
             <X className="w-7 h-7" />
           </button>
-          <img src={fullscreenImage} className="max-w-full max-h-full rounded-lg shadow-2xl animate-in zoom-in-95 duration-200" alt="" />
+          <img src={fullscreenImage} className="max-w-full max-h-full rounded-lg shadow-2xl animate-in zoom-in-95 duration-200" alt="Vista ampliada del servicio" />
         </div>
       )}
     </div>

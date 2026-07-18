@@ -214,7 +214,7 @@ export default function ReviewPage() {
                         <div className="animate-spin rounded-full h-5 w-5 border-2 border-primary-600 border-t-transparent" />
                       ) : (side === 'before' ? beforeUrl : afterUrl) ? (
                         <div className="relative w-full h-full">
-                          <img src={side === 'before' ? beforeUrl : afterUrl} alt="" className="w-full h-full object-cover rounded-lg" />
+                          <img src={side === 'before' ? beforeUrl : afterUrl} alt={side === 'before' ? 'Foto antes' : 'Foto después'} className="w-full h-full object-cover rounded-lg" />
                           <button type="button" onClick={e => { e.preventDefault(); if (side === 'before') setBeforeUrl(''); else setAfterUrl(''); }}
                             className="absolute top-0.5 right-0.5 p-0.5 bg-black/50 rounded text-white text-[10px]">✕</button>
                         </div>

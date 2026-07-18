@@ -169,7 +169,7 @@ export default function GiftBooking() {
           <p className="text-slate-500 mb-2">Código de regalo: <strong className="text-primary-600">{giftCode}</strong></p>
           <p className="text-sm text-slate-400 mb-6">Comparte este código con el destinatario para que pueda canjearlo.</p>
           <p className="text-xs text-slate-400 mb-8">El destinatario debe registrarse en AgendaYa y usar el código al reservar.</p>
-          <button onClick={() => navigate(`/${slug}`)} className="px-6 py-3 bg-primary-600 hover:bg-primary-700 text-white font-bold rounded-lg transition-all">Volver al negocio</button>
+          <button type="button" onClick={() => navigate(`/${slug}`)} className="px-6 py-3 bg-primary-600 hover:bg-primary-700 text-white font-bold rounded-lg transition-all">Volver al negocio</button>
         </div>
       </div>
     );
@@ -181,7 +181,7 @@ export default function GiftBooking() {
     <div className="min-h-screen bg-gradient-to-b from-slate-50 to-white dark:from-slate-950 dark:to-slate-900 py-12 px-4">
       <SEO title="Regalar servicio" description="Regala un servicio de AgendaYa a alguien especial." />
       <div className="max-w-lg mx-auto">
-        <button onClick={() => navigate(-1)} className="flex items-center gap-2 text-sm font-bold text-slate-500 hover:text-primary-600 mb-6 transition-all">
+        <button type="button" onClick={() => navigate(-1)} className="flex items-center gap-2 text-sm font-bold text-slate-500 hover:text-primary-600 mb-6 transition-all">
           <ArrowLeft className="w-4 h-4" /> Volver
         </button>
 

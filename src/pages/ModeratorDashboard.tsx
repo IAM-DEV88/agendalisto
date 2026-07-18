@@ -11,6 +11,7 @@ import SectionHeader from '../components/ui/SectionHeader';
 import EmptyState from '../components/ui/EmptyState';
 import StatCard from '../components/ui/StatCard';
 import ReviewModerationSection from '../components/admin/ReviewModerationSection';
+import SEO from '../components/SEO';
 import {
   FileText,
   MessageSquare,
@@ -102,6 +103,10 @@ const ModeratorDashboard = ({ user }: ModeratorDashboardProps) => {
 
   return (
     <div className="min-h-screen bg-gray-50 dark:bg-gray-900">
+      <SEO
+        title="Panel de Moderación — AgendaYa"
+        description="Modera reseñas, usuarios y contenido en AgendaYa."
+      />
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         <SectionHeader
           title="Panel de Moderación"

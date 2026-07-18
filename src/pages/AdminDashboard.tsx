@@ -242,7 +242,7 @@ const AdminDashboard = ({ user }: AdminDashboardProps) => {
                           <span className="w-5 text-center text-xs font-black text-slate-400">{i + 1}</span>
                           <div className="h-8 w-8 rounded-full bg-emerald-100 dark:bg-emerald-900/50 flex items-center justify-center flex-shrink-0 overflow-hidden">
                             {biz.logo_url ? (
-                              <img src={biz.logo_url} alt="" className="h-8 w-8 object-cover" />
+                              <img src={biz.logo_url} alt={`${biz.name} logo`} className="h-8 w-8 object-cover" />
                             ) : (
                               <Store className="h-4 w-4 text-emerald-600 dark:text-emerald-400" />
                             )}

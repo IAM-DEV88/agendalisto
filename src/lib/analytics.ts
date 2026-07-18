@@ -16,4 +16,21 @@ export function trackEvent(name: AnalyticsEventName, props: AnalyticsProps = {})
   if (import.meta.env.DEV) {
     console.log(`[Analytics] ${name}`, props);
   }
+
+  try {
+    // Send to Plausible
+    if (typeof window !== 'undefined' && (window as any).plausible) {
+      (window as any).plausible(name, { props });
+    }
+
+    // Send to GTM dataLayer
+    if (typeof window !== 'undefined' && (window as any).dataLayer) {
+      (window as any).dataLayer.push({
+        event: 'agendaya_' + name,
+        ...props,
+      });
+    }
+  } catch {
+    // Analytics errors should never break the app
+  }
 }

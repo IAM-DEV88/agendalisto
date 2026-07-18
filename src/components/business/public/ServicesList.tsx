@@ -79,11 +79,11 @@ const ServiceCard: React.FC<{
           />
           {images.length > 1 && (
             <>
-              <button onClick={(e) => handlePrevImage(e, service.id, images.length)}
+              <button type="button" onClick={(e) => handlePrevImage(e, service.id, images.length)}
                 className="absolute left-2 top-1/2 -translate-y-1/2 p-1.5 bg-black/30 hover:bg-black/50 text-white rounded-full backdrop-blur-sm transition-all opacity-0 group-hover:opacity-100">
                 <ChevronLeft className="w-4 h-4" />
               </button>
-              <button onClick={(e) => handleNextImage(e, service.id, images.length)}
+              <button type="button" onClick={(e) => handleNextImage(e, service.id, images.length)}
                 className="absolute right-2 top-1/2 -translate-y-1/2 p-1.5 bg-black/30 hover:bg-black/50 text-white rounded-full backdrop-blur-sm transition-all opacity-0 group-hover:opacity-100">
                 <ChevronRight className="w-4 h-4" />
               </button>

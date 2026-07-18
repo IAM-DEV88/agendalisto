@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react';
 import { Gift, Heart, Rocket, Target, CreditCard, ExternalLink, Loader2 } from 'lucide-react';
 import type { Milestone } from '../lib/api';
 import { getTopMilestones } from '../lib/api';
+import SEO from '../components/SEO';
 
 const Crowdfunding = () => {
   const [milestones, setMilestones] = useState<Milestone[]>([]);
@@ -26,6 +27,10 @@ const Crowdfunding = () => {
 
   return (
     <div className="min-h-screen bg-slate-50 dark:bg-slate-950 transition-colors duration-200 py-12">
+      <SEO
+        title="Crowdfunding — AgendaYa"
+        description="Apoya el desarrollo de AgendaYa, la plataforma de gestión de citas y servicios para profesionales locales."
+      />
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="text-center max-w-3xl mx-auto mb-16">
           <div className="inline-flex items-center justify-center p-3 bg-primary-100 dark:bg-primary-900/30 text-primary-600 dark:text-primary-400 rounded-lg mb-6">

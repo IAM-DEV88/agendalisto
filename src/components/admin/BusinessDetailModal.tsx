@@ -92,7 +92,7 @@ const BusinessDetailModal = ({ business, onClose, onUpdated }: BusinessDetailMod
       <div className="bg-white dark:bg-slate-900 rounded-lg shadow-2xl border border-slate-200 dark:border-slate-800 w-full max-w-2xl max-h-[90vh] overflow-y-auto animate-in zoom-in-95 duration-200 scrollbar-fino">
         <div className="flex items-center justify-between px-6 py-4 border-b border-slate-100 dark:border-slate-800">
           <h3 className="text-lg font-black text-slate-900 dark:text-white">Detalle del Negocio</h3>
-          <button onClick={onClose} className="p-2 rounded-lg text-slate-400 hover:text-slate-600 hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors">
+          <button type="button" onClick={onClose} className="p-2 rounded-lg text-slate-400 hover:text-slate-600 hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors">
             <X className="h-5 w-5" />
           </button>
         </div>
@@ -101,7 +101,7 @@ const BusinessDetailModal = ({ business, onClose, onUpdated }: BusinessDetailMod
           <div className="flex items-center gap-4">
             <div className="h-14 w-14 rounded-full bg-emerald-100 dark:bg-emerald-900/50 flex items-center justify-center flex-shrink-0">
               {business.logo_url ? (
-                <img src={business.logo_url} alt="" className="h-14 w-14 rounded-full object-contain" />
+                <img src={business.logo_url} alt={`${business.name} logo`} className="h-14 w-14 rounded-full object-contain" />
               ) : (
                 <Building2 className="h-6 w-6 text-emerald-600 dark:text-emerald-400" />
               )}
