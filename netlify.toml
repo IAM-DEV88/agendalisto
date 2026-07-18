@@ -8,6 +8,7 @@
   COREPACK_INTEGRITY_KEYS = "0"
   SITE_URL = "https://agendaya.netlify.app"
 
+
 [functions]
   directory = "netlify/functions"
   # esbuild bundler por defecto
@@ -41,3 +42,4 @@
   targetPort = 3000
   publish = "dist"
   autoLaunch = "true"
+

@@ -7,8 +7,8 @@ Deno.serve(async (req) => {
     const SUPABASE_SERVICE_ROLE_KEY = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY');
     const supabase = createClient(SUPABASE_URL!, SUPABASE_SERVICE_ROLE_KEY!);
 
-    // URL pública de la mascota (estándar del sitio)
-    const MASCOTA_IMAGE_URL = "https://ralivarwsyunylsswbuk.supabase.co/storage/v1/object/public/business-logos/5615eaec-524c-47bc-9380-3235bbf44e34_1774234514340.jpg";
+    // URL pública de la mascota (construida desde SUPABASE_URL para evitar hardcoding)
+    const MASCOTA_IMAGE_URL = `${SUPABASE_URL}/storage/v1/object/public/business-logos/5615eaec-524c-47bc-9380-3235bbf44e34_1774234514340.jpg`;
 
     const categorias = {
       problema: [
