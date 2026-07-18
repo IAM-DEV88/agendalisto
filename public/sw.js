@@ -1,4 +1,4 @@
-const CACHE_NAME = 'agendaya-v1';
+const CACHE_NAME = 'agendaya-v2';
 const STATIC_ASSETS = [
   '/',
   '/index.html',
@@ -6,12 +6,12 @@ const STATIC_ASSETS = [
 ];
 
 self.addEventListener('install', (event) => {
+  self.skipWaiting();
   event.waitUntil(
     caches.open(CACHE_NAME).then((cache) => {
       return cache.addAll(STATIC_ASSETS);
     })
   );
-  self.skipWaiting();
 });
 
 self.addEventListener('activate', (event) => {

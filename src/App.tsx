@@ -11,7 +11,7 @@ import ProtectedRoute from './components/ProtectedRoute';
 import { useSelector } from 'react-redux';
 import { useAppDispatch } from './hooks/useAppDispatch';
 import type { RootState } from './store';
-import { setUser, setUserProfile, setBusinesses, setLoading, setAuthInitialized } from './store/userSlice';
+import { setUser, setUserProfile, setBusinesses } from './store/userSlice';
 import { getUserBusinesses } from './lib/api';
 import { Toaster } from 'react-hot-toast';
 import { notifySuccess } from './lib/toast';
@@ -51,7 +51,6 @@ function App() {
   const dispatch = useAppDispatch();
   const user = useSelector((state: RootState) => state.user.user);
   const userProfile = useSelector((state: RootState) => state.user.userProfile);
-  const authInitialized = useSelector((state: RootState) => state.user.authInitialized);
   const authInProgressRef = useRef(false);
 
   const loadProfile = useCallback(async (userId: string) => {
@@ -65,86 +64,44 @@ function App() {
           dispatch(setBusinesses(bizRes.businesses));
         }
       }
-    } else {
-      dispatch(setUserProfile(null));
     }
   }, [dispatch]);
 
-  // Efecto para manejar autenticación, usando useCallback de loadProfile
+  // Auth check runs in background — page renders immediately
   useEffect(() => {
-    // Prevenir ejecuciones duplicadas
     if (authInProgressRef.current) return;
     authInProgressRef.current = true;
-    
-    dispatch(setLoading(true));
 
-    // Obtener sesión inicial
-    const getInitialSession = async () => {
-      try {
-        const { data: { session } } = await supabase.auth.getSession();
-        
-        if (session?.user) {
-          dispatch(setUser(session.user));
-          await loadProfile(session.user.id);
-        } else {
-          dispatch(setUser(null));
-          dispatch(setUserProfile(null));
-          dispatch(setBusinesses([]));
-        }
-      } catch (err) {
-      } finally {
-        dispatch(setAuthInitialized(true));
-        dispatch(setLoading(false));
+    supabase.auth.getSession().then(({ data: { session } }) => {
+      if (session?.user) {
+        dispatch(setUser(session.user));
+        loadProfile(session.user.id);
       }
-    };
+    }).catch(() => {});
 
-    getInitialSession();
-
-    // Suscribirse a cambios de estado de autenticación
     const { data: { subscription } } = supabase.auth.onAuthStateChange(
       async (event, session) => {
-        
-        // Evitar operaciones innecesarias para eventos no relacionados con login/logout
         const isSignificantEvent = ['SIGNED_IN', 'SIGNED_OUT', 'TOKEN_REFRESHED', 'USER_UPDATED'].includes(event);
-        if (!isSignificantEvent) {
-          return;
-        }
-        
-        dispatch(setLoading(true));
+        if (!isSignificantEvent) return;
         
         if (event === 'SIGNED_IN' && session?.user) {
-          const currentUserId = user?.id || null;
-          
-          // Solo actualizar user/userProfile si el ID cambió o no hay perfil actual
-          if (!currentUserId || currentUserId !== session.user.id || !userProfile) {
-            dispatch(setUser(session.user));
-            
-            notifySuccess('Sesión iniciada');
-            // Cargar perfil solo si es un usuario diferente o no hay perfil
-            if (!userProfile || currentUserId !== session.user.id) {
-              await loadProfile(session.user.id);
-            }
-          } else {
-          }
+          dispatch(setUser(session.user));
+          notifySuccess('Sesión iniciada');
+          loadProfile(session.user.id);
         } else if (event === 'SIGNED_OUT') {
           dispatch(setUser(null));
           dispatch(setUserProfile(null));
           dispatch(setBusinesses([]));
-          notifySuccess('Sesión cerrada');
         }
-        
-        dispatch(setLoading(false));
       }
     );
 
-    // Limpiar suscripción al desmontar
     return () => {
       subscription?.unsubscribe();
       authInProgressRef.current = false;
     };
-  }, [dispatch, loadProfile]); // Solo depende de loadProfile (memoizado)
+  }, [dispatch, loadProfile]);
 
-  // Escuchar el evento userProfileUpdated
   useEffect(() => {
     const handleProfileUpdate = (event: CustomEvent) => {
       if (event.detail.profile) {
@@ -157,13 +114,11 @@ function App() {
     };
   }, [dispatch]);
 
-  // Real-time notifications para citas
   useEffect(() => {
-    if (!authInitialized || !user || !userProfile) return;
+    if (!user || !userProfile) return;
     const channel = supabase
       .channel('public:agendaya_appointments')
       .on('postgres_changes', { event: 'INSERT', schema: 'public', table: 'agendaya_appointments' }, ({ new: appt }: { new: Record<string, unknown> }) => {
-        // Notificar al negocio de una nueva reserva
         if (userProfile.business_id === appt.business_id) {
           notifySuccess('Nueva reserva recibida');
         }
@@ -172,7 +127,6 @@ function App() {
         }
       })
       .on('postgres_changes', { event: 'UPDATE', schema: 'public', table: 'agendaya_appointments' }, ({ new: appt }: { new: Record<string, unknown> }) => {
-        // Estatus de cita modificado
         if (user.id === appt.user_id) {
           let msg = '';
           if (appt.status === 'confirmed') msg = 'Tu cita ha sido confirmada';
@@ -185,16 +139,7 @@ function App() {
     return () => {
       supabase.removeChannel(channel);
     };
-  }, [authInitialized, user, userProfile]);
-
-  // Mostrar sólo loading inicial hasta que authInitialized sea true
-  if (!authInitialized) {
-    return <div className="flex h-screen w-full items-center justify-center">
-      <p className="text-xl">Cargando aplicación...</p>
-    </div>;
-  }
-
-  // Evitar loggear en cada render
+  }, [user, userProfile]);
 
   return (
     <Router>

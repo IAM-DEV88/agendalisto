@@ -3,8 +3,9 @@ import react from '@vitejs/plugin-react'
 
 // https://vitejs.dev/config/
 export default defineConfig(({ mode }) => {
-  // Cargar variables de entorno
   const env = loadEnv(mode, process.cwd(), '')
+
+  const isDev = mode === 'development';
 
   return {
     plugins: [react()],
@@ -27,16 +28,40 @@ export default defineConfig(({ mode }) => {
       cssCodeSplit: true,
       rollupOptions: {
         output: {
-          manualChunks: {
-            vendor: ['react', 'react-dom', 'react-router-dom'],
-            supabase: ['@supabase/supabase-js'],
-            ui: ['leaflet', 'react-leaflet', 'swiper'],
-            state: ['@reduxjs/toolkit', 'react-redux', 'redux-persist'],
-            forms: ['react-hook-form', '@hookform/resolvers', 'zod'],
-            payments: ['@paypal/react-paypal-js'],
+          manualChunks(id: string) {
+            if (id.includes('node_modules/react-dom') || id.includes('node_modules/react/') || id.includes('node_modules/scheduler/')) {
+              return 'vendor-core';
+            }
+            if (id.includes('node_modules/react-router') || id.includes('node_modules/@remix-run')) {
+              return 'vendor-router';
+            }
+            if (id.includes('node_modules/@supabase')) {
+              return 'vendor-supabase';
+            }
+            if (id.includes('node_modules/leaflet') || id.includes('node_modules/react-leaflet') || id.includes('node_modules/swiper')) {
+              return 'vendor-ui';
+            }
+            if (id.includes('node_modules/@reduxjs') || id.includes('node_modules/react-redux') || id.includes('node_modules/redux')) {
+              return 'vendor-state';
+            }
+            if (id.includes('node_modules/react-hook-form') || id.includes('node_modules/@hookform') || id.includes('node_modules/zod')) {
+              return 'vendor-forms';
+            }
+            if (id.includes('node_modules/@paypal')) {
+              return 'vendor-payments';
+            }
+            if (id.includes('node_modules/date-fns')) {
+              return 'vendor-date';
+            }
+            if (id.includes('node_modules/lucide-react') || id.includes('node_modules/react-icons')) {
+              return 'vendor-icons';
+            }
           }
         }
-      }
+      },
+    },
+    esbuild: isDev ? {} : {
+      drop: ['console', 'debugger'],
     },
     define: {
       'process.env': {

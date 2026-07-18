@@ -12,25 +12,37 @@
     <meta name="apple-mobile-web-app-title" content="AgendaYa" />
     <link rel="apple-touch-icon" href="/icons/icon-192.svg" />
     <link rel="manifest" href="/manifest.json" />
+
+    <!-- Preconnect to critical third-party origins -->
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link rel="preconnect" href="https://plausible.io" />
+    <link rel="preconnect" href="https://checkout.wompi.co" />
+
+    <!-- Google Fonts: loaded non-blocking with swap -->
+    <link rel="preload" as="style" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" />
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" media="print" onload="this.media='all'" />
+    <noscript><link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" /></noscript>
+
     <title>AgendaYa - Reserva y gestión de citas</title>
+
+    <!-- Google Tag Manager (async, non-blocking) -->
+    <script async src="https://www.googletagmanager.com/gtm.js?id=GTM-W4H4366K"></script>
+    <script>
+      window.dataLayer = window.dataLayer || [];
+      window.dataLayer.push({'gtm.start': new Date().getTime(), event:'gtm.js'});
+    </script>
   </head>
   <body>
-    <!-- Google Tag Manager (noscript) -->
     <noscript><iframe src="https://www.googletagmanager.com/ns.html?id=GTM-W4H4366K"
     height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
-    <!-- End Google Tag Manager (noscript) -->
     <div id="root"></div>
-    <!-- Wompi Widget Checkout JS: https://docs.wompi.co/docs/colombia/widget-checkout-web/ -->
+
+    <!-- Wompi Widget (async) -->
     <script src="https://checkout.wompi.co/widget.js" async></script>
-    <!-- Plausible Analytics (privacy-first, self-hosted) -->
+    <!-- Plausible Analytics (deferred) -->
     <script defer data-domain="agendaya.netlify.app" src="https://plausible.io/js/script.js"></script>
-    <!-- Google Tag Manager (GTM-W4H4366K) -->
-    <script>(function(w,d,s,l,i){w[l]=w[l]||[];w[l].push({'gtm.start':
-    new Date().getTime(),event:'gtm.js'});var f=d.getElementsByTagName(s)[0],
-    j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
-    'https://www.googletagmanager.com/gtm.js?id='+i+dl;f.parentNode.insertBefore(j,f);
-    })(window,document,'script','dataLayer','GTM-W4H4366K');</script>
-    <!-- End Google Tag Manager -->
+
     <script type="module" src="/src/main.tsx"></script>
   </body>
 </html> 

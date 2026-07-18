@@ -244,6 +244,7 @@ const Home = () => {
               <img 
                 src={agendayaImage} 
                 alt="AgendaYa Mascot" 
+                loading="lazy"
                 className="w-full h-full object-cover object-center md:object-right transition-transform duration-1000 group-hover:scale-105"
                 onError={(e) => {
                   e.currentTarget.style.display = 'none';

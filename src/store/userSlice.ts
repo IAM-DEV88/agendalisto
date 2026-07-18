@@ -16,8 +16,8 @@ const initialState: UserState = {
   user: null,
   userProfile: null,
   businesses: [],
-  loading: true,
-  authInitialized: false,
+  loading: false,
+  authInitialized: true,
   error: null,
 };
 
