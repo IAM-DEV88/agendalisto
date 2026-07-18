@@ -129,16 +129,13 @@ function BookingPage() {
 
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 mt-6 animate-in fade-in slide-in-from-bottom-4 duration-500">
 
-        {/* ─── Owner preview banner ─── */}
+        {/* ─── Owner preview indicator ─── */}
         {isOwner && (
-          <div className="bg-primary-50 dark:bg-primary-900/20 rounded-lg p-4 mb-6 border border-primary-200 dark:border-primary-800/50 flex items-start gap-3">
-            <Eye className="w-5 h-5 text-primary-600 dark:text-primary-400 flex-shrink-0 mt-0.5" />
-            <div>
-              <p className="text-sm font-bold text-primary-800 dark:text-primary-300">Vista previa — Tu negocio</p>
-              <p className="text-xs text-primary-600 dark:text-primary-400 mt-0.5">
-                Esta es la vista pública de tu servicio. No puedes agendar citas en tu propio negocio.
-              </p>
-            </div>
+          <div className="flex items-center gap-2 px-4 py-2 mb-6 bg-primary-50/50 dark:bg-primary-900/10 rounded-lg border border-primary-200/50 dark:border-primary-800/30">
+            <div className="w-2 h-2 rounded-full bg-primary-500 shrink-0" />
+            <p className="text-xs font-medium text-primary-600 dark:text-primary-400">
+              Vista pública de tu servicio — Vista previa
+            </p>
           </div>
         )}
 
