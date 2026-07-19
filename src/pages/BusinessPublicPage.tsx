@@ -15,7 +15,7 @@ import ReferralBadge from '../components/ui/ReferralBadge';
 import TabNav from '../components/ui/TabNav';
 import type { Tab } from '../components/ui/TabNav';
 import ShareButton from '../components/ui/ShareButton';
-import { Store, Clock, MapPin, Star, Heart, Phone, Mail, MessageCircle, Globe, Instagram, Facebook } from 'lucide-react';
+import { Store, Clock, MapPin, Star, Heart, Phone, Mail, MessageCircle, Globe, Instagram, Facebook, Pen } from 'lucide-react';
 
 function SkeletonHeader() {
   return (
@@ -216,17 +216,17 @@ function BusinessPublicPage() {
 
   const serviciosTabs: Tab[] = [
     { id: 'vitrina', label: 'Vitrina', count: services.length },
-    { id: 'pagos', label: 'Métodos de pago' },
+    { id: 'pagos', label: 'Pagos' },
   ];
 
   const contactoTabs: Tab[] = [
-    { id: 'info', label: 'Información' },
+    { id: 'info', label: 'Contacto directo' },
     { id: 'ubicacion', label: 'Ubicación' },
   ];
 
   if (loading) return (
     <div className="min-h-screen bg-gradient-to-b from-slate-50 to-white dark:from-slate-950 dark:to-slate-900 transition-colors duration-200">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+      <div className="max-w-7xl mx-auto px-4 py-8">
         <div className="space-y-6">
           <SkeletonHeader />
           <div className="h-12 bg-slate-200 dark:bg-slate-800 rounded-lg animate-pulse" />
@@ -258,6 +258,7 @@ function BusinessPublicPage() {
 
   return (
     <div className="min-h-screen bg-gradient-to-b from-slate-50 to-white dark:from-slate-950 dark:to-slate-900 transition-colors duration-200">
+      
       <SEO
         title={businessData.name}
         description={businessData.description}
@@ -267,7 +268,7 @@ function BusinessPublicPage() {
       />
 
       {/* ═══ BREADCRUMBS ═══ */}
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-4 pb-2">
+      <div className="max-w-7xl mx-auto px-4 pt-4 pb-2">
         <Breadcrumbs crumbs={[
           { label: 'Inicio', href: '/' },
           { label: 'Explorar', href: '/explore' },
@@ -281,45 +282,45 @@ function BusinessPublicPage() {
           ? 'bg-white/80 dark:bg-slate-900/80 backdrop-blur-md shadow-sm border-b border-slate-200/50 dark:border-slate-800/50 w-[100vw] ml-[calc(-50vw+50%)] pl-[calc(50vw-50%)] pr-[calc(50vw-50%)]'
           : 'bg-transparent'
       }`}>
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-3 sm:py-4">
+        <div className="max-w-7xl mx-auto px-4 py-3 sm:py-4">
           <div className="flex items-center gap-3 sm:gap-4">
             <div className="shrink-0">
               {businessData.logo_url ? (
-                <div className="h-10 w-10 sm:h-12 sm:w-12 rounded-lg overflow-hidden ring-2 ring-white dark:ring-slate-800 shadow">
+                <div className="h-20 w-20 sm:h-20 sm:w-20 rounded-lg overflow-hidden ring-2 ring-white dark:ring-slate-800 shadow">
                   <img src={businessData.logo_url} alt={`${businessData.name} logo`} className="h-full w-full object-contain" />
                 </div>
               ) : (
-                <div className="h-10 w-10 sm:h-12 sm:w-12 rounded-lg bg-primary-50 dark:bg-primary-500/10 flex items-center justify-center">
+                <div className="h-20 w-20 sm:h-20 sm:w-20 rounded-lg bg-primary-50 dark:bg-primary-500/10 flex items-center justify-center">
                   <Store className="h-5 w-5 text-primary-500" />
                 </div>
               )}
             </div>
             <div className="flex-1 min-w-0">
-              <h1 className="text-base sm:text-lg font-black text-slate-900 dark:text-white tracking-tight truncate mb-0">
+              <h1 className="text-lg sm:text-xl font-black text-slate-900 dark:text-white tracking-tight truncate mb-0">
                 {businessData.name}
               </h1>
-              <p className="text-xs font-medium text-slate-500 dark:text-slate-400 flex items-center gap-1">
+              <p className="text-sm font-medium text-slate-500 dark:text-slate-400 flex items-center gap-1">
                 <Store className="w-3 h-3 shrink-0" />
                 {categoryName || (businessData.description ? businessData.description.substring(0, 60) + (businessData.description.length > 60 ? '...' : '') : 'Perfil público')}
               </p>
               <div className="flex flex-wrap items-center gap-1.5 mt-1">
                 {services.length > 0 && (
-                  <span className="inline-flex items-center gap-0.5 px-2 py-0.5 rounded-full bg-primary-50 dark:bg-primary-500/10 text-primary-700 dark:text-primary-300 text-[10px] font-bold">
+                  <span className="inline-flex items-center gap-0.5 px-2 py-0.5 rounded-full bg-primary-50 dark:bg-primary-500/10 text-primary-700 dark:text-primary-300 text-xs font-bold">
                     <Store className="w-2.5 h-2.5" />{services.length}
                   </span>
                 )}
                 {averageRating > 0 && (
-                  <span className="inline-flex items-center gap-0.5 px-2 py-0.5 rounded-full bg-amber-50 dark:bg-amber-500/10 text-amber-700 dark:text-amber-300 text-[10px] font-bold">
+                  <span className="inline-flex items-center gap-0.5 px-2 py-0.5 rounded-full bg-amber-50 dark:bg-amber-500/10 text-amber-700 dark:text-amber-300 text-xs font-bold">
                     <Star className="w-2.5 h-2.5 fill-current" />{averageRating.toFixed(1)}
                   </span>
                 )}
                 {businessData.likes_count > 0 && (
-                  <span className="inline-flex items-center gap-0.5 px-2 py-0.5 rounded-full bg-rose-50 dark:bg-rose-500/10 text-rose-600 dark:text-rose-400 text-[10px] font-bold">
+                  <span className="inline-flex items-center gap-0.5 px-2 py-0.5 rounded-full bg-rose-50 dark:bg-rose-500/10 text-rose-600 dark:text-rose-400 text-xs font-bold">
                     <Heart className="w-2.5 h-2.5" />{businessData.likes_count}
                   </span>
                 )}
                 {businessData.plan && businessData.plan !== 'starter' && (
-                  <span className={`px-2 py-0.5 rounded-full text-[9px] font-bold uppercase tracking-wider ${
+                  <span className={`px-2 py-0.5 rounded-full text-[11px] font-bold uppercase tracking-wider ${
                     businessData.plan === 'premium'
                       ? 'bg-amber-100 dark:bg-amber-900/30 text-amber-700 dark:text-amber-300'
                       : 'bg-blue-100 dark:bg-blue-900/30 text-blue-700 dark:text-blue-400'
@@ -330,14 +331,14 @@ function BusinessPublicPage() {
             </div>
           </div>
         </div>
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div className="max-w-7xl mx-auto px-4">
           <TabNav tabs={tabs} activeTabId={activeTab} onTabChange={setActiveTab} sticky />
         </div>
       </div>
 
       {/* ═══ TAB CONTENT ═══ */}
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div ref={contentRef} className="py-6 md:py-8 pb-16 space-y-6">
+      <div className="max-w-7xl mx-auto px-4 py-4 space-y-5 sm:space-y-6">
+        <div ref={contentRef}>
 
           {/* ─── INICIO ─── */}
           {activeTab === 'inicio' && (
@@ -355,6 +356,11 @@ function BusinessPublicPage() {
                           <Store className="w-5 h-5" />
                         </div>
                         <h3 className="text-lg font-black text-slate-900 dark:text-white tracking-tight">Acerca de</h3>
+                        {user && user.id === businessData?.owner_id && (
+                          <Link to="/business/dashboard?tab=settings" className="ml-auto p-1.5 text-slate-400 hover:text-primary-500 hover:bg-primary-50 dark:hover:bg-primary-900/20 rounded-lg transition-all" title="Editar perfil">
+                            <Pen className="w-3.5 h-3.5" />
+                          </Link>
+                        )}
                       </div>
 
                       {(() => {
@@ -446,6 +452,11 @@ function BusinessPublicPage() {
                           <Clock className="w-5 h-5" />
                         </div>
                         <h3 className="text-lg font-black text-slate-900 dark:text-white tracking-tight">Horarios</h3>
+                        {user && user.id === businessData?.owner_id && (
+                          <Link to="/business/dashboard?tab=hours" className="ml-auto p-1.5 text-slate-400 hover:text-primary-500 hover:bg-primary-50 dark:hover:bg-primary-900/20 rounded-lg transition-all" title="Editar horarios">
+                            <Pen className="w-3.5 h-3.5" />
+                          </Link>
+                        )}
                       </div>
                       <BusinessHoursList businessHours={businessHours} />
                     </div>
@@ -496,15 +507,17 @@ function BusinessPublicPage() {
                           <Store className="w-5 h-5" />
                         </div>
                         <h3 className="text-lg font-black text-slate-900 dark:text-white tracking-tight">Servicios Disponibles</h3>
+                        {user && user.id === businessData?.owner_id && (
+                          <Link to="/business/dashboard?tab=services" className="ml-auto p-1.5 text-slate-400 hover:text-primary-500 hover:bg-primary-50 dark:hover:bg-primary-900/20 rounded-lg transition-all" title="Gestionar servicios">
+                            <Pen className="w-3.5 h-3.5" />
+                          </Link>
+                        )}
                       </div>
                       <ServicesList services={services} currentUser={user} businessOwnerId={businessData?.owner_id} showcaseOnly={!!businessData?.showcase_only} />
-                      {user && user.id === businessData?.owner_id && (
-                        <Link to="/business/dashboard?tab=services" className="inline-flex items-center gap-2 px-5 py-2.5 bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300 text-sm font-bold rounded-lg hover:bg-slate-200 dark:hover:bg-slate-700 transition-all">Gestionar Servicios</Link>
-                      )}
                     </div>
                   )}
 
-                  {/* ── Métodos de pago ── */}
+                  {/* ── Pagos ── */}
                   {activeServiciosTab === 'pagos' && (
                     <div className="space-y-5">
                       <div className="flex items-center gap-3">
@@ -512,6 +525,11 @@ function BusinessPublicPage() {
                           <Store className="w-5 h-5" />
                         </div>
                         <h3 className="text-lg font-black text-slate-900 dark:text-white tracking-tight">Métodos de Pago</h3>
+                        {user && user.id === businessData?.owner_id && (
+                          <Link to="/business/dashboard?tab=settings" className="ml-auto p-1.5 text-slate-400 hover:text-primary-500 hover:bg-primary-50 dark:hover:bg-primary-900/20 rounded-lg transition-all" title="Configurar pagos">
+                            <Pen className="w-3.5 h-3.5" />
+                          </Link>
+                        )}
                       </div>
 
                       <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
@@ -557,7 +575,7 @@ function BusinessPublicPage() {
               <div className="bg-white dark:bg-slate-900 rounded-b-lg border border-slate-100 dark:border-slate-800 p-4 md:p-6 -mt-px">
                 <div className="animate-in fade-in zoom-in-95 duration-300">
 
-                  {/* ── Información ── */}
+                  {/* ── Contacto directo ── */}
                   {activeContactoTab === 'info' && (
                     <div className="space-y-5">
                       <div className="flex items-center gap-3">
@@ -565,6 +583,11 @@ function BusinessPublicPage() {
                           <Phone className="w-5 h-5" />
                         </div>
                         <h3 className="text-lg font-black text-slate-900 dark:text-white tracking-tight">Información de contacto</h3>
+                        {user && user.id === businessData?.owner_id && (
+                          <Link to="/business/dashboard?tab=settings" className="ml-auto p-1.5 text-slate-400 hover:text-primary-500 hover:bg-primary-50 dark:hover:bg-primary-900/20 rounded-lg transition-all" title="Editar información de contacto">
+                            <Pen className="w-3.5 h-3.5" />
+                          </Link>
+                        )}
                       </div>
 
                       <div className="flex flex-wrap items-center gap-2">
@@ -639,6 +662,11 @@ function BusinessPublicPage() {
                           <MapPin className="w-5 h-5" />
                         </div>
                         <h3 className="text-lg font-black text-slate-900 dark:text-white tracking-tight">Ubicación</h3>
+                        {user && user.id === businessData?.owner_id && (
+                          <Link to="/business/dashboard?tab=settings" className="ml-auto p-1.5 text-slate-400 hover:text-primary-500 hover:bg-primary-50 dark:hover:bg-primary-900/20 rounded-lg transition-all" title="Editar ubicación">
+                            <Pen className="w-3.5 h-3.5" />
+                          </Link>
+                        )}
                       </div>
                       {businessData.config?.mostrar_direccion !== false && <BusinessLocation address={businessData.address} lat={businessData.lat} lng={businessData.lng} />}
                     </div>

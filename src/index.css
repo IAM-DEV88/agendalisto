@@ -81,11 +81,6 @@
   h5 { font-size: 1.125rem; line-height: 1.5rem; }
   h6 { font-size: 1rem; line-height: 1.5rem; }
 
-  @media (max-width: 639px) {
-    p {
-      margin-bottom: 0.75rem;
-    }
-  }
 
   a:not(.btn) {
     text-decoration: none;

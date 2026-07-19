@@ -48,6 +48,9 @@ interface BookingFormProps {
   onUserRegistered?: () => void;
   cancellationPolicy?: string | null;
   reschedulePolicy?: string | null;
+  hideHero?: boolean;
+  hideForm?: boolean;
+  hideGift?: boolean;
 }
 
 const BookingForm: React.FC<BookingFormProps> = ({
@@ -78,6 +81,9 @@ const BookingForm: React.FC<BookingFormProps> = ({
   onUserRegistered,
   cancellationPolicy,
   reschedulePolicy,
+  hideHero = false,
+  hideForm = false,
+  hideGift = false,
 }) => {
   const [localImageIndex, setLocalImageIndex] = useState(0);
   const imageIndex = controlledImageIndex ?? localImageIndex;
@@ -672,6 +678,8 @@ const BookingForm: React.FC<BookingFormProps> = ({
 
   return (
     <div className="animate-in slide-in-from-bottom-4 duration-500 space-y-5">
+      {!hideHero && (
+      <>
       {/* ─── Hero: gallery + info fusionados ─── */}
       <div className={`overflow-hidden bg-white dark:bg-slate-900 rounded-lg border border-slate-200 dark:border-slate-700 ${images && images.length > 0 ? 'md:grid md:grid-cols-5' : 'p-4 sm:p-5'}`}>
         {images && images.length > 0 && (
@@ -821,7 +829,11 @@ const BookingForm: React.FC<BookingFormProps> = ({
           )}
         </div>
       </div>
+      </>
+      )}
 
+      {!hideForm && (
+      <>
       {!onlineBookable && !isOwnerPreview ? (
         <div className="bg-white dark:bg-slate-900 rounded-lg border border-slate-200 dark:border-slate-700 divide-y divide-slate-100 dark:divide-slate-800">
           <div className="p-4 sm:p-5 flex items-center gap-3">
@@ -901,7 +913,7 @@ const BookingForm: React.FC<BookingFormProps> = ({
         </div>
       ) : (
       <form onSubmit={handleSubmit} className="space-y-4">
-        <div className='bg-white dark:bg-slate-900 rounded-lg border border-slate-200 dark:border-slate-800 shadow-xl shadow-slate-200/50 dark:shadow-none p-2 sm:p-4 flex flex-col gap-y-4'>
+        <div className=' flex flex-col gap-y-4'>
         {/* ─── Step 1: Date + Time ─── */}
         <div className="bg-white dark:bg-slate-900 rounded-lg border border-slate-200 dark:border-slate-700 overflow-hidden">
           <div className="px-4 py-3 bg-slate-50 dark:bg-slate-800/50 border-b border-slate-100 dark:border-slate-800">
@@ -1129,9 +1141,11 @@ const BookingForm: React.FC<BookingFormProps> = ({
       )}
 
 
-
+      </>
+      )}
+      
       {/* ─── Gift ─── */}
-      {service?.can_be_gifted && (
+      {service?.can_be_gifted && !hideGift && (
         <div className="bg-rose-50 dark:bg-rose-900/10 rounded-lg border border-rose-200 dark:border-rose-800/50 p-3">
           <p className="text-xs font-bold text-rose-600 dark:text-rose-400 flex items-center gap-1.5 mb-2">
             <Gift className="w-3.5 h-3.5" /> Código de regalo?

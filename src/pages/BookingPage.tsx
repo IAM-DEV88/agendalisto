@@ -1,16 +1,20 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import {
   getBusinessBySlug,
   getService,
+  getBusinessCategories,
   Service,
-  Business
+  Business,
+  BusinessCategory
 } from '../lib/api';
 import { supabase } from '../lib/supabase';
 import { BookingForm } from '../components/business/public';
-import { ArrowLeft, X, Calendar, Eye, Store } from 'lucide-react';
+import { ArrowLeft, X, Clock, Store, User, MessageCircle, Phone, Mail, Info, Heart } from 'lucide-react';
 import EmptyState from '../components/ui/EmptyState';
 import SEO from '../components/SEO';
+import TabNav from '../components/ui/TabNav';
+import type { Tab } from '../components/ui/TabNav';
 import { useLockBodyScroll } from '../hooks/useLockBodyScroll';
 
 
@@ -18,7 +22,7 @@ function BookingPageSkeleton() {
   return (
     <div className="min-h-screen bg-gradient-to-b from-slate-50 to-white dark:from-slate-950 dark:to-slate-900 pb-20 animate-in fade-in duration-300">
       <div className="bg-white dark:bg-slate-900 border-b border-slate-200 dark:border-slate-800 sticky top-0 z-30">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-14 flex items-center justify-between">
           <div className="h-5 bg-slate-200 dark:bg-slate-700 rounded-lg w-32 animate-pulse" />
           <div className="h-8 w-8 bg-slate-200 dark:bg-slate-700 rounded-lg animate-pulse" />
         </div>
@@ -43,10 +47,15 @@ function BookingPage() {
   const [error, setError] = useState<string | null>(null);
   const [user, setUser] = useState<any>(null);
   const [onlineBookable, setOnlineBookable] = useState(true);
+  const [activeBookTab, setActiveBookTab] = useState('detalles');
 
   const [activeImageIndex, setActiveImageIndex] = useState(0);
   const [fullscreenImage, setFullscreenImage] = useState<string | null>(null);
   useLockBodyScroll(!!fullscreenImage);
+  const [categories, setCategories] = useState<BusinessCategory[]>([]);
+
+  const headerSentinelRef = useRef<HTMLDivElement>(null);
+  const [headerStuck, setHeaderStuck] = useState(false);
 
   const isOwner = !!user && !!businessData && user.id === businessData.owner_id;
 
@@ -66,11 +75,27 @@ function BookingPage() {
         if (!sS || !sD) { setError(sE || 'Servicio no encontrado'); return; }
         setOnlineBookable(sD.permitir_reservas_online !== false && !business.showcase_only);
         setService(sD);
+
+        getBusinessCategories().then(res => {
+          if (res.success && res.data) setCategories(res.data);
+        });
       } catch { setError('Error al cargar la información'); }
       finally { setLoading(false); }
     };
     fetchData();
   }, [slug, serviceId]);
+
+  useEffect(() => {
+    if (loading) return;
+    const el = headerSentinelRef.current;
+    if (!el) return;
+    const observer = new IntersectionObserver(
+      ([entry]) => setHeaderStuck(!entry.isIntersecting),
+      { threshold: 0, rootMargin: '-65px 0px 0px 0px' }
+    );
+    observer.observe(el);
+    return () => observer.disconnect();
+  }, [loading]);
 
   const handleUserRegistered = async () => {
     const { data: { user: freshUser } } = await supabase.auth.getUser();
@@ -80,6 +105,12 @@ function BookingPage() {
   const images = service?.image_urls
     ? (Array.isArray(service.image_urls) ? service.image_urls : [])
     : [];
+
+  const bookTabs: Tab[] = [
+    { id: 'detalles', label: 'Detalles' },
+    { id: 'agendar', label: 'Agendar' },
+    ...(service?.can_be_gifted ? [{ id: 'regalar', label: 'Regalar' }] : []),
+  ];
 
   if (loading) return <BookingPageSkeleton />;
 
@@ -100,34 +131,70 @@ function BookingPage() {
     <div className="min-h-screen bg-gradient-to-b from-slate-50 to-white dark:from-slate-950 dark:to-slate-900 pb-20">
       <SEO title={`Reservar ${service.name} — ${businessData.name}`} />
 
-      {/* Sticky Header */}
-      <div className="bg-white/90 dark:bg-slate-900/90 backdrop-blur-md border-b border-slate-200 dark:border-slate-800 sticky top-0 z-30 shadow-sm">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between">
-          <button
-            onClick={() => navigate(`/${slug}`)}
-            className="inline-flex items-center gap-2 text-sm font-bold text-slate-500 hover:text-primary-600 transition-colors"
-          >
-            <ArrowLeft className="w-4 h-4" />
-            <span className="hidden sm:inline">Volver</span>
-          </button>
-          <div className="flex items-center gap-2 text-xs font-black text-slate-400 uppercase tracking-widest">
-            {onlineBookable || isOwner ? <><Calendar className="w-3.5 h-3.5" /> Agendar cita</> : <><Eye className="w-3.5 h-3.5" /> Información</>}
-          </div>
-          <div className="flex items-center">
-            {businessData.logo_url && (
-              <img
-                src={businessData.logo_url}
-                width={32}
-                height={32}
-                className="w-8 h-8 rounded-lg object-cover border border-slate-200 dark:border-slate-700"
-                alt={businessData.name}
-              />
-            )}
+      {/* Back button (outside header) */}
+      <div className="max-w-7xl mx-auto px-4 pt-4 pb-2">
+        <button
+          onClick={() => navigate(-1)}
+          className="inline-flex items-center gap-1.5 text-xs sm:text-sm font-bold text-slate-500 hover:text-primary-600 transition-colors"
+        >
+          <ArrowLeft className="w-4 h-4" />
+          <span>Volver</span>
+        </button>
+      </div>
+
+      {/* Sentinel for sticky detection */}
+      <div ref={headerSentinelRef} className="h-px" />
+
+      {/* Sticky Header: business + service */}
+      <div data-underline-nav className={`sticky top-16 z-30 transition-colors duration-150 ${
+        headerStuck
+          ? 'bg-white/80 dark:bg-slate-900/80 backdrop-blur-md shadow-sm border-b border-slate-200/50 dark:border-slate-800/50 w-[100vw] ml-[calc(-50vw+50%)] pl-[calc(50vw-50%)] pr-[calc(50vw-50%)]'
+          : 'bg-transparent border-b border-slate-200/50 dark:border-slate-800/50'
+      }`}>
+        <div className="max-w-7xl mx-auto px-4 py-3">
+          <div className="flex items-center gap-3">
+            <div className="shrink-0">
+              {businessData.logo_url ? (
+                <img
+                  src={businessData.logo_url}
+                  width={80}
+                  height={80}
+                  className="w-20 h-20 rounded-lg object-cover border border-slate-200 dark:border-slate-700"
+                  alt={businessData.name}
+                />
+              ) : (
+                <div className="w-20 h-20 rounded-lg bg-primary-50 dark:bg-primary-500/10 flex items-center justify-center">
+                  <Store className="w-8 h-8 text-primary-500" />
+                </div>
+              )}
+            </div>
+            <div className="min-w-0">
+              <p className="text-base font-black text-slate-900 dark:text-white truncate leading-tight">{businessData.name}</p>
+              <p className="text-sm font-medium text-slate-500 dark:text-slate-400 truncate leading-tight">{service.name}</p>
+              <div className="flex flex-wrap items-center gap-1 mt-1">
+                {(() => {
+                  const cat = categories.find(c => c.id === businessData.category_id);
+                  return cat ? (
+                    <span className="inline-flex items-center px-1.5 py-0.5 rounded-full bg-primary-50 dark:bg-primary-500/10 text-primary-700 dark:text-primary-300 text-[10px] font-bold">{cat.name}</span>
+                  ) : null;
+                })()}
+                {businessData.plan && businessData.plan !== 'starter' && (
+                  <span className={`inline-flex items-center px-1.5 py-0.5 rounded-full text-[9px] font-bold uppercase tracking-wider ${
+                    businessData.plan === 'premium'
+                      ? 'bg-amber-100 dark:bg-amber-900/30 text-amber-700 dark:text-amber-300'
+                      : 'bg-blue-100 dark:bg-blue-900/30 text-blue-700 dark:text-blue-400'
+                  }`}>{businessData.plan}</span>
+                )}
+                <span className="inline-flex items-center gap-0.5 px-1.5 py-0.5 rounded-full bg-rose-50 dark:bg-rose-500/10 text-rose-600 dark:text-rose-400 text-[10px] font-bold">
+                  <Heart className="w-2.5 h-2.5" />{service.likes_count}
+                </span>
+              </div>
+            </div>
           </div>
         </div>
       </div>
 
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 mt-6 animate-in fade-in slide-in-from-bottom-4 duration-500">
+      <div className="max-w-7xl mx-auto px-4 mt-4 animate-in fade-in slide-in-from-bottom-4 duration-500">
 
         {/* ─── Owner preview indicator ─── */}
         {isOwner && (
@@ -139,38 +206,264 @@ function BookingPage() {
           </div>
         )}
 
-        {/* ─── Booking Form unificado ─── */}
+        {/* ─── Pill TabNav + connected card ─── */}
         <div>
-          <BookingForm
-            businessId={businessData.id}
-            businessName={businessData.name}
-            businessAddress={businessData.address}
-            businessContact={{ phone: businessData.phone || undefined, email: businessData.email || undefined, whatsapp: businessData.whatsapp || undefined, address: businessData.address || undefined }}
-            serviceId={service.id}
-            userId={user?.id}
-            service={service}
-            onClose={() => navigate(`/${slug}`)}
-            showPrices={service.mostrar_precios ?? true}
-            requireConfirmation={service.requiere_confirmacion ?? true}
-            notifyEmail={businessData.config?.notificaciones_email}
-            notifyWhatsapp={businessData.config?.notificaciones_whatsapp}
-            minCancellationHours={service.min_cancellation_hours ?? 48}
-            minRescheduleHours={service.min_reschedule_hours ?? 48}
-            isOwnerPreview={isOwner}
-            onlineBookable={onlineBookable}
-            slotIntervalMinutes={businessData.config?.slot_interval_minutes ?? 30}
-            bufferMinutes={businessData.config?.buffer_minutes ?? 0}
-            maxAdvanceBookingDays={businessData.config?.max_advance_booking_days ?? 90}
-            images={images}
-            activeImageIndex={activeImageIndex}
-            onImageChange={setActiveImageIndex}
-            onFullscreenImage={setFullscreenImage}
-            cancellationPolicy={service.cancellation_policy_text}
-            reschedulePolicy={service.reschedule_policy_text}
-            onUserRegistered={handleUserRegistered}
-          />
+          <TabNav tabs={bookTabs} activeTabId={activeBookTab} onTabChange={setActiveBookTab} variant="pill" sticky connected />
+
+          <div className="bg-white dark:bg-slate-900 rounded-b-lg border border-slate-100 dark:border-slate-800 p-4 md:p-6 -mt-px">
+            <div className="animate-in fade-in zoom-in-95 duration-300">
+
+              {/* ── Agenda ── */}
+              {activeBookTab === 'agendar' && (
+                <BookingForm
+                  hideHero
+                  hideGift
+                  businessId={businessData.id}
+                  businessName={businessData.name}
+                  businessAddress={businessData.address}
+                  businessContact={{ phone: businessData.phone || undefined, email: businessData.email || undefined, whatsapp: businessData.whatsapp || undefined, address: businessData.address || undefined }}
+                  serviceId={service.id}
+                  userId={user?.id}
+                  service={service}
+                  onClose={() => navigate(-1)}
+                  showPrices={service.mostrar_precios ?? true}
+                  requireConfirmation={service.requiere_confirmacion ?? true}
+                  notifyEmail={businessData.config?.notificaciones_email}
+                  notifyWhatsapp={businessData.config?.notificaciones_whatsapp}
+                  minCancellationHours={service.min_cancellation_hours ?? 48}
+                  minRescheduleHours={service.min_reschedule_hours ?? 48}
+                  isOwnerPreview={isOwner}
+                  onlineBookable={onlineBookable}
+                  slotIntervalMinutes={businessData.config?.slot_interval_minutes ?? 30}
+                  bufferMinutes={businessData.config?.buffer_minutes ?? 0}
+                  maxAdvanceBookingDays={businessData.config?.max_advance_booking_days ?? 90}
+                  images={images}
+                  activeImageIndex={activeImageIndex}
+                  onImageChange={setActiveImageIndex}
+                  onFullscreenImage={setFullscreenImage}
+                  cancellationPolicy={service.cancellation_policy_text}
+                  reschedulePolicy={service.reschedule_policy_text}
+                  onUserRegistered={handleUserRegistered}
+                />
+              )}
+
+              {/* ── Detalles ── */}
+              {activeBookTab === 'detalles' && (
+                <div className="space-y-6">
+                  <div className="flex items-center gap-3">
+                    <div className="p-2 bg-primary-50 text-primary-600 dark:bg-primary-500/10 dark:text-primary-400 rounded-lg">
+                      <Info className="w-5 h-5" />
+                    </div>
+                    <h3 className="text-lg font-black text-slate-900 dark:text-white tracking-tight">Información del Servicio</h3>
+                  </div>
+
+                  {/* Service details grid */}
+                  <div className="grid grid-cols-2 gap-4">
+                    <div className="p-4 rounded-lg border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800/50">
+                      <p className="text-xs font-bold text-slate-400 uppercase tracking-wider mb-1">Precio</p>
+                      <p className="text-lg font-black text-slate-900 dark:text-white">
+                        {service.mostrar_precios !== false ? `$${service.price.toLocaleString()}` : 'Consultar'}
+                      </p>
+                    </div>
+                    <div className="p-4 rounded-lg border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800/50">
+                      <p className="text-xs font-bold text-slate-400 uppercase tracking-wider mb-1">Duración</p>
+                      <p className="text-lg font-black text-slate-900 dark:text-white flex items-center gap-2">
+                        <Clock className="w-4 h-4 text-slate-400" />
+                        {service.duration} min
+                      </p>
+                    </div>
+                    {service.provider && (
+                      <div className="p-4 rounded-lg border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800/50">
+                        <p className="text-xs font-bold text-slate-400 uppercase tracking-wider mb-1">Profesional</p>
+                        <p className="text-sm font-bold text-slate-900 dark:text-white flex items-center gap-2">
+                          <User className="w-4 h-4 text-slate-400" />
+                          {service.provider}
+                        </p>
+                      </div>
+                    )}
+                    {service.requires_payment && (
+                      <div className="p-4 rounded-lg border border-blue-200 dark:border-blue-800 bg-blue-50 dark:bg-blue-500/10">
+                        <p className="text-xs font-bold text-blue-600 uppercase tracking-wider mb-1">Pago</p>
+                        <p className="text-sm font-bold text-blue-800 dark:text-blue-300">Requiere pago del {service.payment_percentage}% para reservar</p>
+                      </div>
+                    )}
+                    <div className="p-4 rounded-lg border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800/50">
+                      <p className="text-xs font-bold text-slate-400 uppercase tracking-wider mb-1">Reserva online</p>
+                      <p className="text-sm font-bold text-slate-900 dark:text-white">
+                        {service.permitir_reservas_online !== false && !businessData.showcase_only ? 'Disponible' : 'Solo consulta'}
+                      </p>
+                    </div>
+                    <div className="p-4 rounded-lg border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800/50">
+                      <p className="text-xs font-bold text-slate-400 uppercase tracking-wider mb-1">Confirmación</p>
+                      <p className="text-sm font-bold text-slate-900 dark:text-white">
+                        {service.requiere_confirmacion ? 'Requiere confirmación' : 'Automática'}
+                      </p>
+                    </div>
+                  </div>
+
+                  {/* Términos y tiempos */}
+                  <div className="space-y-3">
+                    <div className="flex items-center gap-3">
+                      <div className="p-2 bg-slate-50 dark:bg-slate-800 text-slate-500 dark:text-slate-400 rounded-lg">
+                        <Clock className="w-4 h-4" />
+                      </div>
+                      <h4 className="text-sm font-black text-slate-900 dark:text-white tracking-tight">Términos y tiempos</h4>
+                    </div>
+                    <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
+                      <div className="p-3 rounded-lg border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800/50">
+                        <p className="text-[10px] font-bold text-slate-400 uppercase tracking-wider mb-0.5">Duración</p>
+                        <p className="text-sm font-black text-slate-900 dark:text-white">{service.duration} min</p>
+                      </div>
+                      <div className="p-3 rounded-lg border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800/50">
+                        <p className="text-[10px] font-bold text-slate-400 uppercase tracking-wider mb-0.5">Cancelación</p>
+                        <p className="text-sm font-black text-slate-900 dark:text-white">{service.min_cancellation_hours ?? 48}h antes</p>
+                      </div>
+                      <div className="p-3 rounded-lg border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800/50">
+                        <p className="text-[10px] font-bold text-slate-400 uppercase tracking-wider mb-0.5">Reprogramación</p>
+                        <p className="text-sm font-black text-slate-900 dark:text-white">{service.min_reschedule_hours ?? 48}h antes</p>
+                      </div>
+                      <div className="p-3 rounded-lg border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800/50">
+                        <p className="text-[10px] font-bold text-slate-400 uppercase tracking-wider mb-0.5">Antelación máx.</p>
+                        <p className="text-sm font-black text-slate-900 dark:text-white">{businessData.config?.max_advance_booking_days ?? 90} días</p>
+                      </div>
+                      {businessData.config?.slot_interval_minutes ? (
+                        <div className="p-3 rounded-lg border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800/50">
+                          <p className="text-[10px] font-bold text-slate-400 uppercase tracking-wider mb-0.5">Intervalo</p>
+                          <p className="text-sm font-black text-slate-900 dark:text-white">C/{businessData.config.slot_interval_minutes} min</p>
+                        </div>
+                      ) : null}
+                      {businessData.config?.buffer_minutes ? (
+                        <div className="p-3 rounded-lg border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800/50">
+                          <p className="text-[10px] font-bold text-slate-400 uppercase tracking-wider mb-0.5">Tiempo entre citas</p>
+                          <p className="text-sm font-black text-slate-900 dark:text-white">{businessData.config.buffer_minutes} min</p>
+                        </div>
+                      ) : null}
+                    </div>
+                  </div>
+
+                  {/* Description */}
+                  {service.description && (
+                    <div className="p-4 rounded-lg border border-slate-200 dark:border-slate-700">
+                      <p className="text-xs font-bold text-slate-400 uppercase tracking-wider mb-2">Descripción</p>
+                      <p className="text-sm text-slate-600 dark:text-slate-400 leading-relaxed whitespace-pre-line">{service.description}</p>
+                    </div>
+                  )}
+
+                  {/* Policies */}
+                  {(service.cancellation_policy_text || service.reschedule_policy_text) && (
+                    <div className="space-y-3">
+                      {service.cancellation_policy_text && (
+                        <div className="p-4 rounded-lg border border-slate-200 dark:border-slate-700">
+                          <p className="text-xs font-bold text-slate-400 uppercase tracking-wider mb-1">Política de cancelación</p>
+                          <p className="text-sm text-slate-600 dark:text-slate-400">{service.cancellation_policy_text}</p>
+                        </div>
+                      )}
+                      {service.reschedule_policy_text && (
+                        <div className="p-4 rounded-lg border border-slate-200 dark:border-slate-700">
+                          <p className="text-xs font-bold text-slate-400 uppercase tracking-wider mb-1">Política de reprogramación</p>
+                          <p className="text-sm text-slate-600 dark:text-slate-400">{service.reschedule_policy_text}</p>
+                        </div>
+                      )}
+                    </div>
+                  )}
+
+                  {/* Image gallery */}
+                  {images.length > 0 && (
+                    <div className="space-y-3">
+                      <div className="relative aspect-video sm:aspect-[21/9] rounded-lg overflow-hidden bg-slate-100 dark:bg-slate-800">
+                        <img
+                          src={images[activeImageIndex]}
+                          alt={service.name}
+                          className="w-full h-full object-cover cursor-pointer hover:opacity-90 transition-opacity"
+                          onClick={() => setFullscreenImage(images[activeImageIndex])}
+                        />
+                        {images.length > 1 && (
+                          <div className="absolute bottom-3 left-1/2 -translate-x-1/2 flex items-center gap-1.5">
+                            {images.map((_, i) => (
+                              <button
+                                key={i}
+                                onClick={(e) => { e.stopPropagation(); setActiveImageIndex(i); }}
+                                className={`w-2 h-2 rounded-full transition-all ${i === activeImageIndex ? 'bg-white w-4' : 'bg-white/50 hover:bg-white/80'}`}
+                              />
+                            ))}
+                          </div>
+                        )}
+                      </div>
+                      <div className="flex gap-2 overflow-x-auto no-scrollbar">
+                        {images.map((img, i) => (
+                          <button
+                            key={i}
+                            onClick={() => setActiveImageIndex(i)}
+                            className={`shrink-0 w-16 h-16 rounded-lg overflow-hidden border-2 transition-all ${i === activeImageIndex ? 'border-primary-500 ring-1 ring-primary-500' : 'border-transparent opacity-60 hover:opacity-100'}`}
+                          >
+                            <img src={img} alt="" className="w-full h-full object-cover" />
+                          </button>
+                        ))}
+                      </div>
+                    </div>
+                  )}
+
+                  {/* Contact */}
+                  <div className="p-4 rounded-lg border border-slate-200 dark:border-slate-700">
+                    <p className="text-xs font-bold text-slate-400 uppercase tracking-wider mb-3">Contacto del negocio</p>
+                    <div className="space-y-2">
+                      {businessData.phone && (
+                        <a href={`tel:${businessData.phone}`} className="flex items-center gap-2 text-sm font-bold text-slate-700 dark:text-slate-300 hover:text-primary-600 transition-colors">
+                          <Phone className="w-4 h-4 text-primary-500" /> {businessData.phone}
+                        </a>
+                      )}
+                      {businessData.whatsapp && (
+                        <a href={`https://wa.me/${businessData.whatsapp.replace(/[^0-9]/g, '')}`} target="_blank" rel="noopener noreferrer" className="flex items-center gap-2 text-sm font-bold text-emerald-700 dark:text-emerald-300 hover:text-emerald-600 transition-colors">
+                          <MessageCircle className="w-4 h-4" /> WhatsApp
+                        </a>
+                      )}
+                      {businessData.email && (
+                        <a href={`mailto:${businessData.email}`} className="flex items-center gap-2 text-sm font-bold text-slate-700 dark:text-slate-300 hover:text-primary-600 transition-colors">
+                          <Mail className="w-4 h-4 text-primary-500" /> {businessData.email}
+                        </a>
+                      )}
+                    </div>
+                  </div>
+                </div>
+              )}
+
+              {/* ── Regalo ── */}
+              {activeBookTab === 'regalar' && service.can_be_gifted && (
+                <BookingForm
+                  hideHero
+                  hideForm
+                  hideGift={false}
+                  businessId={businessData.id}
+                  businessName={businessData.name}
+                  businessAddress={businessData.address}
+                  businessContact={{ phone: businessData.phone || undefined, email: businessData.email || undefined, whatsapp: businessData.whatsapp || undefined, address: businessData.address || undefined }}
+                  serviceId={service.id}
+                  userId={user?.id}
+                  service={service}
+                  onClose={() => navigate(-1)}
+                  showPrices={service.mostrar_precios ?? true}
+                  requireConfirmation={service.requiere_confirmacion ?? true}
+                  notifyEmail={businessData.config?.notificaciones_email}
+                  notifyWhatsapp={businessData.config?.notificaciones_whatsapp}
+                  minCancellationHours={service.min_cancellation_hours ?? 48}
+                  minRescheduleHours={service.min_reschedule_hours ?? 48}
+                  isOwnerPreview={isOwner}
+                  onlineBookable={onlineBookable}
+                  slotIntervalMinutes={businessData.config?.slot_interval_minutes ?? 30}
+                  bufferMinutes={businessData.config?.buffer_minutes ?? 0}
+                  maxAdvanceBookingDays={businessData.config?.max_advance_booking_days ?? 90}
+                  images={images}
+                  activeImageIndex={activeImageIndex}
+                  onImageChange={setActiveImageIndex}
+                  onFullscreenImage={setFullscreenImage}
+                  cancellationPolicy={service.cancellation_policy_text}
+                  reschedulePolicy={service.reschedule_policy_text}
+                  onUserRegistered={handleUserRegistered}
+                />
+              )}
+            </div>
+          </div>
         </div>
-      </div>
 
       {/* Lightbox */}
       {fullscreenImage && (
@@ -181,6 +474,7 @@ function BookingPage() {
           <img src={fullscreenImage} className="max-w-full max-h-full rounded-lg shadow-2xl animate-in zoom-in-95 duration-200" alt="Fullscreen" />
         </div>
       )}
+      </div>
     </div>
   );
 }

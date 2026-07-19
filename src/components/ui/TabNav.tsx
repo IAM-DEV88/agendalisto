@@ -48,9 +48,9 @@ export const TabNav: React.FC<TabNavProps> = ({
     const underlineBar = document.querySelector('[data-underline-nav]');
     if (underlineBar) {
       const update = () => {
-        const bottom = underlineBar.getBoundingClientRect().bottom;
-        setPillPosition(bottom);
-        setStuck(el.getBoundingClientRect().top <= bottom);
+        const rect = underlineBar.getBoundingClientRect();
+        setPillPosition(rect.bottom - 0);
+        setStuck(el.getBoundingClientRect().top <= rect.bottom);
       };
       update();
       window.addEventListener('scroll', update, { passive: true });
@@ -111,8 +111,8 @@ export const TabNav: React.FC<TabNavProps> = ({
       <>
         <div
           ref={sentinelRef}
-          className={`shrink-0 transition-all duration-300 ${
-            stuck ? 'opacity-0 pointer-events-none' : 'opacity-100'
+          className={`shrink-0 transition-opacity duration-300 ${
+            stuck ? 'opacity-0 pointer-events-none h-0 overflow-hidden m-0' : 'opacity-100'
           }`}
         >
           <div className={connected ? '' : 'py-2.5'}>{pillNav}</div>
@@ -126,7 +126,7 @@ export const TabNav: React.FC<TabNavProps> = ({
           style={{ top: `${pillPosition}px` }}
         >
           <div className="bg-white/80 dark:bg-slate-900/80 backdrop-blur-md shadow-sm border-b border-slate-200/50 dark:border-slate-800/50">
-            <div className={`max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 ${connected ? 'pt-2.5 pb-0' : 'py-2.5'} flex justify-start`}>
+            <div className={`max-w-7xl mx-auto px-4 ${connected ? 'pt-2.5 pb-0' : 'py-2.5'} flex justify-start`}>
               {pillNav}
             </div>
           </div>

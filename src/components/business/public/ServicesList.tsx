@@ -64,9 +64,7 @@ const ServiceCard: React.FC<{
   return (
     <div
       onClick={() => navigate(`/${window.location.pathname.split('/')[1]}/book/${service.id}`)}
-      className={`relative flex flex-col rounded-lg border transition-all overflow-hidden cursor-pointer group border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 hover:border-primary-300 dark:hover:border-primary-700 hover:shadow-2xl ${
-        isOwner ? 'ring-2 ring-primary-300 dark:ring-primary-700' : ''
-      }`}
+      className="relative flex flex-col rounded-lg border transition-all overflow-hidden cursor-pointer group border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 hover:border-primary-300 dark:hover:border-primary-700 hover:shadow-2xl"
     >
       {isOwner && (
         <div className="absolute top-2 left-2 z-10 w-2 h-2 bg-primary-500 rounded-full ring-2 ring-white dark:ring-slate-900 shadow" />
@@ -79,7 +77,6 @@ const ServiceCard: React.FC<{
             src={images[currentImgIdx]}
             alt={service.name}
             className="w-full h-full object-contain bg-slate-100 dark:bg-slate-800 transition-transform duration-500 group-hover:scale-105"
-            onClick={(e) => openFullscreen(e, images[currentImgIdx])}
           />
           {images.length > 1 && (
             <>
