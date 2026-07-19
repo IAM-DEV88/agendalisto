@@ -376,7 +376,7 @@ function BusinessPublicPage() {
                         </div>
                         <h3 className="text-lg font-black text-slate-900 dark:text-white tracking-tight">Acerca de</h3>
                         {user && user.id === businessData?.owner_id && (
-                          <Link to="/business/dashboard?tab=settings" className="ml-auto p-1.5 text-slate-400 hover:text-primary-500 hover:bg-primary-50 dark:hover:bg-primary-900/20 rounded-lg transition-all" title="Editar perfil">
+                          <Link to="/business/dashboard?tab=settings&sub=profile" className="ml-auto p-1.5 text-slate-400 hover:text-primary-500 hover:bg-primary-50 dark:hover:bg-primary-900/20 rounded-lg transition-all" title="Editar perfil">
                             <Pen className="w-3.5 h-3.5" />
                           </Link>
                         )}
@@ -551,7 +551,7 @@ function BusinessPublicPage() {
                         </div>
                         <h3 className="text-lg font-black text-slate-900 dark:text-white tracking-tight">Métodos de Pago</h3>
                         {user && user.id === businessData?.owner_id && (
-                          <Link to="/business/dashboard?tab=settings" className="ml-auto p-1.5 text-slate-400 hover:text-primary-500 hover:bg-primary-50 dark:hover:bg-primary-900/20 rounded-lg transition-all" title="Configurar pagos">
+                          <Link to="/business/dashboard?tab=settings&sub=config" className="ml-auto p-1.5 text-slate-400 hover:text-primary-500 hover:bg-primary-50 dark:hover:bg-primary-900/20 rounded-lg transition-all" title="Configurar pagos">
                             <Pen className="w-3.5 h-3.5" />
                           </Link>
                         )}
@@ -609,7 +609,7 @@ function BusinessPublicPage() {
                         </div>
                         <h3 className="text-lg font-black text-slate-900 dark:text-white tracking-tight">Información de contacto</h3>
                         {user && user.id === businessData?.owner_id && (
-                          <Link to="/business/dashboard?tab=settings" className="ml-auto p-1.5 text-slate-400 hover:text-primary-500 hover:bg-primary-50 dark:hover:bg-primary-900/20 rounded-lg transition-all" title="Editar información de contacto">
+                          <Link to="/business/dashboard?tab=settings&sub=profile" className="ml-auto p-1.5 text-slate-400 hover:text-primary-500 hover:bg-primary-50 dark:hover:bg-primary-900/20 rounded-lg transition-all" title="Editar información de contacto">
                             <Pen className="w-3.5 h-3.5" />
                           </Link>
                         )}
@@ -688,7 +688,7 @@ function BusinessPublicPage() {
                         </div>
                         <h3 className="text-lg font-black text-slate-900 dark:text-white tracking-tight">Ubicación</h3>
                         {user && user.id === businessData?.owner_id && (
-                          <Link to="/business/dashboard?tab=settings" className="ml-auto p-1.5 text-slate-400 hover:text-primary-500 hover:bg-primary-50 dark:hover:bg-primary-900/20 rounded-lg transition-all" title="Editar ubicación">
+                          <Link to="/business/dashboard?tab=settings&sub=profile" className="ml-auto p-1.5 text-slate-400 hover:text-primary-500 hover:bg-primary-50 dark:hover:bg-primary-900/20 rounded-lg transition-all" title="Editar ubicación">
                             <Pen className="w-3.5 h-3.5" />
                           </Link>
                         )}

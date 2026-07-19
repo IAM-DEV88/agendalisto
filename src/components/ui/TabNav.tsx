@@ -112,7 +112,7 @@ export const TabNav: React.FC<TabNavProps> = ({
         <div
           ref={sentinelRef}
           className={`shrink-0 transition-opacity duration-300 ${
-            stuck ? 'opacity-0 pointer-events-none h-0 overflow-hidden m-0' : 'opacity-100'
+            stuck ? 'opacity-0 pointer-events-none' : 'opacity-100'
           }`}
         >
           <div className={connected ? '' : 'py-2.5'}>{pillNav}</div>

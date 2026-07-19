@@ -176,9 +176,14 @@ export const BusinessDashboard: React.FC = () => {
       setActiveTab('services');
     } else if (tabParam === 'hours' || tabParam === 'availability') {
       setActiveTab('hours');
-    } else if (tabParam === 'profile') {
+    } else if (tabParam === 'profile' || tabParam === 'settings') {
       setActiveTab('settings');
-      setActiveSettingsTab('profile');
+      const sub = searchParams.get('sub');
+      if (sub && ['profile', 'operation', 'config'].includes(sub)) {
+        setActiveSettingsTab(sub);
+      } else {
+        setActiveSettingsTab('profile');
+      }
     }
   }, [searchParams]);
 
