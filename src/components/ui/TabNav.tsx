@@ -4,6 +4,7 @@ export interface Tab {
   id: string;
   label: string;
   count?: number;
+  status?: 'complete' | 'incomplete' | 'error';
 }
 
 interface TabNavProps {
@@ -25,7 +26,7 @@ export const TabNav: React.FC<TabNavProps> = ({
 }) => {
   const sentinelRef = useRef<HTMLDivElement>(null);
   const [stuck, setStuck] = useState(false);
-  const [pillPosition, setPillPosition] = useState(108);
+  const [pillPosition, setPillPosition] = useState(64);
 
   useEffect(() => {
     if (!sticky) return;
@@ -61,11 +62,33 @@ export const TabNav: React.FC<TabNavProps> = ({
       };
     }
 
+    let stickyOffset = 64;
+    (document.querySelectorAll('.sticky') as NodeListOf<HTMLElement>).forEach((s) => {
+      if (s.contains(el) || el.contains(s)) return;
+      const top = parseFloat(window.getComputedStyle(s).top) || 0;
+      const bottom = top + s.offsetHeight;
+      if (bottom > stickyOffset) stickyOffset = bottom;
+    });
+    stickyOffset += el.offsetHeight || 36;
+
     const observer = new IntersectionObserver(
-      ([entry]) => setStuck(!entry.isIntersecting),
-      { threshold: 0, rootMargin: '-1px 0px 0px 0px' }
+      ([entry]) => {
+        setStuck(!entry.isIntersecting);
+        if (!entry.isIntersecting) {
+          const stickyEls = document.querySelectorAll('.sticky');
+          let maxBottom = 0;
+          stickyEls.forEach((s) => {
+            if (s.contains(el) || el.contains(s)) return;
+            const r = s.getBoundingClientRect();
+            if (r.bottom > maxBottom && r.top >= 0 && r.top < 200) maxBottom = r.bottom;
+          });
+          if (maxBottom > 0) setPillPosition(maxBottom);
+        }
+      },
+      { threshold: 0, rootMargin: `-${stickyOffset}px 0px 0px 0px` }
     );
     observer.observe(el);
+
     return () => observer.disconnect();
   }, [sticky, variant]);
 
@@ -88,6 +111,15 @@ export const TabNav: React.FC<TabNavProps> = ({
                 : 'text-slate-500 hover:text-slate-700 dark:text-slate-400 dark:hover:text-slate-300 rounded-lg'
             }`}
           >
+            {tab.status && (
+              <span className={`flex-shrink-0 w-1.5 h-1.5 rounded-full ${
+                tab.status === 'complete'
+                  ? 'bg-emerald-500'
+                  : tab.status === 'error'
+                    ? 'bg-red-500'
+                    : 'bg-slate-400 dark:bg-slate-500'
+              }`} />
+            )}
             <span>{tab.label}</span>
             {tab.count !== undefined && tab.count > 0 && (
               <span className={`inline-flex items-center justify-center min-w-[18px] h-[18px] px-1 rounded-lg text-[10px] font-black transition-colors ${
@@ -148,6 +180,15 @@ export const TabNav: React.FC<TabNavProps> = ({
               : 'text-slate-500 hover:text-slate-700 dark:text-slate-400 dark:hover:text-slate-300'
           }`}
         >
+          {tab.status && (
+            <span className={`flex-shrink-0 w-2 h-2 rounded-full ${
+              tab.status === 'complete'
+                ? 'bg-emerald-500'
+                : tab.status === 'error'
+                  ? 'bg-red-500'
+                  : 'bg-slate-300 dark:bg-slate-600'
+            }`} />
+          )}
           <span>{tab.label}</span>
           {tab.count !== undefined && tab.count > 0 && (
             <span className={`inline-flex items-center justify-center min-w-[22px] h-[22px] px-2 rounded-lg text-[11px] font-black transition-colors ${
