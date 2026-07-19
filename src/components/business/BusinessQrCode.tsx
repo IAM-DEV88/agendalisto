@@ -1,11 +1,25 @@
 import { useState, useEffect, useRef } from 'react';
 import { Download, QrCode, Check } from 'lucide-react';
 import { toast } from 'react-hot-toast';
+import QRCode from 'qrcode';
 
 export default function BusinessQrCode({ businessSlug, businessName }: { businessSlug: string; businessName: string }) {
   const [showQr, setShowQr] = useState(false);
   const [copied, setCopied] = useState(false);
+  const [qrSrc, setQrSrc] = useState<string | null>(null);
   const containerRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    if (!showQr) return;
+    const publicUrl = `${window.location.origin}/${businessSlug}`;
+    QRCode.toDataURL(publicUrl, { width: 256, margin: 1, type: 'image/png' })
+      .then(setQrSrc)
+      .catch(() => {
+        QRCode.toString(publicUrl, { type: 'svg' })
+          .then((svg: string) => setQrSrc(`data:image/svg+xml,${encodeURIComponent(svg)}`))
+          .catch(() => setQrSrc(`https://api.qrserver.com/v1/create-qr-code/?size=200x200&data=${encodeURIComponent(publicUrl)}`));
+      });
+  }, [showQr, businessSlug]);
 
   useEffect(() => {
     if (!showQr) return;
@@ -19,11 +33,11 @@ export default function BusinessQrCode({ businessSlug, businessName }: { busines
   }, [showQr]);
 
   const publicUrl = `${window.location.origin}/${businessSlug}`;
-  const qrApiUrl = `https://api.qrserver.com/v1/create-qr-code/?size=400x400&data=${encodeURIComponent(publicUrl)}`;
 
   const handleDownload = async () => {
     try {
-      const res = await fetch(qrApiUrl);
+      const src = qrSrc || `https://api.qrserver.com/v1/create-qr-code/?size=400x400&data=${encodeURIComponent(publicUrl)}`;
+      const res = await fetch(src);
       const blob = await res.blob();
       const url = URL.createObjectURL(blob);
       const a = document.createElement('a');
@@ -59,13 +73,20 @@ export default function BusinessQrCode({ businessSlug, businessName }: { busines
       </button>
 
       {showQr && (
-        <div className="absolute left-1/2 -translate-x-1/2 sm:left-auto sm:translate-x-0 sm:right-0 top-full mt-2 z-50 w-72 max-w-[calc(100vw-2rem)] bg-white dark:bg-slate-900 rounded-lg border border-slate-200 dark:border-slate-700 shadow-2xl p-5 animate-in fade-in slide-in-from-top-2 duration-200">
+        <div className="fixed sm:absolute left-1/2 -translate-x-1/2 sm:left-auto sm:translate-x-0 sm:right-0 top-1/2 -translate-y-1/2 sm:top-full sm:mt-2 sm:-translate-y-0 z-50 w-72 max-w-[calc(100vw-2rem)] bg-white dark:bg-slate-900 rounded-lg border border-slate-200 dark:border-slate-700 shadow-2xl p-5 animate-in fade-in slide-in-from-top-2 duration-200">
           <div className="text-center mb-4">
-            <img
-              src={qrApiUrl}
-              alt={`QR ${businessName}`}
-              className="w-48 h-48 mx-auto rounded-lg bg-white p-2"
-            />
+            {qrSrc ? (
+              <img
+                src={qrSrc}
+                alt={`QR ${businessName}`}
+                className="w-40 h-40 sm:w-48 sm:h-48 mx-auto rounded-lg max-w-full"
+                onError={() => setQrSrc(`https://api.qrserver.com/v1/create-qr-code/?size=200x200&data=${encodeURIComponent(publicUrl)}`)}
+              />
+            ) : (
+              <div className="w-40 h-40 sm:w-48 sm:h-48 mx-auto rounded-lg bg-slate-100 dark:bg-slate-800 animate-pulse flex items-center justify-center">
+                <QrCode className="w-8 h-8 text-slate-300" />
+              </div>
+            )}
             <p className="text-xs font-bold text-slate-500 mt-2">Escanea para ver {businessName}</p>
           </div>
 
