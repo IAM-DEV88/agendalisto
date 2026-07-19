@@ -82,7 +82,14 @@ function BusinessPublicPage() {
 
   useEffect(() => {
     if (!slug) return;
-    QRCode.toDataURL(`${window.location.origin}/${slug}`, { width: 256, margin: 1 }).then(setQrDataUrl).catch(() => setQrDataUrl(null));
+    const publicUrl = `${window.location.origin}/${slug}`;
+    QRCode.toDataURL(publicUrl, { width: 256, margin: 1, type: 'image/png' })
+      .then(setQrDataUrl)
+      .catch(() => {
+        QRCode.toString(publicUrl, { type: 'svg' })
+          .then((svg: string) => setQrDataUrl(`data:image/svg+xml;utf8,${encodeURIComponent(svg)}`))
+          .catch(() => setQrDataUrl(null));
+      });
   }, [slug]);
 
   useEffect(() => {
@@ -384,13 +391,13 @@ function BusinessPublicPage() {
                                 <p className="text-sm text-slate-400 italic">Sin descripción disponible</p>
                               )}
                             </div>
-                            <div className="flex-shrink-0 flex justify-center">
+                            <div className="flex-shrink-0 flex justify-center sm:justify-end">
                               {qrDataUrl ? (
-                                <div className="bg-white dark:bg-slate-800 rounded-lg border border-slate-200 dark:border-slate-700 p-2 shadow-sm">
+                                <div className="bg-white dark:bg-slate-800 rounded-lg border border-slate-200 dark:border-slate-700 shadow-sm">
                                   <img
                                     src={qrDataUrl}
                                     alt={`QR ${businessData.name}`}
-                                    className="w-28 h-28 sm:w-32 sm:h-32 rounded"
+                                    className="w-24 h-24 sm:w-28 sm:h-28 rounded-lg"
                                   />
                                 </div>
                               ) : (
