@@ -16,6 +16,7 @@ import TabNav from '../components/ui/TabNav';
 import type { Tab } from '../components/ui/TabNav';
 import ShareButton from '../components/ui/ShareButton';
 import { Store, Clock, MapPin, Star, Heart, Phone, Mail, MessageCircle, Globe, Instagram, Facebook, Pen } from 'lucide-react';
+import QRCode from 'qrcode';
 
 function SkeletonHeader() {
   return (
@@ -54,7 +55,7 @@ function BusinessPublicPage() {
   const [isLiked, setIsLiked] = useState(false);
   const [likesCount, setLikesCount] = useState(0);
   const [isLiking, setIsLiking] = useState(false);
-  const [qrFailed, setQrFailed] = useState(false);
+  const [qrDataUrl, setQrDataUrl] = useState<string | null>(null);
   const contentRef = useRef<HTMLDivElement>(null);
   const stickyRef = useRef<HTMLDivElement>(null);
   const [headerStuck, setHeaderStuck] = useState(false);
@@ -78,6 +79,11 @@ function BusinessPublicPage() {
       if (res.success && res.data) setCategories(res.data);
     });
   }, []);
+
+  useEffect(() => {
+    if (!slug) return;
+    QRCode.toDataURL(`${window.location.origin}/${slug}`, { width: 256, margin: 1 }).then(setQrDataUrl).catch(() => setQrDataUrl(null));
+  }, [slug]);
 
   useEffect(() => {
     const fetchBusinessData = async () => {
@@ -113,14 +119,17 @@ function BusinessPublicPage() {
         }
 
         setLikesCount(business.likes_count || 0);
-        if (user?.id) {
-          checkIfLiked(user.id, business.id, 'business').then(setIsLiked);
-        }
       } catch (err) { console.error('Error loading business:', err); setError('Error al cargar la información del negocio'); }
       finally { setLoading(false); }
     };
     fetchBusinessData();
-  }, [slug, navigate, user]);
+  }, [slug, navigate]);
+
+  useEffect(() => {
+    if (user?.id && businessData?.id) {
+      checkIfLiked(user.id, businessData.id, 'business').then(setIsLiked);
+    }
+  }, [user, businessData?.id]);
 
   useEffect(() => {
     const params = new URLSearchParams(location.search);
@@ -366,7 +375,6 @@ function BusinessPublicPage() {
 
                       {(() => {
                         const publicUrl = `${window.location.origin}/${slug}`;
-                        const qrUrl = `https://api.qrserver.com/v1/create-qr-code/?size=200x200&data=${encodeURIComponent(publicUrl)}`;
                         return (
                           <div className="flex flex-col sm:flex-row gap-6">
                             <div className="flex-1 min-w-0">
@@ -377,19 +385,18 @@ function BusinessPublicPage() {
                               )}
                             </div>
                             <div className="flex-shrink-0 flex justify-center">
-                              {qrFailed ? (
+                              {qrDataUrl ? (
+                                <div className="bg-white dark:bg-slate-800 rounded-lg border border-slate-200 dark:border-slate-700 p-2 shadow-sm">
+                                  <img
+                                    src={qrDataUrl}
+                                    alt={`QR ${businessData.name}`}
+                                    className="w-28 h-28 sm:w-32 sm:h-32 rounded"
+                                  />
+                                </div>
+                              ) : (
                                 <a href={publicUrl} target="_blank" rel="noopener noreferrer" className="inline-flex items-center gap-2 px-4 py-2 bg-slate-100 dark:bg-slate-800 text-xs font-bold rounded-lg hover:bg-primary-50 dark:hover:bg-primary-900/20 hover:text-primary-600 dark:hover:text-primary-400 transition-all">
                                   <Store className="w-4 h-4" /> Ir al perfil
                                 </a>
-                              ) : (
-                                <div className="bg-white dark:bg-slate-800 rounded-lg border border-slate-200 dark:border-slate-700 p-2 shadow-sm">
-                                  <img
-                                    src={qrUrl}
-                                    alt={`QR ${businessData.name}`}
-                                    className="w-28 h-28 sm:w-32 sm:h-32 rounded"
-                                    onError={() => setQrFailed(true)}
-                                  />
-                                </div>
                               )}
                             </div>
                           </div>

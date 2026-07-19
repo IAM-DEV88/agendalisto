@@ -1,10 +1,9 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Clock, ChevronLeft, ChevronRight, X, Heart, Gift } from 'lucide-react';
+import { Clock, ChevronLeft, ChevronRight, Heart, Gift } from 'lucide-react';
 import { Service, toggleLike, checkIfLiked } from '../../../lib/api';
 import { toast } from 'react-hot-toast';
 import ShareButton from '../../ui/ShareButton';
-import { useLockBodyScroll } from '../../../hooks/useLockBodyScroll';
 
 interface ServicesListProps {
   services: Service[];
@@ -19,10 +18,9 @@ const ServiceCard: React.FC<{
   businessOwnerId: string;
   handlePrevImage: (e: React.MouseEvent, serviceId: string, max: number) => void;
   handleNextImage: (e: React.MouseEvent, serviceId: string, max: number) => void;
-  openFullscreen: (e: React.MouseEvent, url: string) => void;
   currentImgIdx: number;
   showcaseOnly?: boolean;
-}> = ({ service, currentUser, businessOwnerId, handlePrevImage, handleNextImage, openFullscreen, currentImgIdx, showcaseOnly }) => {
+}> = ({ service, currentUser, businessOwnerId, handlePrevImage, handleNextImage, currentImgIdx, showcaseOnly }) => {
   const [isLiked, setIsLiked] = useState(false);
   const [likesCount, setLikesCount] = useState(service.likes_count || 0);
   const [isLiking, setIsLiking] = useState(false);
@@ -175,8 +173,6 @@ const ServicesList: React.FC<ServicesListProps> = ({
   services, currentUser, businessOwnerId, showcaseOnly,
 }) => {
   const [activeImageIndex, setActiveImageIndex] = useState<Record<string, number>>({});
-  const [fullscreenImage, setFullscreenImage] = useState<string | null>(null);
-  useLockBodyScroll(!!fullscreenImage);
 
   if (!services || services.length === 0) {
     return (
@@ -194,48 +190,21 @@ const ServicesList: React.FC<ServicesListProps> = ({
     setActiveImageIndex(prev => ({ ...prev, [serviceId]: ((prev[serviceId] || 0) - 1 + max) % max }));
   };
 
-  const openFullscreen = (e: React.MouseEvent, url: string) => {
-    e.stopPropagation();
-    setFullscreenImage(url);
-  };
-
   return (
-    <>
-      <div className="grid grid-cols-1 sm:grid-cols-2 gap-5">
-        {services.map(service => (
-            <ServiceCard
-              key={service.id}
-              service={service}
-              currentUser={currentUser}
-              businessOwnerId={businessOwnerId}
-              handlePrevImage={handlePrevImage}
-              handleNextImage={handleNextImage}
-              openFullscreen={openFullscreen}
-              currentImgIdx={activeImageIndex[service.id] || 0}
-              showcaseOnly={showcaseOnly}
-            />
-        ))}
-      </div>
-
-      {fullscreenImage && (
-        <div
-          className="fixed inset-0 z-[100] flex items-center justify-center bg-black/95 backdrop-blur-xl p-4 animate-in fade-in duration-200"
-          onClick={() => setFullscreenImage(null)}
-        >
-          <button
-            onClick={() => setFullscreenImage(null)}
-            className="absolute top-5 right-5 p-2 text-white/50 hover:text-white transition-colors"
-          >
-            <X className="w-7 h-7" />
-          </button>
-          <img
-            src={fullscreenImage}
-            className="max-w-full max-h-full rounded-lg shadow-2xl animate-in zoom-in-95 duration-200"
-            alt="Fullscreen"
+    <div className="grid grid-cols-1 sm:grid-cols-2 gap-5">
+      {services.map(service => (
+          <ServiceCard
+            key={service.id}
+            service={service}
+            currentUser={currentUser}
+            businessOwnerId={businessOwnerId}
+            handlePrevImage={handlePrevImage}
+            handleNextImage={handleNextImage}
+            currentImgIdx={activeImageIndex[service.id] || 0}
+            showcaseOnly={showcaseOnly}
           />
-        </div>
-      )}
-    </>
+      ))}
+    </div>
   );
 };
 

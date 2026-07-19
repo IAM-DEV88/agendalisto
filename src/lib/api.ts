@@ -774,9 +774,9 @@ export const checkIfLiked = async (userId: string, targetId: string, type: 'busi
       query.eq('service_id', targetId);
     }
 
-    const { data, error } = await query.maybeSingle();
+    const { data, error } = await query.limit(1);
     if (error) throw error;
-    return !!data;
+    return data && data.length > 0;
   } catch (error) {
     console.error('Error checking like status:', error);
     return false;
@@ -787,22 +787,28 @@ export const toggleLike = async (userId: string, targetId: string, type: 'busine
   try {
     const column = type === 'business' ? 'business_id' : 'service_id';
 
+    const { data: existing } = await supabase
+      .from('agendaya_user_likes')
+      .select('id')
+      .eq('user_id', userId)
+      .eq(column, targetId)
+      .maybeSingle();
+
+    if (existing) {
+      const { error: delError } = await supabase
+        .from('agendaya_user_likes')
+        .delete()
+        .eq('user_id', userId)
+        .eq(column, targetId);
+      if (delError) throw delError;
+      return { success: true, action: 'removed' };
+    }
+
     const { error: insertError } = await supabase
       .from('agendaya_user_likes')
       .insert([{ user_id: userId, [column]: targetId }]);
 
-    if (insertError) {
-      if (insertError.code === '23505') {
-        const { error: delError } = await supabase
-          .from('agendaya_user_likes')
-          .delete()
-          .eq('user_id', userId)
-          .eq(column, targetId);
-        if (delError) throw delError;
-        return { success: true, action: 'removed' };
-      }
-      throw insertError;
-    }
+    if (insertError) throw insertError;
     return { success: true, action: 'added' };
   } catch (err: unknown) {
     return { success: false, error: getErrorMessage(err) };
