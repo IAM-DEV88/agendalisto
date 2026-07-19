@@ -87,8 +87,10 @@ function BusinessPublicPage() {
       .then(setQrDataUrl)
       .catch(() => {
         QRCode.toString(publicUrl, { type: 'svg' })
-          .then((svg: string) => setQrDataUrl(`data:image/svg+xml;utf8,${encodeURIComponent(svg)}`))
-          .catch(() => setQrDataUrl(null));
+          .then((svg: string) => setQrDataUrl(`data:image/svg+xml,${encodeURIComponent(svg)}`))
+          .catch(() => {
+            setQrDataUrl(`https://api.qrserver.com/v1/create-qr-code/?size=200x200&data=${encodeURIComponent(publicUrl)}`);
+          });
       });
   }, [slug]);
 
@@ -393,11 +395,12 @@ function BusinessPublicPage() {
                             </div>
                             <div className="flex-shrink-0 flex justify-center sm:justify-end">
                               {qrDataUrl ? (
-                                <div className="bg-white dark:bg-slate-800 rounded-lg border border-slate-200 dark:border-slate-700 shadow-sm">
+                                <div className="bg-white dark:bg-slate-800 rounded-lg border border-slate-200 dark:border-slate-700 shadow-sm inline-flex">
                                   <img
                                     src={qrDataUrl}
                                     alt={`QR ${businessData.name}`}
-                                    className="w-24 h-24 sm:w-28 sm:h-28 rounded-lg"
+                                    className="w-24 h-24 sm:w-28 sm:h-28 rounded-lg max-w-full"
+                                    onError={(e) => { console.error('QR image load error:', e); setQrDataUrl(null); }}
                                   />
                                 </div>
                               ) : (
