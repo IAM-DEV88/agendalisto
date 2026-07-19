@@ -1,4 +1,4 @@
-import { useState, useEffect, useMemo, useCallback, useRef } from 'react';
+import { useState, useEffect, useMemo, useCallback } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { useSelector } from 'react-redux';
 import { supabase } from '../lib/supabase';
@@ -21,9 +21,10 @@ import type { Appointment } from '../types/appointment';
 import CancelRescheduleModal from '../components/appointments/CancelRescheduleModal';
 import TabNav from '../components/ui/TabNav';
 import SectionHeader from '../components/ui/SectionHeader';
+import ConnectedPillCard from '../components/ui/ConnectedPillCard';
 import Pagination from '../components/ui/Pagination';
 import EmptyState from '../components/ui/EmptyState';
-import { useSwipeable } from '../hooks/useSwipeable';
+import { useSwipeTabs } from '../hooks/useSwipeTabs';
 import {
   CalendarCheck,
   CalendarClock,
@@ -149,7 +150,6 @@ const ProfileDashboard = ({ user }: ProfileDashboardProps) => {
   const [activeAppointmentTab, setActiveAppointmentTab] = useState('calendar');
   const [activeSettingsTab, setActiveSettingsTab] = useState('profile');
   const [activeStatsTab, setActiveStatsTab] = useState('overview');
-  const contentRef = useRef<HTMLDivElement>(null);
   const [selectedAppointmentForCancel, setSelectedAppointmentForCancel] = useState<Appointment | null>(null);
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
   const [deleting, setDeleting] = useState(false);
@@ -333,16 +333,8 @@ const ProfileDashboard = ({ user }: ProfileDashboardProps) => {
     { id: 'history', label: 'Historial', count: pastCount },
   ];
 
-  useSwipeable(contentRef, {
-    onSwipeLeft: () => {
-      const idx = tabs.findIndex(t => t.id === activeTab);
-      if (idx < tabs.length - 1) setActiveTab(tabs[idx + 1].id as typeof activeTab);
-    },
-    onSwipeRight: () => {
-      const idx = tabs.findIndex(t => t.id === activeTab);
-      if (idx > 0) setActiveTab(tabs[idx - 1].id as typeof activeTab);
-    },
-  });
+  const swipeRef = useSwipeTabs(tabs, activeTab, (id) => setActiveTab(id as typeof activeTab));
+  const contentRef = swipeRef;
 
   const settingsTabs = [
     { id: 'profile', label: 'Perfil' },
@@ -493,17 +485,7 @@ const ProfileDashboard = ({ user }: ProfileDashboardProps) => {
                 />
               </div>
 
-              <TabNav
-                tabs={appointmentTabs}
-                activeTabId={activeAppointmentTab}
-                onTabChange={setActiveAppointmentTab}
-                variant="pill"
-                sticky
-                connected
-              />
-
-              <div className="bg-white dark:bg-slate-900 rounded-b-lg border border-slate-100 dark:border-slate-800 p-4 md:p-6 -mt-px">
-                <div className="animate-in fade-in zoom-in-95 duration-300">
+              <ConnectedPillCard tabs={appointmentTabs} activeTabId={activeAppointmentTab} onTabChange={setActiveAppointmentTab}>
                 {/* Calendario */}
                 {activeAppointmentTab === 'calendar' && (
                   <AppointmentCalendar
@@ -610,9 +592,8 @@ const ProfileDashboard = ({ user }: ProfileDashboardProps) => {
                     </div>
                   )
                 )}
-              </div>
+            </ConnectedPillCard>
             </div>
-          </div>
           )}
 
           {/* ═══ FAVORITES TAB ═══ */}
@@ -632,13 +613,10 @@ const ProfileDashboard = ({ user }: ProfileDashboardProps) => {
                 />
               </div>
 
-              <TabNav tabs={[
+              <ConnectedPillCard tabs={[
                 { id: 'overview', label: 'Resumen' },
                 { id: 'referrals', label: 'Referidos' },
-              ]} activeTabId={activeStatsTab} onTabChange={setActiveStatsTab} variant="pill" sticky connected />
-
-              <div className="bg-white dark:bg-slate-900 rounded-b-lg border border-slate-100 dark:border-slate-800 p-4 md:p-6 -mt-px">
-                <div className="animate-in fade-in zoom-in-95 duration-300 space-y-5">
+              ]} activeTabId={activeStatsTab} onTabChange={setActiveStatsTab}>
               {activeStatsTab === 'overview' && (<>
                 {user && appointments.length > 0 && (
                   <VisitStreaks userId={user.id} businessId={appointments.length > 0 ? appointments[0].business_id : ''} />
@@ -700,8 +678,7 @@ const ProfileDashboard = ({ user }: ProfileDashboardProps) => {
                   <ReferralSection userId={user.id} />
                 </div>
               )}
-                </div>
-              </div>
+            </ConnectedPillCard>
             </div>
           )}
 
@@ -715,17 +692,7 @@ const ProfileDashboard = ({ user }: ProfileDashboardProps) => {
                 />
               </div>
 
-              <TabNav
-                tabs={settingsTabs}
-                activeTabId={activeSettingsTab}
-                onTabChange={setActiveSettingsTab}
-                variant="pill"
-                sticky
-                connected
-              />
-
-              <div className="bg-white dark:bg-slate-900 rounded-b-lg border border-slate-100 dark:border-slate-800 p-4 md:p-6 -mt-px">
-                <div className="animate-in fade-in zoom-in-95 duration-300">
+              <ConnectedPillCard tabs={settingsTabs} activeTabId={activeSettingsTab} onTabChange={setActiveSettingsTab}>
                 {activeSettingsTab === 'profile' && (
                   <UserProfileSection
                     profileData={profileData}
@@ -810,8 +777,7 @@ const ProfileDashboard = ({ user }: ProfileDashboardProps) => {
                     </div>
                   </div>
                 )}
-                </div>
-              </div>
+            </ConnectedPillCard>
             </div>
           )}
 

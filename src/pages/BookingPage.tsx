@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef } from 'react';
+import { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import {
   getBusinessBySlug,
@@ -13,8 +13,10 @@ import { BookingForm } from '../components/business/public';
 import { ArrowLeft, X, Clock, Store, User, MessageCircle, Phone, Mail, Info, Heart } from 'lucide-react';
 import EmptyState from '../components/ui/EmptyState';
 import SEO from '../components/SEO';
-import TabNav from '../components/ui/TabNav';
 import type { Tab } from '../components/ui/TabNav';
+import StickyGlassHeader from '../components/ui/StickyGlassHeader';
+import ConnectedPillCard from '../components/ui/ConnectedPillCard';
+import { useStickyDetection } from '../hooks/useStickyDetection';
 import { useLockBodyScroll } from '../hooks/useLockBodyScroll';
 
 
@@ -54,8 +56,7 @@ function BookingPage() {
   useLockBodyScroll(!!fullscreenImage);
   const [categories, setCategories] = useState<BusinessCategory[]>([]);
 
-  const headerSentinelRef = useRef<HTMLDivElement>(null);
-  const [headerStuck, setHeaderStuck] = useState(false);
+  const { ref: headerSentinelRef, stuck: headerStuck } = useStickyDetection(65, !loading);
 
   const isOwner = !!user && !!businessData && user.id === businessData.owner_id;
 
@@ -84,18 +85,6 @@ function BookingPage() {
     };
     fetchData();
   }, [slug, serviceId]);
-
-  useEffect(() => {
-    if (loading) return;
-    const el = headerSentinelRef.current;
-    if (!el) return;
-    const observer = new IntersectionObserver(
-      ([entry]) => setHeaderStuck(!entry.isIntersecting),
-      { threshold: 0, rootMargin: '-65px 0px 0px 0px' }
-    );
-    observer.observe(el);
-    return () => observer.disconnect();
-  }, [loading]);
 
   const handleUserRegistered = async () => {
     const { data: { user: freshUser } } = await supabase.auth.getUser();
@@ -131,7 +120,7 @@ function BookingPage() {
     <div className="min-h-screen bg-gradient-to-b from-slate-50 to-white dark:from-slate-950 dark:to-slate-900 pb-20">
       <SEO title={`Reservar ${service.name} — ${businessData.name}`} />
 
-      {/* Back button (outside header) */}
+      {/* Back button */}
       <div className="max-w-7xl mx-auto px-4 pt-4 pb-2">
         <button
           onClick={() => navigate(-1)}
@@ -146,53 +135,47 @@ function BookingPage() {
       <div ref={headerSentinelRef} className="h-px" />
 
       {/* Sticky Header: business + service */}
-      <div data-underline-nav className={`sticky top-16 z-30 transition-colors duration-150 ${
-        headerStuck
-          ? 'bg-white/80 dark:bg-slate-900/80 backdrop-blur-md shadow-sm border-b border-slate-200/50 dark:border-slate-800/50 w-[100vw] ml-[calc(-50vw+50%)] pl-[calc(50vw-50%)] pr-[calc(50vw-50%)]'
-          : 'bg-transparent border-b border-slate-200/50 dark:border-slate-800/50'
-      }`}>
-        <div className="max-w-7xl mx-auto px-4 py-3">
-          <div className="flex items-center gap-3">
-            <div className="shrink-0">
-              {businessData.logo_url ? (
-                <img
-                  src={businessData.logo_url}
-                  width={80}
-                  height={80}
-                  className="w-20 h-20 rounded-lg object-cover border border-slate-200 dark:border-slate-700"
-                  alt={businessData.name}
-                />
-              ) : (
-                <div className="w-20 h-20 rounded-lg bg-primary-50 dark:bg-primary-500/10 flex items-center justify-center">
-                  <Store className="w-8 h-8 text-primary-500" />
-                </div>
-              )}
-            </div>
-            <div className="min-w-0">
-              <p className="text-base font-black text-slate-900 dark:text-white truncate leading-tight">{businessData.name}</p>
-              <p className="text-sm font-medium text-slate-500 dark:text-slate-400 truncate leading-tight">{service.name}</p>
-              <div className="flex flex-wrap items-center gap-1 mt-1">
-                {(() => {
-                  const cat = categories.find(c => c.id === businessData.category_id);
-                  return cat ? (
-                    <span className="inline-flex items-center px-1.5 py-0.5 rounded-full bg-primary-50 dark:bg-primary-500/10 text-primary-700 dark:text-primary-300 text-[10px] font-bold">{cat.name}</span>
-                  ) : null;
-                })()}
-                {businessData.plan && businessData.plan !== 'starter' && (
-                  <span className={`inline-flex items-center px-1.5 py-0.5 rounded-full text-[9px] font-bold uppercase tracking-wider ${
-                    businessData.plan === 'premium'
-                      ? 'bg-amber-100 dark:bg-amber-900/30 text-amber-700 dark:text-amber-300'
-                      : 'bg-blue-100 dark:bg-blue-900/30 text-blue-700 dark:text-blue-400'
-                  }`}>{businessData.plan}</span>
-                )}
-                <span className="inline-flex items-center gap-0.5 px-1.5 py-0.5 rounded-full bg-rose-50 dark:bg-rose-500/10 text-rose-600 dark:text-rose-400 text-[10px] font-bold">
-                  <Heart className="w-2.5 h-2.5" />{service.likes_count}
-                </span>
+      <StickyGlassHeader stuck={headerStuck} data-underline-nav>
+        <div className="flex items-center gap-3">
+          <div className="shrink-0">
+            {businessData.logo_url ? (
+              <img
+                src={businessData.logo_url}
+                width={80}
+                height={80}
+                className="w-20 h-20 rounded-lg object-cover border border-slate-200 dark:border-slate-700"
+                alt={businessData.name}
+              />
+            ) : (
+              <div className="w-20 h-20 rounded-lg bg-primary-50 dark:bg-primary-500/10 flex items-center justify-center">
+                <Store className="w-8 h-8 text-primary-500" />
               </div>
+            )}
+          </div>
+          <div className="min-w-0">
+            <p className="text-base font-black text-slate-900 dark:text-white truncate leading-tight">{businessData.name}</p>
+            <p className="text-sm font-medium text-slate-500 dark:text-slate-400 truncate leading-tight">{service.name}</p>
+            <div className="flex flex-wrap items-center gap-1 mt-1">
+              {(() => {
+                const cat = categories.find(c => c.id === businessData.category_id);
+                return cat ? (
+                  <span className="inline-flex items-center px-1.5 py-0.5 rounded-full bg-primary-50 dark:bg-primary-500/10 text-primary-700 dark:text-primary-300 text-[10px] font-bold">{cat.name}</span>
+                ) : null;
+              })()}
+              {businessData.plan && businessData.plan !== 'starter' && (
+                <span className={`inline-flex items-center px-1.5 py-0.5 rounded-full text-[9px] font-bold uppercase tracking-wider ${
+                  businessData.plan === 'premium'
+                    ? 'bg-amber-100 dark:bg-amber-900/30 text-amber-700 dark:text-amber-300'
+                    : 'bg-blue-100 dark:bg-blue-900/30 text-blue-700 dark:text-blue-400'
+                }`}>{businessData.plan}</span>
+              )}
+              <span className="inline-flex items-center gap-0.5 px-1.5 py-0.5 rounded-full bg-rose-50 dark:bg-rose-500/10 text-rose-600 dark:text-rose-400 text-[10px] font-bold">
+                <Heart className="w-2.5 h-2.5" />{service.likes_count}
+              </span>
             </div>
           </div>
         </div>
-      </div>
+      </StickyGlassHeader>
 
       <div className="max-w-7xl mx-auto px-4 mt-4 animate-in fade-in slide-in-from-bottom-4 duration-500">
 
@@ -207,10 +190,7 @@ function BookingPage() {
         )}
 
         {/* ─── Pill TabNav + connected card ─── */}
-        <div>
-          <TabNav tabs={bookTabs} activeTabId={activeBookTab} onTabChange={setActiveBookTab} variant="pill" sticky connected />
-
-          <div className="bg-white dark:bg-slate-900 rounded-b-lg border border-slate-100 dark:border-slate-800 p-4 md:p-6 -mt-px">
+        <ConnectedPillCard tabs={bookTabs} activeTabId={activeBookTab} onTabChange={setActiveBookTab}>
             <div className="animate-in fade-in zoom-in-95 duration-300">
 
               {/* ── Agenda ── */}
@@ -462,8 +442,7 @@ function BookingPage() {
                 />
               )}
             </div>
-          </div>
-        </div>
+        </ConnectedPillCard>
 
       {/* Lightbox */}
       {fullscreenImage && (

@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback, useRef, useMemo } from 'react';
+import { useState, useEffect, useCallback, useMemo } from 'react';
 import { Link, useSearchParams } from 'react-router-dom';
 import { useSelector } from 'react-redux';
 import { Business, getBusinessStats, getBusinessById, getBusinessServices, getUserBusinesses, updateAppointmentStatus, rescheduleAppointment, updateBusiness, deleteBusinessService, BusinessStats, getBusinessCategories, BusinessCategory } from '../lib/api';
@@ -15,7 +15,8 @@ import { useBusinessHours } from '../hooks/useBusinessHours';
 import { useBusinessClients } from '../hooks/useBusinessClients';
 import { canAccessAnalytics, PLAN_BADGE } from '../lib/roles';
 import type { RootState } from '../store';
-import { useSwipeable } from '../hooks/useSwipeable';
+import ConnectedPillCard from '../components/ui/ConnectedPillCard';
+import { useSwipeTabs } from '../hooks/useSwipeTabs';
 import PasswordVerifyModal from '../components/ui/PasswordVerifyModal';
 
 import TabNav, { Tab } from '../components/ui/TabNav';
@@ -127,7 +128,6 @@ export const BusinessDashboard: React.FC = () => {
   const [activeAppointmentTab, setActiveAppointmentTab] = useState('calendar');
   const [activeSettingsTab, setActiveSettingsTab] = useState('profile');
   const [activeActivasTab, setActiveActivasTab] = useState('pending');
-  const contentRef = useRef<HTMLDivElement>(null);
 
   const loadBusinessData = useCallback(async (businessId?: string) => {
     const id = businessId || userProfile?.business_id;
@@ -430,23 +430,15 @@ export const BusinessDashboard: React.FC = () => {
     return categories.find(c => c.id === businessData.category_id)?.name || null;
   }, [businessData?.category_id, categories]);
 
-  useSwipeable(contentRef, {
-    onSwipeLeft: () => {
-      const idx = tabs.findIndex(t => t.id === activeTab);
-      if (idx < tabs.length - 1) setActiveTab(tabs[idx + 1].id);
-    },
-    onSwipeRight: () => {
-      const idx = tabs.findIndex(t => t.id === activeTab);
-      if (idx > 0) setActiveTab(tabs[idx - 1].id);
-    },
-  });
-
   const tabs: Tab[] = [
     { id: 'appointments', label: 'Citas', count: activeAppointmentsCount },
     { id: 'services', label: 'Servicios', count: totalServices },
     { id: 'hours', label: 'Horarios' },
     ...(canStats ? [{ id: 'stats' as const, label: 'Estadísticas' }] : []),
   ];
+
+  const swipeRef = useSwipeTabs(tabs, activeTab, setActiveTab);
+  const contentRef = swipeRef;
 
   const appointmentTabs: Tab[] = [
     { id: 'calendar', label: 'Calendario' },
@@ -572,10 +564,7 @@ export const BusinessDashboard: React.FC = () => {
                 <SectionHeader title="Gestión de Citas" description="Administra reservas, consulta el historial y gestiona tus clientes" />
               </div>
 
-              <TabNav tabs={appointmentTabs} activeTabId={activeAppointmentTab} onTabChange={setActiveAppointmentTab} variant="pill" sticky connected />
-
-              <div className="bg-white dark:bg-slate-900 rounded-b-lg border border-slate-100 dark:border-slate-800 p-4 md:p-6 -mt-px">
-                <div className="animate-in fade-in zoom-in-95 duration-300">
+              <ConnectedPillCard tabs={appointmentTabs} activeTabId={activeAppointmentTab} onTabChange={setActiveAppointmentTab}>
                 {activeAppointmentTab === 'activas' && (
                   <div className="space-y-4">
                     <div className="flex items-center gap-2">
@@ -715,8 +704,7 @@ export const BusinessDashboard: React.FC = () => {
                     </div>
                   )
                 )}
-                </div>
-              </div>
+              </ConnectedPillCard>
             </div>
           )}
 
@@ -801,10 +789,7 @@ export const BusinessDashboard: React.FC = () => {
                 <SectionHeader title="Configuración" description="Perfil y comportamiento de la página" />
               </div>
 
-              <TabNav tabs={settingsTabs} activeTabId={activeSettingsTab} onTabChange={setActiveSettingsTab} variant="pill" sticky connected />
-
-              <div className="bg-white dark:bg-slate-900 rounded-b-lg border border-slate-100 dark:border-slate-800 p-4 md:p-6 -mt-px">
-                <div className="animate-in fade-in zoom-in-95 duration-300">
+              <ConnectedPillCard tabs={settingsTabs} activeTabId={activeSettingsTab} onTabChange={setActiveSettingsTab}>
                 {activeSettingsTab === 'profile' && (
                   <BusinessProfileSection
                     businessData={businessData}
@@ -918,9 +903,8 @@ export const BusinessDashboard: React.FC = () => {
                     businessId={businessData?.id || ''}
                   />
                 )}
-                </div>
-              </div>
-            </div>
+                </ConnectedPillCard>
+             </div>
           )}
 
         </div>

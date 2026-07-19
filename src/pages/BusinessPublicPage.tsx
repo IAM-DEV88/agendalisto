@@ -14,6 +14,8 @@ import EmptyState from '../components/ui/EmptyState';
 import ReferralBadge from '../components/ui/ReferralBadge';
 import TabNav from '../components/ui/TabNav';
 import type { Tab } from '../components/ui/TabNav';
+import ConnectedPillCard from '../components/ui/ConnectedPillCard';
+import { useStickyDetection } from '../hooks/useStickyDetection';
 import ShareButton from '../components/ui/ShareButton';
 import { Store, Clock, MapPin, Star, Heart, Phone, Mail, MessageCircle, Globe, Instagram, Facebook, Pen } from 'lucide-react';
 import QRCode from 'qrcode';
@@ -57,21 +59,7 @@ function BusinessPublicPage() {
   const [isLiking, setIsLiking] = useState(false);
   const [qrDataUrl, setQrDataUrl] = useState<string | null>(null);
   const contentRef = useRef<HTMLDivElement>(null);
-  const stickyRef = useRef<HTMLDivElement>(null);
-  const [headerStuck, setHeaderStuck] = useState(false);
-
-  useEffect(() => {
-    const el = stickyRef.current;
-    if (!el || loading) return;
-    const update = () => setHeaderStuck(el.getBoundingClientRect().top < 65);
-    update();
-    window.addEventListener('scroll', update, { passive: true });
-    window.addEventListener('resize', update);
-    return () => {
-      window.removeEventListener('scroll', update);
-      window.removeEventListener('resize', update);
-    };
-  }, [loading]);
+  const { ref: stickyRef, stuck: headerStuck } = useStickyDetection(65, !loading);
 
   useEffect(() => {
     supabase.auth.getUser().then(({ data: { user } }) => setUser(user));
@@ -356,10 +344,7 @@ function BusinessPublicPage() {
 
           {/* ─── INICIO ─── */}
           {activeTab === 'inicio' && (
-            <div>
-              <TabNav tabs={inicioTabs} activeTabId={activeInicioTab} onTabChange={setActiveInicioTab} variant="pill" sticky connected />
-
-              <div className="bg-white dark:bg-slate-900 rounded-b-lg border border-slate-100 dark:border-slate-800 p-4 md:p-6 -mt-px">
+            <ConnectedPillCard tabs={inicioTabs} activeTabId={activeInicioTab} onTabChange={setActiveInicioTab}>
                 <div className="animate-in fade-in zoom-in-95 duration-300">
 
                   {/* ── About ── */}
@@ -487,7 +472,6 @@ function BusinessPublicPage() {
                     <ReviewsSection businessId={businessData.id} plain />
                   )}
                 </div>
-              </div>
 
               {/* ── Sidebar banners ── */}
               <div className="mt-6 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
@@ -507,16 +491,13 @@ function BusinessPublicPage() {
                     </div>
                   </>
                 )}
-              </div>
-            </div>
+               </div>
+            </ConnectedPillCard>
           )}
 
           {/* ─── SERVICIOS ─── */}
           {activeTab === 'servicios' && (
-            <div>
-              <TabNav tabs={serviciosTabs} activeTabId={activeServiciosTab} onTabChange={setActiveServiciosTab} variant="pill" sticky connected />
-
-              <div className="bg-white dark:bg-slate-900 rounded-b-lg border border-slate-100 dark:border-slate-800 p-4 md:p-6 -mt-px">
+            <ConnectedPillCard tabs={serviciosTabs} activeTabId={activeServiciosTab} onTabChange={setActiveServiciosTab}>
                 <div className="animate-in fade-in zoom-in-95 duration-300">
 
                   {/* ── Vitrina ── */}
@@ -583,16 +564,12 @@ function BusinessPublicPage() {
                     </div>
                   )}
                 </div>
-              </div>
-            </div>
+            </ConnectedPillCard>
           )}
 
           {/* ─── CONTACTO ─── */}
           {activeTab === 'contacto' && (
-            <div>
-              <TabNav tabs={contactoTabs} activeTabId={activeContactoTab} onTabChange={setActiveContactoTab} variant="pill" sticky connected />
-
-              <div className="bg-white dark:bg-slate-900 rounded-b-lg border border-slate-100 dark:border-slate-800 p-4 md:p-6 -mt-px">
+            <ConnectedPillCard tabs={contactoTabs} activeTabId={activeContactoTab} onTabChange={setActiveContactoTab}>
                 <div className="animate-in fade-in zoom-in-95 duration-300">
 
                   {/* ── Contacto directo ── */}
@@ -692,8 +669,7 @@ function BusinessPublicPage() {
                     </div>
                   )}
                 </div>
-              </div>
-            </div>
+            </ConnectedPillCard>
           )}
 
         </div>

@@ -12,7 +12,7 @@ import toast from 'react-hot-toast';
 import SEO from '../components/SEO';
 import PhoneInput from '../components/ui/PhoneInput';
 import LocationPicker from '../components/ui/LocationPicker';
-import TabNav from '../components/ui/TabNav';
+import ConnectedPillCard from '../components/ui/ConnectedPillCard';
 import type { Tab } from '../components/ui/TabNav';
 import {
   Store,
@@ -258,7 +258,7 @@ const BusinessRegister = ({ user }: BusinessRegisterProps) => {
           </button>
         </div>
 
-        {/* ═══ STICKY HEADER — full-width glass when stuck ═══ */}
+        {/* ═══ STICKY HEADER ═══ */}
         <div
           ref={headerStickyRef}
           className={`sticky top-16 z-30 transition-colors duration-150 ${
@@ -311,10 +311,7 @@ const BusinessRegister = ({ user }: BusinessRegisterProps) => {
         </div>
 
         {/* ═══ PILL TABS + CONNECTED CARD ═══ */}
-        <div className="animate-in fade-in slide-in-from-bottom-4 duration-500 delay-100">
-          <TabNav tabs={registerTabs} activeTabId={activeTab} onTabChange={setActiveTab} variant="pill" sticky connected />
-
-          <div className="bg-white dark:bg-slate-900 rounded-b-lg border border-slate-100 dark:border-slate-800 shadow-xl shadow-slate-200/50 dark:shadow-none -mt-px">
+        <ConnectedPillCard tabs={registerTabs} activeTabId={activeTab} onTabChange={setActiveTab} className="animate-in fade-in slide-in-from-bottom-4 duration-500 delay-100" cardClassName="shadow-xl shadow-slate-200/50 dark:shadow-none">
             <form onSubmit={handleSubmit}>
 
                 {/* ─── TAB: GENERAL ─── */}
@@ -736,8 +733,7 @@ const BusinessRegister = ({ user }: BusinessRegisterProps) => {
                 )}
 
               </form>
-            </div>
-          </div>
+        </ConnectedPillCard>
 
       </div>
     </div>

@@ -7,6 +7,7 @@ import type { DashboardMetrics, ReferralStat, ReferredUser } from '../lib/api';
 import { notifySuccess, notifyError } from '../lib/toast';
 import type { Review } from '../types/appointment';
 import TabNav from '../components/ui/TabNav';
+import ConnectedPillCard from '../components/ui/ConnectedPillCard';
 import SectionHeader from '../components/ui/SectionHeader';
 import EmptyState from '../components/ui/EmptyState';
 import UserManagementSection from '../components/admin/UserManagementSection';
@@ -382,12 +383,11 @@ const AdminDashboard = ({ user }: AdminDashboardProps) => {
               <div className="mb-4 md:mb-6">
                 <SectionHeader title="Contenido" description="Blog y campañas de marketing" />
               </div>
-              <TabNav tabs={[
+              <ConnectedPillCard tabs={[
                 { id: 'blog', label: 'Blog' },
                 { id: 'marketing', label: 'Marketing' },
                 { id: 'referrals', label: 'Referidos' },
-              ]} activeTabId={activeContentTab} onTabChange={setActiveContentTab} variant="pill" connected />
-              <div className="bg-white dark:bg-slate-900 rounded-b-lg border border-slate-100 dark:border-slate-800 p-4 md:p-6 -mt-px">
+              ]} activeTabId={activeContentTab} onTabChange={setActiveContentTab} sticky>
               {activeContentTab === 'blog' && <BlogManagementSection />}
               {activeContentTab === 'marketing' && <MarketingSection />}
               {activeContentTab === 'referrals' && (
@@ -503,7 +503,7 @@ const AdminDashboard = ({ user }: AdminDashboardProps) => {
                   )}
                 </div>
               )}
-              </div>
+            </ConnectedPillCard>
             </div>
           )}
         </div>

@@ -7,6 +7,7 @@ import type { ReferralStat } from '../lib/api';
 import { notifySuccess, notifyError } from '../lib/toast';
 import type { Review } from '../types/appointment';
 import TabNav from '../components/ui/TabNav';
+import ConnectedPillCard from '../components/ui/ConnectedPillCard';
 import SectionHeader from '../components/ui/SectionHeader';
 import EmptyState from '../components/ui/EmptyState';
 import StatCard from '../components/ui/StatCard';
@@ -125,13 +126,12 @@ const ModeratorDashboard = ({ user }: ModeratorDashboardProps) => {
           {activeTab === 'overview' && (
             <div className="space-y-5">
               <div className="mb-4 md:mb-6">
-                <h3 className="text-lg font-black text-slate-900 dark:text-white">Resumen</h3>
+                <SectionHeader title="Resumen" />
               </div>
-              <TabNav tabs={[
+              <ConnectedPillCard tabs={[
                 { id: 'overview', label: 'General' },
                 { id: 'referrals', label: 'Referidos' },
-              ]} activeTabId={activeOverviewTab} onTabChange={setActiveOverviewTab} variant="pill" connected />
-              <div className="bg-white dark:bg-slate-900 rounded-b-lg border border-slate-100 dark:border-slate-800 p-4 md:p-6 -mt-px">
+              ]} activeTabId={activeOverviewTab} onTabChange={setActiveOverviewTab} sticky>
               {activeOverviewTab === 'overview' && (
                 <div className="bg-white dark:bg-slate-900 rounded-lg border border-slate-200 dark:border-slate-800 p-6">
                   <h3 className="text-lg font-black text-slate-900 dark:text-white mb-2">Moderación General</h3>
@@ -185,7 +185,7 @@ const ModeratorDashboard = ({ user }: ModeratorDashboardProps) => {
                   )}
                 </div>
               )}
-              </div>
+            </ConnectedPillCard>
             </div>
           )}
 
