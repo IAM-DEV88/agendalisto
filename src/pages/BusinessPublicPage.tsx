@@ -323,11 +323,6 @@ function BusinessPublicPage() {
                 {categoryName || (businessData.description ? businessData.description.substring(0, 60) + (businessData.description.length > 60 ? '...' : '') : 'Perfil público')}
               </p>
               <div className="flex flex-wrap items-center gap-1.5 mt-1">
-                {services.length > 0 && (
-                  <span className="inline-flex items-center gap-0.5 px-2 py-0.5 rounded-full bg-primary-50 dark:bg-primary-500/10 text-primary-700 dark:text-primary-300 text-xs font-bold">
-                    <Store className="w-2.5 h-2.5" />{services.length}
-                  </span>
-                )}
                 {averageRating > 0 && (
                   <span className="inline-flex items-center gap-0.5 px-2 py-0.5 rounded-full bg-amber-50 dark:bg-amber-500/10 text-amber-700 dark:text-amber-300 text-xs font-bold">
                     <Star className="w-2.5 h-2.5 fill-current" />{averageRating.toFixed(1)}
