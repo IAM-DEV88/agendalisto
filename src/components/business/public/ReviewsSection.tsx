@@ -76,14 +76,15 @@ const ReviewsSection: React.FC<ReviewsSectionProps> = ({ businessId, plain }) =>
   ) : (
     <div className="space-y-4">
       {reviews.map((review) => (
-        <div
+        <article
           key={review.id}
           className="group p-5 bg-white dark:bg-slate-900 rounded-lg border border-slate-200 dark:border-slate-800 hover:border-primary-200 dark:hover:border-primary-800 hover:shadow-lg transition-all"
+          aria-label={`Reseña de ${review.rating} estrellas${review.comment ? `: ${review.comment.substring(0, 60)}` : ''}`}
         >
           {/* Reviewer info + rating */}
           <div className="flex items-start justify-between gap-3 mb-3">
             <div className="flex items-center gap-3 min-w-0">
-              <div className="w-10 h-10 rounded-lg bg-primary-100 dark:bg-primary-900/30 flex items-center justify-center text-primary-600 dark:text-primary-400 flex-shrink-0 text-sm font-black">
+              <div className="w-10 h-10 rounded-lg bg-primary-100 dark:bg-primary-900/30 flex items-center justify-center text-primary-600 dark:text-primary-400 flex-shrink-0 text-sm font-black" aria-hidden="true">
                 U
               </div>
               <div className="min-w-0">
@@ -95,9 +96,9 @@ const ReviewsSection: React.FC<ReviewsSectionProps> = ({ businessId, plain }) =>
                 </p>
               </div>
             </div>
-            <div className="flex gap-0.5 bg-amber-50 dark:bg-amber-500/10 px-2 py-1 rounded-lg border border-amber-200 dark:border-amber-800 flex-shrink-0">
+            <div className="flex gap-0.5 bg-amber-50 dark:bg-amber-500/10 px-2 py-1 rounded-lg border border-amber-200 dark:border-amber-800 flex-shrink-0" role="img" aria-label={`${review.rating} de 5 estrellas`}>
               {[1, 2, 3, 4, 5].map(i => (
-                <Star key={i} className={`w-3.5 h-3.5 ${i <= review.rating ? 'text-amber-400 fill-current' : 'text-slate-200 dark:text-slate-700'}`} />
+                <Star key={i} className={`w-3.5 h-3.5 ${i <= review.rating ? 'text-amber-400 fill-current' : 'text-slate-200 dark:text-slate-700'}`} aria-hidden="true" />
               ))}
             </div>
           </div>
@@ -112,13 +113,13 @@ const ReviewsSection: React.FC<ReviewsSectionProps> = ({ businessId, plain }) =>
           {/* Service name */}
           {review.service_name && (
             <div className="flex items-center gap-1.5 pt-3 mt-1 border-t border-slate-100 dark:border-slate-800">
-              <Tag className="w-3.5 h-3.5 text-primary-500" />
+              <Tag className="w-3.5 h-3.5 text-primary-500" aria-hidden="true" />
               <span className="text-xs font-bold text-primary-600 dark:text-primary-400">
                 {review.service_name}
               </span>
             </div>
           )}
-        </div>
+        </article>
       ))}
     </div>
   );

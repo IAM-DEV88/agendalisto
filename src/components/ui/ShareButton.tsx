@@ -129,8 +129,9 @@ export default function ShareButton({
         {socialLinks.map(s => (
           <a key={s.id} href={s.href} target="_blank" rel="noopener noreferrer"
             onClick={() => setOpen(false)}
+            aria-label={`Compartir en ${s.label}`}
             className={`w-full flex items-center gap-3 px-3 py-2.5 rounded-lg transition-all text-sm font-bold ${s.cls}`}>
-            <span className="flex items-center justify-center w-8 h-8 rounded-lg bg-white dark:bg-slate-800 shadow-sm border border-slate-200 dark:border-slate-700">
+            <span className="flex items-center justify-center w-8 h-8 rounded-lg bg-white dark:bg-slate-800 shadow-sm border border-slate-200 dark:border-slate-700" aria-hidden="true">
               {s.icon}
             </span>
             {s.label}

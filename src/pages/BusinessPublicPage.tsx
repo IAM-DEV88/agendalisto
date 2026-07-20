@@ -206,9 +206,6 @@ function BusinessPublicPage() {
     ].filter(Boolean),
   } : undefined;
 
-  const totalLikes = services.reduce((sum, s) => sum + (s.likes_count || 0), 0);
-  void totalLikes;
-
   const tabs: Tab[] = [
     { id: 'inicio', label: 'Inicio' },
     { id: 'servicios', label: 'Servicios', count: services.length },
@@ -333,7 +330,8 @@ function BusinessPublicPage() {
         <div className="max-w-7xl mx-auto px-4 pb-2">
           <div className="flex flex-wrap items-center gap-2">
             <button type="button" onClick={handleToggleLike} disabled={isLiking || !user}
-              className={`inline-flex items-center gap-1.5 px-3 py-2 rounded-lg text-xs font-bold transition-all min-h-[36px] ${
+              aria-label={isLiked ? 'Quitar me gusta' : 'Me gusta'}
+              className={`inline-flex items-center gap-1.5 px-3 py-2 rounded-lg text-xs font-bold transition-all min-h-[36px] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary-500 focus-visible:ring-offset-2 dark:focus-visible:ring-offset-slate-900 ${
                 isLiked
                   ? 'bg-rose-50 dark:bg-rose-500/10 text-rose-600 dark:text-rose-400'
                   : 'bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-400 hover:bg-rose-50 dark:hover:bg-rose-500/10 hover:text-rose-600 dark:hover:text-rose-400'
@@ -344,19 +342,22 @@ function BusinessPublicPage() {
             <ShareButton url={window.location.href} title={businessData.name} description={businessData.description || ''} variant="icon" iconSize={16} className="!bg-slate-100 dark:!bg-slate-800 !text-slate-600 dark:!text-slate-400 !rounded-lg !p-2 !min-h-[36px] !min-w-[36px]" />
             {businessData.whatsapp && (
               <a href={`https://wa.me/${businessData.whatsapp.replace(/[^0-9]/g, '')}?text=${encodeURIComponent('Hola, vi tu perfil en AgendaYa y quiero agendar una cita')}`} target="_blank" rel="noopener noreferrer"
-                className="inline-flex items-center gap-1.5 px-3 py-2 rounded-lg bg-emerald-50 dark:bg-emerald-500/10 text-emerald-700 dark:text-emerald-300 text-xs font-bold hover:bg-emerald-100 dark:hover:bg-emerald-500/20 transition-all min-h-[36px]">
+                className="inline-flex items-center gap-1.5 px-3 py-2 rounded-lg bg-emerald-50 dark:bg-emerald-500/10 text-emerald-700 dark:text-emerald-300 text-xs font-bold hover:bg-emerald-100 dark:hover:bg-emerald-500/20 transition-all min-h-[36px] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-emerald-500 focus-visible:ring-offset-2 dark:focus-visible:ring-offset-slate-900"
+                aria-label="Contactar por WhatsApp">
                 <MessageCircle className="w-3.5 h-3.5" /> WhatsApp
               </a>
             )}
             {businessData.phone && (
               <a href={`tel:${businessData.phone}`}
-                className="inline-flex items-center gap-1.5 px-3 py-2 rounded-lg bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-400 text-xs font-bold hover:bg-primary-50 dark:hover:bg-primary-500/10 hover:text-primary-600 dark:hover:text-primary-400 transition-all min-h-[36px]">
+                className="inline-flex items-center gap-1.5 px-3 py-2 rounded-lg bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-400 text-xs font-bold hover:bg-primary-50 dark:hover:bg-primary-500/10 hover:text-primary-600 dark:hover:text-primary-400 transition-all min-h-[36px] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary-500 focus-visible:ring-offset-2 dark:focus-visible:ring-offset-slate-900"
+                aria-label="Llamar al negocio">
                 <Phone className="w-3.5 h-3.5" /> Llamar
               </a>
             )}
             {businessData.website && (
               <a href={businessData.website.startsWith('http') ? businessData.website : `https://${businessData.website}`} target="_blank" rel="noopener noreferrer"
-                className="inline-flex items-center justify-center p-2 rounded-lg bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-400 hover:bg-slate-200 dark:hover:bg-slate-700 transition-all min-h-[36px] min-w-[36px]">
+                className="inline-flex items-center justify-center p-2 rounded-lg bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-400 hover:bg-slate-200 dark:hover:bg-slate-700 transition-all min-h-[36px] min-w-[36px] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary-500 focus-visible:ring-offset-2 dark:focus-visible:ring-offset-slate-900"
+                aria-label="Sitio web">
                 <Globe className="w-4 h-4" />
               </a>
             )}
@@ -423,19 +424,21 @@ function BusinessPublicPage() {
                         );
                       })()}
 
-                      {(businessData.facebook || businessData.instagram || businessData.website) && (
+                      {(businessData.facebook || businessData.instagram) && (
                         <div>
                           <p className="text-xs font-bold text-slate-400 uppercase tracking-wider mb-3">Redes sociales</p>
                           <div className="flex flex-wrap gap-2">
                             {businessData.facebook && (
                               <a href={`https://facebook.com/${businessData.facebook}`} target="_blank" rel="noopener noreferrer"
-                                className="inline-flex items-center gap-1.5 px-3 py-1.5 bg-blue-50 dark:bg-blue-900/20 text-blue-700 dark:text-blue-300 text-xs font-bold rounded-lg hover:bg-blue-100 dark:hover:bg-blue-900/40 transition-all">
+                                className="inline-flex items-center gap-1.5 px-3 py-1.5 bg-blue-50 dark:bg-blue-900/20 text-blue-700 dark:text-blue-300 text-xs font-bold rounded-lg hover:bg-blue-100 dark:hover:bg-blue-900/40 transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 focus-visible:ring-offset-2 dark:focus-visible:ring-offset-slate-900"
+                                aria-label={`Facebook de ${businessData.name}`}>
                                 <Facebook className="w-3.5 h-3.5" /> Facebook
                               </a>
                             )}
                             {businessData.instagram && (
                               <a href={`https://instagram.com/${businessData.instagram}`} target="_blank" rel="noopener noreferrer"
-                                className="inline-flex items-center gap-1.5 px-3 py-1.5 bg-pink-50 dark:bg-pink-900/20 text-pink-700 dark:text-pink-300 text-xs font-bold rounded-lg hover:bg-pink-100 dark:hover:bg-pink-900/40 transition-all">
+                                className="inline-flex items-center gap-1.5 px-3 py-1.5 bg-pink-50 dark:bg-pink-900/20 text-pink-700 dark:text-pink-300 text-xs font-bold rounded-lg hover:bg-pink-100 dark:hover:bg-pink-900/40 transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-pink-500 focus-visible:ring-offset-2 dark:focus-visible:ring-offset-slate-900"
+                                aria-label={`Instagram de ${businessData.name}`}>
                                 <Instagram className="w-3.5 h-3.5" /> Instagram
                               </a>
                             )}
@@ -611,19 +614,22 @@ function BusinessPublicPage() {
                           <div className="flex flex-wrap gap-2">
                             {businessData.facebook && (
                               <a href={`https://facebook.com/${businessData.facebook}`} target="_blank" rel="noopener noreferrer"
-                                className="inline-flex items-center gap-1.5 px-3 py-1.5 bg-blue-50 dark:bg-blue-900/20 text-blue-700 dark:text-blue-300 text-xs font-bold rounded-lg hover:bg-blue-100 dark:hover:bg-blue-900/40 transition-all">
+                                className="inline-flex items-center gap-1.5 px-3 py-1.5 bg-blue-50 dark:bg-blue-900/20 text-blue-700 dark:text-blue-300 text-xs font-bold rounded-lg hover:bg-blue-100 dark:hover:bg-blue-900/40 transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 focus-visible:ring-offset-2 dark:focus-visible:ring-offset-slate-900"
+                                aria-label={`Facebook de ${businessData.name}`}>
                                 <Facebook className="w-3.5 h-3.5" /> Facebook
                               </a>
                             )}
                             {businessData.instagram && (
                               <a href={`https://instagram.com/${businessData.instagram}`} target="_blank" rel="noopener noreferrer"
-                                className="inline-flex items-center gap-1.5 px-3 py-1.5 bg-pink-50 dark:bg-pink-900/20 text-pink-700 dark:text-pink-300 text-xs font-bold rounded-lg hover:bg-pink-100 dark:hover:bg-pink-900/40 transition-all">
+                                className="inline-flex items-center gap-1.5 px-3 py-1.5 bg-pink-50 dark:bg-pink-900/20 text-pink-700 dark:text-pink-300 text-xs font-bold rounded-lg hover:bg-pink-100 dark:hover:bg-pink-900/40 transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-pink-500 focus-visible:ring-offset-2 dark:focus-visible:ring-offset-slate-900"
+                                aria-label={`Instagram de ${businessData.name}`}>
                                 <Instagram className="w-3.5 h-3.5" /> Instagram
                               </a>
                             )}
                             {businessData.website && (
                               <a href={businessData.website.startsWith('http') ? businessData.website : `https://${businessData.website}`} target="_blank" rel="noopener noreferrer"
-                                className="inline-flex items-center gap-1.5 px-3 py-1.5 bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300 text-xs font-bold rounded-lg hover:bg-slate-200 dark:hover:bg-slate-700 transition-all">
+                                className="inline-flex items-center gap-1.5 px-3 py-1.5 bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300 text-xs font-bold rounded-lg hover:bg-slate-200 dark:hover:bg-slate-700 transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary-500 focus-visible:ring-offset-2 dark:focus-visible:ring-offset-slate-900"
+                                aria-label="Sitio web">
                                 <Globe className="w-3.5 h-3.5" /> Sitio web
                               </a>
                             )}

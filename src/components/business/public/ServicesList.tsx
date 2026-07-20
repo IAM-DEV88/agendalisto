@@ -62,7 +62,11 @@ const ServiceCard: React.FC<{
   return (
     <div
       onClick={() => navigate(`/${window.location.pathname.split('/')[1]}/book/${service.id}`)}
-      className="relative flex flex-col rounded-lg border transition-all overflow-hidden cursor-pointer group border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 hover:border-primary-300 dark:hover:border-primary-700 hover:shadow-2xl"
+      onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); navigate(`/${window.location.pathname.split('/')[1]}/book/${service.id}`); } }}
+      role="link"
+      tabIndex={0}
+      aria-label={`${service.name} — ${service.duration} min — ${service.price ? '$' + service.price.toLocaleString() : 'Consultar precio'}`}
+      className="relative flex flex-col rounded-lg border transition-all overflow-hidden cursor-pointer group border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 hover:border-primary-300 dark:hover:border-primary-700 hover:shadow-2xl focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary-500 focus-visible:ring-offset-2 dark:focus-visible:ring-offset-slate-900"
     >
       {isOwner && (
         <div className="absolute top-2 left-2 z-10 w-2 h-2 bg-primary-500 rounded-full ring-2 ring-white dark:ring-slate-900 shadow" />
@@ -79,11 +83,13 @@ const ServiceCard: React.FC<{
           {images.length > 1 && (
             <>
               <button type="button" onClick={(e) => handlePrevImage(e, service.id, images.length)}
-                className="absolute left-2 top-1/2 -translate-y-1/2 p-1.5 bg-black/30 hover:bg-black/50 text-white rounded-full backdrop-blur-sm transition-all opacity-0 group-hover:opacity-100">
+                aria-label="Imagen anterior"
+                className="absolute left-2 top-1/2 -translate-y-1/2 p-1.5 bg-black/30 hover:bg-black/50 text-white rounded-full backdrop-blur-sm transition-all opacity-0 group-hover:opacity-100 focus-visible:opacity-100 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white">
                 <ChevronLeft className="w-4 h-4" />
               </button>
               <button type="button" onClick={(e) => handleNextImage(e, service.id, images.length)}
-                className="absolute right-2 top-1/2 -translate-y-1/2 p-1.5 bg-black/30 hover:bg-black/50 text-white rounded-full backdrop-blur-sm transition-all opacity-0 group-hover:opacity-100">
+                aria-label="Imagen siguiente"
+                className="absolute right-2 top-1/2 -translate-y-1/2 p-1.5 bg-black/30 hover:bg-black/50 text-white rounded-full backdrop-blur-sm transition-all opacity-0 group-hover:opacity-100 focus-visible:opacity-100 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white">
                 <ChevronRight className="w-4 h-4" />
               </button>
               <div className="absolute bottom-2 left-1/2 -translate-x-1/2 flex gap-1">
@@ -139,6 +145,7 @@ const ServiceCard: React.FC<{
                   onClick={(e) => { e.stopPropagation(); }}
                   className="flex items-center gap-1 px-2 py-1 rounded-lg text-[10px] font-black transition-all bg-rose-50 dark:bg-rose-900/20 text-rose-500 dark:text-rose-400 hover:bg-rose-100 dark:hover:bg-rose-900/40"
                   title="Regalar este servicio"
+                  aria-label={`Regalar ${service.name}`}
                 >
                   <Gift className="w-2.5 h-2.5" />
                 </a>
@@ -156,7 +163,8 @@ const ServiceCard: React.FC<{
 
         <div className="mt-2.5 pt-2.5 border-t border-slate-100 dark:border-slate-800">
           <a href={`/${window.location.pathname.split('/')[1]}/book/${service.id}`}
-            className="flex items-center justify-center gap-1 px-3 py-1.5 bg-primary-50 dark:bg-primary-900/20 text-primary-700 dark:text-primary-300 text-[10px] font-bold rounded-lg hover:bg-primary-100 dark:hover:bg-primary-900/40 transition-all active:scale-[0.98]">
+            aria-label={`${showcaseOnly || !canBook ? 'Ver información' : 'Reservar'} ${service.name}`}
+            className="flex items-center justify-center gap-1 px-3 py-1.5 bg-primary-50 dark:bg-primary-900/20 text-primary-700 dark:text-primary-300 text-[10px] font-bold rounded-lg hover:bg-primary-100 dark:hover:bg-primary-900/40 transition-all active:scale-[0.98] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary-500 focus-visible:ring-offset-2 dark:focus-visible:ring-offset-slate-900">
             {showcaseOnly || !canBook ? 'Ver información' : 'Reservar ahora'} <ChevronRight className="w-3 h-3" />
           </a>
         </div>

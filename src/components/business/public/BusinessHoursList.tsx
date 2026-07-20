@@ -21,7 +21,7 @@ const BusinessHoursList: React.FC<BusinessHoursListProps> = ({ businessHours }) 
   const todayIndex = today === 0 ? 6 : today - 1;
 
   return (
-    <div className="space-y-1">
+    <div className="space-y-1" role="list" aria-label="Horarios de atención">
       {days.map((day, index) => {
         const hours = businessHours.find(h => h.day_of_week === index);
         const isOpen = hours && !hours.is_closed;
@@ -30,21 +30,23 @@ const BusinessHoursList: React.FC<BusinessHoursListProps> = ({ businessHours }) 
         return (
           <div
             key={index}
+            role="listitem"
+            aria-label={`${day}${isToday ? ' (Hoy)' : ''}${isOpen ? `: ${formatTime(hours.start_time)} a ${formatTime(hours.end_time)}` : ': Cerrado'}`}
             className={`flex items-center justify-between py-2.5 px-3 rounded-lg transition-colors ${
               isToday ? 'bg-primary-50 dark:bg-primary-500/10 border border-primary-200 dark:border-primary-800' : ''
             }`}
           >
             <div className="flex items-center gap-2">
-              {isToday && <Clock className="w-3 h-3 text-primary-500" />}
+              {isToday && <Clock className="w-3 h-3 text-primary-500" aria-hidden="true" />}
               <span className={`text-sm font-bold ${isToday ? 'text-primary-700 dark:text-primary-300' : isOpen ? 'text-slate-700 dark:text-slate-300' : 'text-slate-400 dark:text-slate-600'}`}>
                 {day}
               </span>
               {isToday && (
-                <span className="text-[9px] font-black text-primary-500 uppercase tracking-widest">Hoy</span>
+                <span className="text-[9px] font-black text-primary-500 uppercase tracking-widest" aria-label="Hoy">Hoy</span>
               )}
             </div>
             {isOpen ? (
-              <span className="text-sm font-black text-primary-600 dark:text-primary-400">
+              <span className="text-sm font-black text-primary-600 dark:text-primary-400" aria-label={`De ${formatTime(hours.start_time)} a ${formatTime(hours.end_time)}`}>
                 {formatTime(hours.start_time)} - {formatTime(hours.end_time)}
               </span>
             ) : (
