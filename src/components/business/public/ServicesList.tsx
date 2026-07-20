@@ -134,13 +134,13 @@ const ServiceCard: React.FC<{
             </a>
           )}
 
-          <div onClick={(e) => e.stopPropagation()} className="text-slate-400 dark:text-slate-500 hover:text-primary-500 transition-colors">
+          <div onClick={(e) => e.stopPropagation()} className="text-slate-400 dark:text-slate-500 hover:text-primary-500 transition-colors flex-shrink-0">
             <ShareButton
               url={shareUrl}
               title={`Reservar: ${service.name}`}
               variant="text"
               iconSize={11}
-              className="p-0.5 bg-transparent hover:bg-transparent text-slate-400 dark:text-slate-500 hover:text-primary-500 !rounded"
+              className="p-0.5 bg-transparent hover:bg-transparent text-slate-400 dark:text-slate-500 hover:text-primary-500 !rounded !gap-1"
             />
           </div>
 

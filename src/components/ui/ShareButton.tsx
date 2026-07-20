@@ -47,8 +47,11 @@ export default function ShareButton({
     const r = btnRef.current.getBoundingClientRect();
     const dw = 256;
     const dh = 320;
-    const top = (window.innerHeight - r.bottom >= dh) ? r.bottom + 8 : Math.max(r.bottom - dh - 8, 8);
-    const left = (window.innerWidth - r.left >= dw) ? r.left : Math.max(8, window.innerWidth - dw - 8);
+    const top = (window.innerHeight - r.bottom >= dh) ? r.bottom + 8 : Math.max(8, r.bottom - dh - 8);
+    const rightGap = window.innerWidth - r.right;
+    const left = (rightGap >= dw)
+      ? r.left
+      : Math.max(8, window.innerWidth - dw - 8);
     setPos({ top, left });
   };
 
@@ -157,7 +160,7 @@ export default function ShareButton({
           copied ? <Check style={{width: iconSize, height: iconSize}} /> : <Share2 style={{width: iconSize, height: iconSize}} />
         ) : variant === 'text' ? (
           <>{copied ? <Check style={{width: iconSize-4, height: iconSize-4}} /> : <Share2 style={{width: iconSize-4, height: iconSize-4}} />}
-            <span className="font-bold text-[10px]">{copied ? 'Copiado' : 'Compartir'}</span></>
+            <span className="font-bold text-[10px] hidden sm:inline">{copied ? 'Copiado' : 'Compartir'}</span></>
         ) : (
           <>{copied ? <Check className="h-5 w-5" /> : <Share2 className="h-5 w-5" />}
             <span className="font-bold text-sm">{copied ? '¡Copiado!' : 'Compartir'}</span></>
