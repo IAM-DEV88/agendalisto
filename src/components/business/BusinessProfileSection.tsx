@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { Camera, Save, Loader2, Globe, Phone, MapPin, Mail, Tag, Info, Crosshair, MessageCircle, Instagram, Facebook, Store } from 'lucide-react';
-import { Business, updateBusiness, getBusinessCategories, BusinessCategory } from '../../lib/api';
+import { Business, getBusinessCategories, BusinessCategory } from '../../lib/api';
 import { supabase } from '../../lib/supabase';
 import { generateBusinessDescription } from '../../lib/ai';
 import DescriptionGenerator from '../DescriptionGenerator';
@@ -143,28 +143,18 @@ const BusinessProfileSection: React.FC<BusinessProfileSectionProps> = ({
   // Interceptar el formulario para manejar la subida del logo
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    // Step 1: upload the logo file
     if (selectedFile) {
       const logoUrl = await uploadLogoFile();
       if (logoUrl) {
-        // update parent state
         onChange({ target: { name: 'logo_url', value: logoUrl } } as any);
-        // update local preview
         setPreviewUrl(logoUrl);
-        // persist logo_url in database immediately to avoid stale state
-        try {
-          await updateBusiness(businessData.id, { logo_url: logoUrl });
-        } catch (err: any) {
-          console.error('[BusinessProfileSection] Error saving logo_url after upload:', err);
-        }
       }
     }
-    // Step 2: save any other changes via parent handler
-    await onSave(e);
-    // Step 3: save lat/lng AFTER onSave so it doesn't get overwritten
     if (mapLat !== businessData.lat || mapLng !== businessData.lng) {
-      await updateBusiness(businessData.id, { lat: mapLat, lng: mapLng });
+      onChange({ target: { name: 'lat', value: mapLat } } as any);
+      onChange({ target: { name: 'lng', value: mapLng } } as any);
     }
+    await onSave(e);
   };
 
   return (

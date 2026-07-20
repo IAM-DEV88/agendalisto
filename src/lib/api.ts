@@ -1130,8 +1130,8 @@ export async function getBusinessConfig(businessId: string): Promise<{ success: 
       // Other errors
       return { success: false, error: getErrorMessage(error) };
     }
-    // Single row returned
-    return { success: true, config: data as BusinessConfig };
+    // Single row returned — merge with defaults in case DB row is missing newer columns
+    return { success: true, config: { ...DEFAULT_BUSINESS_CONFIG, ...data } as BusinessConfig };
   } catch (err: unknown) {
     return { success: false, error: getErrorMessage(err) };
   }
@@ -1314,13 +1314,24 @@ export async function deleteStaff(staffId: string): Promise<{ success: boolean; 
 }
 
 // ─── Password verification ───
+// Uses signInWithPassword + restores the original session so the user
+// stays logged in with their current tokens regardless of the result.
 
 export async function verifyPassword(password: string): Promise<{ success: boolean; error?: string }> {
   try {
     const { data: { user } } = await supabase.auth.getUser();
     if (!user?.email) return { success: false, error: 'No se pudo obtener el usuario' };
+
+    const { data: { session } } = await supabase.auth.getSession();
+
     const { error } = await supabase.auth.signInWithPassword({ email: user.email, password });
-    if (error) throw error;
+
+    // Restore original session no matter what (keeps user logged in)
+    if (session) {
+      await supabase.auth.setSession(session);
+    }
+
+    if (error) return { success: false, error: 'Contraseña incorrecta' };
     return { success: true };
   } catch (err: unknown) {
     return { success: false, error: getErrorMessage(err) || 'Contraseña incorrecta' };

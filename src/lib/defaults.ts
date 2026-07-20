@@ -13,4 +13,9 @@ export const DEFAULT_BUSINESS_CONFIG: BusinessConfig = {
   slot_interval_minutes: 30,
   buffer_minutes: 0,
   max_advance_booking_days: 90,
+  password_protect_staff: true,
+  password_protect_hours: true,
+  password_protect_services: true,
+  password_protect_appointments: true,
+  password_protect_profile: true,
 };

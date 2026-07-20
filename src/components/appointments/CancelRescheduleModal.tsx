@@ -1,7 +1,7 @@
-import { useState, useEffect, useMemo, useCallback } from 'react';
-import { X, AlertCircle, Calendar as CalendarIcon, ChevronLeft, ChevronRight, Clock, User } from 'lucide-react';
+import { useState, useEffect, useMemo, useCallback, useRef } from 'react';
+import { X, AlertCircle, Calendar as CalendarIcon, ChevronLeft, ChevronRight, Clock, User, Lock, Loader2 } from 'lucide-react';
 import { Appointment } from '../../types/appointment';
-import { cancelAppointment, rescheduleAppointment, getBusinessHours, getBusinessAppointments, getBusinessConfig, getBusinessStaff, BusinessHours, Appointment as ApiAppointment } from '../../lib/api';
+import { cancelAppointment, rescheduleAppointment, getBusinessHours, getBusinessAppointments, getBusinessConfig, getBusinessStaff, BusinessHours, Appointment as ApiAppointment, verifyPassword } from '../../lib/api';
 import type { Staff } from '../../lib/api';
 import { toast } from 'react-hot-toast';
 import {
@@ -16,15 +16,21 @@ interface Props {
   onClose: () => void;
   appointment: Appointment | null;
   isOwner?: boolean;
+  passwordProtectAppointments?: boolean;
 }
 
-export default function CancelRescheduleModal({ isOpen, onClose, appointment, isOwner }: Props) {
+export default function CancelRescheduleModal({ isOpen, onClose, appointment, isOwner, passwordProtectAppointments }: Props) {
   useLockBodyScroll(isOpen);
   const [mode, setMode] = useState<'cancel' | 'reschedule' | null>(null);
   const [reason, setReason] = useState('');
   const [newDate, setNewDate] = useState('');
   const [newTime, setNewTime] = useState('');
   const [loading, setLoading] = useState(false);
+  const [showPasswordModal, setShowPasswordModal] = useState(false);
+  const [password, setPassword] = useState('');
+  const [passwordError, setPasswordError] = useState('');
+  const [verifying, setVerifying] = useState(false);
+  const passwordVerifiedRef = useRef<'cancel' | 'reschedule' | null>(null);
   const [businessHours, setBusinessHours] = useState<BusinessHours[]>([]);
   const [appointments, setAppointments] = useState<ApiAppointment[]>([]);
   const [loadingSlots, setLoadingSlots] = useState(true);
@@ -203,6 +209,59 @@ export default function CancelRescheduleModal({ isOpen, onClose, appointment, is
 
   if (!isOpen || !appointment) return null;
 
+  const needPassword = !!(isOwner && passwordProtectAppointments);
+
+  const handlePasswordSubmit = async () => {
+    if (!password.trim()) { setPasswordError('Ingresa tu contraseña'); return; }
+    setVerifying(true);
+    setPasswordError('');
+    const res = await verifyPassword(password);
+    if (res.success) {
+      setPassword('');
+      setShowPasswordModal(false);
+      passwordVerifiedRef.current = mode;
+      if (mode === 'cancel') await handleCancel();
+      else if (mode === 'reschedule') await handleReschedule();
+    } else {
+      setPasswordError(res.error || 'Contraseña incorrecta');
+    }
+    setVerifying(false);
+  };
+
+  const passwordModal = showPasswordModal && (
+    <div className="fixed inset-0 z-[60] flex items-center justify-center p-4 bg-black/50 backdrop-blur-sm animate-in fade-in duration-200">
+      <div className="bg-white dark:bg-slate-900 rounded-lg shadow-2xl max-w-sm w-full p-6 animate-in zoom-in-95 duration-200">
+        <div className="flex items-center gap-3 mb-4">
+          <div className="p-2 bg-primary-50 dark:bg-primary-500/10 rounded-full">
+            <Lock className="w-5 h-5 text-primary-600 dark:text-primary-400" />
+          </div>
+          <h3 className="text-lg font-black text-slate-900 dark:text-white">Confirmar contraseña</h3>
+        </div>
+        <p className="text-sm text-slate-600 dark:text-slate-400 mb-4">
+          Ingresa tu contraseña para continuar con esta acción.
+        </p>
+        <input
+          type="password" value={password}
+          onChange={e => { setPassword(e.target.value); setPasswordError(''); }}
+          onKeyDown={e => { if (e.key === 'Enter') handlePasswordSubmit(); }}
+          placeholder="Tu contraseña"
+          className="w-full px-4 py-2.5 rounded-lg border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 text-sm font-bold text-slate-900 dark:text-white focus:ring-2 focus:ring-primary-500/20 focus:border-primary-500 outline-none transition-all"
+          autoFocus
+        />
+        {passwordError && <p className="text-xs font-bold text-red-500 mt-2">{passwordError}</p>}
+        <div className="flex gap-3 justify-end mt-4">
+          <button type="button" onClick={() => { setShowPasswordModal(false); passwordVerifiedRef.current = null; setPassword(''); setPasswordError(''); }} disabled={verifying} className="px-4 py-2 text-sm font-bold text-slate-700 dark:text-slate-300 bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 rounded-lg transition-all">
+            Cancelar
+          </button>
+          <button type="button" onClick={handlePasswordSubmit} disabled={verifying || !password.trim()} className="inline-flex items-center gap-2 px-4 py-2 text-sm font-bold text-white bg-primary-600 hover:bg-primary-700 rounded-lg transition-all disabled:opacity-50">
+            {verifying ? <Loader2 className="w-4 h-4 animate-spin" /> : <Lock className="w-4 h-4" />}
+            {verifying ? 'Verificando...' : 'Confirmar'}
+          </button>
+        </div>
+      </div>
+    </div>
+  );
+
   const isWithinMinTime = !isOwner && minCancellationHours > 0 &&
     (new Date(appointment.start_time).getTime() - Date.now()) < minCancellationHours * 3600000;
 
@@ -211,6 +270,12 @@ export default function CancelRescheduleModal({ isOpen, onClose, appointment, is
 
   const handleCancel = async () => {
     if (isWithinMinTime) { toast.error(`Contacta al negocio — solo pueden cancelar con ${minCancellationHours}h de anticipación`); return; }
+    if (needPassword && passwordVerifiedRef.current !== 'cancel') {
+      passwordVerifiedRef.current = null;
+      setShowPasswordModal(true);
+      return;
+    }
+    passwordVerifiedRef.current = null;
     setLoading(true);
     toast.loading('Cancelando cita...', { id: 'cancel' });
     const res = await cancelAppointment(appointment.id, reason);
@@ -229,6 +294,12 @@ export default function CancelRescheduleModal({ isOpen, onClose, appointment, is
     const startTime = new Date(`${newDate}T${newTime}`);
     const endTime = new Date(startTime.getTime() + serviceDuration * 60000);
     if (startTime <= new Date()) { toast.error('La nueva fecha y hora no puede estar en el pasado'); return; }
+    if (needPassword && passwordVerifiedRef.current !== 'reschedule') {
+      passwordVerifiedRef.current = null;
+      setShowPasswordModal(true);
+      return;
+    }
+    passwordVerifiedRef.current = null;
     setLoading(true);
     toast.loading('Reprogramando cita...', { id: 'reschedule' });
     const res = await rescheduleAppointment(appointment.id, startTime.toISOString(), endTime.toISOString(), rescheduleStaff || undefined);
@@ -244,6 +315,7 @@ export default function CancelRescheduleModal({ isOpen, onClose, appointment, is
   const reset = () => { setMode(null); setReason(''); setNewDate(''); setNewTime(''); };
 
   return (
+    <>
     <div className="fixed inset-0 z-50 flex items-start sm:items-center justify-center px-2 pt-16 sm:pt-0 sm:p-4 bg-black/50 backdrop-blur-sm animate-in fade-in duration-200" onClick={onClose}>
       <div
         className="relative w-full sm:max-w-md max-h-[calc(100dvh-5rem)] sm:max-h-[85vh] bg-white dark:bg-slate-900 rounded-lg shadow-2xl overflow-hidden flex flex-col animate-in sm:zoom-in-95 duration-300"
@@ -544,5 +616,7 @@ export default function CancelRescheduleModal({ isOpen, onClose, appointment, is
         </div>
       </div>
     </div>
+    {passwordModal}
+    </>
   );
 }

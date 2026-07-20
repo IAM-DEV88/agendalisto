@@ -11,11 +11,10 @@ import type { Staff } from '../../lib/api';
 interface StaffSectionProps {
   businessId: string;
   plan: 'starter' | 'pro' | 'premium';
-  passwordProtectionEnabled?: boolean;
   passwordProtectStaff?: boolean;
 }
 
-export default function StaffSection({ businessId, plan, passwordProtectionEnabled = true, passwordProtectStaff = true }: StaffSectionProps) {
+export default function StaffSection({ businessId, plan, passwordProtectStaff = true }: StaffSectionProps) {
   const maxStaff = getMaxStaff(plan);
   const [staff, setStaff] = useState<Staff[]>([]);
   const [loading, setLoading] = useState(true);
@@ -86,7 +85,7 @@ export default function StaffSection({ businessId, plan, passwordProtectionEnabl
       setShowPasswordModal(false);
       const action = pendingAction;
       setPendingAction(null);
-      if (action?.type === 'edit') { /* editingStaff persists, StaffFormModal will show */ }
+      if (action?.type === 'edit' && editingStaff) await executeEdit(editingStaff);
       else if (action?.type === 'create' && action.data) await executeCreate(action.data);
       else if (action?.type === 'delete' && deletingStaff) await executeDelete(deletingStaff.id);
     } else {
@@ -132,7 +131,7 @@ export default function StaffSection({ businessId, plan, passwordProtectionEnabl
     setSubmitting(false);
   };
 
-  const needPassword = passwordProtectionEnabled && passwordProtectStaff;
+  const needPassword = !!passwordProtectStaff;
 
   const handleDeleteConfirm = (member: Staff) => {
     setDeletingStaff(member);
@@ -203,7 +202,7 @@ export default function StaffSection({ businessId, plan, passwordProtectionEnabl
                 </div>
               </div>
               <div className="flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
-                <button type="button" onClick={() => { setEditingStaff(member); if (needPassword) requestPassword({ type: 'edit' }); }} className="p-1.5 text-slate-400 hover:text-primary-600 dark:hover:text-primary-400 rounded-lg hover:bg-slate-100 dark:hover:bg-slate-800 transition-all" title="Editar">
+                <button type="button" onClick={() => setEditingStaff(member)} className="p-1.5 text-slate-400 hover:text-primary-600 dark:hover:text-primary-400 rounded-lg hover:bg-slate-100 dark:hover:bg-slate-800 transition-all" title="Editar">
                   <Edit2 className="w-4 h-4" />
                 </button>
                 <button type="button" onClick={() => handleDeleteConfirm(member)} className="p-1.5 text-slate-400 hover:text-red-500 rounded-lg hover:bg-slate-100 dark:hover:bg-slate-800 transition-all" title="Eliminar">
@@ -229,7 +228,7 @@ export default function StaffSection({ businessId, plan, passwordProtectionEnabl
         />
       )}
 
-      {editingStaff && !showPasswordModal && (
+      {editingStaff && (
         <StaffFormModal
           title="Editar encargado"
           initial={{ full_name: editingStaff.full_name, email: editingStaff.email || '', phone: editingStaff.phone || '', is_active: editingStaff.is_active }}
@@ -237,13 +236,17 @@ export default function StaffSection({ businessId, plan, passwordProtectionEnabl
           onSave={async (data) => {
             const updated = { ...editingStaff, ...data };
             setEditingStaff(updated);
-            await executeEdit(updated);
+            if (needPassword) {
+              requestPassword({ type: 'edit' });
+            } else {
+              await executeEdit(updated);
+            }
           }}
           onClose={() => { setEditingStaff(null); setPendingAction(null); }}
         />
       )}
 
-      {deletingStaff && !showPasswordModal && (
+      {deletingStaff && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50 backdrop-blur-sm animate-in fade-in duration-200">
           <div className="bg-white dark:bg-slate-900 rounded-lg shadow-2xl max-w-md w-full p-6 animate-in zoom-in-95 duration-200">
             <div className="flex items-center gap-3 mb-4">
@@ -259,7 +262,7 @@ export default function StaffSection({ businessId, plan, passwordProtectionEnabl
               <button type="button" onClick={() => { setDeletingStaff(null); setPendingAction(null); }} disabled={submitting} className="px-5 py-2.5 text-sm font-bold text-slate-700 dark:text-slate-300 bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 rounded-lg transition-all">
                 Cancelar
               </button>
-              <button type="button" onClick={() => { if (needPassword) requestPassword({ type: 'delete' }); else { const id = deletingStaff?.id; if (id) executeDelete(id); } }} disabled={submitting} className="inline-flex items-center gap-2 px-5 py-2.5 text-sm font-bold text-white bg-red-600 hover:bg-red-700 rounded-lg transition-all disabled:opacity-50">
+              <button type="button" onClick={() => handleDeleteConfirm(deletingStaff)} disabled={submitting} className="inline-flex items-center gap-2 px-5 py-2.5 text-sm font-bold text-white bg-red-600 hover:bg-red-700 rounded-lg transition-all disabled:opacity-50">
                 {submitting ? <Loader2 className="w-4 h-4 animate-spin" /> : <Trash2 className="w-4 h-4" />}
                 {submitting ? 'Eliminando...' : 'Sí, eliminar'}
               </button>

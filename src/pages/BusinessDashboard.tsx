@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback, useMemo } from 'react';
+import { useState, useEffect, useCallback, useMemo, useRef } from 'react';
 import { Link, useSearchParams } from 'react-router-dom';
 import { useSelector } from 'react-redux';
 import { Business, getBusinessStats, getBusinessById, getBusinessServices, getUserBusinesses, updateAppointmentStatus, rescheduleAppointment, updateBusiness, deleteBusinessService, BusinessStats, getBusinessCategories, BusinessCategory } from '../lib/api';
@@ -57,6 +57,7 @@ export const BusinessDashboard: React.FC = () => {
   const plan = (userProfile?.plan as 'starter' | 'pro' | 'premium') || 'starter';
   const { itemsPerPage } = useUIConfig();
   const [businessData, setBusinessData] = useState<Business | null>(null);
+  const businessDataRef = useRef(businessData);
   const [businessMessage, setBusinessMessage] = useState<{ text: string; type: 'success' | 'error' } | null>(null);
   const [savingBusiness, setSavingBusiness] = useState(false);
 
@@ -78,34 +79,18 @@ export const BusinessDashboard: React.FC = () => {
 
   // Password verification for sensitive actions
   const [showPasswordModal, setShowPasswordModal] = useState(false);
-  const [passwordAction, setPasswordAction] = useState<(() => Promise<void>) | null>(null);
   const [passwordDescription, setPasswordDescription] = useState('');
+  const pendingActionRef = useRef<(() => Promise<void>) | null>(null);
 
-  const requestPassword = useCallback(async (action: () => Promise<any>, featureFlag: boolean | undefined, description: string): Promise<any> => {
-    const needsPassword = businessConfig?.password_protection_enabled && featureFlag;
-    if (!needsPassword) {
-      await action();
-      return;
-    }
-    return new Promise<void | boolean>((resolve, reject) => {
-      setPasswordDescription(description);
-      setPasswordAction(async () => {
-        try {
-          await action();
-          resolve();
-        } catch (e) {
-          reject(e);
-        }
-      });
-      setShowPasswordModal(true);
-    });
-  }, [businessConfig?.password_protection_enabled]);
+  const businessConfigRef = useRef(businessConfig);
+  useEffect(() => { businessConfigRef.current = businessConfig; }, [businessConfig]);
 
   const handlePasswordVerified = useCallback(async () => {
-    if (passwordAction) {
-      await passwordAction();
-    }
-  }, [passwordAction]);
+    const action = pendingActionRef.current;
+    if (!action) return;
+    pendingActionRef.current = null;
+    await action();
+  }, []);
 
   const [pagination, setPagination] = useState({
     pending: { page: 1, perPage: itemsPerPage },
@@ -235,92 +220,141 @@ export const BusinessDashboard: React.FC = () => {
   }, [businessData?.id, refreshAppointments]);
 
   const handleUpdateAppointmentStatus = async (id: string, newStatus: AppointmentStatus) => {
-    requestPassword(async () => {
-      try {
-        const response = await updateAppointmentStatus(id, newStatus);
-        if (response.success) {
-          const statusText =
-            newStatus === 'confirmed' ? 'confirmada' :
-              newStatus === 'completed' ? 'completada' :
-                newStatus === 'cancelled' ? 'cancelada' : 'actualizada';
-          notifySuccess(`Cita ${statusText} correctamente`);
-          await refreshAppointments();
-        } else {
-          notifyError(response.error || 'Error al actualizar el estado de la cita');
+    const bc = businessConfigRef.current;
+    await execIfNoGuard(
+      'Modificar estado de la cita',
+      async () => {
+        try {
+          const response = await updateAppointmentStatus(id, newStatus);
+          if (response.success) {
+            const statusText =
+              newStatus === 'confirmed' ? 'confirmada' :
+                newStatus === 'completed' ? 'completada' :
+                  newStatus === 'cancelled' ? 'cancelada' : 'actualizada';
+            notifySuccess(`Cita ${statusText} correctamente`);
+            await refreshAppointments();
+          } else {
+            notifyError(response.error || 'Error al actualizar el estado de la cita');
+          }
+        } catch (err: unknown) {
+          notifyError(err instanceof Error ? err.message : 'Error al actualizar el estado de la cita');
         }
-      } catch (err: unknown) {
-        notifyError(err instanceof Error ? err.message : 'Error al actualizar el estado de la cita');
-      }
-    }, businessConfig?.password_protect_appointments, 'Modificar estado de la cita');
+      },
+      !!(bc?.password_protect_appointments),
+    );
   };
 
   const handleReschedule = async (id: string, startTime: string, endTime: string) => {
-    let result: { success: boolean; error?: string; new_status?: string } = { success: false };
-    await requestPassword(async () => {
-      result = await rescheduleAppointment(id, startTime, endTime);
-      if (result.success) {
-        notifySuccess('Cita reprogramada correctamente');
-        await refreshAppointments();
-      } else {
-        notifyError(result.error || 'Error al reprogramar la cita');
-      }
-    }, businessConfig?.password_protect_appointments, 'Reprogramar cita');
+    const bc = businessConfigRef.current;
+    const needsGuard = !!(bc?.password_protect_appointments);
+    if (needsGuard) {
+      pendingActionRef.current = async () => {
+        const result = await rescheduleAppointment(id, startTime, endTime);
+        if (result.success) {
+          notifySuccess('Cita reprogramada correctamente');
+          await refreshAppointments();
+        } else {
+          notifyError(result.error || 'Error al reprogramar la cita');
+        }
+      };
+      setPasswordDescription('Reprogramar cita');
+      setShowPasswordModal(true);
+      return undefined as any;
+    }
+    const result = await rescheduleAppointment(id, startTime, endTime);
+    if (result.success) {
+      notifySuccess('Cita reprogramada correctamente');
+      await refreshAppointments();
+    } else {
+      notifyError(result.error || 'Error al reprogramar la cita');
+    }
     return result;
   };
+
+  useEffect(() => { businessDataRef.current = businessData; }, [businessData]);
 
   const handleBusinessChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
     const { name, value, type } = e.target;
     const val = type === 'checkbox' ? (e.target as HTMLInputElement).checked : value;
-    setBusinessData(prev => prev ? ({ ...prev, [name]: val } as Business) : prev);
+    const next = { ...businessDataRef.current!, [name]: val } as Business;
+    businessDataRef.current = next;
+    setBusinessData(next);
   };
 
-  const handleHoursSubmitWithPassword = useCallback(async (e: React.FormEvent) => {
-    return requestPassword(async () => {
-      return handleHoursSubmit(e);
-    }, businessConfig?.password_protect_hours, 'Modificar horarios del negocio');
-  }, [handleHoursSubmit, requestPassword, businessConfig?.password_protect_hours]);
+  const execIfNoGuard = useCallback(async (label: string, fn: () => Promise<void>, needsGuard: boolean): Promise<void> => {
+    if (needsGuard) {
+      pendingActionRef.current = fn;
+      setPasswordDescription(label);
+      setShowPasswordModal(true);
+      return;
+    }
+    await fn();
+  }, []);
 
-  const handleConfigSaveWithPassword = useCallback(async (e: React.FormEvent) => {
-    return requestPassword(async () => {
-      return handleConfigSave(e);
-    }, businessConfig?.password_protection_enabled, 'Guardar configuración del negocio');
-  }, [handleConfigSave, requestPassword, businessConfig?.password_protection_enabled]);
+  const executeBusinessUpdate = useCallback(async (data: Business) => {
+    setSavingBusiness(true);
+    setBusinessMessage(null);
+    try {
+      const response = await updateBusiness(data.id, {
+        name: data.name,
+        description: data.description,
+        address: data.address,
+        phone: data.phone,
+        whatsapp: data.whatsapp,
+        instagram: data.instagram,
+        facebook: data.facebook,
+        email: data.email,
+        category_id: data.category_id,
+        website: data.website,
+        lat: data.lat,
+        lng: data.lng,
+        logo_url: data.logo_url,
+        showcase_only: data.showcase_only ?? false,
+      });
+      setBusinessData(response);
+      dispatch(updateBusinessInStore(response));
+      setBusinessMessage({ text: 'Datos del negocio actualizados', type: 'success' });
+      notifySuccess('Datos del negocio actualizados');
+    } catch (err: unknown) {
+      const msg = err instanceof Error ? err.message : 'Error al actualizar';
+      setBusinessMessage({ text: msg, type: 'error' });
+      notifyError(msg);
+    } finally {
+      setSavingBusiness(false);
+    }
+  }, []);
 
   const handleBusinessSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!businessData) return;
-    requestPassword(async () => {
-      setSavingBusiness(true);
-      setBusinessMessage(null);
-      try {
-        const response = await updateBusiness(businessData.id, {
-          name: businessData.name,
-          description: businessData.description,
-          address: businessData.address,
-          phone: businessData.phone,
-          whatsapp: businessData.whatsapp,
-          instagram: businessData.instagram,
-          facebook: businessData.facebook,
-          email: businessData.email,
-          category_id: businessData.category_id,
-          website: businessData.website,
-          lat: businessData.lat,
-          lng: businessData.lng,
-          showcase_only: businessData.showcase_only ?? false,
-        });
-        setBusinessData(response);
-        dispatch(updateBusinessInStore(response));
-        setBusinessMessage({ text: 'Datos del negocio actualizados', type: 'success' });
-        notifySuccess('Datos del negocio actualizados');
-      } catch (err: unknown) {
-        const msg = err instanceof Error ? err.message : 'Error al actualizar';
-        setBusinessMessage({ text: msg, type: 'error' });
-        notifyError(msg);
-      } finally {
-        setSavingBusiness(false);
-      }
-    }, businessConfig?.password_protect_profile, 'Modificar perfil del negocio');
+    const data = businessDataRef.current;
+    if (!data) return;
+    const bc = businessConfigRef.current;
+    await execIfNoGuard(
+      'Modificar perfil del negocio',
+      () => executeBusinessUpdate(data),
+      !!(bc?.password_protect_profile),
+    );
   };
+
+  const handleHoursSubmitWithPassword = useCallback(async (e: React.FormEvent) => {
+    e.preventDefault();
+    const bc = businessConfigRef.current;
+    await execIfNoGuard(
+      'Modificar horarios del negocio',
+      async () => { await handleHoursSubmit(e); },
+      !!(bc?.password_protect_hours),
+    );
+  }, [handleHoursSubmit]);
+
+  const handleConfigSaveWithPassword = useCallback(async (e: React.FormEvent) => {
+    e.preventDefault();
+    const bc = businessConfigRef.current;
+    await execIfNoGuard(
+      'Guardar configuración del negocio',
+      async () => { await handleConfigSave(e); },
+      !!(bc?.password_protect_profile),
+    );
+  }, [handleConfigSave]);
 
   const hasAnalytics = canAccessAnalytics(plan);
 
@@ -714,13 +748,19 @@ export const BusinessDashboard: React.FC = () => {
               <ServicesSection
                 businessId={businessData.id}
                 getServices={getBusinessServices}
-                deleteService={async (id: string) => {
-                  let result: { success: boolean; error?: string } = { success: false };
-                  await requestPassword(async () => {
-                    result = await deleteBusinessService(id);
-                  }, businessConfig?.password_protect_services, 'Eliminar servicio');
-                  return result;
-                }}
+                  deleteService={async (id: string) => {
+                    const bc = businessConfigRef.current;
+                    const needsGuard = !!(bc?.password_protect_services);
+                    if (!needsGuard) return deleteBusinessService(id);
+                    return new Promise<{ success: boolean; error?: string }>((resolve) => {
+                      pendingActionRef.current = async () => {
+                        const result = await deleteBusinessService(id);
+                        resolve(result);
+                      };
+                      setPasswordDescription('Eliminar servicio');
+                      setShowPasswordModal(true);
+                    });
+                  }}
                 itemsPerPage={itemsPerPage}
                 plan={plan}
               />
@@ -740,12 +780,7 @@ export const BusinessDashboard: React.FC = () => {
                 days={days}
                 businessId={businessData?.id}
                 plan={plan}
-                passwordProtectionEnabled={businessConfig?.password_protection_enabled}
                 passwordProtectStaff={businessConfig?.password_protect_staff}
-                passwordProtectHours={businessConfig?.password_protect_hours}
-                passwordProtectServices={businessConfig?.password_protect_services}
-                passwordProtectAppointments={businessConfig?.password_protect_appointments}
-                passwordProtectProfile={businessConfig?.password_protect_profile}
               />
             </div>
           )}
@@ -916,11 +951,12 @@ export const BusinessDashboard: React.FC = () => {
         onClose={() => setAppointmentToReschedule(null)}
         appointment={appointmentToReschedule}
         isOwner
+        passwordProtectAppointments={businessConfigRef.current?.password_protect_appointments}
       />
 
       <PasswordVerifyModal
         isOpen={showPasswordModal}
-        onClose={() => { setShowPasswordModal(false); setPasswordAction(null); setPasswordDescription(''); }}
+        onClose={() => { setShowPasswordModal(false); setPasswordDescription(''); pendingActionRef.current = null; }}
         onVerified={handlePasswordVerified}
         title="Confirmar contraseña"
         description={passwordDescription || 'Ingresa tu contraseña para continuar con esta acción.'}

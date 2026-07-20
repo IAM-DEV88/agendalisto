@@ -79,14 +79,19 @@ function App() {
       }
     }).catch(() => {});
 
+    let lastEvent = '';
+
     const { data: { subscription } } = supabase.auth.onAuthStateChange(
       async (event, session) => {
         const isSignificantEvent = ['SIGNED_IN', 'SIGNED_OUT', 'TOKEN_REFRESHED', 'USER_UPDATED'].includes(event);
         if (!isSignificantEvent) return;
-        
+
+        // Avoid re-processing the same event on session refresh / tab focus
+        if (event === lastEvent) return;
+        lastEvent = event;
+
         if (event === 'SIGNED_IN' && session?.user) {
           dispatch(setUser(session.user));
-          notifySuccess('Sesión iniciada');
           loadProfile(session.user.id);
         } else if (event === 'SIGNED_OUT') {
           dispatch(setUser(null));

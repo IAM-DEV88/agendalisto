@@ -211,54 +211,43 @@ export const BusinessConfigSection: React.FC<BusinessConfigSectionProps> = ({
                 <h3 className="text-lg font-black text-slate-900 dark:text-white tracking-tight">Protección por Contraseña</h3>
               </div>
 
-              <ConfigToggle
-                id="password_protection_enabled"
-                label="Activar protección por contraseña"
-                description="Requerir contraseña del perfil para realizar acciones sensibles en el negocio."
-                checked={!!config.password_protection_enabled}
-                onChange={(val) => onConfigChange('password_protection_enabled', val)}
-              />
+              <p className="text-sm text-slate-500 dark:text-slate-400">Activa qué acciones requieren tu contraseña para ejecutarse.</p>
 
-              {config.password_protection_enabled && (
-                <div className="space-y-1 pl-4 border-l-2 border-violet-200 dark:border-violet-800/50">
-                  <p className="text-[11px] font-bold text-violet-500 uppercase tracking-wider mb-2">Acciones protegidas</p>
-                  <ConfigToggle
-                    id="password_protect_staff"
-                    label="Gestión de encargados"
-                    description="Añadir, editar o eliminar personal del negocio."
-                    checked={!!config.password_protect_staff}
-                    onChange={(val) => onConfigChange('password_protect_staff', val)}
-                  />
-                  <ConfigToggle
-                    id="password_protect_hours"
-                    label="Modificar horarios"
-                    description="Cambiar jornadas, descansos y horarios de atención."
-                    checked={!!config.password_protect_hours}
-                    onChange={(val) => onConfigChange('password_protect_hours', val)}
-                  />
-                  <ConfigToggle
-                    id="password_protect_services"
-                    label="Gestión de servicios"
-                    description="Crear, editar o eliminar servicios del negocio."
-                    checked={!!config.password_protect_services}
-                    onChange={(val) => onConfigChange('password_protect_services', val)}
-                  />
-                  <ConfigToggle
-                    id="password_protect_appointments"
-                    label="Gestión de citas"
-                    description="Cancelar, reprogramar o modificar citas."
-                    checked={!!config.password_protect_appointments}
-                    onChange={(val) => onConfigChange('password_protect_appointments', val)}
-                  />
-                  <ConfigToggle
-                    id="password_protect_profile"
-                    label="Modificar perfil"
-                    description="Cambiar información del negocio, logo y datos de contacto."
-                    checked={!!config.password_protect_profile}
-                    onChange={(val) => onConfigChange('password_protect_profile', val)}
-                  />
-                </div>
-              )}
+              <ConfigToggle
+                id="password_protect_staff"
+                label="Gestión de encargados"
+                description="Añadir, editar o eliminar personal del negocio."
+                checked={!!config.password_protect_staff}
+                onChange={(val) => onConfigChange('password_protect_staff', val)}
+              />
+              <ConfigToggle
+                id="password_protect_hours"
+                label="Modificar horarios"
+                description="Cambiar jornadas, descansos y horarios de atención."
+                checked={!!config.password_protect_hours}
+                onChange={(val) => onConfigChange('password_protect_hours', val)}
+              />
+              <ConfigToggle
+                id="password_protect_services"
+                label="Gestión de servicios"
+                description="Crear, editar o eliminar servicios del negocio."
+                checked={!!config.password_protect_services}
+                onChange={(val) => onConfigChange('password_protect_services', val)}
+              />
+              <ConfigToggle
+                id="password_protect_appointments"
+                label="Gestión de citas"
+                description="Cancelar, reprogramar o modificar citas."
+                checked={!!config.password_protect_appointments}
+                onChange={(val) => onConfigChange('password_protect_appointments', val)}
+              />
+              <ConfigToggle
+                id="password_protect_profile"
+                label="Modificar perfil"
+                description="Cambiar información del negocio, logo y datos de contacto."
+                checked={!!config.password_protect_profile}
+                onChange={(val) => onConfigChange('password_protect_profile', val)}
+              />
             </div>
           </div>
 

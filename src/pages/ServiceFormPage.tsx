@@ -1,7 +1,7 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { useSelector } from 'react-redux';
-import { getService, getBusinessServices, createBusinessService, updateBusinessService } from '../lib/api';
+import { getService, getBusinessServices, createBusinessService, updateBusinessService, getBusinessConfig, verifyPassword } from '../lib/api';
 import { supabase } from '../lib/supabase';
 import { getMaxServices, getMaxImages, PLAN_LABELS } from '../lib/roles';
 import { notifySuccess, notifyError } from '../lib/toast';
@@ -11,7 +11,7 @@ import { useLockBodyScroll } from '../hooks/useLockBodyScroll';
 import {
   ArrowLeft, ChevronLeft, ChevronRight, X, Store,
   Clock, User, Loader2, Image as ImageIcon, Plus,
-  Sparkles, Save, Tag, FileText, DollarSign, Info, Settings, LayoutGrid, Eye, CheckCircle
+  Sparkles, Save, Tag, FileText, DollarSign, Info, Settings, LayoutGrid, Eye, CheckCircle, Lock
 } from 'lucide-react';
 import { generateServiceDescription } from '../lib/ai';
 import DescriptionGenerator from '../components/DescriptionGenerator';
@@ -85,6 +85,25 @@ export default function ServiceFormPage() {
   const [activeImageIndex, setActiveImageIndex] = useState(0);
   const [fullscreenImage, setFullscreenImage] = useState<string | null>(null);
   useLockBodyScroll(!!fullscreenImage);
+
+  // Password protection
+  const [showPasswordModal, setShowPasswordModal] = useState(false);
+  const [passwordValue, setPasswordValue] = useState('');
+  const [passwordError, setPasswordError] = useState('');
+  const [verifying, setVerifying] = useState(false);
+  const passwordVerifiedRef = useRef(false);
+  const [configLoaded, setConfigLoaded] = useState<{ services?: boolean }>({});
+
+  useEffect(() => {
+    if (!businessId) return;
+    getBusinessConfig(businessId).then(res => {
+      if (res.success && res.config) {
+        setConfigLoaded({
+          services: !!res.config.password_protect_services,
+        });
+      }
+    });
+  }, [businessId]);
 
   useEffect(() => {
     const init = async () => {
@@ -208,8 +227,34 @@ export default function ServiceFormPage() {
     }));
   };
 
-  const handleSubmit = async (e: React.FormEvent) => {
+  const handlePasswordSubmit = async () => {
+    if (!passwordValue.trim()) { setPasswordError('Ingresa tu contraseña'); return; }
+    setVerifying(true);
+    setPasswordError('');
+    const res = await verifyPassword(passwordValue);
+    if (res.success) {
+      setPasswordValue('');
+      setShowPasswordModal(false);
+      passwordVerifiedRef.current = true;
+      await doSubmit();
+    } else {
+      setPasswordError(res.error || 'Contraseña incorrecta');
+    }
+    setVerifying(false);
+  };
+
+  const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
+    doSubmit();
+  };
+
+  const doSubmit = async () => {
+    const needsGuard = !!(configLoaded.services && !passwordVerifiedRef.current);
+    if (needsGuard) {
+      setShowPasswordModal(true);
+      return;
+    }
+    passwordVerifiedRef.current = false;
     setError(null);
     setIsSubmitting(true);
 
@@ -792,6 +837,39 @@ export default function ServiceFormPage() {
             <X className="w-7 h-7" />
           </button>
           <img src={fullscreenImage} className="max-w-full max-h-full rounded-lg shadow-2xl animate-in zoom-in-95 duration-200" alt="Vista ampliada del servicio" />
+        </div>
+      )}
+
+      {showPasswordModal && (
+        <div className="fixed inset-0 z-[60] flex items-center justify-center p-4 bg-black/50 backdrop-blur-sm animate-in fade-in duration-200">
+          <div className="bg-white dark:bg-slate-900 rounded-lg shadow-2xl max-w-sm w-full p-6 animate-in zoom-in-95 duration-200">
+            <div className="flex items-center gap-3 mb-4">
+              <div className="p-2 bg-primary-50 dark:bg-primary-500/10 rounded-full">
+                <Lock className="w-5 h-5 text-primary-600 dark:text-primary-400" />
+              </div>
+              <h3 className="text-lg font-black text-slate-900 dark:text-white">Confirmar contraseña</h3>
+            </div>
+            <p className="text-sm text-slate-600 dark:text-slate-400 mb-4">
+              Ingresa tu contraseña para continuar guardando el servicio.
+            </p>
+            <input
+              type="password" value={passwordValue}
+              onChange={e => { setPasswordValue(e.target.value); setPasswordError(''); }}
+              onKeyDown={e => { if (e.key === 'Enter') handlePasswordSubmit(); }}
+              placeholder="Tu contraseña"
+              className="w-full px-4 py-2.5 rounded-lg border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 text-sm font-bold text-slate-900 dark:text-white focus:ring-2 focus:ring-primary-500/20 focus:border-primary-500 outline-none transition-all"
+            />
+            {passwordError && <p className="text-xs font-bold text-red-500 mt-2">{passwordError}</p>}
+            <div className="flex gap-3 justify-end mt-4">
+              <button type="button" onClick={() => { setShowPasswordModal(false); passwordVerifiedRef.current = false; setPasswordValue(''); setPasswordError(''); }} disabled={verifying} className="px-4 py-2 text-sm font-bold text-slate-700 dark:text-slate-300 bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 rounded-lg transition-all">
+                Cancelar
+              </button>
+              <button type="button" onClick={handlePasswordSubmit} disabled={verifying || !passwordValue.trim()} className="inline-flex items-center gap-2 px-4 py-2 text-sm font-bold text-white bg-primary-600 hover:bg-primary-700 rounded-lg transition-all disabled:opacity-50">
+                {verifying ? <Loader2 className="w-4 h-4 animate-spin" /> : <Lock className="w-4 h-4" />}
+                {verifying ? 'Verificando...' : 'Confirmar'}
+              </button>
+            </div>
+          </div>
         </div>
       )}
     </div>
