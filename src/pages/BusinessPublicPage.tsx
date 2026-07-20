@@ -17,6 +17,7 @@ import type { Tab } from '../components/ui/TabNav';
 import ConnectedPillCard from '../components/ui/ConnectedPillCard';
 import { useStickyDetection } from '../hooks/useStickyDetection';
 import ShareButton from '../components/ui/ShareButton';
+import { toast } from 'react-hot-toast';
 import { Store, Clock, MapPin, Star, Heart, Phone, Mail, MessageCircle, Globe, Instagram, Facebook, Pen } from 'lucide-react';
 import QRCode from 'qrcode';
 
@@ -137,15 +138,17 @@ function BusinessPublicPage() {
   }, [location.search, navigate, slug]);
 
   const handleToggleLike = async () => {
-    if (!user || !businessData) return;
+    if (!businessData) return;
+    if (!user) { toast.error('Debes iniciar sesión'); return; }
     try {
       setIsLiking(true);
       const result = await toggleLike(user.id, businessData.id, 'business');
       if (result.success) {
         setIsLiked(result.action === 'added');
         setLikesCount(prev => result.action === 'added' ? prev + 1 : prev - 1);
+        toast.success(result.action === 'added' ? '¡Te gusta este negocio!' : 'Ya no te gusta este negocio');
       }
-    } catch { /* ignore */ }
+    } catch { toast.error('Error al procesar'); }
     finally { setIsLiking(false); }
   };
 
@@ -329,7 +332,7 @@ function BusinessPublicPage() {
         {/* ─── INTERACCIÓN (ultra compacta, sin fondo/borde) ─── */}
         <div className="max-w-7xl mx-auto px-4 pb-2">
           <div className="flex flex-wrap items-center gap-2">
-            <button type="button" onClick={handleToggleLike} disabled={isLiking || !user}
+            <button type="button" onClick={handleToggleLike} disabled={isLiking}
               aria-label={isLiked ? 'Quitar me gusta' : 'Me gusta'}
               className={`inline-flex items-center gap-1.5 px-3 py-2 rounded-lg text-xs font-bold transition-all min-h-[36px] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary-500 focus-visible:ring-offset-2 dark:focus-visible:ring-offset-slate-900 ${
                 isLiked
