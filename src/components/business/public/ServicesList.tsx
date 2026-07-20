@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Clock, ChevronLeft, ChevronRight, Heart, Gift } from 'lucide-react';
+import { Clock, Heart, Gift, ChevronRight } from 'lucide-react';
 import { Service, toggleLike, checkIfLiked } from '../../../lib/api';
 import { toast } from 'react-hot-toast';
 import ShareButton from '../../ui/ShareButton';
@@ -8,19 +8,15 @@ import ShareButton from '../../ui/ShareButton';
 interface ServicesListProps {
   services: Service[];
   currentUser: import('@supabase/supabase-js').User | null;
-  businessOwnerId: string;
   showcaseOnly?: boolean;
 }
 
 const ServiceCard: React.FC<{
   service: Service;
+  index: number;
   currentUser: import('@supabase/supabase-js').User | null;
-  businessOwnerId: string;
-  handlePrevImage: (e: React.MouseEvent, serviceId: string, max: number) => void;
-  handleNextImage: (e: React.MouseEvent, serviceId: string, max: number) => void;
-  currentImgIdx: number;
   showcaseOnly?: boolean;
-}> = ({ service, currentUser, businessOwnerId, handlePrevImage, handleNextImage, currentImgIdx, showcaseOnly }) => {
+}> = ({ service, index, currentUser, showcaseOnly }) => {
   const [isLiked, setIsLiked] = useState(false);
   const [likesCount, setLikesCount] = useState(service.likes_count || 0);
   const [isLiking, setIsLiking] = useState(false);
@@ -56,161 +52,128 @@ const ServiceCard: React.FC<{
 
   const hasImages = images.length > 0;
   const canBook = service.permitir_reservas_online !== false;
-  const isOwner = currentUser && currentUser.id === businessOwnerId;
   const navigate = useNavigate();
+
+  const goToBook = () => navigate(`/${window.location.pathname.split('/')[1]}/book/${service.id}`);
 
   return (
     <div
-      onClick={() => navigate(`/${window.location.pathname.split('/')[1]}/book/${service.id}`)}
-      onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); navigate(`/${window.location.pathname.split('/')[1]}/book/${service.id}`); } }}
+      onClick={goToBook}
+      onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); goToBook(); } }}
       role="link"
       tabIndex={0}
-      aria-label={`${service.name} — ${service.duration} min — ${service.price ? '$' + service.price.toLocaleString() : 'Consultar precio'}`}
-      className="relative flex flex-col rounded-lg border transition-all overflow-hidden cursor-pointer group border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 hover:border-primary-300 dark:hover:border-primary-700 hover:shadow-2xl focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary-500 focus-visible:ring-offset-2 dark:focus-visible:ring-offset-slate-900"
+      aria-label={`${index + 1}. ${service.name} — ${service.duration} min — ${service.price ? '$' + service.price.toLocaleString() : 'Consultar precio'}`}
+      className="group relative flex items-stretch rounded-lg border transition-all cursor-pointer border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 hover:border-primary-300 dark:hover:border-primary-700 hover:shadow-lg focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary-500 focus-visible:ring-offset-2 dark:focus-visible:ring-offset-slate-900 min-h-[88px]"
     >
-      {isOwner && (
-        <div className="absolute top-2 left-2 z-10 w-2 h-2 bg-primary-500 rounded-full ring-2 ring-white dark:ring-slate-900 shadow" />
-      )}
+      {/* Number badge */}
+      <div className="flex items-center justify-center w-10 shrink-0 bg-slate-50 dark:bg-slate-800/80 border-r border-slate-200 dark:border-slate-700">
+        <span className="text-xs font-black text-slate-300 dark:text-slate-600 leading-none">
+          {(index + 1).toString().padStart(2, '0')}
+        </span>
+      </div>
 
-      {/* Gallery */}
+      {/* Thumbnail */}
       {hasImages && (
-        <div className="relative aspect-video overflow-hidden bg-slate-100 dark:bg-slate-800">
+        <div className="relative w-24 shrink-0 overflow-hidden bg-slate-100 dark:bg-slate-800">
           <img
-            src={images[currentImgIdx]}
+            src={images[0]}
             alt={service.name}
-            className="w-full h-full object-contain bg-slate-100 dark:bg-slate-800 transition-transform duration-500 group-hover:scale-105"
+            className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
           />
-          {images.length > 1 && (
-            <>
-              <button type="button" onClick={(e) => handlePrevImage(e, service.id, images.length)}
-                aria-label="Imagen anterior"
-                className="absolute left-2 top-1/2 -translate-y-1/2 p-1.5 bg-black/30 hover:bg-black/50 text-white rounded-full backdrop-blur-sm transition-all opacity-0 group-hover:opacity-100 focus-visible:opacity-100 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white">
-                <ChevronLeft className="w-4 h-4" />
-              </button>
-              <button type="button" onClick={(e) => handleNextImage(e, service.id, images.length)}
-                aria-label="Imagen siguiente"
-                className="absolute right-2 top-1/2 -translate-y-1/2 p-1.5 bg-black/30 hover:bg-black/50 text-white rounded-full backdrop-blur-sm transition-all opacity-0 group-hover:opacity-100 focus-visible:opacity-100 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white">
-                <ChevronRight className="w-4 h-4" />
-              </button>
-              <div className="absolute bottom-2 left-1/2 -translate-x-1/2 flex gap-1">
-                {images.map((_, i) => (
-                  <div key={i} className={`w-1.5 h-1.5 rounded-full transition-all ${i === currentImgIdx ? 'bg-white scale-125' : 'bg-white/40'}`} />
-                ))}
-              </div>
-            </>
-          )}
         </div>
       )}
 
       {/* Content */}
-      <div className="p-4 flex flex-col flex-1">
-        <div className="flex items-start justify-between gap-2 mb-1.5">
-          <h4 className="font-black text-base tracking-tight text-slate-900 dark:text-white leading-tight">
-            {service.name}
-          </h4>
+      <div className="flex-1 flex flex-col justify-center min-w-0 px-3 py-2.5">
+        <div className="flex items-start justify-between gap-2">
+          <div className="min-w-0 flex-1">
+            <h4 className="text-sm font-black text-slate-900 dark:text-white leading-tight truncate">
+              {service.name}
+            </h4>
+            {service.description && (
+              <p className="text-[11px] text-slate-500 dark:text-slate-400 leading-tight truncate mt-0.5">
+                {service.description}
+              </p>
+            )}
+          </div>
           {service.mostrar_precios !== false && service.price ? (
-            <span className="text-base font-black text-primary-600 dark:text-primary-400 flex-shrink-0">
+            <span className="text-sm font-black text-primary-600 dark:text-primary-400 flex-shrink-0 leading-tight">
               ${service.price.toLocaleString()}
             </span>
           ) : null}
         </div>
 
-        {service.description && (
-          <p className="text-xs text-slate-600 dark:text-slate-400 line-clamp-2 mb-3 leading-relaxed flex-1">
-            {service.description}
-          </p>
-        )}
-
-        <div className="flex items-center justify-between gap-3 pt-2.5 border-t border-slate-100 dark:border-slate-800">
-          <div className="flex items-center gap-1.5 text-[11px] font-bold text-slate-400 dark:text-slate-500">
-            <Clock className="w-3 h-3" />
+        <div className="flex items-center gap-2 mt-2">
+          <div className="flex items-center gap-1 text-[10px] font-bold text-slate-400 dark:text-slate-500">
+            <Clock className="w-2.5 h-2.5" />
             {service.duration} min
           </div>
 
-          <div className="flex items-center gap-1">
-            <button
-              onClick={handleToggleLike}
-              disabled={isLiking}
-              className={`flex items-center gap-1 px-2 py-1 rounded-lg text-[10px] font-black transition-all ${
-                isLiked ? 'bg-rose-500 text-white' : 'bg-slate-100 dark:bg-slate-800 text-slate-500 dark:text-slate-400 hover:bg-slate-200 dark:hover:bg-slate-700'
-              }`}
+          <span className="w-px h-3 bg-slate-200 dark:bg-slate-700" />
+
+          <button
+            onClick={handleToggleLike}
+            disabled={isLiking}
+            className={`flex items-center gap-1 px-1.5 py-0.5 rounded text-[10px] font-bold transition-all ${
+              isLiked ? 'text-rose-500' : 'text-slate-400 dark:text-slate-500 hover:text-rose-400'
+            }`}
+            aria-label={isLiked ? 'Quitar me gusta' : 'Me gusta'}
+          >
+            <Heart className={`w-2.5 h-2.5 ${isLiked ? 'fill-current' : ''}`} />
+            {likesCount > 0 && likesCount}
+          </button>
+
+          {service.can_be_gifted && (
+            <a
+              href={`/${window.location.pathname.split('/')[1]}/gift/${service.id}`}
+              onClick={(e) => { e.stopPropagation(); }}
+              className="text-slate-400 dark:text-slate-500 hover:text-rose-400 transition-colors p-0.5"
+              aria-label={`Regalar ${service.name}`}
             >
-              <Heart className={`w-2.5 h-2.5 ${isLiked ? 'fill-current' : ''}`} />
-              {likesCount}
-            </button>
-            <div onClick={(e) => e.stopPropagation()} className="flex items-center gap-1">
-              {service.can_be_gifted && (
-                <a
-                  href={`/${window.location.pathname.split('/')[1]}/gift/${service.id}`}
-                  onClick={(e) => { e.stopPropagation(); }}
-                  className="flex items-center gap-1 px-2 py-1 rounded-lg text-[10px] font-black transition-all bg-rose-50 dark:bg-rose-900/20 text-rose-500 dark:text-rose-400 hover:bg-rose-100 dark:hover:bg-rose-900/40"
-                  title="Regalar este servicio"
-                  aria-label={`Regalar ${service.name}`}
-                >
-                  <Gift className="w-2.5 h-2.5" />
-                </a>
-              )}
-              <ShareButton
-                url={shareUrl}
-                title={`Reservar: ${service.name}`}
-                variant="text"
-                iconSize={11}
-                className="bg-slate-100 dark:bg-slate-800 text-slate-500 dark:text-slate-400 hover:bg-slate-200 dark:hover:bg-slate-700 !py-1"
-              />
-            </div>
+              <Gift className="w-2.5 h-2.5" />
+            </a>
+          )}
+
+          <div onClick={(e) => e.stopPropagation()} className="text-slate-400 dark:text-slate-500 hover:text-primary-500 transition-colors">
+            <ShareButton
+              url={shareUrl}
+              title={`Reservar: ${service.name}`}
+              variant="text"
+              iconSize={11}
+              className="p-0.5 bg-transparent hover:bg-transparent text-slate-400 dark:text-slate-500 hover:text-primary-500 !rounded"
+            />
+          </div>
+
+          <div className="ml-auto">
+            <span className="flex items-center gap-0.5 text-[10px] font-bold text-primary-600 dark:text-primary-400 opacity-0 group-hover:opacity-100 transition-opacity">
+              {showcaseOnly || !canBook ? 'Ver' : 'Reservar'} <ChevronRight className="w-2.5 h-2.5" />
+            </span>
           </div>
         </div>
-
-        <div className="mt-2.5 pt-2.5 border-t border-slate-100 dark:border-slate-800">
-          <a href={`/${window.location.pathname.split('/')[1]}/book/${service.id}`}
-            aria-label={`${showcaseOnly || !canBook ? 'Ver información' : 'Reservar'} ${service.name}`}
-            className="flex items-center justify-center gap-1 px-3 py-1.5 bg-primary-50 dark:bg-primary-900/20 text-primary-700 dark:text-primary-300 text-[10px] font-bold rounded-lg hover:bg-primary-100 dark:hover:bg-primary-900/40 transition-all active:scale-[0.98] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary-500 focus-visible:ring-offset-2 dark:focus-visible:ring-offset-slate-900">
-            {showcaseOnly || !canBook ? 'Ver información' : 'Reservar ahora'} <ChevronRight className="w-3 h-3" />
-          </a>
-        </div>
-
-        {isOwner && (
-          <div className="mt-2 pt-2 border-t border-slate-100 dark:border-slate-800" />
-        )}
       </div>
     </div>
   );
 };
 
 const ServicesList: React.FC<ServicesListProps> = ({
-  services, currentUser, businessOwnerId, showcaseOnly,
+  services, currentUser, showcaseOnly,
 }) => {
-  const [activeImageIndex, setActiveImageIndex] = useState<Record<string, number>>({});
-
   if (!services || services.length === 0) {
     return (
       <p className="text-sm text-slate-400 italic text-center py-8">No hay servicios disponibles</p>
     );
   }
 
-  const handleNextImage = (e: React.MouseEvent, serviceId: string, max: number) => {
-    e.stopPropagation();
-    setActiveImageIndex(prev => ({ ...prev, [serviceId]: ((prev[serviceId] || 0) + 1) % max }));
-  };
-
-  const handlePrevImage = (e: React.MouseEvent, serviceId: string, max: number) => {
-    e.stopPropagation();
-    setActiveImageIndex(prev => ({ ...prev, [serviceId]: ((prev[serviceId] || 0) - 1 + max) % max }));
-  };
-
   return (
-    <div className="grid grid-cols-1 sm:grid-cols-2 gap-5">
-      {services.map(service => (
-          <ServiceCard
-            key={service.id}
-            service={service}
-            currentUser={currentUser}
-            businessOwnerId={businessOwnerId}
-            handlePrevImage={handlePrevImage}
-            handleNextImage={handleNextImage}
-            currentImgIdx={activeImageIndex[service.id] || 0}
-            showcaseOnly={showcaseOnly}
-          />
+    <div className="space-y-2">
+      {services.map((service, i) => (
+        <ServiceCard
+          key={service.id}
+          service={service}
+          index={i}
+          currentUser={currentUser}
+          showcaseOnly={showcaseOnly}
+        />
       ))}
     </div>
   );

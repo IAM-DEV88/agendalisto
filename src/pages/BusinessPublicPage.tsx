@@ -513,7 +513,7 @@ function BusinessPublicPage() {
                           </Link>
                         )}
                       </div>
-                      <ServicesList services={services} currentUser={user} businessOwnerId={businessData?.owner_id} showcaseOnly={!!businessData?.showcase_only} />
+                      <ServicesList services={services} currentUser={user} showcaseOnly={!!businessData?.showcase_only} />
                     </div>
                   )}
 
