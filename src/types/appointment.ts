@@ -13,6 +13,7 @@ export interface Review {
   status: ReviewStatus;
   before_image_url?: string | null;
   after_image_url?: string | null;
+  service_name?: string | null;
 }
 
 export interface Service {

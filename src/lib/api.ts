@@ -1343,12 +1343,21 @@ export async function getBusinessReviews(businessId: string): Promise<{ success:
   try {
     const { data, error } = await supabase
       .from('agendaya_reviews')
-      .select('id, rating, comment, created_at, appointment_id, business_id, user_id, status')
+      .select(`
+        id, rating, comment, created_at, appointment_id, business_id, user_id, status,
+        agendaya_appointments (
+          agendaya_services ( name )
+        )
+      `)
       .eq('business_id', businessId)
       .eq('status', 'approved')
       .order('created_at', { ascending: false });
     if (error) throw error;
-    return { success: true, data: data as Review[] };
+    const flattened = (data as any[]).map(item => ({
+      ...item,
+      service_name: item.agendaya_appointments?.agendaya_services?.name ?? null,
+    }));
+    return { success: true, data: flattened as Review[] };
   } catch (err: unknown) {
     return { success: false, data: [], error: getErrorMessage(err) };
   }

@@ -311,16 +311,6 @@ function BusinessPublicPage() {
                 {categoryName || (businessData.description ? businessData.description.substring(0, 60) + (businessData.description.length > 60 ? '...' : '') : 'Perfil público')}
               </p>
               <div className="flex flex-wrap items-center gap-1.5 mt-1">
-                {averageRating > 0 && (
-                  <span className="inline-flex items-center gap-0.5 px-2 py-0.5 rounded-full bg-amber-50 dark:bg-amber-500/10 text-amber-700 dark:text-amber-300 text-xs font-bold">
-                    <Star className="w-2.5 h-2.5 fill-current" />{averageRating.toFixed(1)}
-                  </span>
-                )}
-                {businessData.likes_count > 0 && (
-                  <span className="inline-flex items-center gap-0.5 px-2 py-0.5 rounded-full bg-rose-50 dark:bg-rose-500/10 text-rose-600 dark:text-rose-400 text-xs font-bold">
-                    <Heart className="w-2.5 h-2.5" />{businessData.likes_count}
-                  </span>
-                )}
                 {businessData.plan && businessData.plan !== 'starter' && (
                   <span className={`px-2 py-0.5 rounded-full text-[11px] font-bold uppercase tracking-wider ${
                     businessData.plan === 'premium'
@@ -328,11 +318,51 @@ function BusinessPublicPage() {
                       : 'bg-blue-100 dark:bg-blue-900/30 text-blue-700 dark:text-blue-400'
                   }`}>{businessData.plan}</span>
                 )}
+                {averageRating > 0 && (
+                  <span className="inline-flex items-center gap-0.5 px-2 py-0.5 rounded-full bg-amber-50 dark:bg-amber-500/10 text-amber-700 dark:text-amber-300 text-xs font-bold">
+                    <Star className="w-2.5 h-2.5 fill-current" />{averageRating.toFixed(1)}
+                  </span>
+                )}
                 {referralCount >= 3 && <ReferralBadge count={referralCount} size="sm" />}
               </div>
             </div>
           </div>
         </div>
+
+        {/* ─── INTERACCIÓN (ultra compacta, sin fondo/borde) ─── */}
+        <div className="max-w-7xl mx-auto px-4 pb-2">
+          <div className="flex flex-wrap items-center gap-2">
+            <button type="button" onClick={handleToggleLike} disabled={isLiking || !user}
+              className={`inline-flex items-center gap-1.5 px-3 py-2 rounded-lg text-xs font-bold transition-all min-h-[36px] ${
+                isLiked
+                  ? 'bg-rose-50 dark:bg-rose-500/10 text-rose-600 dark:text-rose-400'
+                  : 'bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-400 hover:bg-rose-50 dark:hover:bg-rose-500/10 hover:text-rose-600 dark:hover:text-rose-400'
+              }`}>
+              <Heart className={`w-3.5 h-3.5 ${isLiked ? 'fill-current' : ''}`} />
+              {likesCount > 0 ? likesCount : 'Me gusta'}
+            </button>
+            <ShareButton url={window.location.href} title={businessData.name} description={businessData.description || ''} variant="icon" iconSize={16} className="!bg-slate-100 dark:!bg-slate-800 !text-slate-600 dark:!text-slate-400 !rounded-lg !p-2 !min-h-[36px] !min-w-[36px]" />
+            {businessData.whatsapp && (
+              <a href={`https://wa.me/${businessData.whatsapp.replace(/[^0-9]/g, '')}?text=${encodeURIComponent('Hola, vi tu perfil en AgendaYa y quiero agendar una cita')}`} target="_blank" rel="noopener noreferrer"
+                className="inline-flex items-center gap-1.5 px-3 py-2 rounded-lg bg-emerald-50 dark:bg-emerald-500/10 text-emerald-700 dark:text-emerald-300 text-xs font-bold hover:bg-emerald-100 dark:hover:bg-emerald-500/20 transition-all min-h-[36px]">
+                <MessageCircle className="w-3.5 h-3.5" /> WhatsApp
+              </a>
+            )}
+            {businessData.phone && (
+              <a href={`tel:${businessData.phone}`}
+                className="inline-flex items-center gap-1.5 px-3 py-2 rounded-lg bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-400 text-xs font-bold hover:bg-primary-50 dark:hover:bg-primary-500/10 hover:text-primary-600 dark:hover:text-primary-400 transition-all min-h-[36px]">
+                <Phone className="w-3.5 h-3.5" /> Llamar
+              </a>
+            )}
+            {businessData.website && (
+              <a href={businessData.website.startsWith('http') ? businessData.website : `https://${businessData.website}`} target="_blank" rel="noopener noreferrer"
+                className="inline-flex items-center justify-center p-2 rounded-lg bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-400 hover:bg-slate-200 dark:hover:bg-slate-700 transition-all min-h-[36px] min-w-[36px]">
+                <Globe className="w-4 h-4" />
+              </a>
+            )}
+          </div>
+        </div>
+
         <div className="max-w-7xl mx-auto px-4">
           <TabNav tabs={tabs} activeTabId={activeTab} onTabChange={setActiveTab} sticky />
         </div>
@@ -393,34 +423,6 @@ function BusinessPublicPage() {
                         );
                       })()}
 
-                      <div>
-                        <p className="text-xs font-bold text-slate-400 uppercase tracking-wider mb-3">Interacción</p>
-                        <div className="flex flex-wrap items-center gap-2">
-                          <button type="button" onClick={handleToggleLike} disabled={isLiking || !user}
-                            className={`inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-bold transition-all ${
-                              isLiked
-                                ? 'bg-rose-50 dark:bg-rose-500/10 text-rose-600 dark:text-rose-400'
-                                : 'bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-400 hover:bg-rose-50 dark:hover:bg-rose-500/10 hover:text-rose-600 dark:hover:text-rose-400'
-                            }`}>
-                            <Heart className={`w-3.5 h-3.5 ${isLiked ? 'fill-current' : ''}`} />
-                            {likesCount > 0 ? likesCount : 'Me gusta'}
-                          </button>
-                          <ShareButton url={window.location.href} title={businessData.name} description={businessData.description || ''} variant="icon" iconSize={16} className="!bg-slate-100 dark:!bg-slate-800 !text-slate-600 dark:!text-slate-400 !rounded-lg !p-2.5" />
-                          {businessData.whatsapp && (
-                            <a href={`https://wa.me/${businessData.whatsapp.replace(/[^0-9]/g, '')}?text=${encodeURIComponent('Hola, vi tu perfil en AgendaYa y quiero agendar una cita')}`} target="_blank" rel="noopener noreferrer"
-                              className="inline-flex items-center gap-1.5 px-3 py-1.5 bg-emerald-50 dark:bg-emerald-500/10 text-emerald-700 dark:text-emerald-300 text-xs font-bold rounded-lg hover:bg-emerald-100 dark:hover:bg-emerald-500/20 transition-all">
-                              <MessageCircle className="w-3.5 h-3.5" /> WhatsApp
-                            </a>
-                          )}
-                          {businessData.phone && (
-                            <a href={`tel:${businessData.phone}`}
-                              className="inline-flex items-center gap-1.5 px-3 py-1.5 bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-400 text-xs font-bold rounded-lg hover:bg-primary-50 dark:hover:bg-primary-500/10 hover:text-primary-600 dark:hover:text-primary-400 transition-all">
-                              <Phone className="w-3.5 h-3.5" /> Llamar
-                            </a>
-                          )}
-                        </div>
-                      </div>
-
                       {(businessData.facebook || businessData.instagram || businessData.website) && (
                         <div>
                           <p className="text-xs font-bold text-slate-400 uppercase tracking-wider mb-3">Redes sociales</p>
@@ -435,12 +437,6 @@ function BusinessPublicPage() {
                               <a href={`https://instagram.com/${businessData.instagram}`} target="_blank" rel="noopener noreferrer"
                                 className="inline-flex items-center gap-1.5 px-3 py-1.5 bg-pink-50 dark:bg-pink-900/20 text-pink-700 dark:text-pink-300 text-xs font-bold rounded-lg hover:bg-pink-100 dark:hover:bg-pink-900/40 transition-all">
                                 <Instagram className="w-3.5 h-3.5" /> Instagram
-                              </a>
-                            )}
-                            {businessData.website && (
-                              <a href={businessData.website.startsWith('http') ? businessData.website : `https://${businessData.website}`} target="_blank" rel="noopener noreferrer"
-                                className="inline-flex items-center gap-1.5 px-3 py-1.5 bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300 text-xs font-bold rounded-lg hover:bg-slate-200 dark:hover:bg-slate-700 transition-all">
-                                <Globe className="w-3.5 h-3.5" /> Sitio web
                               </a>
                             )}
                           </div>
@@ -584,20 +580,6 @@ function BusinessPublicPage() {
                           <Link to="/business/dashboard?tab=settings&sub=profile" className="ml-auto p-1.5 text-slate-400 hover:text-primary-500 hover:bg-primary-50 dark:hover:bg-primary-900/20 rounded-lg transition-all" title="Editar información de contacto">
                             <Pen className="w-3.5 h-3.5" />
                           </Link>
-                        )}
-                      </div>
-
-                      <div className="flex flex-wrap items-center gap-2">
-                        <button type="button" onClick={handleToggleLike} disabled={isLiking || !user}
-                          className={`inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-bold transition-all ${isLiked ? 'bg-rose-50 dark:bg-rose-500/10 text-rose-600 dark:text-rose-400' : 'bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-400 hover:bg-rose-50 dark:hover:bg-rose-500/10 hover:text-rose-600 dark:hover:text-rose-400'}`}>
-                          <Heart className={`w-3.5 h-3.5 ${isLiked ? 'fill-current' : ''}`} /> {likesCount > 0 ? likesCount : 'Me gusta'}
-                        </button>
-                        <ShareButton url={window.location.href} title={businessData.name} description={businessData.description || ''} variant="icon" iconSize={16} className="!bg-slate-100 dark:!bg-slate-800 !text-slate-600 dark:!text-slate-400 !rounded-lg !p-2.5" />
-                        {businessData.whatsapp && (
-                          <a href={`https://wa.me/${businessData.whatsapp.replace(/[^0-9]/g, '')}?text=${encodeURIComponent('Hola, vi tu perfil en AgendaYa y quiero agendar una cita')}`} target="_blank" rel="noopener noreferrer"
-                            className="inline-flex items-center gap-1.5 px-3 py-1.5 bg-emerald-50 dark:bg-emerald-500/10 text-emerald-700 dark:text-emerald-300 text-xs font-bold rounded-lg hover:bg-emerald-100 dark:hover:bg-emerald-500/20 transition-all">
-                            <MessageCircle className="w-3.5 h-3.5" /> WhatsApp
-                          </a>
                         )}
                       </div>
 
