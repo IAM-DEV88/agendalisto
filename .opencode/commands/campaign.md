@@ -1,59 +1,57 @@
 ---
 description: >
-  Ejecuta una campaña de mejora: N rondas por cada agente en secuencia.
-  Ej: `/campaign 5` → 5 rondas de quality, 5 de performance, 5 de architecture...
+  Ejecuta N rondas por cada agente con un objetivo personalizado.
+  Ej: `/campaign 5 "mejora la legibilidad del código"`
 agent: build
 ---
 
-Ejecuta una campaña completa de mejora recorriendo todos los agentes.
+Ejecuta una campaña de mejora recorriendo todos los agentes, cada uno aplicando el objetivo desde su perspectiva.
 
 ## Uso
 
 ```
-/campaign [rondas-por-agente] [división-inicial]
-/campaign 5              → 5 rondas de cada agente
-/campaign 3 quality      → empieza en quality, 3 rondas cada uno
-/campaign               → 1 ronda de cada agente (default)
+/campaign [rondas] [división-inicio] "objetivo personalizado"
+/campaign 5                                        → 1 ronda c/u, objetivo por defecto
+/campaign 5 "elimina código muerto y mejora tipos" → 5 rondas c/u con objetivo custom
+/campaign 3 quality "optimiza rendimiento"         → empieza en quality, 3 rondas c/u
+/campaign "solo auditar, sin cambios"              → 1 ronda c/u en modo solo lectura
 ```
+
+## Parámetros
+
+- `$1` — Número de rondas por división (opcional, default: 1)
+- `$2` — División inicial (opcional, ej: performance, default: quality)
+- `$ARGUMENTS` — Todo el texto después del comando. Si contiene un string entre comillas, ese es el objetivo. Si no, se usa objetivo genérico.
+
+## Objetivo personalizado
+
+Si el usuario incluye un objetivo entre comillas `"..."`, ese objetivo debe ser pasado a CADA agente de división para que lo aborde desde su especialidad:
+
+| División | Cómo interpreta el objetivo |
+|----------|----------------------------|
+| quality | "Aplica el objetivo priorizando tipos, tests y código muerto" |
+| architecture | "Aplica el objetivo priorizando estructura, refactors y deuda técnica" |
+| reliability | "Aplica el objetivo priorizando manejo de errores y robustez" |
+| performance | "Aplica el objetivo priorizando velocidad y bundle" |
+| ux | "Aplica el objetivo priorizando accesibilidad y experiencia de usuario" |
+| product | "Aplica el objetivo priorizando features y valor de negocio" |
 
 ## Orden de ejecución
 
-1. **quality** — Tests, tipos, código muerto
-2. **architecture** — Refactors, splits, monolitos
-3. **reliability** — Error boundaries, fallbacks
-4. **performance** — Memo, lazy loading, bundle
-5. **ux** — Accesibilidad, responsive, i18n
-6. **product** — Features, negocio
+quality → architecture → reliability → performance → ux → product
 
 ## Mecanismo
 
 1. Leer `.opencode/improve/priorities.md` y `AGENTS.md` para contexto
-2. Por cada división en orden (quality, architecture, reliability, performance, ux, product):
-   a. Ejecutar N rondas. Para CADA ronda, usar `task` para invocar al subagente correspondiente (ej: `@quality`). Pasarle el objetivo específico y el número de ronda.
-   b. Esperar a que el subagente termine. Leer el resultado.
-   c. Actualizar `.opencode/improve/rounds.md` con lo hecho.
-   d. Validar con `pnpm type-check` después de cada ronda.
-3. Al terminar todas las divisiones: mostrar resumen global en formato tabla.
+2. Parsear: extraer $1 (rondas), detectar si $2 es una división conocida y si hay objetivo entre comillas
+3. Por cada división en orden:
+   a. Invocar al subagente con `task`, pasándole: el objetivo (personalizado o genérico), el número de ronda, y la división.
+   b. Leer el resultado, validar con `pnpm type-check`
+   c. Actualizar `.opencode/improve/rounds.md`
+4. Al terminar: mostrar resumen global
 
-## Criterios de parada por división
+## Criterios de parada
 
-Una división se salta si:
-- La ronda anterior no encontró nada que cambiar
-- El type-check falla 2 veces seguidas en la misma división
-- El agente reporta "BLOQUEADO"
-
-## Formato del log en rounds.md
-
-```
-# Campaña YYYY-MM-DD — 5 rondas por división
-
-## quality (5/5 completadas)
-- Ronda 1: eliminados 3 imports muertos
-- Ronda 2: reemplazados 2 any por tipos
-- ...
-
-## architecture (3/5 — detenido por type-check fallido)
-- Ronda 1: extraído api/businesses.ts
-- Ronda 2: extraído api/appointments.ts
-- Ronda 3: ❌ type-check falló, división detenida
-```
+- Si una ronda completa 0 cambios, saltar a la siguiente división
+- Si type-check falla 2 veces seguidas, detener esa división
+- Si el agente reporta "BLOQUEADO", saltar división

@@ -291,8 +291,8 @@ Este proyecto tiene un sistema de agentes de mejora definidos en `.opencode/`. C
 
 Comandos disponibles:
 - `/scan <área>` — Auditoría de solo lectura
-- `/improve [N] <división>: <objetivo>` — Ejecuta N rondas de mejora
-- `/campaign [N]` — Ejecuta N rondas de CADA agente en secuencia
+- `/improve [N] <división>: <objetivo>` — Ejecuta N rondas de mejora en una división
+- `/campaign [N] ["objetivo"]` — Ejecuta N rondas de CADA agente. Podés pasar un objetivo personalizado entre comillas
 - `/report` — Muestra historial de rondas
 - `/status` — Estado actual del proyecto
 
