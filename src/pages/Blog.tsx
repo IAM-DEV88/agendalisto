@@ -1,6 +1,6 @@
 import { useState, useEffect, useRef, useCallback } from 'react';
 import { Link } from 'react-router-dom';
-import { MessageSquare, Heart, Clock, User, Search, ChevronRight, Loader2, BookOpen, X, Mail, Send, Check } from 'lucide-react';
+import { MessageSquare, Heart, Clock, User, Search, ChevronRight, Loader2, BookOpen, X, Mail, Send, Check, Pen } from 'lucide-react';
 import { getBlogPosts, BlogPost, toggleBlogLike, subscribeToNewsletter } from '../lib/api';
 import { supabase } from '../lib/supabase';
 import { toast } from 'react-hot-toast';
@@ -100,56 +100,55 @@ const Blog = () => {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-b from-slate-50 to-white dark:from-slate-950 dark:to-slate-900 transition-colors duration-200 py-12">
+    <div className="min-h-screen bg-gradient-to-b from-slate-50 to-white dark:from-slate-950 dark:to-slate-900 transition-colors duration-200">
       <SEO
         title="Blog de Comunidad"
         description="Historias, consejos y novedades de nuestro Guía y los mejores negocios de AgendaYa."
       />
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+      <div className="max-w-7xl mx-auto px-4 py-6 space-y-4 sm:space-y-5">
 
-        {/* Header */}
-        <div className="text-center mb-10 animate-in fade-in slide-in-from-top-4 duration-500">
-          <div className="w-14 h-14 rounded-lg bg-primary-50 dark:bg-primary-500/10 flex items-center justify-center mx-auto mb-4 ring-1 ring-primary-200 dark:ring-primary-800">
-            <BookOpen className="w-7 h-7 text-primary-600 dark:text-primary-400" />
-          </div>
-          <h1 className="text-3xl sm:text-4xl font-black text-slate-900 dark:text-white tracking-tight mb-3">
-            Blog de Comunidad
-          </h1>
-          <p className="text-base sm:text-lg text-slate-500 dark:text-slate-400 font-medium max-w-xl mx-auto">
-            Historias, consejos y novedades de nuestro Guía y los mejores negocios de AgendaYa.
-          </p>
-        </div>
-
-        {/* Search */}
-        <div className="max-w-xl mx-auto mb-10 animate-in fade-in slide-in-from-bottom-4 duration-500 delay-100">
-          <div className="relative">
-            <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
-            <input
-              type="text"
-              placeholder="Buscar publicaciones..."
-              value={searchTerm}
-              onChange={(e) => setSearchTerm(e.target.value)}
-              className="w-full pl-11 pr-4 py-3.5 bg-white dark:bg-slate-900 rounded-lg border border-slate-200 dark:border-slate-700 shadow-lg shadow-slate-200/50 dark:shadow-none focus:ring-2 focus:ring-primary-500/20 focus:border-primary-500 outline-none transition-all text-sm font-medium"
-            />
-            {searchTerm && (
-              <button
-                onClick={() => setSearchTerm('')}
-                className="absolute right-3.5 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600 transition-colors"
-              >
-                <X className="w-4 h-4" />
-              </button>
-            )}
+        {/* ═══ HEADER (dashboard style) ═══ */}
+        <div className="bg-white dark:bg-slate-900 rounded-lg border border-slate-200 dark:border-slate-800 shadow-sm p-4 animate-in fade-in slide-in-from-top-4 duration-500">
+          <div className="flex items-center gap-3">
+            <div className="w-10 h-10 rounded-lg bg-primary-50 dark:bg-primary-500/10 flex items-center justify-center text-primary-600 dark:text-primary-400 shrink-0">
+              <Pen className="w-5 h-5" />
+            </div>
+            <div className="flex-1 min-w-0">
+              <h1 className="text-lg sm:text-xl font-black text-slate-900 dark:text-white tracking-tight truncate">
+                Blog de Comunidad
+              </h1>
+              <p className="text-xs sm:text-sm font-medium text-slate-500 dark:text-slate-400">
+                Historias, consejos y novedades de los mejores negocios
+              </p>
+            </div>
           </div>
         </div>
 
-        {/* Business CTA Banner */}
-        <div className="max-w-xl mx-auto mb-8 animate-in fade-in slide-in-from-bottom-4 duration-500 delay-200">
-          <Link
-            to="/register"
-            className="flex items-center justify-center gap-2 px-5 py-3 bg-primary-50 dark:bg-primary-900/20 text-primary-700 dark:text-primary-300 font-bold text-sm rounded-lg border border-primary-200 dark:border-primary-800 hover:bg-primary-100 dark:hover:bg-primary-900/40 transition-all"
-          >
-            🌐 ¿Tienes un negocio? Crea tu página web gratis →
-          </Link>
+        {/* ═══ SEARCH + CTA (compact row) ═══ */}
+        <div className="animate-in fade-in slide-in-from-bottom-4 duration-500 delay-100">
+          <div className="flex flex-wrap items-center gap-2">
+            <div className="relative flex-1 min-w-[200px] max-w-md">
+              <Search className="absolute left-2.5 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-slate-400" />
+              <input
+                type="text"
+                placeholder="Buscar publicaciones..."
+                value={searchTerm}
+                onChange={(e) => setSearchTerm(e.target.value)}
+                className="w-full pl-8 pr-8 py-2 rounded-lg border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 text-slate-900 dark:text-slate-100 focus:ring-2 focus:ring-primary-500/20 focus:border-primary-500 outline-none transition-all text-xs font-medium min-h-[36px]"
+              />
+              {searchTerm && (
+                <button onClick={() => setSearchTerm('')} className="absolute right-2 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600">
+                  <X className="w-3 h-3" />
+                </button>
+              )}
+            </div>
+            <Link
+              to="/register"
+              className="inline-flex items-center gap-1.5 px-3 py-2 rounded-lg bg-primary-50 dark:bg-primary-900/20 text-primary-700 dark:text-primary-300 text-xs font-bold hover:bg-primary-100 dark:hover:bg-primary-900/40 transition-all min-h-[36px]"
+            >
+              🌐 Crear web gratis →
+            </Link>
+          </div>
         </div>
 
         {/* Content */}
