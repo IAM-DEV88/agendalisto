@@ -279,3 +279,21 @@ pnpm netlify-build    # Build para Netlify (instala + build + sitemap + prerende
 - After edits, run `pnpm type-check` to verify no new errors.
 - **Remember: tables are `agendaya_profiles` NOT `profiles`.**
 - **SQL compartido:** Si modificas `handle_new_user()`, hacerlo en `../supabase-shared/handle_new_user.sql`. Nunca redefinirlo en archivos SQL del proyecto.
+
+## Improvement Agents System
+
+Este proyecto tiene un sistema de agentes de mejora definidos en `.opencode/`. Cualquier agente de opencode DEBE:
+
+1. Leer `.opencode/improve/priorities.md` antes de ejecutar cambios estructurales.
+2. Ejecutar `pnpm type-check` después de CADA cambio.
+3. NO modificar archivos de otras apps del ecosistema (lexigo, encuentrosvip, guild_portal).
+4. NO modificar `../supabase-shared/`.
+
+Comandos disponibles:
+- `/scan <área>` — Auditoría de solo lectura
+- `/improve [N] <división>: <objetivo>` — Ejecuta N rondas de mejora
+- `/campaign [N]` — Ejecuta N rondas de CADA agente en secuencia
+- `/report` — Muestra historial de rondas
+- `/status` — Estado actual del proyecto
+
+Agentes de división: `@quality`, `@architecture`, `@reliability`, `@performance`, `@ux`, `@product`.
