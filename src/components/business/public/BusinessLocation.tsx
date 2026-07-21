@@ -1,8 +1,7 @@
-import React, { useEffect, useRef } from 'react';
-import L from 'leaflet';
-import 'leaflet/dist/leaflet.css';
+import React, { useEffect, useRef, useState } from 'react';
 import { MapPin, ExternalLink } from 'lucide-react';
 import { parseCoordinatesFromAddress } from '../../../utils/coordinates';
+import type { Map as LeafletMap } from 'leaflet';
 
 interface BusinessLocationProps {
   address: string;
@@ -10,16 +9,11 @@ interface BusinessLocationProps {
   lng?: number | null;
 }
 
-const markerIcon = L.divIcon({
-  html: '<div style="width:32px;height:32px;border-radius:50%;background:#7C3AED;box-shadow:0 4px 12px rgba(124,58,237,0.4);display:flex;align-items:center;justify-content:center;color:white;font-size:18px;font-weight:700;border:3px solid white;line-height:1;">📍</div>',
-  iconSize: [32, 32],
-  iconAnchor: [16, 32],
-  className: '',
-});
-
 const BusinessLocation: React.FC<BusinessLocationProps> = ({ address, lat, lng }) => {
   const mapRef = useRef<HTMLDivElement>(null);
-  const mapInstanceRef = useRef<L.Map | null>(null);
+  const mapInstanceRef = useRef<LeafletMap | null>(null);
+  const leafletRef = useRef<typeof import('leaflet') | null>(null);
+  const [leafletLoaded, setLeafletLoaded] = useState(false);
 
   // Try DB coords first, then parse from address
   const coords = (lat && lng)
@@ -31,11 +25,33 @@ const BusinessLocation: React.FC<BusinessLocationProps> = ({ address, lat, lng }
   const hasCoords = coords.lat !== null && coords.lng !== null;
 
   useEffect(() => {
-    if (!mapRef.current || !hasCoords) return;
+    let cancelled = false;
+    async function initLeaflet() {
+      const L = await import('leaflet');
+      await import('leaflet/dist/leaflet.css');
+      if (!cancelled) {
+        leafletRef.current = L;
+        setLeafletLoaded(true);
+      }
+    }
+    initLeaflet();
+    return () => { cancelled = true; };
+  }, []);
 
+  useEffect(() => {
+    if (!mapRef.current || !hasCoords || !leafletLoaded || !leafletRef.current) return;
+
+    const L = leafletRef.current;
     const map = L.map(mapRef.current, { zoomControl: false, attributionControl: false }).setView([coords.lat!, coords.lng!], 15);
 
     L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', { maxZoom: 19 }).addTo(map);
+
+    const markerIcon = L.divIcon({
+      html: '<div style="width:32px;height:32px;border-radius:50%;background:#7C3AED;box-shadow:0 4px 12px rgba(124,58,237,0.4);display:flex;align-items:center;justify-content:center;color:white;font-size:18px;font-weight:700;border:3px solid white;line-height:1;">📍</div>',
+      iconSize: [32, 32],
+      iconAnchor: [16, 32],
+      className: '',
+    });
 
     L.marker([coords.lat!, coords.lng!], { icon: markerIcon }).addTo(map);
 
@@ -45,7 +61,7 @@ const BusinessLocation: React.FC<BusinessLocationProps> = ({ address, lat, lng }
       map.remove();
       mapInstanceRef.current = null;
     };
-  }, [hasCoords]);
+  }, [hasCoords, leafletLoaded]);
 
   if (!address && !hasCoords) {
     return (

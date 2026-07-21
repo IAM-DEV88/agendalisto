@@ -3,7 +3,7 @@
 # Uso:   bash .opencode/batch-improve.sh 100 quality
 #        bash .opencode/batch-improve.sh 50 architecture
 #
-# Requisitos: opencode instalado, proyecto en git, config con subagent_depth >= 3
+# Requisitos: opencode instalado, proyecto en git, build con permission.task: allow
 # ──────────────────────────────────────────────────────────────────────────────
 
 set -e

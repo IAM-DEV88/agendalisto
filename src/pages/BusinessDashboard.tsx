@@ -3,6 +3,7 @@ import { Link, useSearchParams } from 'react-router-dom';
 import { useSelector } from 'react-redux';
 import { Business, getBusinessStats, getBusinessById, getBusinessServices, getUserBusinesses, updateAppointmentStatus, rescheduleAppointment, updateBusiness, deleteBusinessService, BusinessStats, getBusinessCategories, BusinessCategory } from '../lib/api';
 import { supabase, UserProfile } from '../lib/supabase';
+import { FALLBACK_PLACEHOLDER } from '../lib/config';
 import { Appointment, AppointmentStatus } from '../types/appointment';
 import { useBusinessAppointments } from '../hooks/useBusinessAppointments';
 import { notifySuccess, notifyError } from '../lib/toast';
@@ -13,7 +14,7 @@ import { setBusinesses, updateBusinessInStore } from '../store/userSlice';
 import { useBusinessConfig } from '../hooks/useBusinessConfig';
 import { useBusinessHours } from '../hooks/useBusinessHours';
 import { useBusinessClients } from '../hooks/useBusinessClients';
-import { canAccessAnalytics, PLAN_BADGE } from '../lib/roles';
+import { canAccessAnalytics, PLAN_BADGE, PLAN_FEATURES, PLAN_PRICES } from '../lib/roles';
 import type { RootState } from '../store';
 import ConnectedPillCard from '../components/ui/ConnectedPillCard';
 import { useSwipeTabs } from '../hooks/useSwipeTabs';
@@ -48,6 +49,9 @@ import {
   CheckCircle2,
   AlertCircle,
   Save,
+  Sparkles,
+  TrendingUp,
+  Crown,
 } from 'lucide-react';
 
 export const BusinessDashboard: React.FC = () => {
@@ -121,13 +125,18 @@ export const BusinessDashboard: React.FC = () => {
       const response = await getBusinessById(id);
       if (response.success && response.data) {
         setBusinessData(response.data);
-        const servicesResponse = await getBusinessServices(response.data.id);
+        // Parallelize services and stats fetching
+        const [servicesResponse] = await Promise.all([
+          getBusinessServices(response.data.id),
+          getBusinessStats(response.data.id).then(setBusinessStats).catch((err: unknown) => {
+            const msg = err instanceof Error ? err.message : 'Error al cargar estadísticas';
+            console.error('[BusinessDashboard] Error fetching business stats:', err);
+            notifyError(msg);
+          }),
+        ]);
         if (servicesResponse.success && servicesResponse.data) {
           setTotalServices(servicesResponse.data.length);
         }
-        getBusinessStats(response.data.id).then(setBusinessStats).catch((err) => {
-          console.error('[BusinessDashboard] Error fetching business stats:', err);
-        });
       } else {
         setBusinessMessage({
           text: response.error || 'No se encontró información de tu negocio',
@@ -148,9 +157,15 @@ export const BusinessDashboard: React.FC = () => {
   }, [loadBusinessData]);
 
   useEffect(() => {
-    getBusinessCategories().then(res => {
-      if (res.success && res.data) setCategories(res.data);
-    });
+    getBusinessCategories()
+      .then(res => {
+        if (res.success && res.data) setCategories(res.data);
+      })
+      .catch((err: unknown) => {
+        const msg = err instanceof Error ? err.message : 'Error al cargar categorías';
+        console.error('[BusinessDashboard] Error fetching categories:', err);
+        notifyError(msg);
+      });
   }, []);
 
   const [searchParams] = useSearchParams();
@@ -175,11 +190,17 @@ export const BusinessDashboard: React.FC = () => {
   useEffect(() => {
     if (!user?.id) return;
     if (businesses.length === 0) {
-      getUserBusinesses(user.id).then(res => {
-        if (res.success && res.businesses && res.businesses.length > 0) {
-          dispatch(setBusinesses(res.businesses));
-        }
-      });
+      getUserBusinesses(user.id)
+        .then(res => {
+          if (res.success && res.businesses && res.businesses.length > 0) {
+            dispatch(setBusinesses(res.businesses));
+          }
+        })
+        .catch((err: unknown) => {
+          const msg = err instanceof Error ? err.message : 'Error al cargar tus negocios';
+          console.error('[BusinessDashboard] Error fetching user businesses:', err);
+          notifyError(msg);
+        });
     }
   }, [user?.id]);
 
@@ -504,7 +525,7 @@ export const BusinessDashboard: React.FC = () => {
                       <div className="relative shrink-0">
                         <div className="h-16 w-16 sm:h-14 sm:w-14 rounded-lg overflow-hidden ring-2 ring-white dark:ring-slate-800 shadow-lg transition-transform duration-300 group-hover:scale-105">
                           <img
-                            src={businessData.logo_url || 'https://upload.wikimedia.org/wikipedia/commons/8/89/Portrait_Placeholder.png'}
+                            src={businessData.logo_url || FALLBACK_PLACEHOLDER}
                             alt={`${businessData.name} logo`}
                             className="h-full w-full object-contain"
                           />
@@ -582,6 +603,84 @@ export const BusinessDashboard: React.FC = () => {
           {/* ═══ PROGRESS ═══ */}
           {businessData && (
             <BusinessProgressSection businessData={businessData} />
+          )}
+
+          {/* ═══ ¿POR QUÉ ACTUALIZAR? (Solo Starter) ═══ */}
+          {plan === 'starter' && (
+            <div className="animate-in fade-in slide-in-from-top-4 duration-500 space-y-3">
+              <div className="bg-gradient-to-r from-blue-50 to-indigo-50 dark:from-blue-950/20 dark:to-indigo-950/20 rounded-xl border border-blue-200 dark:border-blue-800 p-5 sm:p-6">
+                <div className="flex flex-col sm:flex-row items-start sm:items-center gap-4">
+                  <div className="p-3 rounded-xl bg-blue-100 dark:bg-blue-900/30 text-blue-600 dark:text-blue-400 shrink-0">
+                    <Sparkles className="w-6 h-6" />
+                  </div>
+                  <div className="flex-1 min-w-0">
+                    <h3 className="text-base font-black text-slate-900 dark:text-white tracking-tight mb-0.5">
+                      Estás en el plan <span className="text-blue-600 dark:text-blue-400">Starter</span>
+                    </h3>
+                    <p className="text-sm text-slate-500 dark:text-slate-400">
+                      Tu negocio está online, pero puedes aprovechar mucho más. Estos son los beneficios que obtienes al actualizar:
+                    </p>
+                  </div>
+                  <Link
+                    to="/plans"
+                    className="inline-flex items-center gap-2 px-5 py-2.5 bg-blue-600 hover:bg-blue-700 text-white text-sm font-bold rounded-xl transition-all shadow-lg shadow-blue-200/50 dark:shadow-blue-900/30 whitespace-nowrap shrink-0"
+                  >
+                    <TrendingUp className="w-4 h-4" />
+                    Comparar planes
+                  </Link>
+                </div>
+              </div>
+
+              {/* Beneficios desbloqueables */}
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                {/* Pro features */}
+                <div className="bg-white dark:bg-slate-900 rounded-xl border border-blue-200 dark:border-blue-800 p-4 sm:p-5 hover:shadow-lg transition-all">
+                  <div className="flex items-center gap-2 mb-3">
+                    <span className="px-2 py-0.5 bg-blue-100 text-blue-700 dark:bg-blue-900/30 dark:text-blue-400 rounded text-[10px] font-black uppercase tracking-wider">Pro</span>
+                    <span className="text-xs font-bold text-slate-400 line-through">Starter</span>
+                  </div>
+                  <ul className="space-y-2">
+                    {PLAN_FEATURES.pro.filter(f => !PLAN_FEATURES.starter.some(s => s.label === f.label && s.included)).map((feat, i) => (
+                      <li key={i} className="flex items-start gap-2 text-xs sm:text-sm font-medium text-slate-700 dark:text-slate-300">
+                        <CheckCircle2 className="w-4 h-4 text-blue-500 shrink-0 mt-0.5" />
+                        <span>{feat.label}</span>
+                      </li>
+                    ))}
+                  </ul>
+                  <Link
+                    to="/plans"
+                    className="mt-4 block w-full text-center py-2.5 bg-blue-600 hover:bg-blue-700 text-white text-xs font-black rounded-lg transition-all shadow-lg shadow-blue-500/25 active:scale-95 uppercase tracking-wider"
+                  >
+                    Actualizar a Pro — ${PLAN_PRICES.pro.amount.toLocaleString('es-CO')}/mes
+                  </Link>
+                </div>
+
+                {/* Premium features */}
+                <div className="bg-white dark:bg-slate-900 rounded-xl border border-amber-200 dark:border-amber-800 p-4 sm:p-5 hover:shadow-lg transition-all relative overflow-hidden">
+                  <div className="absolute top-0 right-0 bg-gradient-to-l from-amber-400 to-amber-500 text-white text-[9px] font-black px-3 py-1 rounded-bl-xl uppercase tracking-widest">
+                    Recomendado
+                  </div>
+                  <div className="flex items-center gap-2 mb-3">
+                    <span className="px-2 py-0.5 bg-amber-100 text-amber-700 dark:bg-amber-900/30 dark:text-amber-400 rounded text-[10px] font-black uppercase tracking-wider">Premium</span>
+                    <span className="text-xs font-bold text-slate-400 line-through">Starter</span>
+                  </div>
+                  <ul className="space-y-2">
+                    {PLAN_FEATURES.premium.filter(f => !PLAN_FEATURES.starter.some(s => s.label === f.label && s.included)).map((feat, i) => (
+                      <li key={i} className="flex items-start gap-2 text-xs sm:text-sm font-medium text-slate-700 dark:text-slate-300">
+                        <Crown className="w-4 h-4 text-amber-500 shrink-0 mt-0.5" />
+                        <span>{feat.label}</span>
+                      </li>
+                    ))}
+                  </ul>
+                  <Link
+                    to="/plans"
+                    className="mt-4 block w-full text-center py-2.5 bg-gradient-to-r from-amber-500 to-amber-600 hover:from-amber-600 hover:to-amber-700 text-white text-xs font-black rounded-lg transition-all shadow-lg shadow-amber-500/25 active:scale-95 uppercase tracking-wider"
+                  >
+                    Actualizar a Premium — ${PLAN_PRICES.premium.amount.toLocaleString('es-CO')}/mes
+                  </Link>
+                </div>
+              </div>
+            </div>
           )}
 
           {/* ═══ TABS ═══ (outside space-y-8 to couple with Nav on scroll) */}

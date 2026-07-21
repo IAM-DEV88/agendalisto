@@ -1,5 +1,3 @@
-import type { Appointment } from '../types/appointment';
-
 export interface IcsEventData {
   summary: string;
   description?: string;
@@ -47,13 +45,4 @@ export function downloadIcs(data: IcsEventData, filename?: string) {
   URL.revokeObjectURL(url);
 }
 
-export function generateIcsFromAppointment(appointment: Appointment): string {
-  return generateIcsFile({
-    summary: `${appointment.services?.name || 'Cita'} - ${appointment.businesses?.name || ''}`,
-    description: appointment.notes || '',
-    location: appointment.businesses?.address || '',
-    startTime: new Date(appointment.start_time),
-    endTime: new Date(appointment.end_time),
-    uid: appointment.id,
-  });
-}
+

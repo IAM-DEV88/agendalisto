@@ -1,9 +1,10 @@
 import React from 'react';
 import { Calendar, User, Clock, Loader2, CheckCircle2, XCircle, PlayCircle, Info } from 'lucide-react';
 import SectionHeader from '../ui/SectionHeader';
+import type { Appointment } from '../../lib/api';
 
 interface AppointmentsSectionProps {
-  appointments: import('../../lib/api').Appointment[];
+  appointments: Appointment[];
   loading: boolean;
   onUpdateStatus: (id: string, status: 'pending' | 'confirmed' | 'completed' | 'cancelled') => Promise<void>;
 }
@@ -14,15 +15,20 @@ const AppointmentsSection: React.FC<AppointmentsSectionProps> = ({
   onUpdateStatus 
 }) => {
   const formatDate = (dateString: string) => {
-    const date = new Date(dateString);
-    return date.toLocaleDateString('es-ES', {
-      weekday: 'long',
-      year: 'numeric',
-      month: 'long',
-      day: 'numeric',
-      hour: 'numeric',
-      minute: 'numeric',
-    });
+    try {
+      const date = new Date(dateString);
+      if (isNaN(date.getTime())) return 'Fecha inválida';
+      return date.toLocaleDateString('es-ES', {
+        weekday: 'long',
+        year: 'numeric',
+        month: 'long',
+        day: 'numeric',
+        hour: 'numeric',
+        minute: 'numeric',
+      });
+    } catch {
+      return 'Fecha inválida';
+    }
   };
 
   return (
@@ -48,7 +54,7 @@ const AppointmentsSection: React.FC<AppointmentsSectionProps> = ({
       ) : (
         <div className="card overflow-hidden">
           <ul className="divide-y divide-slate-100 dark:divide-slate-800">
-            {appointments.map((appointment: any) => {
+            {appointments.map((appointment: Appointment) => {
               return (
                 <li key={appointment.id} className="p-4 sm:p-6 hover:bg-slate-50/50 dark:hover:bg-slate-800/50 transition-colors">
                   <div className="flex flex-col md:flex-row md:items-center justify-between gap-6">

@@ -113,7 +113,7 @@ export default function SEOLandingPage() {
               >
                 <div className="h-48 bg-slate-100 dark:bg-slate-800 overflow-hidden">
                   <img src={business.logo_url || FALLBACK_BUSINESS_LOGO} alt={business.name}
-                    className="w-full h-full object-contain group-hover:scale-110 transition-transform duration-500"
+                    loading="lazy" className="w-full h-full object-contain group-hover:scale-110 transition-transform duration-500"
                     onError={e => { (e.target as HTMLImageElement).src = FALLBACK_BUSINESS_LOGO; }} />
                 </div>
                 <div className="p-5">

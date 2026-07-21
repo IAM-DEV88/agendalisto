@@ -17,7 +17,7 @@ const ServiceCard: React.FC<{
   index: number;
   currentUser: import('@supabase/supabase-js').User | null;
   showcaseOnly?: boolean;
-}> = ({ service, index, currentUser, showcaseOnly }) => {
+}> = React.memo(({ service, index, currentUser, showcaseOnly }) => {
   const [isLiked, setIsLiked] = useState(false);
   const [likesCount, setLikesCount] = useState(service.likes_count || 0);
   const [isLiking, setIsLiking] = useState(false);
@@ -83,6 +83,7 @@ const ServiceCard: React.FC<{
           <img
             src={images[0]}
             alt={service.name}
+            loading="lazy"
             className="w-full h-full object-contain transition-transform duration-500 group-hover:scale-105"
           />
         </div>
@@ -119,10 +120,11 @@ const ServiceCard: React.FC<{
           <button
             onClick={handleToggleLike}
             disabled={isLiking}
-            className={`flex items-center gap-1 px-1.5 py-0.5 rounded text-[10px] font-bold transition-all ${
+            className={`flex items-center gap-1 px-1.5 py-0.5 rounded text-[10px] font-bold transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary-500 focus-visible:ring-offset-2 dark:focus-visible:ring-offset-slate-900 ${
               isLiked ? 'text-rose-500' : 'text-slate-400 dark:text-slate-500 hover:text-rose-400'
             }`}
             aria-label={isLiked ? 'Quitar me gusta' : 'Me gusta'}
+            aria-pressed={isLiked}
           >
             <Heart className={`w-2.5 h-2.5 ${isLiked ? 'fill-current' : ''}`} />
             {likesCount > 0 && likesCount}
@@ -158,7 +160,7 @@ const ServiceCard: React.FC<{
       </div>
     </div>
   );
-};
+});
 
 const ServicesList: React.FC<ServicesListProps> = ({
   services, currentUser, showcaseOnly,

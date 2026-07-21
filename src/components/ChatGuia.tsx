@@ -5,6 +5,7 @@ import { saveChatMessage, getChatHistory, ChatMessage, getBlogPosts, getPopularP
 import { toast } from 'react-hot-toast';
 import { Link } from 'react-router-dom';
 import { getCityConfig } from '../lib/cities';
+import { sanitizeUrl, sanitizeTextInput } from '../utils/sanitize';
 
 // Función para parsear el contenido del mensaje y detectar enlaces en formato Markdown y negritas
 const MessageContent = ({ content }: { content: string }) => {
@@ -23,13 +24,14 @@ const MessageContent = ({ content }: { content: string }) => {
       const match = part.match(/\[(.*?)\]\((.*?)\)/);
       if (match) {
         const linkText = match[1];
-        const url = match[2];
-        
-        if (url.startsWith('/')) {
+        const rawUrl = match[2];
+        const safeUrl = rawUrl.startsWith('/') ? rawUrl : sanitizeUrl(rawUrl);
+        if (!safeUrl) return <span key={`${key}-${i}`}>{linkText}</span>;
+        if (safeUrl.startsWith('/')) {
           return (
             <Link 
               key={`${key}-${i}`} 
-              to={url} 
+              to={safeUrl} 
               className="font-bold underline decoration-2 decoration-primary-400 hover:text-primary-500 dark:hover:text-primary-300 transition-colors inline-flex items-center"
             >
               {linkText}
@@ -39,7 +41,7 @@ const MessageContent = ({ content }: { content: string }) => {
         return (
           <a 
             key={`${key}-${i}`} 
-            href={url} 
+            href={safeUrl} 
             target="_blank" 
             rel="noopener noreferrer" 
             className="font-bold underline decoration-2 decoration-primary-400 hover:text-primary-500 dark:hover:text-primary-300 transition-colors inline-flex items-center"
@@ -299,7 +301,7 @@ const ChatGuia = () => {
     e.preventDefault();
     if (!input.trim() || isLoading) return;
 
-    const userMessage = input.trim();
+    const userMessage = sanitizeTextInput(input.trim(), 4000);
     setInput('');
     setIsLoading(true);
 
@@ -317,10 +319,11 @@ const ChatGuia = () => {
     setMessages(prev => [...prev, tempUserMsg]);
 
     try {
-      // Save user message to DB
+      // Save user message to DB (sanitizado)
+      const sanitizedMessage = userMessage;
       await saveChatMessage({
         role: 'user',
-        content: userMessage,
+        content: sanitizedMessage,
         session_id: sessionId.current,
         user_id: user?.id
       });
@@ -394,7 +397,10 @@ const ChatGuia = () => {
       {/* Floating Button */}
       <button
         onClick={() => setIsOpen(!isOpen)}
-        className="w-14 h-14 bg-primary-600 hover:bg-primary-500 text-white rounded-full shadow-2xl flex items-center justify-center transition-all transform hover:scale-110 active:scale-95"
+        className="w-14 h-14 bg-primary-600 hover:bg-primary-500 text-white rounded-full shadow-2xl flex items-center justify-center transition-all transform hover:scale-110 active:scale-95 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary-500 focus-visible:ring-offset-2 dark:focus-visible:ring-offset-slate-900"
+        aria-label={isOpen ? 'Cerrar chat' : 'Abrir chat'}
+        aria-expanded={isOpen}
+        aria-haspopup="dialog"
       >
         {isOpen ? <X className="w-6 h-6" /> : <MessageSquare className="w-6 h-6" />}
       </button>
@@ -413,7 +419,7 @@ const ChatGuia = () => {
                 <div className="text-xs text-primary-100">En línea ahora</div>
               </div>
             </div>
-            <button type="button" onClick={() => setIsOpen(false)} className="hover:bg-white/10 p-1 rounded-full">
+            <button type="button" onClick={() => setIsOpen(false)} className="hover:bg-white/10 p-1 rounded-full focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white/50" aria-label="Cerrar chat">
               <X className="w-5 h-5" />
             </button>
           </div>
@@ -483,7 +489,8 @@ const ChatGuia = () => {
             <button
               type="submit"
               disabled={!input.trim() || isLoading}
-              className="p-2 bg-primary-600 text-white rounded-lg hover:bg-primary-500 disabled:opacity-50 transition-colors"
+              className="p-2 bg-primary-600 text-white rounded-lg hover:bg-primary-500 disabled:opacity-50 transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary-500 focus-visible:ring-offset-2 dark:focus-visible:ring-offset-slate-900"
+              aria-label="Enviar mensaje"
             >
               <Send className="w-5 h-5" />
             </button>

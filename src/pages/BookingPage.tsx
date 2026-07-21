@@ -87,8 +87,13 @@ function BookingPage() {
   }, [slug, serviceId]);
 
   const handleUserRegistered = async () => {
-    const { data: { user: freshUser } } = await supabase.auth.getUser();
-    if (freshUser) setUser(freshUser);
+    try {
+      const { data: { user: freshUser } } = await supabase.auth.getUser();
+      if (freshUser) setUser(freshUser);
+    } catch (err: unknown) {
+      console.error('[BookingPage] Error al refrescar usuario tras registro:', err);
+      // No mostramos error al usuario porque el registro ya fue exitoso
+    }
   };
 
   const images = service?.image_urls

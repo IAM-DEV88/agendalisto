@@ -18,8 +18,8 @@ export const useAuth = () => {
       } else {
         setUser(null);
       }
-    }).catch((err: any) => {
-      setError(err.message);
+    }).catch((err: unknown) => {
+      setError(err instanceof Error ? err.message : 'Error desconocido');
     }).finally(() => {
       setLoading(false);
     });

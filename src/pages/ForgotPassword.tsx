@@ -95,7 +95,7 @@ const ForgotPassword = () => {
                 <div className="w-full border-t border-slate-200 dark:border-slate-700" />
               </div>
               <div className="relative flex justify-center text-sm font-bold uppercase tracking-widest">
-                <span className="px-4 bg-white dark:bg-slate-800 text-slate-400">
+                <span className="px-4 bg-white dark:bg-slate-800 text-slate-500">
                   O vuelve a
                 </span>
               </div>

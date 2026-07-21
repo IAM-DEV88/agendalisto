@@ -1,18 +1,16 @@
 import { Link, useNavigate } from 'react-router-dom';
 import { useAuth } from '../hooks/useAuth';
-import { useState, useEffect, useMemo } from 'react';
-import { getBusinessCategories, BusinessCategory, getTopMilestones } from '../lib/api';
-import { Swiper, SwiperSlide } from 'swiper/react';
-import { Pagination, Autoplay } from 'swiper/modules';
-import { Search, MapPin, CheckCircle2, ArrowRight } from 'lucide-react';
-import { getCategoryIcon } from '../lib/categoryIcons';
-import 'swiper/css';
-import 'swiper/css/pagination';
+import { useState, useEffect, useMemo, lazy, Suspense } from 'react';
+import { getBusinessCategories, getTopMilestones } from '../lib/api';
+import type { BusinessCategory } from '../lib/api';
+import { Search, MapPin, CheckCircle2, ArrowRight, CalendarCheck, Star, Heart, History, Store } from 'lucide-react';
 import BlogHomeSection from '../components/BlogHomeSection';
 import { supabase } from '../lib/supabase';
 import type { Milestone } from '../lib/api';
 import SEO from '../components/SEO';
 import agendayaImage from '../assets/branding/AgendaYA.jpg';
+
+const CategorySwiper = lazy(() => import('../components/CategorySwiper'));
 
 const Home = () => {
   const { user, loading } = useAuth();
@@ -125,6 +123,38 @@ const Home = () => {
               
               {user ? (
                 <div className="flex flex-col gap-4">
+                  {user.role === 'visitor' && (
+                    <div className="space-y-3 mb-2">
+                      <div className="flex items-center gap-3 text-white/90">
+                        <CheckCircle2 className="w-5 h-5 text-primary-300" />
+                        <span className="font-bold">Activa tu cuenta de cliente</span>
+                      </div>
+                      <div className="flex items-center gap-3 text-white/90">
+                        <CheckCircle2 className="w-5 h-5 text-primary-300" />
+                        <span className="font-bold">Agenda citas sin filas</span>
+                      </div>
+                      <div className="flex items-center gap-3 text-white/90">
+                        <CheckCircle2 className="w-5 h-5 text-primary-300" />
+                        <span className="font-bold">Guarda favoritos y reseña</span>
+                      </div>
+                    </div>
+                  )}
+                  {user.role === 'client' && !user.business_id && (
+                    <div className="space-y-2 mb-2">
+                      <div className="flex items-center gap-3 text-white/90">
+                        <Store className="w-5 h-5 text-primary-300 shrink-0" />
+                        <span className="font-bold">Página web gratis para tu negocio</span>
+                      </div>
+                      <div className="flex items-center gap-3 text-white/90">
+                        <CheckCircle2 className="w-5 h-5 text-primary-300 shrink-0" />
+                        <span className="font-bold">Recibe reservas online 24/7</span>
+                      </div>
+                      <div className="flex items-center gap-3 text-white/90">
+                        <Star className="w-5 h-5 text-primary-300 shrink-0" />
+                        <span className="font-bold">Aparece en búsquedas y reseñas</span>
+                      </div>
+                    </div>
+                  )}
                   <Link to={cta.registerLink} className="btn-primary w-full text-center">
                     {cta.registerText}
                   </Link>
@@ -184,49 +214,89 @@ const Home = () => {
           </div>
           
           {!loadingCategories ? (
-            <Swiper
-              modules={[Pagination, Autoplay]}
-              autoplay={{ delay: 4500, pauseOnMouseEnter: true, disableOnInteraction: false }}
-              spaceBetween={24}
-              slidesPerView={1}
-              pagination={{ clickable: true, el: '.swiper-pagination-custom' }}
-              breakpoints={{
-                640: { slidesPerView: 2 },
-                1024: { slidesPerView: 3 },
-                1280: { slidesPerView: 4 },
-              }}
-              className="pb-12"
-            >
-              {categories.map((cat) => (
-                <SwiperSlide key={cat.id}>
-                  <Link to={`/explore?category=${cat.id}`} className="group block h-full">
+            <Suspense fallback={
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+                {categories.slice(0, 4).map((cat) => (
+                  <Link key={cat.id} to={`/explore?category=${cat.id}`} className="group block h-full">
                     <div className="card h-full p-6 flex flex-col hover:border-primary-400 group-hover:shadow-xl transition-all duration-300">
-                      <span className="text-4xl block mb-4">
-                        {getCategoryIcon(cat.name)}
-                      </span>
-                      <h3 className="text-xl font-bold text-slate-900 dark:text-white mb-2 group-hover:text-primary-600 dark:group-hover:text-primary-400 transition-colors">
-                        {cat.name}
-                      </h3>
-                      <p className="text-slate-600 dark:text-slate-400 text-sm line-clamp-3">
-                        {cat.description}
-                      </p>
-                      <div className="mt-auto pt-4 flex items-center text-primary-600 dark:text-primary-400 font-semibold text-sm">
-                        Ver servicios
-                        <svg className="ml-2 w-4 h-4 group-hover:translate-x-1 transition-transform" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
-                        </svg>
-                      </div>
+                      <h3 className="text-xl font-bold text-slate-900 dark:text-white mb-2">{cat.name}</h3>
+                      <p className="text-slate-600 dark:text-slate-400 text-sm line-clamp-3">{cat.description}</p>
                     </div>
                   </Link>
-                </SwiperSlide>
-              ))}
-              <div className="swiper-pagination-custom mt-8 flex justify-center"></div>
-            </Swiper>
+                ))}
+              </div>
+            }>
+              <CategorySwiper categories={categories} />
+            </Suspense>
           ) : (
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
               {[1, 2, 3, 4].map((i) => (
                 <div key={i} className="card h-48 animate-pulse bg-slate-200 dark:bg-slate-800"></div>
               ))}
+            </div>
+          )}
+        </div>
+      </section>
+
+      {/* ─── BENEFITS SECTION: visitor → client ─── */}
+      <section className="py-16 bg-white dark:bg-slate-950 transition-colors duration-200">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="text-center max-w-3xl mx-auto mb-12">
+            <h2 className="text-3xl font-bold text-slate-900 dark:text-white mb-4">
+              ¿Por qué crear una cuenta gratuita?
+            </h2>
+            <p className="text-slate-600 dark:text-slate-400">
+      {user ? 'Disfruta de todos los beneficios de tener una cuenta activa.' : 'Regístrate gratis y empieza a disfrutar de estos beneficios en segundos.'}
+            </p>
+          </div>
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+            <div className="card p-6 text-center hover:border-primary-300 dark:hover:border-primary-700 transition-all duration-300 hover:shadow-lg">
+              <div className="w-12 h-12 rounded-lg bg-primary-50 dark:bg-primary-500/10 flex items-center justify-center mx-auto mb-4">
+                <CalendarCheck className="w-6 h-6 text-primary-600 dark:text-primary-400" />
+              </div>
+              <h3 className="font-bold text-slate-900 dark:text-white mb-2">Reserva en segundos</h3>
+              <p className="text-sm text-slate-500 dark:text-slate-400 leading-relaxed">
+                Agenda citas online sin llamadas ni filas. Elige el día y la hora que mejor te quede.
+              </p>
+            </div>
+            <div className="card p-6 text-center hover:border-primary-300 dark:hover:border-primary-700 transition-all duration-300 hover:shadow-lg">
+              <div className="w-12 h-12 rounded-lg bg-emerald-50 dark:bg-emerald-500/10 flex items-center justify-center mx-auto mb-4">
+                <Star className="w-6 h-6 text-emerald-600 dark:text-emerald-400" />
+              </div>
+              <h3 className="font-bold text-slate-900 dark:text-white mb-2">Escribe reseñas</h3>
+              <p className="text-sm text-slate-500 dark:text-slate-400 leading-relaxed">
+                Ayuda a la comunidad compartiendo tu experiencia. Tus reseñas ayudan a otros a elegir mejor.
+              </p>
+            </div>
+            <div className="card p-6 text-center hover:border-primary-300 dark:hover:border-primary-700 transition-all duration-300 hover:shadow-lg">
+              <div className="w-12 h-12 rounded-lg bg-amber-50 dark:bg-amber-500/10 flex items-center justify-center mx-auto mb-4">
+                <Heart className="w-6 h-6 text-amber-600 dark:text-amber-400" />
+              </div>
+              <h3 className="font-bold text-slate-900 dark:text-white mb-2">Guarda favoritos</h3>
+              <p className="text-sm text-slate-500 dark:text-slate-400 leading-relaxed">
+                Guarda tus negocios favoritos y accede rápidamente a ellos cuando quieras reservar.
+              </p>
+            </div>
+            <div className="card p-6 text-center hover:border-primary-300 dark:hover:border-primary-700 transition-all duration-300 hover:shadow-lg">
+              <div className="w-12 h-12 rounded-lg bg-violet-50 dark:bg-violet-500/10 flex items-center justify-center mx-auto mb-4">
+                <History className="w-6 h-6 text-violet-600 dark:text-violet-400" />
+              </div>
+              <h3 className="font-bold text-slate-900 dark:text-white mb-2">Historial de citas</h3>
+              <p className="text-sm text-slate-500 dark:text-slate-400 leading-relaxed">
+                Lleva el control de todas tus citas pasadas y futuras desde un solo lugar.
+              </p>
+            </div>
+          </div>
+          {!user && (
+            <div className="text-center mt-10">
+              <Link
+                to="/register"
+                className="inline-flex items-center gap-2 px-8 py-4 bg-primary-600 hover:bg-primary-500 text-white font-bold rounded-lg shadow-lg shadow-primary-500/30 transition-all hover:-translate-y-0.5 active:translate-y-0"
+              >
+                Crear cuenta gratis
+                <span className="text-sm opacity-80">— sin compromiso</span>
+              </Link>
+              <p className="text-xs text-slate-400 mt-3">Ya tienes cuenta? <Link to="/login" className="font-bold text-primary-600 dark:text-primary-400 hover:text-primary-500">Inicia sesión</Link></p>
             </div>
           )}
         </div>
@@ -268,7 +338,7 @@ const Home = () => {
                   to={cta.registerLink} 
                   className="inline-flex items-center px-8 py-4 bg-primary-500 hover:bg-primary-400 text-white font-black rounded-lg transition-all shadow-xl shadow-primary-500/25 active:scale-95 group/btn"
                 >
-                  Tu web gratis
+                  {user?.role === 'client' && !user?.business_id ? 'Crear web gratis' : user?.business_id ? 'Ir a mi negocio' : user?.role === 'visitor' ? 'Activar cuenta' : 'Tu web gratis'}
                   <svg className="ml-3 w-5 h-5 group-hover:translate-x-1 transition-transform" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={3} d="M14 5l7 7-7 7" />
                   </svg>

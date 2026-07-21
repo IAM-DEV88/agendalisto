@@ -89,8 +89,8 @@ export const useUIConfig = (userId?: string): UseUIConfigResult => {
       
       notifySuccess('Configuración guardada correctamente');
       return true;
-    } catch (err: any) {
-      const errorMsg = err.message || 'Error al guardar la configuración';
+    } catch (err: unknown) {
+      const errorMsg = err instanceof Error ? err.message : 'Error al guardar la configuración';
       setMessage(errorMsg);
       notifyError(errorMsg);
       return false;

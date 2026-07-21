@@ -1,8 +1,10 @@
+import React from 'react';
+
 interface StarRatingProps {
   rating: number;
 }
 
-export default function StarRating({ rating }: StarRatingProps) {
+const StarRating = React.memo<StarRatingProps>(({ rating }) => {
   return (
     <div className="flex items-center gap-0.5">
       {[1, 2, 3, 4, 5].map((star) => (
@@ -17,4 +19,6 @@ export default function StarRating({ rating }: StarRatingProps) {
       ))}
     </div>
   );
-}
+});
+
+export default StarRating;

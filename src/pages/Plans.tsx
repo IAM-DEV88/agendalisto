@@ -5,7 +5,7 @@ import { PLANS, PLAN_LABELS, PLAN_DESCRIPTIONS, PLAN_PRICES, PLAN_FEATURES, PLAN
 import type { RootState } from '../store';
 import SEO from '../components/SEO';
 import PayPalSubscribeButton from '../components/PayPalSubscribeButton';
-import { Check, X, Sparkles, Crown, Store } from 'lucide-react';
+import { Check, X, Sparkles, Crown, Store, TrendingUp, MessageCircle, BarChart3, ShieldCheck } from 'lucide-react';
 
 const PLAN_ICONS: Record<Plan, React.ReactNode> = {
   starter: <div className="w-10 h-10 rounded-lg bg-slate-100 dark:bg-slate-800 flex items-center justify-center text-slate-500" />,
@@ -52,13 +52,58 @@ function PlansContent() {
 
       <div className="max-w-6xl mx-auto px-4 py-16 sm:py-24">
         {/* Header */}
-        <div className="text-center mb-12">
+        <div className="text-center mb-10">
           <h1 className="text-4xl sm:text-5xl font-black text-slate-900 dark:text-white tracking-tight mb-4">
             Planes para tu negocio
           </h1>
           <p className="text-lg text-slate-500 dark:text-slate-400 max-w-2xl mx-auto">
             Empieza gratis y escala a medida que creces. Todos los planes incluyen tu propia página web profesional con gestión de citas.
           </p>
+        </div>
+
+        {/* ═══ FEATURE UNLOCK COMPARISON BANNER ═══ */}
+        <div className="mb-12 bg-gradient-to-r from-blue-50 via-white to-amber-50 dark:from-blue-950/20 dark:via-slate-900 dark:to-amber-950/20 rounded-2xl border border-slate-200 dark:border-slate-700 p-6 sm:p-8">
+          <h2 className="text-lg font-black text-slate-900 dark:text-white tracking-tight mb-6 text-center">
+            ¿Qué desbloqueas al mejorar tu plan?
+          </h2>
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+            <div className="flex items-start gap-3 p-4 rounded-xl bg-white dark:bg-slate-800 border border-slate-100 dark:border-slate-700 shadow-sm">
+              <div className="p-2 rounded-lg bg-blue-50 dark:bg-blue-900/20 text-blue-600 dark:text-blue-400 shrink-0">
+                <TrendingUp className="w-5 h-5" />
+              </div>
+              <div>
+                <p className="text-sm font-bold text-slate-900 dark:text-white">Mejor posición</p>
+                <p className="text-xs text-slate-500 dark:text-slate-400 mt-0.5">Aparece primero en búsquedas con score +2/+3</p>
+              </div>
+            </div>
+            <div className="flex items-start gap-3 p-4 rounded-xl bg-white dark:bg-slate-800 border border-slate-100 dark:border-slate-700 shadow-sm">
+              <div className="p-2 rounded-lg bg-emerald-50 dark:bg-emerald-900/20 text-emerald-600 dark:text-emerald-400 shrink-0">
+                <MessageCircle className="w-5 h-5" />
+              </div>
+              <div>
+                <p className="text-sm font-bold text-slate-900 dark:text-white">WhatsApp + Email</p>
+                <p className="text-xs text-slate-500 dark:text-slate-400 mt-0.5">Notificaciones y contacto con clientes</p>
+              </div>
+            </div>
+            <div className="flex items-start gap-3 p-4 rounded-xl bg-white dark:bg-slate-800 border border-slate-100 dark:border-slate-700 shadow-sm">
+              <div className="p-2 rounded-lg bg-amber-50 dark:bg-amber-900/20 text-amber-600 dark:text-amber-400 shrink-0">
+                <BarChart3 className="w-5 h-5" />
+              </div>
+              <div>
+                <p className="text-sm font-bold text-slate-900 dark:text-white">Analytics</p>
+                <p className="text-xs text-slate-500 dark:text-slate-400 mt-0.5">Ingresos, tendencias, retención y LTV</p>
+              </div>
+            </div>
+            <div className="flex items-start gap-3 p-4 rounded-xl bg-white dark:bg-slate-800 border border-slate-100 dark:border-slate-700 shadow-sm">
+              <div className="p-2 rounded-lg bg-purple-50 dark:bg-purple-900/20 text-purple-600 dark:text-purple-400 shrink-0">
+                <ShieldCheck className="w-5 h-5" />
+              </div>
+              <div>
+                <p className="text-sm font-bold text-slate-900 dark:text-white">Badge + Prioridad</p>
+                <p className="text-xs text-slate-500 dark:text-slate-400 mt-0.5">Distintivo Pro/Premium en tu perfil</p>
+              </div>
+            </div>
+          </div>
         </div>
 
         {/* Pricing Cards */}
@@ -140,18 +185,25 @@ function PlansContent() {
                         {hasBusiness ? <><Store className="w-4 h-4" /> Ir a mi negocio</> : 'Empezar gratis'}
                       </Link>
                     ) : plan === currentPlan ? (
-                      <div className="w-full text-center py-3 font-bold rounded-lg bg-slate-100 dark:bg-slate-800 text-slate-400 cursor-not-allowed">
-                        Plan actual
+                      <div className="w-full text-center py-3 font-bold rounded-lg bg-emerald-50 dark:bg-emerald-900/20 text-emerald-700 dark:text-emerald-300 border border-emerald-200 dark:border-emerald-800 cursor-default flex items-center justify-center gap-2">
+                        <Check className="w-4 h-4" /> Plan actual — disfrutando de {PLAN_LABELS[plan]}
                       </div>
                     ) : !user || !PAYPAL_CLIENT_ID ? (
                       <Link
-                        to={user ? '/business/dashboard' : '/login'}
+                        to={user ? '/plans' : '/login'}
                         className={`block w-full text-center py-3 font-bold rounded-lg transition-all ${card.button}`}
                       >
-                        {user ? `Mejora a ${PLAN_LABELS[plan]}` : 'Inicia sesión'}
+                        {user ? `Cambiar a ${PLAN_LABELS[plan]}` : 'Inicia sesión para mejorar'}
                       </Link>
                     ) : (
-                      <PayPalSubscribeButton plan={plan as 'pro' | 'premium'} userId={user.id} />
+                      <div className="space-y-2">
+                        <PayPalSubscribeButton plan={plan as 'pro' | 'premium'} userId={user.id} />
+                        <p className="text-xs text-center text-slate-400 dark:text-slate-500">
+                          {plan === 'pro'
+                            ? 'Badge Pro, analytics y WhatsApp'
+                            : 'Todo Pro + branding + badge Premium'}
+                        </p>
+                      </div>
                     )}
                   </div>
               </div>
@@ -160,7 +212,7 @@ function PlansContent() {
         </div>
 
         {/* Footer note */}
-        <p className="text-center text-sm text-slate-400 dark:text-slate-500 mt-12">
+        <p className="text-center text-sm text-slate-500 dark:text-slate-400 mt-12">
           Todos los planes incluyen soporte por email. ¿Tienes dudas?{' '}
           <a href="/faq" className="font-bold text-primary-600 dark:text-primary-400 hover:underline">
             Preguntas frecuentes

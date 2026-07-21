@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useRef, useEffect } from 'react';
 import { format } from 'date-fns';
 import { es } from 'date-fns/locale';
 import { Appointment, AppointmentStatus } from '../../types/appointment';
@@ -8,6 +8,7 @@ import {
   CheckCircle, XCircle, Phone, Mail, Star, CalendarClock,
 } from 'lucide-react';
 import { useLockBodyScroll } from '../../hooks/useLockBodyScroll';
+import { useFocusTrap } from '../../hooks/useFocusTrap';
 
 interface AppointmentModalProps {
   isOpen: boolean;
@@ -51,7 +52,19 @@ const AppointmentModal: React.FC<AppointmentModalProps> = ({
   showReviewSection = false,
   currentUserId,
 }) => {
+  const containerRef = useRef<HTMLDivElement>(null);
   useLockBodyScroll(isOpen && !!appointment);
+  useFocusTrap(containerRef, isOpen && !!appointment);
+
+  useEffect(() => {
+    if (!isOpen || !appointment) return;
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.key === 'Escape') onClose();
+    };
+    document.addEventListener('keydown', handleKeyDown);
+    return () => document.removeEventListener('keydown', handleKeyDown);
+  }, [isOpen, appointment, onClose]);
+
   if (!isOpen || !appointment) return null;
 
   const cfg = statusConfig[appointment.status] || statusConfig.pending;
@@ -66,8 +79,15 @@ const AppointmentModal: React.FC<AppointmentModalProps> = ({
   const isSameDay = startDate.toDateString() === endDate.toDateString();
 
   return (
-    <div className="fixed inset-0 z-50 flex items-start sm:items-center justify-center px-2 pt-16 sm:pt-0 sm:p-4 bg-black/50 backdrop-blur-sm animate-in fade-in duration-200 !mt-0" onClick={onClose}>
+    <div
+      className="fixed inset-0 z-50 flex items-start sm:items-center justify-center px-2 pt-16 sm:pt-0 sm:p-4 bg-black/50 backdrop-blur-sm animate-in fade-in duration-200 !mt-0"
+      role="dialog"
+      aria-modal="true"
+      aria-labelledby="appt-title"
+      onClick={onClose}
+    >
       <div
+        ref={containerRef}
         className="relative w-full sm:max-w-lg max-h-[calc(100dvh-5rem)] sm:max-h-[85vh] bg-white dark:bg-slate-900 rounded-lg shadow-2xl overflow-hidden animate-in sm:zoom-in-95 duration-300"
         onClick={e => e.stopPropagation()}
       >
@@ -82,7 +102,7 @@ const AppointmentModal: React.FC<AppointmentModalProps> = ({
             <div className="flex items-center gap-2.5 min-w-0">
               <div className={`w-2.5 h-2.5 rounded-full flex-shrink-0 ${cfg.dot}`} />
               <div className="min-w-0">
-                <h2 className="text-sm font-bold text-slate-900 dark:text-white truncate mb-0">
+                <h2 id="appt-title" className="text-sm font-bold text-slate-900 dark:text-white truncate mb-0">
                   {appointment.services?.name || 'Cita'}
                 </h2>
                 <p className="text-[11px] font-medium text-slate-400 truncate mb-0">
@@ -92,6 +112,7 @@ const AppointmentModal: React.FC<AppointmentModalProps> = ({
             </div>
             <button
               onClick={onClose}
+              aria-label="Cerrar"
               className="p-1.5 hover:bg-slate-100 dark:hover:bg-slate-800 text-slate-400 hover:text-slate-600 dark:hover:text-slate-300 rounded-lg transition-all active:scale-90 flex-shrink-0"
             >
               <X className="w-4 h-4" />

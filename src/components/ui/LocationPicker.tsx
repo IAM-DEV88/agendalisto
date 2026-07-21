@@ -1,7 +1,6 @@
 import { useEffect, useRef, useState } from 'react';
-import L from 'leaflet';
-import 'leaflet/dist/leaflet.css';
 import { MapPin, Search, Loader2 } from 'lucide-react';
+import type { Map as LeafletMap, Marker as LeafletMarker } from 'leaflet';
 
 interface LocationPickerProps {
   lat?: number | null;
@@ -12,18 +11,13 @@ interface LocationPickerProps {
 const DEFAULT_CENTER: [number, number] = [4.142, -73.63];
 const NOMINATIM = 'https://nominatim.openstreetmap.org/search';
 
-const markerIcon = L.divIcon({
-  html: '<div style="width:32px;height:32px;border-radius:50%;background:#7C3AED;box-shadow:0 4px 12px rgba(124,58,237,0.4);display:flex;align-items:center;justify-content:center;color:white;font-size:18px;font-weight:700;border:3px solid white;line-height:1;">📍</div>',
-  iconSize: [32, 32],
-  iconAnchor: [16, 32],
-  className: '',
-});
-
 export default function LocationPicker({ lat, lng, onChange }: LocationPickerProps) {
   const mapRef = useRef<HTMLDivElement>(null);
-  const mapInstanceRef = useRef<L.Map | null>(null);
-  const markerRef = useRef<L.Marker | null>(null);
+  const mapInstanceRef = useRef<LeafletMap | null>(null);
+  const markerRef = useRef<LeafletMarker | null>(null);
   const initializedRef = useRef(false);
+  const leafletRef = useRef<typeof import('leaflet') | null>(null);
+  const [leafletLoaded, setLeafletLoaded] = useState(false);
 
   const [searchQuery, setSearchQuery] = useState('');
   const [searching, setSearching] = useState(false);
@@ -32,11 +26,34 @@ export default function LocationPicker({ lat, lng, onChange }: LocationPickerPro
 
   const hasCoords = lat !== null && lat !== undefined && lng !== null && lng !== undefined;
 
+  // Dynamically load leaflet
+  useEffect(() => {
+    let cancelled = false;
+    async function initLeaflet() {
+      const L = await import('leaflet');
+      await import('leaflet/dist/leaflet.css');
+      if (!cancelled) {
+        leafletRef.current = L;
+        setLeafletLoaded(true);
+      }
+    }
+    initLeaflet();
+    return () => { cancelled = true; };
+  }, []);
+
   const placeMarker = (newLat: number, newLng: number) => {
+    const L = leafletRef.current;
     const map = mapInstanceRef.current;
-    if (!map) return;
+    if (!L || !map) return;
 
     if (markerRef.current) markerRef.current.remove();
+
+    const markerIcon = L.divIcon({
+      html: '<div style="width:32px;height:32px;border-radius:50%;background:#7C3AED;box-shadow:0 4px 12px rgba(124,58,237,0.4);display:flex;align-items:center;justify-content:center;color:white;font-size:18px;font-weight:700;border:3px solid white;line-height:1;">📍</div>',
+      iconSize: [32, 32],
+      iconAnchor: [16, 32],
+      className: '',
+    });
 
     const marker = L.marker([newLat, newLng], { icon: markerIcon, draggable: true }).addTo(map);
     marker.on('dragend', () => {
@@ -54,7 +71,9 @@ export default function LocationPicker({ lat, lng, onChange }: LocationPickerPro
   };
 
   useEffect(() => {
-    if (!mapRef.current || initializedRef.current) return;
+    if (!mapRef.current || initializedRef.current || !leafletLoaded) return;
+    const L = leafletRef.current;
+    if (!L) return;
     initializedRef.current = true;
 
     const map = L.map(mapRef.current, { zoomControl: true, attributionControl: false });
@@ -79,7 +98,7 @@ export default function LocationPicker({ lat, lng, onChange }: LocationPickerPro
       markerRef.current = null;
       initializedRef.current = false;
     };
-  }, []);
+  }, [leafletLoaded]);
 
   useEffect(() => {
     if (hasCoords && mapInstanceRef.current) {

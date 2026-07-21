@@ -18,6 +18,7 @@ import ConnectedPillCard from '../components/ui/ConnectedPillCard';
 import { useStickyDetection } from '../hooks/useStickyDetection';
 import ShareButton from '../components/ui/ShareButton';
 import { toast } from 'react-hot-toast';
+import { PLAN_BADGE } from '../lib/roles';
 import { Store, Clock, MapPin, Star, Heart, Phone, Mail, MessageCircle, Globe, Instagram, Facebook, Pen } from 'lucide-react';
 import QRCode from 'qrcode';
 
@@ -92,31 +93,30 @@ function BusinessPublicPage() {
         if (!success || !business) { setError(businessError || 'Negocio no encontrado'); return; }
         setBusinessData(business);
         recordBusinessVisit(business.id, user?.id);
-
-        const { success: sS, data: sD } = await getBusinessServices(business.id);
-        if (sS && sD) {
-          const active = sD.filter(s => s.is_active !== false);
-          setServices(active);
-        }
-
-        try { setBusinessHours(await getBusinessHours(business.id)); } catch (err) {
-          console.error('Error loading business hours:', err);
-        }
-
-        try {
-          const { success: rS, data: rD } = await getBusinessReviews(business.id);
-          if (rS && rD) {
-            setReviews(rD);
-            setAverageRating(rD.length > 0 ? rD.reduce((sum, r) => sum + r.rating, 0) / rD.length : 0);
-          }
-        } catch (err) { console.error('Error loading reviews:', err); }
-
-        if (business.owner_id) {
-          const counts = await getReferralCounts([business.owner_id]);
-          setReferralCount(counts[business.owner_id] || 0);
-        }
-
         setLikesCount(business.likes_count || 0);
+
+        // Parallelize independent data fetches after getting business
+        const bid = business.id;
+        const ownerId = business.owner_id;
+        await Promise.allSettled([
+          getBusinessServices(bid).then(({ success, data }) => {
+            if (success && data) {
+              setServices(data.filter(s => s.is_active !== false));
+            }
+          }),
+          getBusinessHours(bid).then(hours => setBusinessHours(hours)).catch(err => {
+            console.error('Error loading business hours:', err);
+          }),
+          getBusinessReviews(bid).then(({ success, data }) => {
+            if (success && data) {
+              setReviews(data);
+              setAverageRating(data.length > 0 ? data.reduce((sum, r) => sum + r.rating, 0) / data.length : 0);
+            }
+          }).catch(err => { console.error('Error loading reviews:', err); }),
+          ownerId ? getReferralCounts([ownerId]).then(counts => {
+            setReferralCount(counts[ownerId] || 0);
+          }) : Promise.resolve(),
+        ]);
       } catch (err) { console.error('Error loading business:', err); setError('Error al cargar la información del negocio'); }
       finally { setLoading(false); }
     };
@@ -312,11 +312,14 @@ function BusinessPublicPage() {
               </p>
               <div className="flex flex-wrap items-center gap-1.5 mt-1">
                 {businessData.plan && businessData.plan !== 'starter' && (
-                  <span className={`px-2 py-0.5 rounded-full text-[11px] font-bold uppercase tracking-wider ${
-                    businessData.plan === 'premium'
-                      ? 'bg-amber-100 dark:bg-amber-900/30 text-amber-700 dark:text-amber-300'
-                      : 'bg-blue-100 dark:bg-blue-900/30 text-blue-700 dark:text-blue-400'
-                  }`}>{businessData.plan}</span>
+                  (() => {
+                    const badge = PLAN_BADGE[businessData.plan as 'pro' | 'premium'];
+                    return badge ? (
+                      <span className={`px-2 py-0.5 rounded-full text-[11px] font-bold uppercase tracking-wider ${badge.className}`}>
+                        {badge.text}
+                      </span>
+                    ) : null;
+                  })()
                 )}
                 {averageRating > 0 && (
                   <span className="inline-flex items-center gap-0.5 px-2 py-0.5 rounded-full bg-amber-50 dark:bg-amber-500/10 text-amber-700 dark:text-amber-300 text-xs font-bold">
@@ -334,6 +337,7 @@ function BusinessPublicPage() {
           <div className="flex flex-wrap items-center gap-2">
             <button type="button" onClick={handleToggleLike} disabled={isLiking}
               aria-label={isLiked ? 'Quitar me gusta' : 'Me gusta'}
+              aria-pressed={isLiked}
               className={`inline-flex items-center gap-1.5 px-3 py-2 rounded-lg text-xs font-bold transition-all min-h-[36px] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary-500 focus-visible:ring-offset-2 dark:focus-visible:ring-offset-slate-900 ${
                 isLiked
                   ? 'bg-rose-50 dark:bg-rose-500/10 text-rose-600 dark:text-rose-400'
@@ -410,12 +414,13 @@ function BusinessPublicPage() {
                             <div className="flex-shrink-0 flex justify-center sm:justify-end">
                               {qrDataUrl ? (
                                 <div className="bg-white dark:bg-slate-800 rounded-lg border border-slate-200 dark:border-slate-700 shadow-sm inline-flex">
-                                  <img
-                                    src={qrDataUrl}
-                                    alt={`QR ${businessData.name}`}
-                                    className="w-24 h-24 sm:w-28 sm:h-28 rounded-lg max-w-full"
-                                    onError={(e) => { console.error('QR image load error:', e); setQrDataUrl(null); }}
-                                  />
+                                <img
+                                  src={qrDataUrl}
+                                  alt={`QR ${businessData.name}`}
+                                  loading="lazy"
+                                  className="w-24 h-24 sm:w-28 sm:h-28 rounded-lg max-w-full"
+                                  onError={(e) => { console.error('QR image load error:', e); setQrDataUrl(null); }}
+                                />
                                 </div>
                               ) : (
                                 <a href={publicUrl} target="_blank" rel="noopener noreferrer" className="inline-flex items-center gap-2 px-4 py-2 bg-slate-100 dark:bg-slate-800 text-xs font-bold rounded-lg hover:bg-primary-50 dark:hover:bg-primary-900/20 hover:text-primary-600 dark:hover:text-primary-400 transition-all">

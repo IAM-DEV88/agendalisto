@@ -16,7 +16,7 @@ interface TabNavProps {
   connected?: boolean;
 }
 
-export const TabNav: React.FC<TabNavProps> = ({
+export const TabNav: React.FC<TabNavProps> = React.memo(({
   tabs,
   activeTabId,
   onTabChange,
@@ -27,6 +27,39 @@ export const TabNav: React.FC<TabNavProps> = ({
   const sentinelRef = useRef<HTMLDivElement>(null);
   const [stuck, setStuck] = useState(false);
   const [pillPosition, setPillPosition] = useState(64);
+
+  const handleTabKeyDown = (e: React.KeyboardEvent, currentTabId: string) => {
+    const currentIndex = tabs.findIndex(t => t.id === currentTabId);
+    let nextIndex = -1;
+
+    switch (e.key) {
+      case 'ArrowRight':
+        e.preventDefault();
+        nextIndex = (currentIndex + 1) % tabs.length;
+        break;
+      case 'ArrowLeft':
+        e.preventDefault();
+        nextIndex = (currentIndex - 1 + tabs.length) % tabs.length;
+        break;
+      case 'Home':
+        e.preventDefault();
+        nextIndex = 0;
+        break;
+      case 'End':
+        e.preventDefault();
+        nextIndex = tabs.length - 1;
+        break;
+      default:
+        return;
+    }
+
+    if (nextIndex >= 0 && nextIndex < tabs.length) {
+      const nextTab = tabs[nextIndex];
+      onTabChange(nextTab.id);
+      const btn = document.getElementById(`tab-${nextTab.id}`);
+      btn?.focus();
+    }
+  };
 
   useEffect(() => {
     if (!sticky) return;
@@ -98,13 +131,14 @@ export const TabNav: React.FC<TabNavProps> = ({
   }, [activeTabId]);
 
   const pillNav = (
-    <div className="overflow-x-auto no-scrollbar" role="tablist" aria-label="Navegación de pestañas">
+    <div className="overflow-x-auto no-scrollbar" role="tablist" aria-orientation="horizontal" aria-label="Navegación de pestañas" onKeyDown={(e) => handleTabKeyDown(e, activeTabId)}>
       <div className="bg-slate-100 dark:bg-slate-800/80 p-0.5 inline-flex items-center gap-0.5 w-max rounded-t-lg">
         {tabs.map((tab) => (
           <button
             key={tab.id}
             id={`tab-${tab.id}`}
             role="tab"
+            tabIndex={activeTabId === tab.id ? 0 : -1}
             aria-selected={activeTabId === tab.id}
             aria-controls={`panel-${tab.id}`}
             onClick={() => onTabChange(tab.id)}
@@ -161,7 +195,7 @@ export const TabNav: React.FC<TabNavProps> = ({
           style={{ top: `${pillPosition}px` }}
         >
           <div className={`max-w-7xl mx-auto px-4 ${connected ? 'pt-2.5' : 'py-2.5'} flex justify-start`}>
-            <div className="overflow-x-auto no-scrollbar" role="tablist" aria-label="Navegación de pestañas">
+            <div className="overflow-x-auto no-scrollbar" role="tablist" aria-orientation="horizontal" aria-label="Navegación de pestañas" onKeyDown={(e) => handleTabKeyDown(e, activeTabId)}>
               <div className="w-max rounded-t-lg">
                 <div className="bg-slate-100 dark:bg-slate-800 p-0.5 inline-flex items-center gap-0.5 rounded-t-lg">
                   {tabs.map((tab) => (
@@ -169,6 +203,7 @@ export const TabNav: React.FC<TabNavProps> = ({
                       key={tab.id}
                       id={`tab-${tab.id}`}
                       role="tab"
+                      tabIndex={activeTabId === tab.id ? 0 : -1}
                       aria-selected={activeTabId === tab.id}
                       aria-controls={`panel-${tab.id}`}
                       onClick={() => onTabChange(tab.id)}
@@ -209,12 +244,13 @@ export const TabNav: React.FC<TabNavProps> = ({
   }
 
   const nav = (
-    <nav className="flex overflow-x-auto no-scrollbar tabnav-x-scroll gap-1" role="tablist" aria-label="Navegación de pestañas">
+    <nav className="flex overflow-x-auto no-scrollbar tabnav-x-scroll gap-1" role="tablist" aria-orientation="horizontal" aria-label="Navegación de pestañas" onKeyDown={(e) => handleTabKeyDown(e, activeTabId)}>
       {tabs.map((tab) => (
         <button
           key={tab.id}
           id={`tab-${tab.id}`}
           role="tab"
+          tabIndex={activeTabId === tab.id ? 0 : -1}
           aria-selected={activeTabId === tab.id}
           aria-controls={`panel-${tab.id}`}
           onClick={() => onTabChange(tab.id)}
@@ -268,6 +304,6 @@ export const TabNav: React.FC<TabNavProps> = ({
       {nav}
     </div>
   );
-};
+});
 
 export default TabNav;

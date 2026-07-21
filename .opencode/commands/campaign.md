@@ -28,11 +28,12 @@ Ejecuta una campaña completa de mejora recorriendo todos los agentes.
 ## Mecanismo
 
 1. Leer `.opencode/improve/priorities.md` y `AGENTS.md` para contexto
-2. Por cada división en orden:
-   a. Ejecutar N rondas usando `task` para invocar al subagente correspondiente
-   b. Después de cada ronda: actualizar `.opencode/improve/rounds.md`
-   c. Validar con `pnpm type-check`
-3. Al terminar todas las divisiones: mostrar resumen global
+2. Por cada división en orden (quality, architecture, reliability, performance, ux, product):
+   a. Ejecutar N rondas. Para CADA ronda, usar `task` para invocar al subagente correspondiente (ej: `@quality`). Pasarle el objetivo específico y el número de ronda.
+   b. Esperar a que el subagente termine. Leer el resultado.
+   c. Actualizar `.opencode/improve/rounds.md` con lo hecho.
+   d. Validar con `pnpm type-check` después de cada ronda.
+3. Al terminar todas las divisiones: mostrar resumen global en formato tabla.
 
 ## Criterios de parada por división
 

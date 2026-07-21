@@ -25,8 +25,9 @@ export async function uploadImage(
       .getPublicUrl(fileName);
 
     return { url: publicUrl.publicUrl, error: null };
-  } catch (err: any) {
-    return { url: null, error: err.message || 'Error al subir la imagen' };
+  } catch (err: unknown) {
+    const message = err instanceof Error ? err.message : 'Error al subir la imagen';
+    return { url: null, error: message };
   }
 }
 
@@ -41,8 +42,9 @@ export async function deleteImage(url: string): Promise<{ error: string | null }
 
     if (error) throw error;
     return { error: null };
-  } catch (err: any) {
-    return { error: err.message || 'Error al eliminar la imagen' };
+  } catch (err: unknown) {
+    const message = err instanceof Error ? err.message : 'Error al eliminar la imagen';
+    return { error: message };
   }
 }
 

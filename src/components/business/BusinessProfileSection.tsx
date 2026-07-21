@@ -10,6 +10,7 @@ import LocationPicker from '../ui/LocationPicker';
 import FormInput from '../ui/FormInput';
 import FormTextarea from '../ui/FormTextarea';
 import FormSelect from '../ui/FormSelect';
+import { FALLBACK_PLACEHOLDER } from '../../lib/config';
 
 interface BusinessProfileSectionProps {
   businessData: Business;
@@ -25,8 +26,8 @@ const BusinessProfileSection: React.FC<BusinessProfileSectionProps> = ({
   onSave,
   onChange
 }) => {
-  // Imagen fallback para cuando haya error
-  const FALLBACK_LOGO = 'https://upload.wikimedia.org/wikipedia/commons/8/89/Portrait_Placeholder.png';
+  // Imagen fallback local (data URI) para cuando haya error
+  const FALLBACK_LOGO = FALLBACK_PLACEHOLDER;
 
   // Nombre correcto del bucket para logos
   const BUCKET_NAME = 'business-logos';

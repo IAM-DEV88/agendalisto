@@ -13,17 +13,22 @@ const BlogHomeSection = () => {
 
   useEffect(() => {
     const fetchData = async () => {
-      const { data: { user } } = await supabase.auth.getUser();
-      setUser(user);
+      try {
+        const { data: { user } } = await supabase.auth.getUser();
+        setUser(user);
 
-      const [latestRes, popularRes] = await Promise.all([
-        getLatestBlogPost(),
-        getPopularPosts(4)
-      ]);
+        const [latestRes, popularRes] = await Promise.all([
+          getLatestBlogPost(),
+          getPopularPosts(4)
+        ]);
 
-      if (latestRes.success && latestRes.data) setLatestPost(latestRes.data);
-      if (popularRes.success && popularRes.data) setPopularPosts(popularRes.data);
-      setLoading(false);
+        if (latestRes.success && latestRes.data) setLatestPost(latestRes.data);
+        if (popularRes.success && popularRes.data) setPopularPosts(popularRes.data);
+      } catch (err: unknown) {
+        console.error('[BlogHomeSection] Error fetching blog data:', err);
+      } finally {
+        setLoading(false);
+      }
     };
     fetchData();
   }, []);
@@ -70,7 +75,7 @@ const BlogHomeSection = () => {
                 <div className="card h-full overflow-hidden flex flex-col hover:border-primary-400 transition-all duration-300 shadow-xl shadow-slate-200/50 dark:shadow-none">
                   <div className="relative h-64 sm:h-80 overflow-hidden bg-slate-200 dark:bg-slate-800">
                     {latestPost.image_url ? (
-                      <img src={latestPost.image_url} alt={latestPost.title} className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105" />
+                      <img src={latestPost.image_url} alt={latestPost.title} loading="lazy" className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105" />
                     ) : (
                       <div className="w-full h-full flex items-center justify-center">
                         <MessageSquare className="w-16 h-16 text-slate-400 opacity-20" />
@@ -93,7 +98,7 @@ const BlogHomeSection = () => {
                     </p>
                     <div className="mt-auto pt-6 border-t border-slate-100 dark:border-slate-800 flex items-center justify-between">
                       <div className="flex items-center gap-6">
-                        <button type="button" onClick={(e) => handleLike(e, latestPost.id, 'post')} className="flex items-center gap-2 text-slate-500 hover:text-rose-500 transition-colors">
+                        <button type="button" onClick={(e) => handleLike(e, latestPost.id, 'post')} className="flex items-center gap-2 text-slate-500 hover:text-rose-500 transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary-500 focus-visible:ring-offset-2 dark:focus-visible:ring-offset-slate-900 rounded-lg" aria-label={latestPost.likes_count > 0 ? 'Quitar me gusta' : 'Me gusta'} aria-pressed={latestPost.likes_count > 0}>
                           <Heart className={`w-5 h-5 ${latestPost.likes_count > 0 ? 'fill-rose-500 text-rose-500' : ''}`} />
                           <span className="font-bold">{latestPost.likes_count}</span>
                         </button>
@@ -120,7 +125,7 @@ const BlogHomeSection = () => {
                 <div className="card p-5 hover:border-primary-400 transition-all duration-300 flex gap-5 shadow-sm hover:shadow-md">
                   <div className="w-24 h-24 rounded-lg overflow-hidden flex-shrink-0 bg-slate-100 dark:bg-slate-800">
                     {post.image_url ? (
-                      <img src={post.image_url} alt={post.title} className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110" />
+                      <img src={post.image_url} alt={post.title} loading="lazy" className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110" />
                     ) : (
                       <div className="w-full h-full flex items-center justify-center">
                         <MessageSquare className="w-6 h-6 text-slate-300" />

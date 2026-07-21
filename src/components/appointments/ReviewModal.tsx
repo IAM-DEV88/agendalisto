@@ -1,8 +1,9 @@
-import React, { useState } from 'react';
+import React, { useState, useRef, useEffect } from 'react';
 import { Star, X, Send, Heart, Camera, MessageSquareText } from 'lucide-react';
 import { Appointment } from '../../types/appointment';
 import { uploadImage } from '../../lib/storage';
 import { useLockBodyScroll } from '../../hooks/useLockBodyScroll';
+import { useFocusTrap } from '../../hooks/useFocusTrap';
 
 interface ReviewModalProps {
   isOpen: boolean;
@@ -19,7 +20,19 @@ const ReviewModal: React.FC<ReviewModalProps> = ({
   onSubmit,
   userId,
 }) => {
+  const containerRef = useRef<HTMLDivElement>(null);
   useLockBodyScroll(isOpen);
+  useFocusTrap(containerRef, isOpen);
+
+  useEffect(() => {
+    if (!isOpen) return;
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.key === 'Escape') onClose();
+    };
+    document.addEventListener('keydown', handleKeyDown);
+    return () => document.removeEventListener('keydown', handleKeyDown);
+  }, [isOpen, onClose]);
+
   const [rating, setRating] = useState(5);
   const [comment, setComment] = useState('');
   const [loading, setLoading] = useState(false);
@@ -56,9 +69,13 @@ const ReviewModal: React.FC<ReviewModalProps> = ({
   return (
     <div
       className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50 backdrop-blur-sm animate-in fade-in duration-200"
+      role="dialog"
+      aria-modal="true"
+      aria-labelledby="review-title"
       onClick={onClose}
     >
       <div
+        ref={containerRef}
         className="w-full max-w-lg bg-white dark:bg-slate-900 rounded-lg shadow-2xl overflow-hidden animate-in fade-in zoom-in-95 duration-200"
         onClick={e => e.stopPropagation()}
       >
@@ -70,7 +87,7 @@ const ReviewModal: React.FC<ReviewModalProps> = ({
                 <Heart className="w-5 h-5 text-amber-500" />
               </div>
               <div>
-                <h3 className="text-lg font-black text-slate-900 dark:text-white">
+                <h3 id="review-title" className="text-lg font-black text-slate-900 dark:text-white">
                   Tu opinión importa
                 </h3>
                 <p className="text-xs font-medium text-slate-500 dark:text-slate-400">
@@ -80,6 +97,7 @@ const ReviewModal: React.FC<ReviewModalProps> = ({
             </div>
             <button
               onClick={onClose}
+              aria-label="Cerrar"
               className="p-2 hover:bg-slate-100 dark:hover:bg-slate-800 text-slate-400 hover:text-slate-600 dark:hover:text-slate-300 rounded-lg transition-all"
             >
               <X className="w-5 h-5" />

@@ -102,6 +102,8 @@ function FavoriteBusinessCard({ fav, index, removingId, onRemove }: { fav: Favor
           <img
             src={fav.logo_url || FALLBACK_BUSINESS_LOGO}
             alt={fav.name}
+            width={160}
+            height={160}
             className="w-full h-full object-contain group-hover:scale-110 transition-transform duration-500"
             onError={(e) => { e.currentTarget.src = FALLBACK_BUSINESS_LOGO; }}
           />
@@ -139,7 +141,7 @@ function FavoriteBusinessCard({ fav, index, removingId, onRemove }: { fav: Favor
         <button
           onClick={() => onRemove(fav)}
           disabled={removingId === fav.like_id}
-          className="w-full inline-flex items-center justify-center gap-2 px-4 py-2 bg-red-50 hover:bg-red-100 dark:bg-red-500/10 dark:hover:bg-red-500/20 text-red-600 dark:text-red-400 text-xs font-bold rounded-lg transition-all active:scale-95 disabled:opacity-50"
+          className="w-full inline-flex items-center justify-center gap-2 px-4 py-2 bg-red-50 hover:bg-red-100 dark:bg-red-500/10 dark:hover:bg-red-500/20 text-red-600 dark:text-red-400 text-xs font-bold rounded-lg transition-all active:scale-95 disabled:opacity-50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-red-500 focus-visible:ring-offset-2 dark:focus-visible:ring-offset-slate-900"
         >
           <Trash2 className="w-3.5 h-3.5" />
           {removingId === fav.like_id ? 'Eliminando...' : 'Eliminar de favoritos'}
@@ -210,6 +212,8 @@ function FavoriteServiceCard({ fav, index, removingId, onRemove }: { fav: Servic
           <img
             src={previewImage}
             alt={fav.name}
+            width={160}
+            height={160}
             className="w-full h-full object-contain group-hover:scale-110 transition-transform duration-500"
             onError={(e) => { e.currentTarget.src = FALLBACK_BUSINESS_LOGO; }}
           />
@@ -248,7 +252,7 @@ function FavoriteServiceCard({ fav, index, removingId, onRemove }: { fav: Servic
         <button
           onClick={() => onRemove(fav)}
           disabled={removingId === fav.like_id}
-          className="w-full inline-flex items-center justify-center gap-2 px-4 py-2 bg-red-50 hover:bg-red-100 dark:bg-red-500/10 dark:hover:bg-red-500/20 text-red-600 dark:text-red-400 text-xs font-bold rounded-lg transition-all active:scale-95 disabled:opacity-50"
+          className="w-full inline-flex items-center justify-center gap-2 px-4 py-2 bg-red-50 hover:bg-red-100 dark:bg-red-500/10 dark:hover:bg-red-500/20 text-red-600 dark:text-red-400 text-xs font-bold rounded-lg transition-all active:scale-95 disabled:opacity-50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-red-500 focus-visible:ring-offset-2 dark:focus-visible:ring-offset-slate-900"
         >
           <Trash2 className="w-3.5 h-3.5" />
           {removingId === fav.like_id ? 'Eliminando...' : 'Eliminar de favoritos'}
@@ -317,6 +321,8 @@ function FavoriteBlogCard({ fav, index, removingId, onRemove }: { fav: BlogPostF
           <img
             src={fav.image_url || FALLBACK_BLOG_IMG}
             alt={fav.title}
+            width={160}
+            height={160}
             className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500"
             onError={(e) => { e.currentTarget.src = FALLBACK_BLOG_IMG; }}
           />
@@ -352,7 +358,7 @@ function FavoriteBlogCard({ fav, index, removingId, onRemove }: { fav: BlogPostF
         <button
           onClick={() => onRemove(fav)}
           disabled={removingId === fav.like_id}
-          className="w-full inline-flex items-center justify-center gap-2 px-4 py-2 bg-red-50 hover:bg-red-100 dark:bg-red-500/10 dark:hover:bg-red-500/20 text-red-600 dark:text-red-400 text-xs font-bold rounded-lg transition-all active:scale-95 disabled:opacity-50"
+          className="w-full inline-flex items-center justify-center gap-2 px-4 py-2 bg-red-50 hover:bg-red-100 dark:bg-red-500/10 dark:hover:bg-red-500/20 text-red-600 dark:text-red-400 text-xs font-bold rounded-lg transition-all active:scale-95 disabled:opacity-50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-red-500 focus-visible:ring-offset-2 dark:focus-visible:ring-offset-slate-900"
         >
           <Trash2 className="w-3.5 h-3.5" />
           {removingId === fav.like_id ? 'Eliminando...' : 'Eliminar de favoritos'}

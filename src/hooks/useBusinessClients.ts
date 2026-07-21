@@ -31,12 +31,13 @@ export const useBusinessClients = (businessId: string | undefined): UseBusinessC
           type: 'error' 
         });
       }
-    } catch (err: any) {
+    } catch (err: unknown) {
+      const errorMsg = err instanceof Error ? err.message : 'Error al cargar los clientes del negocio';
       setMessage({ 
-        text: err.message || 'Error al cargar los clientes del negocio', 
+        text: errorMsg, 
         type: 'error' 
       });
-      notifyError(err.message || 'Error al cargar los clientes del negocio');
+      notifyError(errorMsg);
     } finally {
       setLoading(false);
     }

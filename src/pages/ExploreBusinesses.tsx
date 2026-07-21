@@ -1,6 +1,7 @@
-import { useState, useEffect, useMemo, useCallback, useRef, lazy, Suspense } from 'react';
+import { useState, useEffect, useMemo, useCallback, useRef, lazy, Suspense, memo } from 'react';
 import { Link, useSearchParams } from 'react-router-dom';
-import { MapPin, Heart, Store, Search, X, Map, List, MessageCircle, Loader2, SlidersHorizontal } from 'lucide-react';
+import { MapPin, Heart, Store, Search, X, Map, List, MessageCircle, Loader2, SlidersHorizontal, Sparkles, Crown, UserPlus } from 'lucide-react';
+import { useSelector } from 'react-redux';
 import { getBusinesses, getBusinessCategories, toggleLike, checkLikedBusinesses, getReferralCounts } from '../lib/api';
 import type { Business, BusinessCategory } from '../lib/api';
 import { supabase } from '../lib/supabase';
@@ -12,11 +13,12 @@ import ShareButton from '../components/ui/ShareButton';
 import ReferralBadge from '../components/ui/ReferralBadge';
 import { FALLBACK_BUSINESS_LOGO } from '../lib/config';
 import { useDominantColor } from '../hooks/useDominantColor';
+import type { RootState } from '../store';
 
 const BusinessMap = lazy(() => import('../components/ui/BusinessMap'));
 const PAGE_SIZE = 12;
 
-const BusinessCard = ({ business, categories, isLiked: initialLiked, currentUser, onToggleLike, referralCount }: {
+const BusinessCard = memo(({ business, categories, isLiked: initialLiked, currentUser, onToggleLike, referralCount }: {
   business: Business;
   categories: BusinessCategory[];
   isLiked: boolean;
@@ -70,6 +72,8 @@ const BusinessCard = ({ business, categories, isLiked: initialLiked, currentUser
           src={business.logo_url || FALLBACK_BUSINESS_LOGO}
           alt={business.name}
           loading="lazy"
+          width={96}
+          height={96}
           className="w-full h-full object-contain transition-transform duration-500 group-hover:scale-105"
           onError={(e) => { e.currentTarget.src = FALLBACK_BUSINESS_LOGO; }}
         />
@@ -88,12 +92,14 @@ const BusinessCard = ({ business, categories, isLiked: initialLiked, currentUser
               </span>
             )}
             {business.plan === 'premium' && (
-              <span className="px-1.5 py-[1px] bg-amber-100 dark:bg-amber-900/40 text-amber-700 dark:text-amber-300 rounded text-[9px] font-bold uppercase leading-tight">
+              <span className="inline-flex items-center gap-0.5 px-2 py-[2px] bg-gradient-to-r from-amber-100 to-amber-50 dark:from-amber-900/50 dark:to-amber-800/30 text-amber-700 dark:text-amber-300 rounded text-[10px] font-black uppercase leading-tight tracking-wide shadow-sm">
+                <Crown className="w-2.5 h-2.5" />
                 Premium
               </span>
             )}
             {business.plan === 'pro' && (
-              <span className="px-1.5 py-[1px] bg-blue-100 dark:bg-blue-900/40 text-blue-700 dark:text-blue-300 rounded text-[9px] font-bold uppercase leading-tight">
+              <span className="inline-flex items-center gap-0.5 px-2 py-[2px] bg-gradient-to-r from-blue-100 to-blue-50 dark:from-blue-900/50 dark:to-blue-800/30 text-blue-700 dark:text-blue-300 rounded text-[10px] font-black uppercase leading-tight tracking-wide shadow-sm">
+                <Sparkles className="w-2.5 h-2.5" />
                 Pro
               </span>
             )}
@@ -108,7 +114,7 @@ const BusinessCard = ({ business, categories, isLiked: initialLiked, currentUser
         {business.address && (
           <div className="flex items-center gap-1 mt-1.5">
             <MapPin className="w-2.5 h-2.5 text-slate-400 shrink-0" />
-            <p className="text-[10px] font-medium text-slate-400 truncate">{business.address}</p>
+            <p className="text-[10px] font-medium text-slate-500 truncate">{business.address}</p>
           </div>
         )}
 
@@ -121,8 +127,9 @@ const BusinessCard = ({ business, categories, isLiked: initialLiked, currentUser
             onClick={handleToggleLike}
             disabled={isLiking}
             aria-label={isLiked ? 'Quitar de favoritos' : 'Agregar a favoritos'}
-            className={`flex items-center gap-1 px-1.5 py-0.5 rounded text-[10px] font-bold transition-all ${
-              isLiked ? 'text-rose-500' : 'text-slate-400 dark:text-slate-500 hover:text-rose-400'
+            aria-pressed={isLiked}
+            className={`flex items-center gap-1 px-1.5 py-0.5 rounded text-[10px] font-bold transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary-500 focus-visible:ring-offset-2 dark:focus-visible:ring-offset-slate-900 ${
+              isLiked ? 'text-rose-500' : 'text-slate-500 hover:text-rose-400'
             }`}
           >
             <Heart className={`w-2.5 h-2.5 ${isLiked ? 'fill-current' : ''}`} />
@@ -135,7 +142,7 @@ const BusinessCard = ({ business, categories, isLiked: initialLiked, currentUser
               title={business.name}
               variant="text"
               iconSize={11}
-              className="p-0.5 bg-transparent hover:bg-transparent text-slate-400 dark:text-slate-500 hover:text-primary-500 !rounded !gap-1"
+              className="p-0.5 bg-transparent hover:bg-transparent text-slate-500 hover:text-primary-500 !rounded !gap-1"
             />
           </div>
 
@@ -147,7 +154,7 @@ const BusinessCard = ({ business, categories, isLiked: initialLiked, currentUser
                 e.stopPropagation();
                 window.open(`https://wa.me/${business.whatsapp}?text=${encodeURIComponent('Hola, vi tu perfil en AgendaYa y quiero agendar una cita')}`, '_blank', 'noopener,noreferrer');
               }}
-              className="text-slate-400 dark:text-slate-500 hover:text-emerald-500 transition-colors p-0.5"
+              className="text-slate-500 hover:text-emerald-500 transition-colors p-0.5"
             >
               <MessageCircle className="w-2.5 h-2.5" />
             </button>
@@ -162,7 +169,7 @@ const BusinessCard = ({ business, categories, isLiked: initialLiked, currentUser
       </div>
     </Link>
   );
-};
+});
 
 function SkeletonCard() {
   return (
@@ -199,6 +206,13 @@ const ExploreBusinesses = () => {
   const [likedIds, setLikedIds] = useState<Set<string>>(new Set());
   const [referralCounts, setReferralCounts] = useState<Record<string, number>>({});
   const [mapBusinesses, setMapBusinesses] = useState<Business[]>([]);
+  const [dismissedCta, setDismissedCta] = useState(() => sessionStorage.getItem('agendaya_explore_cta_dismissed') === 'true');
+
+  const userProfile = useSelector((state: RootState) => state.user.userProfile);
+  const myBusinesses = useSelector((state: RootState) => state.user.businesses);
+  const isVisitorOrClient = userProfile && (userProfile.role === 'visitor' || userProfile.role === 'client');
+  const hasBusiness = myBusinesses.length > 0;
+  const showRegisterCta = userProfile && isVisitorOrClient && !hasBusiness && !dismissedCta;
 
   const observer = useRef<IntersectionObserver | null>(null);
   const initialLoadRef = useRef(false);
@@ -278,17 +292,25 @@ const ExploreBusinesses = () => {
       setBusinesses(prev => isInitial ? data : [...prev, ...data]);
       setHasMore(data.length === PAGE_SIZE);
 
+      // Parallelize liked check and referral counts
+      const parallelPromises: Promise<void>[] = [];
+
       if (user && data.length > 0) {
-        const ids = data.map(b => b.id);
-        const liked = await checkLikedBusinesses(user.id, ids);
-        setLikedIds(prev => new Set([...prev, ...liked]));
+        parallelPromises.push(
+          checkLikedBusinesses(user.id, data.map(b => b.id))
+            .then(liked => setLikedIds(prev => new Set([...prev, ...liked])))
+        );
       }
 
       const ownerIds = data.map(b => b.owner_id).filter(Boolean);
       if (ownerIds.length > 0) {
-        const counts = await getReferralCounts(ownerIds);
-        setReferralCounts(prev => ({ ...prev, ...counts }));
+        parallelPromises.push(
+          getReferralCounts(ownerIds)
+            .then(counts => setReferralCounts(prev => ({ ...prev, ...counts })))
+        );
       }
+
+      await Promise.all(parallelPromises);
     } catch {
       setError('Error al cargar los negocios. Intenta de nuevo.');
     } finally {
@@ -311,14 +333,14 @@ const ExploreBusinesses = () => {
 
   const hasFilters = searchTerm || locationTerm || category !== 'all';
   const clearFilters = () => { setSearchTerm(''); setLocationTerm(''); setCategory('all'); };
-  const handleToggleLike = (id: string) => {
+  const handleToggleLike = useCallback((id: string) => {
     setLikedIds(prev => {
       const next = new Set(prev);
       if (next.has(id)) next.delete(id);
       else next.add(id);
       return next;
     });
-  };
+  }, []);
 
   return (
     <div className="min-h-screen bg-gradient-to-b from-slate-50 to-white dark:from-slate-950 dark:to-slate-900 transition-colors duration-200">
@@ -413,7 +435,7 @@ const ExploreBusinesses = () => {
             </div>
           </div>
           {hasFilters && businesses.length > 0 && (
-            <p className="text-[11px] font-medium text-slate-400 mt-1.5">
+            <p className="text-[11px] font-medium text-slate-500 mt-1.5">
               {businesses.length} {businesses.length === 1 ? 'resultado' : 'resultados'}
             </p>
           )}
@@ -485,12 +507,49 @@ const ExploreBusinesses = () => {
               <div className="text-center py-8 animate-in fade-in duration-300">
                 <div className="inline-flex items-center gap-2 px-4 py-2 bg-slate-100 dark:bg-slate-800/50 rounded-full border border-slate-200 dark:border-slate-700">
                   <div className="w-1 h-1 rounded-full bg-slate-300 dark:bg-slate-600" />
-                  <span className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Has llegado al final</span>
+                  <span className="text-[10px] font-bold text-slate-600 uppercase tracking-widest">Has llegado al final</span>
                   <div className="w-1 h-1 rounded-full bg-slate-300 dark:bg-slate-600" />
                 </div>
               </div>
             )}
           </>
+        )}
+
+        {/* ═══ STICKY CTA: REGISTRAR NEGOCIO ═══ */}
+        {showRegisterCta && (
+          <div className="sticky bottom-0 z-40 -mx-4 px-4 pb-4 pt-2 mt-4 bg-gradient-to-t from-slate-50 via-slate-50/95 to-transparent dark:from-slate-950 dark:via-slate-950/95 dark:to-transparent animate-in fade-in slide-in-from-bottom-8 duration-500">
+            <div className="bg-gradient-to-r from-primary-600 to-primary-700 dark:from-primary-700 dark:to-primary-800 rounded-xl shadow-2xl shadow-primary-500/30 p-4 sm:p-5">
+              <div className="flex flex-col sm:flex-row items-start sm:items-center gap-3 sm:gap-4">
+                <div className="hidden sm:flex w-10 h-10 rounded-lg bg-white/20 items-center justify-center shrink-0">
+                  <Store className="w-5 h-5 text-white" />
+                </div>
+                <div className="flex-1 min-w-0">
+                  <p className="text-sm sm:text-base font-black text-white tracking-tight">
+                    ¿Tienes un negocio? <span className="text-primary-200">Regístralo gratis</span>
+                  </p>
+                  <p className="text-xs sm:text-sm text-primary-200/80 font-medium mt-0.5">
+                    Llega a más clientes, recibe reservas online y haz crecer tu negocio.
+                  </p>
+                </div>
+                <div className="flex items-center gap-2 shrink-0 w-full sm:w-auto">
+                  <Link
+                    to="/business/register"
+                    className="flex-1 sm:flex-none inline-flex items-center justify-center gap-1.5 px-5 py-2.5 bg-white text-primary-700 text-xs sm:text-sm font-black rounded-lg hover:bg-primary-50 active:scale-95 transition-all shadow-lg"
+                  >
+                    <UserPlus className="w-4 h-4" />
+                    Registrar gratis
+                  </Link>
+                  <button
+                    onClick={() => { setDismissedCta(true); sessionStorage.setItem('agendaya_explore_cta_dismissed', 'true'); }}
+                    className="w-8 h-8 flex items-center justify-center rounded-lg text-white/60 hover:text-white hover:bg-white/10 transition-all shrink-0"
+                    aria-label="Cerrar"
+                  >
+                    <X className="w-4 h-4" />
+                  </button>
+                </div>
+              </div>
+            </div>
+          </div>
         )}
       </div>
     </div>

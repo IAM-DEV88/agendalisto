@@ -1,6 +1,7 @@
-import { useState } from 'react';
+import { useState, useRef, useEffect } from 'react';
 import { Lock, Loader2, X } from 'lucide-react';
 import { verifyPassword } from '../../lib/api';
+import { useFocusTrap } from '../../hooks/useFocusTrap';
 
 interface Props {
   isOpen: boolean;
@@ -14,6 +15,18 @@ export default function PasswordVerifyModal({ isOpen, onClose, onVerified, title
   const [password, setPassword] = useState('');
   const [error, setError] = useState('');
   const [verifying, setVerifying] = useState(false);
+
+  const containerRef = useRef<HTMLDivElement>(null);
+  useFocusTrap(containerRef, isOpen);
+
+  useEffect(() => {
+    if (!isOpen) return;
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.key === 'Escape') onClose();
+    };
+    document.addEventListener('keydown', handleKeyDown);
+    return () => document.removeEventListener('keydown', handleKeyDown);
+  }, [isOpen, onClose]);
 
   if (!isOpen) return null;
 
@@ -39,16 +52,21 @@ export default function PasswordVerifyModal({ isOpen, onClose, onVerified, title
   };
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50 backdrop-blur-sm animate-in fade-in duration-200">
-      <div className="bg-white dark:bg-slate-900 rounded-lg shadow-2xl max-w-sm w-full p-6 animate-in zoom-in-95 duration-200">
+    <div
+      className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50 backdrop-blur-sm animate-in fade-in duration-200"
+      role="dialog"
+      aria-modal="true"
+      aria-labelledby="pwm-title"
+    >
+      <div ref={containerRef} className="bg-white dark:bg-slate-900 rounded-lg shadow-2xl max-w-sm w-full p-6 animate-in zoom-in-95 duration-200">
         <div className="flex items-center justify-between mb-4">
           <div className="flex items-center gap-3">
             <div className="p-2 bg-primary-50 dark:bg-primary-500/10 rounded-full">
               <Lock className="w-5 h-5 text-primary-600 dark:text-primary-400" />
             </div>
-            <h3 className="text-lg font-black text-slate-900 dark:text-white">{title}</h3>
+            <h3 id="pwm-title" className="text-lg font-black text-slate-900 dark:text-white">{title}</h3>
           </div>
-          <button type="button" onClick={onClose} className="p-1 text-slate-400 hover:text-slate-600 dark:hover:text-slate-300 transition-colors">
+          <button type="button" onClick={onClose} aria-label="Cerrar" className="p-1 text-slate-400 hover:text-slate-600 dark:hover:text-slate-300 transition-colors">
             <X className="w-5 h-5" />
           </button>
         </div>

@@ -1,9 +1,10 @@
-import React, { useState, useEffect, useCallback } from 'react';
+import React, { useState, useEffect, useCallback, useRef } from 'react';
 import { Edit2, Trash2, User, Mail, Phone, Loader2, AlertTriangle, Lock, Plus, Users, CheckCircle, XCircle } from 'lucide-react';
 import { getBusinessStaff, createStaff, updateStaff, deleteStaff, verifyPassword } from '../../lib/api';
 import { getMaxStaff, PLAN_LABELS } from '../../lib/roles';
 import { notifySuccess, notifyError } from '../../lib/toast';
 import { useLockBodyScroll } from '../../hooks/useLockBodyScroll';
+import { useFocusTrap } from '../../hooks/useFocusTrap';
 import { supabase } from '../../lib/supabase';
 import EmptyState from '../ui/EmptyState';
 import type { Staff } from '../../lib/api';
@@ -31,7 +32,11 @@ export default function StaffSection({ businessId, plan, passwordProtectStaff = 
   const [passwordError, setPasswordError] = useState('');
   const [submitting, setSubmitting] = useState(false);
 
+  const deleteDialogRef = useRef<HTMLDivElement>(null);
+  const passwordDialogRef = useRef<HTMLDivElement>(null);
   useLockBodyScroll(!!showCreateModal || !!editingStaff || !!deletingStaff || showPasswordModal);
+  useFocusTrap(deleteDialogRef, !!deletingStaff);
+  useFocusTrap(passwordDialogRef, showPasswordModal);
 
   const loadStaff = useCallback(async () => {
     try {
@@ -247,13 +252,17 @@ export default function StaffSection({ businessId, plan, passwordProtectStaff = 
       )}
 
       {deletingStaff && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50 backdrop-blur-sm animate-in fade-in duration-200">
-          <div className="bg-white dark:bg-slate-900 rounded-lg shadow-2xl max-w-md w-full p-6 animate-in zoom-in-95 duration-200">
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50 backdrop-blur-sm animate-in fade-in duration-200"
+          role="dialog"
+          aria-modal="true"
+          aria-labelledby="stf-del-title"
+        >
+          <div ref={deleteDialogRef} className="bg-white dark:bg-slate-900 rounded-lg shadow-2xl max-w-md w-full p-6 animate-in zoom-in-95 duration-200">
             <div className="flex items-center gap-3 mb-4">
               <div className="p-2 bg-red-100 dark:bg-red-900/40 rounded-full">
                 <AlertTriangle className="w-6 h-6 text-red-600 dark:text-red-400" />
               </div>
-              <h3 className="text-xl font-black text-slate-900 dark:text-white">¿Eliminar encargado?</h3>
+              <h3 id="stf-del-title" className="text-xl font-black text-slate-900 dark:text-white">¿Eliminar encargado?</h3>
             </div>
             <p className="text-sm text-slate-600 dark:text-slate-400 leading-relaxed mb-6">
               Se eliminará permanentemente a <strong className="text-slate-800 dark:text-slate-200">{deletingStaff.full_name}</strong> del personal del negocio.
@@ -272,13 +281,17 @@ export default function StaffSection({ businessId, plan, passwordProtectStaff = 
       )}
 
       {showPasswordModal && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50 backdrop-blur-sm animate-in fade-in duration-200">
-          <div className="bg-white dark:bg-slate-900 rounded-lg shadow-2xl max-w-sm w-full p-6 animate-in zoom-in-95 duration-200">
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50 backdrop-blur-sm animate-in fade-in duration-200"
+          role="dialog"
+          aria-modal="true"
+          aria-labelledby="stf-pw-title"
+        >
+          <div ref={passwordDialogRef} className="bg-white dark:bg-slate-900 rounded-lg shadow-2xl max-w-sm w-full p-6 animate-in zoom-in-95 duration-200">
             <div className="flex items-center gap-3 mb-4">
               <div className="p-2 bg-primary-50 dark:bg-primary-500/10 rounded-full">
                 <Lock className="w-5 h-5 text-primary-600 dark:text-primary-400" />
               </div>
-              <h3 className="text-lg font-black text-slate-900 dark:text-white">Confirmar contraseña</h3>
+              <h3 id="stf-pw-title" className="text-lg font-black text-slate-900 dark:text-white">Confirmar contraseña</h3>
             </div>
             <p className="text-sm text-slate-600 dark:text-slate-400 mb-4">
               Ingresa tu contraseña para continuar con esta acción.
@@ -315,6 +328,17 @@ function StaffFormModal({ title, initial, submitting, onSave, onClose }: {
   onSave: (data: { full_name: string; email?: string; phone?: string; is_active: boolean }) => Promise<void>;
   onClose: () => void;
 }) {
+  const formRef = useRef<HTMLDivElement>(null);
+  useFocusTrap(formRef, true);
+
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.key === 'Escape') onClose();
+    };
+    document.addEventListener('keydown', handleKeyDown);
+    return () => document.removeEventListener('keydown', handleKeyDown);
+  }, [onClose]);
+
   const [form, setForm] = useState({
     full_name: initial?.full_name || '',
     email: initial?.email || '',
@@ -329,16 +353,20 @@ function StaffFormModal({ title, initial, submitting, onSave, onClose }: {
   };
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50 backdrop-blur-sm animate-in fade-in duration-200" data-swipe-block>
-      <div className="bg-white dark:bg-slate-900 rounded-lg shadow-2xl max-w-md w-full p-6 animate-in zoom-in-95 duration-200">
+    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50 backdrop-blur-sm animate-in fade-in duration-200" data-swipe-block
+      role="dialog"
+      aria-modal="true"
+      aria-labelledby="stf-form-title"
+    >
+      <div ref={formRef} className="bg-white dark:bg-slate-900 rounded-lg shadow-2xl max-w-md w-full p-6 animate-in zoom-in-95 duration-200">
         <div className="flex items-center justify-between mb-5">
           <div className="flex items-center gap-3">
             <div className="p-2 bg-primary-50 dark:bg-primary-500/10 rounded-full">
               <User className="w-5 h-5 text-primary-600 dark:text-primary-400" />
             </div>
-            <h3 className="text-lg font-black text-slate-900 dark:text-white">{title}</h3>
+            <h3 id="stf-form-title" className="text-lg font-black text-slate-900 dark:text-white">{title}</h3>
           </div>
-          <button type="button" onClick={onClose} className="p-1 text-slate-400 hover:text-slate-600 dark:hover:text-slate-300 transition-colors">
+          <button type="button" onClick={onClose} aria-label="Cerrar" className="p-1 text-slate-400 hover:text-slate-600 dark:hover:text-slate-300 transition-colors">
             <XCircle className="w-5 h-5" />
           </button>
         </div>

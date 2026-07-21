@@ -26,7 +26,7 @@ export default function InstallApp() {
         </button>
         <button
           onClick={() => setDismissed(true)}
-          className="p-1.5 rounded-lg hover:bg-slate-100 dark:hover:bg-slate-800 text-slate-400 transition-all flex-shrink-0"
+          className="p-1.5 rounded-lg hover:bg-slate-100 dark:hover:bg-slate-800 text-slate-400 transition-all flex-shrink-0 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary-500 focus-visible:ring-offset-2 dark:focus-visible:ring-offset-slate-900"
           aria-label="Cerrar"
         >
           <X className="w-4 h-4" />

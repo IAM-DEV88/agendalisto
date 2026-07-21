@@ -46,18 +46,13 @@ Controla **cuántas iteraciones** puede hacer un agente antes de forzar una resp
 - **Valor bajo** (3-5) = agente rápido y barato
 - **Valor alto** (20+) = agente persistente para tareas complejas
 
-### 2.2 `subagent_depth`
+### 2.2 `subagent_depth` (no disponible en esta versión)
 
-Controla cuántos **niveles de profundidad** pueden tener los subagentes.
+En versiones recientes de opencode este campo fue eliminado.
 
-```json
-{
-  "subagent_depth": 5  // Un subagente puede invocar otro, hasta 5 niveles
-}
-```
+**Implicación:** los subagentes NO pueden invocar a otros subagentes. Solo el agente primario (build) puede usar `task` para invocar subagentes.
 
-- **Default**: `1` (un subagente NO puede invocar otros subagentes)
-- Para loops recursivos necesitás `subagent_depth >= 2`
+Para loops: el loop debe ejecutarlo el agente **build** (primario), no un subagente.
 
 ### 2.3 `task` tool
 
@@ -107,39 +102,9 @@ El agente itera automáticamente sin límite:
 
 ---
 
-### Tipo 2: Loop por auto-task (recursivo)
+### Tipo 2: Loop por comando personalizado (manual repetitivo)
 
-Un subagente que se re-invoca a sí mismo al terminar cada ronda:
-
-```json
-{
-  "subagent_depth": 10,
-  "agent": {
-    "worker": {
-      "description": "Trabajador persistente que se re-invoca",
-      "mode": "subagent",
-      "permission": {
-        "task": "allow"
-      },
-      "prompt": "Completa UNA parte de la tarea. Cuando termines, evalúa: si queda trabajo pendiente, usa task para invocar 'worker' de nuevo con las instrucciones de lo que falta. Si todo está completo, responde 'OBJETIVO CUMPLIDO'."
-    }
-  }
-}
-```
-
-**Cómo usarlo:**
-```
-@worker Realiza una revisión de todos los archivos sin test coverage
-```
-
-**Flujo:** worker → hace un archivo → se re-invoca → hace otro → se re-invoca → ... → termina
-
-**Ventaja:** Control explícito de cada ciclo.
-**Desventaja:** Consume más tokens porque cada reinvocación carga el contexto completo.
-
----
-
-### Tipo 3: Loop por comando personalizado (manual repetitivo)
+El agente BUILD te invoca a TI (el humano) entre rondas.
 
 Un comando que podés ejecutar tantas veces como quieras:
 
@@ -148,9 +113,8 @@ Un comando que podés ejecutar tantas veces como quieras:
   "command": {
     "ronda": {
       "description": "Ejecuta una ronda de mejora y reporta",
-      "agent": "worker",
-      "subtask": true,
-      "template": "Ejecuta UNA ronda de mejora. Al terminar, registra en el archivo de log: 'Ronda completada: (qué se hizo)'. Si queda trabajo pendiente, informa 'PENDIENTE: (qué falta)'."
+      "agent": "quality",
+      "template": "Ejecuta UNA ronda de mejora de calidad. Al terminar, registra en .opencode/improve/rounds.md lo que hiciste. Informa 'PENDIENTE: (qué falta)' si queda trabajo."
     }
   }
 }
@@ -169,35 +133,26 @@ Un comando que podés ejecutar tantas veces como quieras:
 
 ---
 
-### Tipo 4: Loop orquestado (cadena de agentes)
+### Tipo 3: Loop orquestado (cadena de agentes, el de AgendaYa)
 
-Un agente primario que coordina subagentes en secuencia:
+El agente primario (`build`) coordina subagentes en secuencia:
 
 ```
-Primario
- ├── @quality → escanea
- ├── @performance → optimiza
- ├── @quality → verifica
- └── decide si repetir
+Build (primario)
+ ├── task → @quality   → hace 1 ronda
+ ├── task → @architecture → hace 1 ronda
+ ├── task → @reliability → hace 1 ronda
+ └── ...
 ```
 
-Esto se logra con:
+Los comandos `/campaign` y `/improve` de AgendaYa usan este patrón. El primario tiene `permission.task: allow` para poder invocar a cada subagente.
 
-```json
-{
-  "subagent_depth": 5,
-  "agent": {
-    "orquestador": {
-      "description": "Orquesta agentes de mejora en cadena",
-      "mode": "all",
-      "permission": {
-        "task": "allow"
-      },
-      "prompt": "Eres un orquestador. Para completar la tarea, invoca los agentes necesarios (@quality, @performance, etc.) en secuencia. Después de cada uno, evalúa si el resultado es correcto. Si no, reinvéntalo con instrucciones más específicas. Cuando todo esté listo, responde 'OBJETIVO CUMPLIDO'."
-    }
-  }
-}
-```
+**Ventaja:** No necesita `subagent_depth`. El primario invoca subagentes, los subagentes solo trabajan.
+**Desventaja:** El primario acumula contexto de todas las divisiones.
+
+---
+
+
 
 ---
 
@@ -290,21 +245,37 @@ opencode agent create
 
 ```json
 {
-  "subagent_depth": 5,              // ← Para loops recursivos
+  "$schema": "https://opencode.ai/config.json",
   "agent": {
-    "loop-worker": {
-      "mode": "subagent",
-      "steps": 10,                  // ← Límite por ronda
+    "build": {
       "permission": {
-        "task": "allow",            // ← Necesario para auto-reinvocación
+        "task": "allow"
+      }
+    },
+    "worker": {
+      "mode": "subagent",
+      "permission": {
         "edit": "allow",
         "bash": "allow"
       },
-      "prompt": "Eres un worker persistente. {instrucciones}. Al terminar cada unidad de trabajo, evalúa si hay más trabajo pendiente. Si sí, invócate de nuevo con task. Si no, responde 'COMPLETO'."
+      "prompt": "Eres un worker. Completa la tarea asignada y reporta."
     }
   }
 }
 ```
+
+### Campos clave
+
+| Campo | Ubicación | Obligatorio | Propósito |
+|-------|-----------|-------------|-----------|
+| `permission.task: "allow"` | En el agente primario | ✅ Para loops | Permite que BUILD invoque subagentes |
+| `steps` | Por agente | ❌ | Límite de iteraciones por ronda (omitir = sin límite) |
+
+### Dónde va el archivo
+
+El config debe estar en `.opencode/opencode.json` (relativo al proyecto).
+
+Las referencias `{file:agents/calidad.md}` son **relativas al directorio del config** (`.opencode/`), no a la raíz del proyecto.
 
 ---
 

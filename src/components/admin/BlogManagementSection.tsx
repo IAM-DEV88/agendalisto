@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { adminGetAllPosts, createBlogPost, updateBlogPost, deleteBlogPost, BlogPost } from '../../lib/api';
 import { toast } from 'react-hot-toast';
 import { Plus, Edit2, Trash2, Eye, X, Loader2, Save, FileText, User, MessageSquare } from 'lucide-react';
@@ -6,6 +6,7 @@ import EmptyState from '../ui/EmptyState';
 import ImageUpload from '../ui/ImageUpload';
 import { supabase } from '../../lib/supabase';
 import { useLockBodyScroll } from '../../hooks/useLockBodyScroll';
+import { useFocusTrap } from '../../hooks/useFocusTrap';
 
 export default function BlogManagementSection() {
   const [posts, setPosts] = useState<BlogPost[]>([]);
@@ -14,7 +15,24 @@ export default function BlogManagementSection() {
   const [editing, setEditing] = useState<BlogPost | null>(null);
   const [previewOpen, setPreviewOpen] = useState(false);
   const [previewPost, setPreviewPost] = useState<BlogPost | null>(null);
+  const editDialogRef = useRef<HTMLDivElement>(null);
+  const previewDialogRef = useRef<HTMLDivElement>(null);
   useLockBodyScroll(modalOpen || previewOpen);
+  useFocusTrap(editDialogRef, modalOpen);
+  useFocusTrap(previewDialogRef, previewOpen);
+
+  useEffect(() => {
+    if (!modalOpen && !previewOpen) return;
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.key === 'Escape') {
+        setModalOpen(false);
+        setPreviewOpen(false);
+      }
+    };
+    document.addEventListener('keydown', handleKeyDown);
+    return () => document.removeEventListener('keydown', handleKeyDown);
+  }, [modalOpen, previewOpen]);
+
   const [saving, setSaving] = useState(false);
   const [userId, setUserId] = useState<string>('');
   const [form, setForm] = useState({ title: '', content: '', excerpt: '', author_name: '', image_url: '' });
@@ -157,14 +175,18 @@ export default function BlogManagementSection() {
 
       {/* Create/Edit Modal */}
       {modalOpen && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 animate-in fade-in duration-200">
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 animate-in fade-in duration-200"
+          role="dialog"
+          aria-modal="true"
+          aria-labelledby="blog-edit-title"
+        >
           <div className="absolute inset-0 bg-black/40 backdrop-blur-sm" onClick={() => setModalOpen(false)} />
-          <div className="relative w-full max-w-3xl bg-white dark:bg-slate-900 rounded-lg border border-slate-200 dark:border-slate-700 shadow-2xl max-h-[90vh] overflow-y-auto p-6 sm:p-8 animate-in zoom-in-95 duration-200 scrollbar-fino">
-            <button type="button" onClick={() => setModalOpen(false)} className="absolute top-4 right-4 p-2 rounded-lg hover:bg-slate-100 dark:hover:bg-slate-800 text-slate-400 transition-all">
+          <div ref={editDialogRef} className="relative w-full max-w-3xl bg-white dark:bg-slate-900 rounded-lg border border-slate-200 dark:border-slate-700 shadow-2xl max-h-[90vh] overflow-y-auto p-6 sm:p-8 animate-in zoom-in-95 duration-200 scrollbar-fino">
+            <button type="button" onClick={() => setModalOpen(false)} aria-label="Cerrar" className="absolute top-4 right-4 p-2 rounded-lg hover:bg-slate-100 dark:hover:bg-slate-800 text-slate-400 transition-all">
               <X className="w-5 h-5" />
             </button>
 
-            <h3 className="text-xl font-black text-slate-900 dark:text-white mb-6">{editing ? 'Editar publicación' : 'Nueva publicación'}</h3>
+            <h3 id="blog-edit-title" className="text-xl font-black text-slate-900 dark:text-white mb-6">{editing ? 'Editar publicación' : 'Nueva publicación'}</h3>
 
             <div className="space-y-5 p-2 md:p-4">
               <div>
@@ -241,12 +263,17 @@ export default function BlogManagementSection() {
 
       {/* Preview Modal */}
       {previewOpen && previewPost && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 animate-in fade-in duration-200">
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 animate-in fade-in duration-200"
+          role="dialog"
+          aria-modal="true"
+          aria-labelledby="blog-preview-title"
+        >
           <div className="absolute inset-0 bg-black/40 backdrop-blur-sm" onClick={() => setPreviewOpen(false)} />
-          <div className="relative w-full max-w-2xl bg-white dark:bg-slate-900 rounded-lg border border-slate-200 dark:border-slate-700 shadow-2xl max-h-[80vh] overflow-y-auto p-6 sm:p-8 animate-in zoom-in-95 duration-200 scrollbar-fino">
-            <button type="button" onClick={() => setPreviewOpen(false)} className="absolute top-4 right-4 p-2 rounded-lg hover:bg-slate-100 dark:hover:bg-slate-800 text-slate-400 transition-all">
+          <div ref={previewDialogRef} className="relative w-full max-w-2xl bg-white dark:bg-slate-900 rounded-lg border border-slate-200 dark:border-slate-700 shadow-2xl max-h-[80vh] overflow-y-auto p-6 sm:p-8 animate-in zoom-in-95 duration-200 scrollbar-fino">
+            <button type="button" onClick={() => setPreviewOpen(false)} aria-label="Cerrar" className="absolute top-4 right-4 p-2 rounded-lg hover:bg-slate-100 dark:hover:bg-slate-800 text-slate-400 transition-all">
               <X className="w-5 h-5" />
             </button>
+            <h2 id="blog-preview-title" className="sr-only">Vista previa: {previewPost.title}</h2>
             {previewPost.image_url && (
               <img src={previewPost.image_url} alt={`${previewPost.title} portada`} className="w-full h-48 object-cover rounded-lg mb-6 bg-slate-100" />
             )}

@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useRef, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useDispatch, useSelector } from 'react-redux';
 import { Eye, Bell, ListOrdered, Save, Loader2, CheckCircle2, AlertCircle, ChevronDown, Link as LinkIcon, Copy, Check, ExternalLink, Trash2, AlertTriangle, Lock } from 'lucide-react';
@@ -47,13 +47,29 @@ export const BusinessConfigSection: React.FC<BusinessConfigSectionProps> = ({
   const { itemsPerPage, setItemsPerPageValue, saveItemsPerPage } = useUIConfig(user?.id);
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
   const [deleting, setDeleting] = useState(false);
+  const deleteDialogRef = useRef<HTMLDivElement>(null);
   useLockBodyScroll(showDeleteConfirm);
+
+  useEffect(() => {
+    if (!showDeleteConfirm) return;
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.key === 'Escape') setShowDeleteConfirm(false);
+    };
+    document.addEventListener('keydown', handleKeyDown);
+    return () => document.removeEventListener('keydown', handleKeyDown);
+  }, [showDeleteConfirm]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    const saved = await saveItemsPerPage();
-    if (saved) {
-      onSave(e);
+    try {
+      const saved = await saveItemsPerPage();
+      if (saved) {
+        await onSave(e);
+      }
+    } catch (err: unknown) {
+      const msg = err instanceof Error ? err.message : 'Error al guardar configuración';
+      console.error('[BusinessConfigSection] Error en handleSubmit:', err);
+      toast.error(msg);
     }
   };
 
@@ -300,13 +316,17 @@ export const BusinessConfigSection: React.FC<BusinessConfigSectionProps> = ({
 
       {/* ─── MODAL CONFIRMACIÓN ELIMINAR ─── */}
       {showDeleteConfirm && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50 backdrop-blur-sm animate-in fade-in duration-200">
-          <div className="bg-white dark:bg-slate-900 rounded-lg shadow-2xl max-w-md w-full p-6 animate-in zoom-in-95 duration-200">
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50 backdrop-blur-sm animate-in fade-in duration-200"
+          role="dialog"
+          aria-modal="true"
+          aria-labelledby="biz-del-title"
+        >
+          <div ref={deleteDialogRef} className="bg-white dark:bg-slate-900 rounded-lg shadow-2xl max-w-md w-full p-6 animate-in zoom-in-95 duration-200">
             <div className="flex items-center gap-3 mb-4">
               <div className="p-2 bg-red-100 dark:bg-red-900/40 rounded-full">
                 <AlertTriangle className="w-6 h-6 text-red-600 dark:text-red-400" />
               </div>
-              <h3 className="text-xl font-black text-slate-900 dark:text-white">¿Eliminar negocio?</h3>
+              <h3 id="biz-del-title" className="text-xl font-black text-slate-900 dark:text-white">¿Eliminar negocio?</h3>
             </div>
             <p className="text-sm text-slate-600 dark:text-slate-400 leading-relaxed mb-6">
               Esta acción eliminará permanentemente <strong className="text-slate-800 dark:text-slate-200">{businessName}</strong> 
@@ -324,19 +344,27 @@ export const BusinessConfigSection: React.FC<BusinessConfigSectionProps> = ({
                 onClick={async () => {
                   if (!businessId) return;
                   setDeleting(true);
-                  const result = await deleteBusiness(businessId);
-                  if (result.success) {
-                    toast.success('Negocio eliminado correctamente');
-                    const updated = businesses.filter(b => b.id !== businessId);
-                    dispatch(setBusinesses(updated));
-                    // If the deleted business was the active one, navigate
-                    if (userProfile?.business_id === businessId) {
-                      const nextBiz = updated[0]?.id;
-                      dispatch(setActiveBusinessId(nextBiz));
+                  try {
+                    const result = await deleteBusiness(businessId);
+                    if (result.success) {
+                      toast.success('Negocio eliminado correctamente');
+                      const updated = businesses.filter(b => b.id !== businessId);
+                      dispatch(setBusinesses(updated));
+                      // If the deleted business was the active one, navigate
+                      if (userProfile?.business_id === businessId) {
+                        const nextBiz = updated[0]?.id;
+                        dispatch(setActiveBusinessId(nextBiz));
+                      }
+                      navigate('/dashboard');
+                    } else {
+                      toast.error(result.error || 'Error al eliminar el negocio');
+                      setDeleting(false);
+                      setShowDeleteConfirm(false);
                     }
-                    navigate('/dashboard');
-                  } else {
-                    toast.error(result.error || 'Error al eliminar el negocio');
+                  } catch (err: unknown) {
+                    const msg = err instanceof Error ? err.message : 'Error al eliminar el negocio';
+                    console.error('[BusinessConfigSection] Error al eliminar:', err);
+                    toast.error(msg);
                     setDeleting(false);
                     setShowDeleteConfirm(false);
                   }

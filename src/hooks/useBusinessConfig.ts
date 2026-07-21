@@ -32,8 +32,8 @@ export const useBusinessConfig = (businessId: string | undefined): UseBusinessCo
         } else {
           setMessage({ type: 'error', text: error || 'Error loading business configuration' });
         }
-      } catch (err: any) {
-        setMessage({ type: 'error', text: err.message || 'Error loading business configuration' });
+      } catch (err: unknown) {
+        setMessage({ type: 'error', text: err instanceof Error ? err.message : 'Error loading business configuration' });
       } finally {
         setLoading(false);
       }
@@ -72,9 +72,10 @@ export const useBusinessConfig = (businessId: string | undefined): UseBusinessCo
         notifyError(result.error || 'Error al guardar la configuración');
         return false;
       }
-    } catch (err: any) {
-      setMessage({ text: err.message || 'Error al guardar la configuración', type: 'error' });
-      notifyError(err.message || 'Error al guardar la configuración');
+    } catch (err: unknown) {
+      const errorMsg = err instanceof Error ? err.message : 'Error al guardar la configuración';
+      setMessage({ text: errorMsg, type: 'error' });
+      notifyError(errorMsg);
       return false;
     } finally {
       setSaving(false);

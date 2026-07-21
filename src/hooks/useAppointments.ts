@@ -1,6 +1,6 @@
 import { useEffect, useReducer } from 'react';
 import * as ApiClient from '../lib/api';
-import { Appointment } from '../types/appointment';
+import { Appointment, Review } from '../types/appointment';
 import { supabase } from '../lib/supabase';
 
 type AppointmentsState = {
@@ -14,7 +14,7 @@ type AppointmentsAction =
   | { type: 'FETCH_SUCCESS'; payload: Appointment[] }
   | { type: 'FETCH_ERROR'; payload: string }
   | { type: 'UPDATE_APPOINTMENT'; payload: Appointment }
-  | { type: 'ADD_REVIEW'; payload: { appointmentId: string; review: import('../lib/api').Review } };
+  | { type: 'ADD_REVIEW'; payload: { appointmentId: string; review: Review } };
 
 function appointmentsReducer(state: AppointmentsState, action: AppointmentsAction): AppointmentsState {
   switch (action.type) {
@@ -90,7 +90,7 @@ export function useAppointments(userId: string | undefined) {
     };
   }, [userId]);
 
-  const addReview = (appointmentId: string, review: any) => {
+  const addReview = (appointmentId: string, review: Review) => {
     dispatch({ type: 'ADD_REVIEW', payload: { appointmentId, review } });
   };
 

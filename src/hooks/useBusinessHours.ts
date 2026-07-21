@@ -45,13 +45,14 @@ export const useBusinessHours = (businessId: string | undefined): UseBusinessHou
         });
         
         setBusinessHoursState(fullWeek);
-      } catch (err: any) {
+      } catch (err: unknown) {
+        const errorMsg = err instanceof Error ? err.message : 'Error al cargar los horarios del negocio';
         console.error('[useBusinessHours] error loading hours', err);
         setMessage({ 
-          text: err.message || 'Error al cargar los horarios del negocio', 
+          text: errorMsg, 
           type: 'error' 
         });
-        notifyError(err.message || 'Error al cargar los horarios del negocio');
+        notifyError(errorMsg);
       } finally {
         setLoading(false);
       }
@@ -94,9 +95,10 @@ export const useBusinessHours = (businessId: string | undefined): UseBusinessHou
       setMessage({ text: 'Horarios actualizados correctamente', type: 'success' });
       notifySuccess('Horarios actualizados correctamente');
       return true;
-    } catch (err: any) {
-      setMessage({ text: err.message || 'Error al actualizar horarios', type: 'error' });
-      notifyError(err.message || 'Error al actualizar horarios');
+    } catch (err: unknown) {
+      const errorMsg = err instanceof Error ? err.message : 'Error al actualizar horarios';
+      setMessage({ text: errorMsg, type: 'error' });
+      notifyError(errorMsg);
       return false;
     } finally {
       setSaving(false);

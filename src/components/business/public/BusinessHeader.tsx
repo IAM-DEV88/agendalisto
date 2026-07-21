@@ -5,6 +5,7 @@ import { supabase } from '../../../lib/supabase';
 import { Link } from 'react-router-dom';
 import { toast } from 'react-hot-toast';
 import ShareButton from '../../ui/ShareButton';
+import { FALLBACK_PLACEHOLDER } from '../../../lib/config';
 
 interface BusinessHeaderProps {
   businessData: Business;
@@ -57,7 +58,7 @@ const BusinessHeader: React.FC<BusinessHeaderProps> = ({ businessData, averageRa
 
   // Verificar si una URL realmente existe y es accesible
   const verifyImageUrl = async (url: string): Promise<boolean> => {
-    if (!url || url === 'https://upload.wikimedia.org/wikipedia/commons/8/89/Portrait_Placeholder.png') return true; // La URL fallback siempre existe
+    if (!url || url === FALLBACK_PLACEHOLDER) return true; // La URL fallback siempre existe
     
     try {
       // Método 1: Intentar hacer un HEAD request
@@ -101,7 +102,7 @@ const BusinessHeader: React.FC<BusinessHeaderProps> = ({ businessData, averageRa
       
       // Verificar URLs problemáticas conocidas
       if (logoUrlToProcess && logoUrlToProcess.endsWith('_1746130038843.png')) {
-        setLogoUrl('https://upload.wikimedia.org/wikipedia/commons/8/89/Portrait_Placeholder.png');
+        setLogoUrl(FALLBACK_PLACEHOLDER);
         setImageState('error');
         return;
       }
@@ -110,7 +111,7 @@ const BusinessHeader: React.FC<BusinessHeaderProps> = ({ businessData, averageRa
       
       // Si la URL ya se sabe que es inválida, usar fallback directamente
       if (invalidUrlsRef.current.has(logoUrlToProcess)) {
-        setLogoUrl('https://upload.wikimedia.org/wikipedia/commons/8/89/Portrait_Placeholder.png');
+        setLogoUrl(FALLBACK_PLACEHOLDER);
         setImageState('error');
         return;
       }
@@ -121,7 +122,7 @@ const BusinessHeader: React.FC<BusinessHeaderProps> = ({ businessData, averageRa
         
         if (!isAccessible) {
           invalidUrlsRef.current.add(logoUrlToProcess);
-          setLogoUrl('https://upload.wikimedia.org/wikipedia/commons/8/89/Portrait_Placeholder.png');
+          setLogoUrl(FALLBACK_PLACEHOLDER);
           setImageState('error');
           return;
         }
@@ -162,7 +163,7 @@ const BusinessHeader: React.FC<BusinessHeaderProps> = ({ businessData, averageRa
           return;
         }
       } catch (error) {
-        setLogoUrl('https://upload.wikimedia.org/wikipedia/commons/8/89/Portrait_Placeholder.png');
+        setLogoUrl(FALLBACK_PLACEHOLDER);
         setImageState('error');
       }
     };
@@ -199,11 +200,11 @@ const BusinessHeader: React.FC<BusinessHeaderProps> = ({ businessData, averageRa
   // Marcar URL como inválida y usar fallback
   const handleImageError = (e: React.SyntheticEvent<HTMLImageElement>) => {
     // Guardar URL fallida para evitar intentos futuros
-    if (logoUrl && logoUrl !== 'https://upload.wikimedia.org/wikipedia/commons/8/89/Portrait_Placeholder.png') {
+    if (logoUrl && logoUrl !== FALLBACK_PLACEHOLDER) {
       invalidUrlsRef.current.add(logoUrl);
     }
     
-    e.currentTarget.src = 'https://upload.wikimedia.org/wikipedia/commons/8/89/Portrait_Placeholder.png';
+    e.currentTarget.src = FALLBACK_PLACEHOLDER;
     setImageState('error');
   };
   
@@ -289,12 +290,13 @@ const BusinessHeader: React.FC<BusinessHeaderProps> = ({ businessData, averageRa
                     <button
                       onClick={handleToggleLike}
                       disabled={isLiking}
-                      className={`flex items-center gap-2 px-4 py-2 rounded-lg transition-all ${
+                      className={`flex items-center gap-2 px-4 py-2 rounded-lg transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary-500 focus-visible:ring-offset-2 dark:focus-visible:ring-offset-slate-900 ${
                         isLiked 
                           ? 'bg-rose-500 text-white shadow-md shadow-rose-200 dark:shadow-rose-900/20' 
                           : 'hover:bg-slate-200 dark:hover:bg-slate-700 text-slate-600 dark:text-slate-400'
                       }`}
-                      title={isLiked ? 'Ya no me gusta' : 'Me gusta'}
+                      aria-label={isLiked ? 'Ya no me gusta' : 'Me gusta'}
+                      aria-pressed={isLiked}
                     >
                       <Heart className={`h-5 w-5 ${isLiked ? 'fill-current' : ''}`} />
                       <span className="font-bold text-sm">{likesCount}</span>

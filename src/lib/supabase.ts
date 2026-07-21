@@ -7,80 +7,8 @@ if (!SUPABASE_URL || !SUPABASE_ANON_KEY) {
 
 export const supabase = createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
-function getErrorMessage(err: unknown): string {
-  if (err instanceof Error) return err.message;
-  return String(err);
-}
-
-export const signUp = async (email: string, password: string, fullName?: string) => {
-  try {
-    const response = await supabase.auth.signUp({
-      email,
-      password,
-      options: {
-        data: {
-          email,
-          full_name: fullName ?? email.split('@')[0],
-          role: 'visitor',
-        },
-      },
-    });
-    return response;
-  } catch (err: unknown) {
-    return { data: { user: null, session: null }, error: { message: getErrorMessage(err), name: 'UnknownError' } };
-  }
-};
-
-export const signIn = async (email: string, password: string) => {
-  try {
-    const response = await supabase.auth.signInWithPassword({ email, password });
-    return response;
-  } catch (err: unknown) {
-    return { data: { user: null, session: null }, error: { message: getErrorMessage(err), name: 'UnknownError' } };
-  }
-};
-
-export const signOut = async () => {
-  try {
-    const response = await supabase.auth.signOut();
-    return response;
-  } catch (err: unknown) {
-    return { error: { message: getErrorMessage(err), name: 'UnknownError' }, data: { user: null, session: null } };
-  }
-};
-
-export const resetPassword = async (email: string) => {
-  try {
-    const response = await supabase.auth.resetPasswordForEmail(email);
-    return response;
-  } catch (err: unknown) {
-    return { data: { user: null, session: null }, error: { message: getErrorMessage(err), name: 'UnknownError' } };
-  }
-};
-
-export const updatePassword = async (newPassword: string) => {
-  try {
-    const response = await supabase.auth.updateUser({ password: newPassword });
-    return response;
-  } catch (err: unknown) {
-    return { data: { user: null }, error: { message: getErrorMessage(err), name: 'UnknownError' } };
-  }
-};
-
-export const signInWithProvider = async (provider: 'google') => {
-  try {
-    const response = await supabase.auth.signInWithOAuth({
-      provider,
-      options: {
-        redirectTo: `${window.location.origin}/dashboard`,
-        queryParams: provider === 'google' ? { access_type: 'offline', prompt: 'consent' } : undefined,
-      },
-    });
-    return response;
-  } catch (err: unknown) {
-    return { data: { provider, url: null }, error: { message: getErrorMessage(err), name: 'UnknownError' } };
-  }
-};
+// Re-export auth functions from the api/auth module for backward compatibility
+export { signUp, signIn, signOut, resetPassword, updatePassword, signInWithProvider } from './api/auth';
 
 // User profile types
 export interface UserProfile {

@@ -34,6 +34,8 @@ import {
   Sparkles,
   Crown,
   Crosshair,
+  CalendarCheck,
+  TrendingUp,
 } from 'lucide-react';
 
 type BusinessRegisterProps = {
@@ -309,6 +311,33 @@ const BusinessRegister = ({ user }: BusinessRegisterProps) => {
             </div>
           )}
         </div>
+
+        {/* ═══ BENEFITS HIGHLIGHTS ═══ */}
+        {!existingCount && (
+          <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 mb-6 animate-in fade-in slide-in-from-bottom-4 duration-500 delay-75">
+            <div className="bg-white dark:bg-slate-900 rounded-lg border border-slate-200 dark:border-slate-800 p-4 text-center hover:border-primary-300 dark:hover:border-primary-700 transition-all">
+              <div className="w-10 h-10 rounded-lg bg-primary-50 dark:bg-primary-500/10 flex items-center justify-center mx-auto mb-2">
+                <Globe className="w-5 h-5 text-primary-600 dark:text-primary-400" />
+              </div>
+              <h3 className="text-sm font-bold text-slate-900 dark:text-white mb-1">Web profesional</h3>
+              <p className="text-xs text-slate-500 dark:text-slate-400">Página pública con mapa, reseñas y toda tu información.</p>
+            </div>
+            <div className="bg-white dark:bg-slate-900 rounded-lg border border-slate-200 dark:border-slate-800 p-4 text-center hover:border-primary-300 dark:hover:border-primary-700 transition-all">
+              <div className="w-10 h-10 rounded-lg bg-emerald-50 dark:bg-emerald-500/10 flex items-center justify-center mx-auto mb-2">
+                <CalendarCheck className="w-5 h-5 text-emerald-600 dark:text-emerald-400" />
+              </div>
+              <h3 className="text-sm font-bold text-slate-900 dark:text-white mb-1">Reservas online</h3>
+              <p className="text-xs text-slate-500 dark:text-slate-400">Tus clientes agendan solos, sin llamadas ni intermediarios.</p>
+            </div>
+            <div className="bg-white dark:bg-slate-900 rounded-lg border border-slate-200 dark:border-slate-800 p-4 text-center hover:border-primary-300 dark:hover:border-primary-700 transition-all">
+              <div className="w-10 h-10 rounded-lg bg-amber-50 dark:bg-amber-500/10 flex items-center justify-center mx-auto mb-2">
+                <TrendingUp className="w-5 h-5 text-amber-600 dark:text-amber-400" />
+              </div>
+              <h3 className="text-sm font-bold text-slate-900 dark:text-white mb-1">Más clientes</h3>
+              <p className="text-xs text-slate-500 dark:text-slate-400">Aparece en búsquedas y deja que nuevos clientes te encuentren.</p>
+            </div>
+          </div>
+        )}
 
         {/* ═══ PILL TABS + CONNECTED CARD ═══ */}
         <ConnectedPillCard tabs={registerTabs} activeTabId={activeTab} onTabChange={setActiveTab} className="animate-in fade-in slide-in-from-bottom-4 duration-500 delay-100" cardClassName="shadow-xl shadow-slate-200/50 dark:shadow-none">

@@ -3,8 +3,6 @@
 export const ROLES = ['visitor', 'client', 'business_owner', 'moderator', 'admin'] as const;
 export type Role = (typeof ROLES)[number];
 
-export const SELF_ASSIGNABLE_ROLES: Role[] = ['visitor', 'client', 'business_owner'];
-
 export const ROLE_LABELS: Record<Role, string> = {
   visitor: 'Visitante',
   client: 'Cliente',
@@ -85,21 +83,7 @@ export const PLAN_BADGE = {
   premium: { text: 'Premium', className: 'bg-amber-100 text-amber-700 dark:bg-amber-900/30 dark:text-amber-400' },
 } as const;
 
-export const PLAN_SCORE: Record<Plan, number> = {
-  starter: 0,
-  pro: 2,
-  premium: 3,
-};
-
 // Helpers
-
-export function isSelfAssignable(role: string): boolean {
-  return (SELF_ASSIGNABLE_ROLES as readonly string[]).includes(role);
-}
-
-export function getPlanScore(plan: string): number {
-  return PLAN_SCORE[plan as Plan] ?? 0;
-}
 
 export function canAccessDashboard(role: string): boolean {
   return role === 'business_owner' || role === 'admin' || role === 'moderator';
@@ -142,12 +126,6 @@ export function canUseEmailNotifications(plan: Plan | string): boolean {
   return (plan as Plan) !== 'starter';
 }
 
-export function hasFeature(plan: Plan | string, featureLabel: string): boolean {
-  const features = PLAN_FEATURES[plan as Plan];
-  if (!features) return false;
-  return features.some(f => f.label === featureLabel && f.included);
-}
-
 export function canAccessAnalytics(plan: Plan | string): boolean {
   const p = plan as Plan;
   return p === 'pro' || p === 'premium';
@@ -155,14 +133,6 @@ export function canAccessAnalytics(plan: Plan | string): boolean {
 
 export function canAccessAdvancedAnalytics(plan: Plan | string): boolean {
   return (plan as Plan) === 'premium';
-}
-
-export function canUseWhatsApp(plan: Plan | string): boolean {
-  return (plan as Plan) !== 'starter';
-}
-
-export function canCustomBranding(plan: Plan | string): boolean {
-  return (plan as Plan) === 'pro' || (plan as Plan) === 'premium';
 }
 
 export function getMaxStaff(plan: Plan | string): number {

@@ -87,5 +87,3 @@ export interface GuestInfo {
   email: string;
   phone: string;
 }
-
-export default Appointment;

@@ -7,6 +7,7 @@ import Nav from './components/Nav';
 import Footer from './components/Footer';
 import ChatGuia from './components/ChatGuia';
 import InstallApp from './components/ui/InstallApp';
+import ErrorBoundary from './components/ui/ErrorBoundary';
 import ProtectedRoute from './components/ProtectedRoute';
 import { useSelector } from 'react-redux';
 import { useAppDispatch } from './hooks/useAppDispatch';
@@ -147,6 +148,7 @@ function App() {
   }, [user, userProfile]);
 
   return (
+    <ErrorBoundary>
     <Router>
       <ScrollToTop />
       <div className="min-h-screen flex flex-col bg-gray-50 dark:bg-gray-900 text-gray-900 dark:text-gray-100">
@@ -231,6 +233,7 @@ function App() {
         <Toaster position="top-right" />
       </div>
     </Router>
+    </ErrorBoundary>
   );
 }
 

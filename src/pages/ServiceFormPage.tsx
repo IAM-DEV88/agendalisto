@@ -96,13 +96,19 @@ export default function ServiceFormPage() {
 
   useEffect(() => {
     if (!businessId) return;
-    getBusinessConfig(businessId).then(res => {
-      if (res.success && res.config) {
-        setConfigLoaded({
-          services: !!res.config.password_protect_services,
-        });
-      }
-    });
+    getBusinessConfig(businessId)
+      .then(res => {
+        if (res.success && res.config) {
+          setConfigLoaded({
+            services: !!res.config.password_protect_services,
+          });
+        }
+      })
+      .catch((err: unknown) => {
+        const msg = err instanceof Error ? err.message : 'Error al cargar configuración del negocio';
+        console.error('[ServiceFormPage] Error loading config:', err);
+        notifyError(msg);
+      });
   }, [businessId]);
 
   useEffect(() => {

@@ -1,9 +1,10 @@
-import React, { useState, useEffect, useCallback } from 'react';
+import React, { useState, useEffect, useCallback, useRef } from 'react';
 import { Link } from 'react-router-dom';
 import { Plus, Edit2, Trash2, Clock, User, Info, CheckCircle, XCircle, Loader2, Sparkles, AlertTriangle } from 'lucide-react';
 import type { Service } from '../../lib/api';
 import { notifySuccess, notifyError } from '../../lib/toast';
 import { useLockBodyScroll } from '../../hooks/useLockBodyScroll';
+import { useFocusTrap } from '../../hooks/useFocusTrap';
 import SectionHeader from '../ui/SectionHeader';
 import { Pagination } from '../ui/Pagination';
 import { getMaxServices, PLAN_LABELS } from '../../lib/roles';
@@ -30,7 +31,9 @@ const ServicesSection: React.FC<ServicesSectionProps> = ({
   const [error, setError] = useState<string | null>(null);
   const [serviceToDelete, setServiceToDelete] = useState<Service | null>(null);
   const [deleting, setDeleting] = useState(false);
+  const deleteDialogRef = useRef<HTMLDivElement>(null);
   useLockBodyScroll(!!serviceToDelete);
+  useFocusTrap(deleteDialogRef, !!serviceToDelete);
 
   useEffect(() => {
     if (businessId) {
@@ -277,13 +280,17 @@ const ServicesSection: React.FC<ServicesSectionProps> = ({
       </div>
 
       {serviceToDelete && (
-        <div data-swipe-block className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50 backdrop-blur-sm animate-in fade-in duration-200">
-          <div className="bg-white dark:bg-slate-900 rounded-lg shadow-2xl max-w-md w-full p-6 animate-in zoom-in-95 duration-200">
+        <div data-swipe-block className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50 backdrop-blur-sm animate-in fade-in duration-200"
+          role="dialog"
+          aria-modal="true"
+          aria-labelledby="svc-del-title"
+        >
+          <div ref={deleteDialogRef} className="bg-white dark:bg-slate-900 rounded-lg shadow-2xl max-w-md w-full p-6 animate-in zoom-in-95 duration-200">
             <div className="flex items-center gap-3 mb-4">
               <div className="p-2 bg-red-100 dark:bg-red-900/40 rounded-full">
                 <AlertTriangle className="w-6 h-6 text-red-600 dark:text-red-400" />
               </div>
-              <h3 className="text-xl font-black text-slate-900 dark:text-white">¿Eliminar servicio?</h3>
+              <h3 id="svc-del-title" className="text-xl font-black text-slate-900 dark:text-white">¿Eliminar servicio?</h3>
             </div>
               <p className="text-sm text-slate-600 dark:text-slate-400 leading-relaxed mb-6">
                 Esta acción eliminará permanentemente <strong className="text-slate-800 dark:text-slate-200">{serviceToDelete.name}</strong>{' '}y no podrá recuperarse.
@@ -299,6 +306,7 @@ const ServicesSection: React.FC<ServicesSectionProps> = ({
               <button
                 onClick={handleConfirmDelete}
                 disabled={deleting}
+                aria-label="Confirmar eliminación"
                 className="inline-flex items-center gap-2 px-5 py-2.5 text-sm font-bold text-white bg-red-600 hover:bg-red-700 rounded-lg transition-all disabled:opacity-50"
               >
                 {deleting ? <Loader2 className="w-4 h-4 animate-spin" /> : <Trash2 className="w-4 h-4" />}

@@ -7,6 +7,7 @@ import { toast } from 'react-hot-toast';
 import SEO from '../components/SEO';
 import Breadcrumbs from '../components/ui/Breadcrumbs';
 import ShareButton from '../components/ui/ShareButton';
+import { sanitizeTextInput, sanitizeUrl } from '../utils/sanitize';
 
 // Función para parsear el contenido del mensaje (reutilizada del chat)
 const MessageContent = ({ content }: { content: string }) => {
@@ -20,11 +21,13 @@ const MessageContent = ({ content }: { content: string }) => {
         const match = part.match(/\[(.*?)\]\((.*?)\)/);
         if (match) {
           const linkText = match[1];
-          const url = match[2];
-          if (url.startsWith('/')) {
-            return <Link key={`${key}-${i}`} to={url} className="font-bold underline decoration-2 decoration-primary-400 hover:text-primary-500 transition-colors">{linkText}</Link>;
+          const rawUrl = match[2];
+          const safeUrl = rawUrl.startsWith('/') ? rawUrl : sanitizeUrl(rawUrl);
+          if (!safeUrl) return <span key={`${key}-${i}`}>{linkText}</span>;
+          if (safeUrl.startsWith('/')) {
+            return <Link key={`${key}-${i}`} to={safeUrl} className="font-bold underline decoration-2 decoration-primary-400 hover:text-primary-500 transition-colors">{linkText}</Link>;
           }
-          return <a key={`${key}-${i}`} href={url} target="_blank" rel="noopener noreferrer" className="font-bold underline decoration-2 decoration-primary-400 hover:text-primary-500 transition-colors">{linkText}</a>;
+          return <a key={`${key}-${i}`} href={safeUrl} target="_blank" rel="noopener noreferrer" className="font-bold underline decoration-2 decoration-primary-400 hover:text-primary-500 transition-colors">{linkText}</a>;
         }
         return part;
       });
@@ -41,7 +44,7 @@ const BlogPostView = () => {
   const [loading, setLoading] = useState(true);
   const [newComment, setNewComment] = useState('');
   const [isSubmitting, setIsSubmitting] = useState(false);
-  const [user, setUser] = useState<any>(null);
+  const [user, setUser] = useState<import('@supabase/supabase-js').User | null>(null);
   const [showOffensiveWarning, setShowOffensiveWarning] = useState(false);
   const [otherPostsContext, setOtherPostsContext] = useState<string>('');
 
@@ -79,14 +82,21 @@ const BlogPostView = () => {
 
   const fetchPostAndComments = async () => {
     setLoading(true);
-    const [postRes, commentsRes] = await Promise.all([
-      getBlogPost(id!),
-      getBlogComments(id!)
-    ]);
+    try {
+      const [postRes, commentsRes] = await Promise.all([
+        getBlogPost(id!),
+        getBlogComments(id!)
+      ]);
 
-    if (postRes.success && postRes.data) setPost(postRes.data);
-    if (commentsRes.success && commentsRes.data) setComments(commentsRes.data);
-    setLoading(false);
+      if (postRes.success && postRes.data) setPost(postRes.data);
+      if (commentsRes.success && commentsRes.data) setComments(commentsRes.data);
+    } catch (err: unknown) {
+      console.error('[BlogPostView] Error fetching post or comments:', err);
+      const msg = err instanceof Error ? err.message : 'Error al cargar el contenido';
+      toast.error(msg);
+    } finally {
+      setLoading(false);
+    }
   };
 
   const handleLike = async (targetId: string, type: 'post' | 'comment') => {
@@ -137,12 +147,18 @@ const BlogPostView = () => {
         return;
       }
 
-      // 2. Guardar comentario del usuario
+      // 2. Guardar comentario del usuario (sanitizado)
+      const sanitizedContent = sanitizeTextInput(newComment, 2000);
+      if (!sanitizedContent) {
+        toast.error('El comentario no puede estar vacío');
+        setIsSubmitting(false);
+        return;
+      }
       const res = await createBlogComment({
         post_id: id!,
         user_id: user.id,
-        author_name: user.user_metadata?.full_name || user.email?.split('@')[0] || 'Usuario',
-        content: newComment.trim(),
+        author_name: sanitizeTextInput(user.user_metadata?.full_name || user.email?.split('@')[0] || 'Usuario', 100),
+        content: sanitizedContent,
         is_agent_reply: false
       });
 
@@ -224,6 +240,35 @@ const BlogPostView = () => {
 
   const ogImageUrl = post.image_url || `${window.location.origin}/.netlify/functions/og-image?type=post&title=${encodeURIComponent(post.title)}&author=${encodeURIComponent(post.author_name)}&date=${post.created_at}&excerpt=${encodeURIComponent((post.excerpt || post.content).substring(0, 120))}`;
 
+  // Memoize content splitting to avoid re-computation on every render
+  const { leftColumn, rightColumn } = useMemo(() => {
+    const paragraphs = post.content.split('\n').filter(p => p.trim() !== '');
+    let left: string[] = [];
+    let right: string[] = [];
+
+    if (paragraphs.length > 1) {
+      const midpoint = Math.ceil(paragraphs.length / 2);
+      left = paragraphs.slice(0, midpoint);
+      right = paragraphs.slice(midpoint);
+    } else if (paragraphs.length === 1) {
+      const text = paragraphs[0];
+      const sentences = text.match(/[^.!?]+[.!?]|\s*[^.!?]+$/g) || [text];
+
+      if (sentences.length > 1) {
+        const midpoint = Math.ceil(sentences.length / 2);
+        left = [sentences.slice(0, midpoint).join(' ')];
+        right = [sentences.slice(midpoint).join(' ')];
+      } else {
+        const words = text.split(' ');
+        const midpoint = Math.ceil(words.length / 2);
+        left = [words.slice(0, midpoint).join(' ')];
+        right = [words.slice(midpoint).join(' ')];
+      }
+    }
+
+    return { leftColumn: left, rightColumn: right };
+  }, [post.content]);
+
   return (
     <div className="min-h-screen bg-slate-50 dark:bg-slate-900 transition-colors duration-200 py-12">
       <SEO 
@@ -260,69 +305,38 @@ const BlogPostView = () => {
           </h1>
 
           <div className="prose prose-lg dark:prose-invert max-w-none mb-12 text-slate-700 dark:text-slate-300 leading-relaxed font-medium">
-            {(() => {
-              const paragraphs = post.content.split('\n').filter(p => p.trim() !== '');
-              
-              let leftColumn: string[] = [];
-              let rightColumn: string[] = [];
+            <div className="lg:grid lg:grid-cols-2 lg:gap-16 relative">
+              {/* Vertical Line */}
+              <div className="hidden lg:block absolute left-1/2 top-4 bottom-4 w-[2px] bg-slate-200 dark:bg-gray-500 -translate-x-1/2"></div>
 
-              if (paragraphs.length > 1) {
-                const midpoint = Math.ceil(paragraphs.length / 2);
-                leftColumn = paragraphs.slice(0, midpoint);
-                rightColumn = paragraphs.slice(midpoint);
-              } else if (paragraphs.length === 1) {
-                // Si solo hay un párrafo, intentamos dividirlo por frases
-                const text = paragraphs[0];
-                const sentences = text.match(/[^.!?]+[.!?]|\s*[^.!?]+$/g) || [text];
-                
-                if (sentences.length > 1) {
-                  const midpoint = Math.ceil(sentences.length / 2);
-                  leftColumn = [sentences.slice(0, midpoint).join(' ')];
-                  rightColumn = [sentences.slice(midpoint).join(' ')];
-                } else {
-                  // Si solo hay una frase o el regex falló, dividimos por palabras
-                  const words = text.split(' ');
-                  const midpoint = Math.ceil(words.length / 2);
-                  leftColumn = [words.slice(0, midpoint).join(' ')];
-                  rightColumn = [words.slice(midpoint).join(' ')];
-                }
-              }
+              <div className="space-y-6">
+                {leftColumn.map((para, i) => (
+                  <p
+                    key={`left-${i}`}
+                    className={`text-justify ${
+                      i === 0
+                        ? 'first-letter:text-7xl first-letter:font-black first-letter:text-primary-600 first-letter:mr-3 first-letter:float-left first-letter:leading-[0.8]'
+                        : ''
+                    }`}
+                  >
+                    {para}
+                  </p>
+                ))}
+              </div>
 
-              return (
-                <div className="lg:grid lg:grid-cols-2 lg:gap-16 relative">
-                  {/* Vertical Line */}
-                  <div className="hidden lg:block absolute left-1/2 top-4 bottom-4 w-[2px] bg-slate-200 dark:bg-gray-500 -translate-x-1/2"></div>
-                  
-                  <div className="space-y-6">
-                    {leftColumn.map((para, i) => (
-                      <p 
-                        key={`left-${i}`} 
-                        className={`text-justify ${
-                          i === 0 
-                            ? 'first-letter:text-7xl first-letter:font-black first-letter:text-primary-600 first-letter:mr-3 first-letter:float-left first-letter:leading-[0.8]' 
-                            : ''
-                        }`}
-                      >
-                        {para}
-                      </p>
-                    ))}
-                  </div>
-                  
-                  <div className="space-y-6 mt-6 lg:mt-0">
-                    {rightColumn.map((para, i) => (
-                      <p key={`right-${i}`} className="text-justify">
-                        {para}
-                      </p>
-                    ))}
-                  </div>
-                </div>
-              );
-            })()}
+              <div className="space-y-6 mt-6 lg:mt-0">
+                {rightColumn.map((para, i) => (
+                  <p key={`right-${i}`} className="text-justify">
+                    {para}
+                  </p>
+                ))}
+              </div>
+            </div>
           </div>
 
           <div className="pt-8 border-t border-slate-100 dark:border-slate-800 flex items-center justify-between">
             <div className="flex items-center gap-8">
-              <button type="button" onClick={() => handleLike(post.id, 'post')} className="flex items-center gap-2 text-slate-500 hover:text-rose-500 transition-colors">
+              <button type="button" onClick={() => handleLike(post.id, 'post')} className="flex items-center gap-2 text-slate-500 hover:text-rose-500 transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary-500 focus-visible:ring-offset-2 dark:focus-visible:ring-offset-slate-900 rounded-lg" aria-label={post.likes_count > 0 ? 'Quitar me gusta' : 'Me gusta'} aria-pressed={post.likes_count > 0}>
                 <Heart className={`w-6 h-6 ${post.likes_count > 0 ? 'fill-rose-500 text-rose-500' : ''}`} />
                 <span className="font-bold text-lg">{post.likes_count}</span>
               </button>
@@ -345,7 +359,7 @@ const BlogPostView = () => {
         <div className="mb-8 text-center animate-in fade-in slide-in-from-bottom-4 duration-500">
           <Link
             to="/register"
-            className="inline-flex items-center gap-2 px-6 py-3 bg-primary-600 hover:bg-primary-700 text-white font-bold rounded-lg transition-all shadow-lg shadow-primary-500/25 hover:-translate-y-0.5 active:translate-y-0"
+            className="inline-flex items-center gap-2 px-6 py-3 bg-primary-600 hover:bg-primary-700 text-white font-bold rounded-lg transition-all shadow-lg shadow-primary-500/25 hover:-translate-y-0.5 active:translate-y-0 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary-500 focus-visible:ring-offset-2 dark:focus-visible:ring-offset-slate-900"
           >
             🌐 ¿Tienes un negocio? Crea tu página web gratis →
           </Link>
@@ -419,7 +433,9 @@ const BlogPostView = () => {
                             </div>
                             <button 
                               onClick={() => handleLike(comment.id, 'comment')} 
-                              className="flex items-center gap-1.5 px-3 py-1 bg-slate-50 dark:bg-slate-800 rounded-full text-slate-400 hover:text-rose-500 hover:bg-rose-50 dark:hover:bg-rose-900/10 transition-all text-xs font-bold"
+                              className="flex items-center gap-1.5 px-3 py-1 bg-slate-50 dark:bg-slate-800 rounded-full text-slate-400 hover:text-rose-500 hover:bg-rose-50 dark:hover:bg-rose-900/10 transition-all text-xs font-bold focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary-500 focus-visible:ring-offset-2 dark:focus-visible:ring-offset-slate-900"
+                              aria-label={comment.likes_count > 0 ? 'Quitar me gusta' : 'Me gusta'}
+                              aria-pressed={comment.likes_count > 0}
                             >
                               <Heart className={`w-3.5 h-3.5 ${comment.likes_count > 0 ? 'fill-rose-500 text-rose-500' : ''}`} />
                               {comment.likes_count}
@@ -447,7 +463,9 @@ const BlogPostView = () => {
                               </div>
                               <button 
                                 onClick={() => handleLike(agentReply.id, 'comment')} 
-                                className="flex items-center gap-1.5 px-3 py-1 bg-white/50 dark:bg-slate-800 rounded-full text-slate-400 hover:text-rose-500 hover:bg-rose-50 dark:hover:bg-rose-900/10 transition-all text-xs font-bold"
+                                className="flex items-center gap-1.5 px-3 py-1 bg-white/50 dark:bg-slate-800 rounded-full text-slate-400 hover:text-rose-500 hover:bg-rose-50 dark:hover:bg-rose-900/10 transition-all text-xs font-bold focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary-500 focus-visible:ring-offset-2 dark:focus-visible:ring-offset-slate-900"
+                                aria-label={agentReply.likes_count > 0 ? 'Quitar me gusta' : 'Me gusta'}
+                                aria-pressed={agentReply.likes_count > 0}
                               >
                                 <Heart className={`w-3.5 h-3.5 ${agentReply.likes_count > 0 ? 'fill-rose-500 text-rose-500' : ''}`} />
                                 {agentReply.likes_count}

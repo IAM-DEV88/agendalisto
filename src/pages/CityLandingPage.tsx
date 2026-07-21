@@ -52,18 +52,24 @@ export default function CityLandingPage() {
     e.preventDefault();
     if (!customerDemand.trim()) return;
     setDemandSubmitting(true);
-    const result = await insertLandingLead({
-      type: 'customer',
-      city_slug: cityConfig?.slug ?? citySlug ?? '',
-      name: 'Anónimo',
-      message: customerDemand.trim(),
-    });
-    setDemandSubmitting(false);
-    if (result.success) {
-      toast.success('¡Gracias! Te avisaremos cuando esté disponible.');
-      setCustomerDemand('');
-    } else {
-      toast.error('No pudimos guardar tu solicitud. Intenta de nuevo.');
+    try {
+      const result = await insertLandingLead({
+        type: 'customer',
+        city_slug: cityConfig?.slug ?? citySlug ?? '',
+        name: 'Anónimo',
+        message: customerDemand.trim(),
+      });
+      if (result.success) {
+        toast.success('¡Gracias! Te avisaremos cuando esté disponible.');
+        setCustomerDemand('');
+      } else {
+        toast.error('No pudimos guardar tu solicitud. Intenta de nuevo.');
+      }
+    } catch (err: unknown) {
+      console.error('[CityLandingPage] Error submitting demand:', err);
+      toast.error('Ocurrió un error al enviar tu solicitud. Intenta de nuevo.');
+    } finally {
+      setDemandSubmitting(false);
     }
   };
 
@@ -174,6 +180,7 @@ export default function CityLandingPage() {
                     <img
                       src={business.logo_url || FALLBACK_BUSINESS_LOGO}
                       alt={business.name}
+                      loading="lazy"
                       className="w-full h-full object-contain group-hover:scale-110 transition-transform duration-500"
                       onError={(e) => { (e.target as HTMLImageElement).src = FALLBACK_BUSINESS_LOGO; }}
                     />

@@ -1,5 +1,5 @@
 import { Link, useNavigate, useLocation } from 'react-router-dom';
-import { useState, useEffect, useRef, useMemo } from 'react';
+import { useState, useEffect, useRef, useMemo, memo } from 'react';
 import { useSelector } from 'react-redux';
 import { signOut, supabase } from '../lib/supabase';
 import { UserProfile } from '../lib/supabase';
@@ -18,7 +18,7 @@ const NAV_LINKS = [
   { to: '/blog', label: 'Blog' },
 ] as const;
 
-const Nav = ({ user }: NavProps) => {
+const Nav = memo(({ user }: NavProps) => {
   const { theme, toggleTheme } = useTheme();
   const navigate = useNavigate();
   const location = useLocation();
@@ -100,7 +100,7 @@ const Nav = ({ user }: NavProps) => {
           {/* Desktop navigation */}
           <div className="hidden sm:ml-6 sm:flex sm:items-center sm:space-x-4">
             {NAV_LINKS.map(link => (
-              <Link key={link.to} to={link.to} className="px-3 py-2 text-sm font-semibold text-slate-700 dark:text-slate-300 hover:text-primary-600 dark:hover:text-primary-400 transition-colors">
+              <Link key={link.to} to={link.to} aria-current={location.pathname === link.to ? 'page' : undefined} className="px-3 py-2 text-sm font-semibold text-slate-700 dark:text-slate-300 hover:text-primary-600 dark:hover:text-primary-400 transition-colors">
                 {link.label}
               </Link>
             ))}
@@ -121,7 +121,9 @@ const Nav = ({ user }: NavProps) => {
                 <button
                   ref={buttonRef}
                   onClick={() => setIsUserDropdownOpen(!isUserDropdownOpen)}
-                  className="flex items-center px-3 py-2 text-sm font-bold text-slate-700 dark:text-white hover:text-primary-600 group transition-colors"
+                  className="flex items-center px-3 py-2 text-sm font-bold text-slate-700 dark:text-white hover:text-primary-600 group transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary-500 focus-visible:ring-offset-2 dark:focus-visible:ring-offset-slate-900 rounded-lg"
+                  aria-haspopup="true"
+                  aria-expanded={isUserDropdownOpen}
                 >
                   {user?.avatar_url ? (
                     <img
@@ -139,13 +141,13 @@ const Nav = ({ user }: NavProps) => {
                     </div>
                   )}
                   <span className="ml-2 hidden lg:block">{userName}</span>
-                  <ChevronDown className={`ml-1 h-4 w-4 text-slate-400 group-hover:text-primary-500 transition-transform ${isUserDropdownOpen ? 'rotate-180' : ''}`} />
+                  <ChevronDown className={`ml-1 h-4 w-4 text-slate-500 group-hover:text-primary-500 transition-transform ${isUserDropdownOpen ? 'rotate-180' : ''}`} />
                 </button>
 
                 {isUserDropdownOpen && (
                   <div ref={dropdownRef} className="origin-top-right absolute right-0 mt-2 w-56 rounded-lg shadow-xl bg-white dark:bg-slate-800 ring-1 ring-slate-200 dark:ring-slate-700 z-20 py-2 overflow-hidden animate-in fade-in zoom-in duration-200">
                     <div className="px-4 py-3 border-b border-slate-100 dark:border-slate-700">
-                      <p className="text-xs font-bold text-slate-400 uppercase tracking-widest">Cuenta</p>
+                      <p className="text-xs font-bold text-slate-500 uppercase tracking-widest">Cuenta</p>
                       <p className="text-sm font-bold text-slate-900 dark:text-white truncate">{userName}</p>
                     </div>
                     <div className="py-1">
@@ -189,7 +191,7 @@ const Nav = ({ user }: NavProps) => {
 
             <button
               onClick={toggleTheme}
-              className="ml-2 p-2 rounded-lg text-slate-500 hover:text-primary-600 hover:bg-primary-50 dark:text-slate-400 dark:hover:text-primary-400 dark:hover:bg-slate-800 transition-all"
+              className="ml-2 p-2 rounded-lg text-slate-500 hover:text-primary-600 hover:bg-primary-50 dark:text-slate-400 dark:hover:text-primary-400 dark:hover:bg-slate-800 transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary-500 focus-visible:ring-offset-2 dark:focus-visible:ring-offset-slate-900"
               aria-label="Toggle theme"
             >
               {theme === 'dark' ? <Sun className="h-5 w-5" /> : <Moon className="h-5 w-5" />}
@@ -200,7 +202,7 @@ const Nav = ({ user }: NavProps) => {
           <div className="flex items-center sm:hidden">
             <button
               onClick={toggleTheme}
-              className="p-2 mr-2 rounded-lg text-slate-500 dark:text-slate-400"
+              className="p-2 mr-2 rounded-lg text-slate-500 dark:text-slate-400 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary-500 focus-visible:ring-offset-2 dark:focus-visible:ring-offset-slate-900"
               aria-label="Toggle theme"
             >
               {theme === 'dark' ? <Sun className="h-5 w-5" /> : <Moon className="h-5 w-5" />}
@@ -208,7 +210,7 @@ const Nav = ({ user }: NavProps) => {
             <button
               ref={mobileButtonRef}
               onClick={() => setIsMenuOpen(prev => !prev)}
-              className="inline-flex items-center justify-center p-2 rounded-lg text-slate-500 hover:text-primary-600 hover:bg-primary-50 dark:text-slate-400 dark:hover:text-primary-400 dark:hover:bg-slate-800 transition-all"
+              className="inline-flex items-center justify-center p-2 rounded-lg text-slate-500 hover:text-primary-600 hover:bg-primary-50 dark:text-slate-400 dark:hover:text-primary-400 dark:hover:bg-slate-800 transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary-500 focus-visible:ring-offset-2 dark:focus-visible:ring-offset-slate-900"
               aria-expanded={isMenuOpen}
             >
               <span className="sr-only">Abrir menú</span>
@@ -227,7 +229,7 @@ const Nav = ({ user }: NavProps) => {
         <div ref={mobileMenuRef} className="sm:hidden bg-white dark:bg-slate-900 border-b border-slate-200 dark:border-slate-800 animate-in slide-in-from-top duration-300">
           <div className="pt-2 pb-6 px-4 space-y-2">
             {NAV_LINKS.map(link => (
-              <Link key={link.to} to={link.to} onClick={closeMenus} className="block px-4 py-3 text-base font-bold text-slate-700 dark:text-slate-300 rounded-lg hover:bg-primary-50 dark:hover:bg-slate-800 hover:text-primary-600 transition-all">
+              <Link key={link.to} to={link.to} onClick={closeMenus} aria-current={location.pathname === link.to ? 'page' : undefined} className="block px-4 py-3 text-base font-bold text-slate-700 dark:text-slate-300 rounded-lg hover:bg-primary-50 dark:hover:bg-slate-800 hover:text-primary-600 transition-all">
                 {link.label}
               </Link>
             ))}
@@ -282,6 +284,6 @@ const Nav = ({ user }: NavProps) => {
       )}
     </header>
   );
-};
+});
 
 export default Nav;

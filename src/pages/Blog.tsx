@@ -66,15 +66,24 @@ const Blog = () => {
     if (isInitial) setLoading(true);
     else setLoadingMore(true);
 
-    const res = await getBlogPosts(pageToFetch, 6, searchTerm || undefined);
+    try {
+      const res = await getBlogPosts(pageToFetch, 6, searchTerm || undefined);
 
-    if (res.success && res.data) {
-      setPosts(prev => isInitial ? res.data! : [...prev, ...res.data!]);
-      setHasMore(res.hasMore || false);
+      if (res.success && res.data) {
+        setPosts(prev => isInitial ? res.data! : [...prev, ...res.data!]);
+        setHasMore(res.hasMore || false);
+      } else if (!res.success) {
+        console.error('[Blog] Error fetching posts:', res.error);
+        toast.error('No se pudieron cargar las publicaciones. Intenta de nuevo.');
+      }
+    } catch (err: unknown) {
+      const message = err instanceof Error ? err.message : 'Error desconocido';
+      console.error('[Blog] Unexpected error fetching posts:', message);
+      toast.error('No se pudieron cargar las publicaciones. Intenta de nuevo.');
+    } finally {
+      setLoading(false);
+      setLoadingMore(false);
     }
-
-    setLoading(false);
-    setLoadingMore(false);
   };
 
   const handleLike = async (e: React.MouseEvent, id: string) => {
@@ -174,7 +183,7 @@ const Blog = () => {
                       {/* Image */}
                       <div className="h-48 overflow-hidden bg-slate-100 dark:bg-slate-800 flex-shrink-0">
                         {post.image_url ? (
-                          <img src={post.image_url} alt={post.title} loading="lazy" className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110" />
+                          <img src={post.image_url} alt={post.title} loading="lazy" width={400} height={192} className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110" />
                         ) : (
                           <div className="w-full h-full flex items-center justify-center">
                             <BookOpen className="w-10 h-10 text-slate-300 dark:text-slate-600" />
@@ -210,7 +219,7 @@ const Blog = () => {
                         <div className="pt-4 border-t border-slate-100 dark:border-slate-800 flex items-center justify-between">
                           <div className="flex items-center gap-4">
                             <div className="flex items-center gap-1.5 text-slate-500 hover:text-rose-500 transition-colors text-xs font-bold">
-                              <button type="button" onClick={(e) => handleLike(e, post.id)} className="flex items-center gap-1.5">
+                              <button type="button" onClick={(e) => handleLike(e, post.id)} className="flex items-center gap-1.5 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary-500 focus-visible:ring-offset-2 dark:focus-visible:ring-offset-slate-900 rounded" aria-label={post.likes_count > 0 ? 'Quitar me gusta' : 'Me gusta'} aria-pressed={post.likes_count > 0}>
                                 <Heart className={`w-4 h-4 ${post.likes_count > 0 ? 'fill-rose-500 text-rose-500' : ''}`} />
                                 {post.likes_count}
                               </button>

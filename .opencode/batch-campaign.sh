@@ -4,7 +4,7 @@
 #        bash .opencode/batch-campaign.sh 5       # 5 rondas de cada agente
 #
 # Requisitos: opencode instalado, proyecto en git,
-#             config con subagent_depth >= 5
+#             build con permission.task: allow
 # ──────────────────────────────────────────────────────────────────────────────
 
 set -e

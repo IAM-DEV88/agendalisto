@@ -121,7 +121,7 @@ const Register = () => {
           </p>
           <div className="mt-8 flex flex-col items-center gap-3">
             <div className="animate-spin rounded-full h-5 w-5 border-2 border-primary-600 border-t-transparent" />
-            <p className="text-xs font-medium text-slate-400">Redirigiendo al inicio de sesión...</p>
+            <p className="text-xs font-medium text-slate-500">Redirigiendo al inicio de sesión...</p>
           </div>
         </div>
       </div>
@@ -169,7 +169,7 @@ const Register = () => {
                 Nombre completo
               </label>
               <div className="relative">
-                <User className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
+                <User className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" aria-hidden="true" />
                 <input
                   id="fullName"
                   name="fullName"
@@ -190,7 +190,7 @@ const Register = () => {
                 Correo electrónico
               </label>
               <div className="relative">
-                <Mail className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
+                <Mail className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" aria-hidden="true" />
                 <input
                   id="email"
                   name="email"
@@ -228,7 +228,7 @@ const Register = () => {
                   Contraseña
                 </label>
                 <div className="relative">
-                  <Lock className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
+                  <Lock className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" aria-hidden="true" />
                   <input
                     id="password"
                     name="password"
@@ -243,10 +243,11 @@ const Register = () => {
                   <button
                     type="button"
                     onClick={() => setShowPassword(!showPassword)}
-                    className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600 dark:hover:text-slate-300 transition-colors"
+                    className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-500 hover:text-slate-600 dark:hover:text-slate-300 transition-colors"
                     tabIndex={-1}
+                    aria-label={showPassword ? 'Ocultar contraseña' : 'Mostrar contraseña'}
                   >
-                    {showPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
+                    {showPassword ? <EyeOff className="w-4 h-4" aria-hidden="true" /> : <Eye className="w-4 h-4" aria-hidden="true" />}
                   </button>
                 </div>
                 {/* Validation indicator */}
@@ -270,7 +271,7 @@ const Register = () => {
                   Confirmar
                 </label>
                 <div className="relative">
-                  <Lock className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
+                  <Lock className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" aria-hidden="true" />
                   <input
                     id="confirmPassword"
                     name="confirmPassword"
@@ -285,10 +286,11 @@ const Register = () => {
                   <button
                     type="button"
                     onClick={() => setShowConfirm(!showConfirm)}
-                    className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600 dark:hover:text-slate-300 transition-colors"
+                    className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-500 hover:text-slate-600 dark:hover:text-slate-300 transition-colors"
                     tabIndex={-1}
+                    aria-label={showConfirm ? 'Ocultar contraseña' : 'Mostrar contraseña'}
                   >
-                    {showConfirm ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
+                    {showConfirm ? <EyeOff className="w-4 h-4" aria-hidden="true" /> : <Eye className="w-4 h-4" aria-hidden="true" />}
                   </button>
                 </div>
                 {/* Match indicator */}
@@ -334,7 +336,7 @@ const Register = () => {
                 <div className="w-full border-t border-slate-200 dark:border-slate-700" />
               </div>
               <div className="relative flex justify-center text-xs font-bold uppercase">
-                <span className="bg-white dark:bg-slate-900 px-4 text-slate-400">O regístrate con</span>
+                <span className="bg-white dark:bg-slate-900 px-4 text-slate-500">O regístrate con</span>
               </div>
             </div>
             <div className="grid grid-cols-2 gap-3">

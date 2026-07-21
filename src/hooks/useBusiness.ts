@@ -35,11 +35,11 @@ export function useBusiness(userId: string | null) {
         } else {
           setError(typeof apiError === 'string' ? apiError : 'Error al verificar información del negocio');
         }
-      } catch (err: any) {
+      } catch (err: unknown) {
         // No actualizar si componente se desmontó
         if (!isMounted) return;
         
-        setError(err.message || 'Error al verificar información del negocio');
+        setError(err instanceof Error ? err.message : 'Error al verificar información del negocio');
         setHasBusiness(false);
       } finally {
         // No actualizar si componente se desmontó

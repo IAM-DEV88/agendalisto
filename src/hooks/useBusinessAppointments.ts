@@ -19,8 +19,8 @@ export function useBusinessAppointments(businessId: string | null) {
       } else {
         setError(String(apiError || 'Error loading business appointments'));
       }
-    } catch (err: any) {
-      setError(err.message || 'Error loading business appointments');
+    } catch (err: unknown) {
+      setError(err instanceof Error ? err.message : 'Error loading business appointments');
     } finally {
       setLoading(false);
     }

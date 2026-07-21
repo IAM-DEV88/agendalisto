@@ -10,6 +10,7 @@ import {
 } from 'date-fns';
 import { es } from 'date-fns/locale';
 import { useLockBodyScroll } from '../../hooks/useLockBodyScroll';
+import { useFocusTrap } from '../../hooks/useFocusTrap';
 
 interface Props {
   isOpen: boolean;
@@ -20,6 +21,8 @@ interface Props {
 }
 
 export default function CancelRescheduleModal({ isOpen, onClose, appointment, isOwner, passwordProtectAppointments }: Props) {
+  const dialogRef = useRef<HTMLDivElement>(null);
+  const passwordDialogRef = useRef<HTMLDivElement>(null);
   useLockBodyScroll(isOpen);
   const [mode, setMode] = useState<'cancel' | 'reschedule' | null>(null);
   const [reason, setReason] = useState('');
@@ -31,6 +34,17 @@ export default function CancelRescheduleModal({ isOpen, onClose, appointment, is
   const [passwordError, setPasswordError] = useState('');
   const [verifying, setVerifying] = useState(false);
   const passwordVerifiedRef = useRef<'cancel' | 'reschedule' | null>(null);
+  useFocusTrap(dialogRef, isOpen && !showPasswordModal);
+  useFocusTrap(passwordDialogRef, showPasswordModal);
+
+  useEffect(() => {
+    if (!isOpen) return;
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.key === 'Escape') onClose();
+    };
+    document.addEventListener('keydown', handleKeyDown);
+    return () => document.removeEventListener('keydown', handleKeyDown);
+  }, [isOpen, onClose]);
   const [businessHours, setBusinessHours] = useState<BusinessHours[]>([]);
   const [appointments, setAppointments] = useState<ApiAppointment[]>([]);
   const [loadingSlots, setLoadingSlots] = useState(true);
@@ -229,13 +243,17 @@ export default function CancelRescheduleModal({ isOpen, onClose, appointment, is
   };
 
   const passwordModal = showPasswordModal && (
-    <div className="fixed inset-0 z-[60] flex items-center justify-center p-4 bg-black/50 backdrop-blur-sm animate-in fade-in duration-200">
-      <div className="bg-white dark:bg-slate-900 rounded-lg shadow-2xl max-w-sm w-full p-6 animate-in zoom-in-95 duration-200">
+    <div className="fixed inset-0 z-[60] flex items-center justify-center p-4 bg-black/50 backdrop-blur-sm animate-in fade-in duration-200"
+      role="dialog"
+      aria-modal="true"
+      aria-labelledby="crm-pw-title"
+    >
+      <div ref={passwordDialogRef} className="bg-white dark:bg-slate-900 rounded-lg shadow-2xl max-w-sm w-full p-6 animate-in zoom-in-95 duration-200">
         <div className="flex items-center gap-3 mb-4">
           <div className="p-2 bg-primary-50 dark:bg-primary-500/10 rounded-full">
             <Lock className="w-5 h-5 text-primary-600 dark:text-primary-400" />
           </div>
-          <h3 className="text-lg font-black text-slate-900 dark:text-white">Confirmar contraseña</h3>
+          <h3 id="crm-pw-title" className="text-lg font-black text-slate-900 dark:text-white">Confirmar contraseña</h3>
         </div>
         <p className="text-sm text-slate-600 dark:text-slate-400 mb-4">
           Ingresa tu contraseña para continuar con esta acción.
@@ -316,8 +334,15 @@ export default function CancelRescheduleModal({ isOpen, onClose, appointment, is
 
   return (
     <>
-    <div className="fixed inset-0 z-50 flex items-start sm:items-center justify-center px-2 pt-16 sm:pt-0 sm:p-4 bg-black/50 backdrop-blur-sm animate-in fade-in duration-200" onClick={onClose}>
+    <div
+      className="fixed inset-0 z-50 flex items-start sm:items-center justify-center px-2 pt-16 sm:pt-0 sm:p-4 bg-black/50 backdrop-blur-sm animate-in fade-in duration-200"
+      role="dialog"
+      aria-modal="true"
+      aria-labelledby="crm-title"
+      onClick={onClose}
+    >
       <div
+        ref={dialogRef}
         className="relative w-full sm:max-w-md max-h-[calc(100dvh-5rem)] sm:max-h-[85vh] bg-white dark:bg-slate-900 rounded-lg shadow-2xl overflow-hidden flex flex-col animate-in sm:zoom-in-95 duration-300"
         onClick={e => e.stopPropagation()}
       >
@@ -340,10 +365,10 @@ export default function CancelRescheduleModal({ isOpen, onClose, appointment, is
                 </div>
               )}
             </div>
-            <span className="text-[10px] font-bold uppercase tracking-wider text-slate-400">
+            <span id="crm-title" className="text-[10px] font-bold uppercase tracking-wider text-slate-400">
               {mode === 'cancel' ? 'Cancelar cita' : mode === 'reschedule' ? 'Reprogramar' : 'Gestionar cita'}
             </span>
-            <button type="button" onClick={onClose} className="p-1.5 rounded-lg hover:bg-slate-100 dark:hover:bg-slate-800 text-slate-400 transition-all active:scale-90">
+            <button type="button" onClick={onClose} aria-label="Cerrar" className="p-1.5 rounded-lg hover:bg-slate-100 dark:hover:bg-slate-800 text-slate-400 transition-all active:scale-90">
               <X className="w-4 h-4" />
             </button>
           </div>

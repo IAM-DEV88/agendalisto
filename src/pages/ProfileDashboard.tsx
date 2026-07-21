@@ -36,11 +36,16 @@ import {
   Trash2,
   AlertTriangle,
   Loader2,
-
+  CheckCircle2,
   ListChecks,
   Plus,
   UserPlus,
   ListOrdered,
+  Search,
+  X,
+  Heart,
+  XCircle,
+  ChevronRight,
 } from 'lucide-react';
 import { ROLE_LABELS, PLAN_BADGE, PLAN_LABELS, getMaxBusinesses } from '../lib/roles';
 import { updateProfileRole, deleteAccount } from '../lib/api';
@@ -153,6 +158,11 @@ const ProfileDashboard = ({ user }: ProfileDashboardProps) => {
   const [selectedAppointmentForCancel, setSelectedAppointmentForCancel] = useState<Appointment | null>(null);
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
   const [deleting, setDeleting] = useState(false);
+  const [showWelcome, setShowWelcome] = useState(() => {
+    if (!isVisitor) return false;
+    const dismissed = sessionStorage.getItem('agendaya_welcome_dismissed');
+    return dismissed !== 'true';
+  });
   useLockBodyScroll(showDeleteConfirm);
 
   const {
@@ -447,23 +457,86 @@ const ProfileDashboard = ({ user }: ProfileDashboardProps) => {
             </div>
           </div>
 
+          {/* ─── WELCOME ONBOARDING CARD (first session only) ─── */}
+          {isVisitor && showWelcome && (
+            <div className="bg-gradient-to-r from-primary-50 via-primary-50/80 to-white dark:from-primary-950/40 dark:to-slate-900 border border-primary-200 dark:border-primary-800 rounded-lg p-6 animate-in fade-in slide-in-from-bottom-4 duration-500">
+              <div className="flex flex-col sm:flex-row items-start gap-4">
+                <div className="flex-1">
+                  <h2 className="text-xl font-black text-primary-800 dark:text-primary-300 mb-2">
+                    👋 ¡Bienvenido a AgendaYa!
+                  </h2>
+                  <p className="text-sm text-primary-700/80 dark:text-primary-400/80 mb-4 max-w-lg">
+                    Has creado tu cuenta correctamente. Estos son los primeros pasos que puedes seguir:
+                  </p>
+                  <div className="flex flex-wrap gap-2">
+                    <button
+                      onClick={() => { handleActivateClient(); setShowWelcome(false); sessionStorage.setItem('agendaya_welcome_dismissed', 'true'); }}
+                      className="inline-flex items-center gap-1.5 px-4 py-2 bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-bold rounded-lg transition-all shadow-lg shadow-emerald-500/25 active:scale-95"
+                    >
+                      <UserPlus className="w-3.5 h-3.5" />
+                      1. Activar cuenta de cliente
+                    </button>
+                    <Link
+                      to="/explore"
+                      onClick={() => sessionStorage.setItem('agendaya_welcome_dismissed', 'true')}
+                      className="inline-flex items-center gap-1.5 px-4 py-2 bg-white dark:bg-slate-800 text-primary-700 dark:text-primary-300 text-xs font-bold rounded-lg border border-primary-200 dark:border-primary-700 hover:bg-primary-50 dark:hover:bg-primary-900/20 transition-all active:scale-95 shadow-sm"
+                    >
+                      <Search className="w-3.5 h-3.5" />
+                      2. Explorar servicios
+                    </Link>
+                    <Link
+                      to="/business/register"
+                      onClick={() => sessionStorage.setItem('agendaya_welcome_dismissed', 'true')}
+                      className="inline-flex items-center gap-1.5 px-4 py-2 bg-white dark:bg-slate-800 text-primary-700 dark:text-primary-300 text-xs font-bold rounded-lg border border-primary-200 dark:border-primary-700 hover:bg-primary-50 dark:hover:bg-primary-900/20 transition-all active:scale-95 shadow-sm"
+                    >
+                      <Store className="w-3.5 h-3.5" />
+                      3. Registrar mi negocio
+                    </Link>
+                  </div>
+                </div>
+                <button
+                  onClick={() => { setShowWelcome(false); sessionStorage.setItem('agendaya_welcome_dismissed', 'true'); }}
+                  className="shrink-0 p-1.5 rounded-lg text-primary-400 hover:text-primary-600 dark:hover:text-primary-300 hover:bg-primary-100 dark:hover:bg-primary-800/30 transition-all self-start"
+                  aria-label="Cerrar bienvenida"
+                >
+                  <X className="w-4 h-4" />
+                </button>
+              </div>
+            </div>
+          )}
+
           {/* ─── VISITOR UPGRADE BANNER ─── */}
           {isVisitor && (
-            <div className="bg-gradient-to-r from-emerald-50 to-teal-50 dark:from-emerald-950/30 dark:to-teal-950/30 border border-emerald-200 dark:border-emerald-800 rounded-lg p-4 animate-in fade-in slide-in-from-bottom-4 duration-500 delay-75">
-              <div className="flex flex-col sm:flex-row items-start sm:items-center gap-3">
+            <div className="bg-gradient-to-r from-emerald-50 to-teal-50 dark:from-emerald-950/30 dark:to-teal-950/30 border border-emerald-200 dark:border-emerald-800 rounded-lg p-4 sm:p-6 animate-in fade-in slide-in-from-bottom-4 duration-500 delay-75">
+              <div className="flex flex-col sm:flex-row items-start sm:items-center gap-4">
                 <div className="flex-1">
-                  <h3 className="font-bold text-emerald-800 dark:text-emerald-300 text-sm">
-                    Activa tu cuenta de cliente
+                  <h3 className="font-bold text-emerald-800 dark:text-emerald-300 text-base mb-2">
+                    🚀 Activa tu cuenta de cliente — es gratis
                   </h3>
-                  <p className="text-xs text-emerald-600 dark:text-emerald-400 mt-0.5">
-                    Agenda citas, escribe reseñas y obtén tu página web gratis para tu negocio.
-                  </p>
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-x-6 gap-y-1.5 mt-2">
+                    <div className="flex items-center gap-2 text-xs text-emerald-700 dark:text-emerald-300">
+                      <CheckCircle2 className="w-3.5 h-3.5 shrink-0 text-emerald-500" />
+                      Agenda citas online sin llamadas
+                    </div>
+                    <div className="flex items-center gap-2 text-xs text-emerald-700 dark:text-emerald-300">
+                      <CheckCircle2 className="w-3.5 h-3.5 shrink-0 text-emerald-500" />
+                      Guarda tus negocios favoritos
+                    </div>
+                    <div className="flex items-center gap-2 text-xs text-emerald-700 dark:text-emerald-300">
+                      <CheckCircle2 className="w-3.5 h-3.5 shrink-0 text-emerald-500" />
+                      Escribe reseñas y ayuda a otros
+                    </div>
+                    <div className="flex items-center gap-2 text-xs text-emerald-700 dark:text-emerald-300">
+                      <CheckCircle2 className="w-3.5 h-3.5 shrink-0 text-emerald-500" />
+                      Accede a tu historial de citas
+                    </div>
+                  </div>
                 </div>
                 <button
                   onClick={handleActivateClient}
-                  className="inline-flex items-center gap-1.5 px-4 py-2 bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-bold rounded-lg transition-all shadow-lg shadow-emerald-500/25 active:scale-95 flex-shrink-0"
+                  className="inline-flex items-center gap-1.5 px-5 py-2.5 bg-emerald-600 hover:bg-emerald-700 text-white text-sm font-bold rounded-lg transition-all shadow-lg shadow-emerald-500/25 active:scale-95 flex-shrink-0 w-full sm:w-auto justify-center"
                 >
-                  <UserPlus className="w-3.5 h-3.5" />
+                  <UserPlus className="w-4 h-4" />
                   Activar ahora
                 </button>
               </div>
@@ -576,6 +649,27 @@ const ProfileDashboard = ({ user }: ProfileDashboardProps) => {
                     />
                   ) : (
                     <div className="space-y-4">
+                      {/* Resumen del historial */}
+                      <div className="grid grid-cols-2 gap-3">
+                        <div className="bg-emerald-50 dark:bg-emerald-500/10 rounded-lg border border-emerald-200 dark:border-emerald-800 p-3 flex items-center gap-3">
+                          <div className="w-8 h-8 rounded-lg bg-emerald-100 dark:bg-emerald-900/40 flex items-center justify-center shrink-0">
+                            <CheckCircle2 className="w-4 h-4 text-emerald-600 dark:text-emerald-400" />
+                          </div>
+                          <div>
+                            <p className="text-lg font-black text-emerald-700 dark:text-emerald-300">{completedCount}</p>
+                            <p className="text-[10px] font-bold text-emerald-600/70 dark:text-emerald-400/70 uppercase tracking-wider">Completadas</p>
+                          </div>
+                        </div>
+                        <div className="bg-red-50 dark:bg-red-500/10 rounded-lg border border-red-200 dark:border-red-800 p-3 flex items-center gap-3">
+                          <div className="w-8 h-8 rounded-lg bg-red-100 dark:bg-red-900/40 flex items-center justify-center shrink-0">
+                            <XCircle className="w-4 h-4 text-red-600 dark:text-red-400" />
+                          </div>
+                          <div>
+                            <p className="text-lg font-black text-red-700 dark:text-red-300">{cancelledCount}</p>
+                            <p className="text-[10px] font-bold text-red-600/70 dark:text-red-400/70 uppercase tracking-wider">Canceladas</p>
+                          </div>
+                        </div>
+                      </div>
                       <UserAppointmentList
                         appointments={paginatedPastAppointments}
                         onReschedule={handleReschedule}
@@ -596,10 +690,38 @@ const ProfileDashboard = ({ user }: ProfileDashboardProps) => {
             </div>
           )}
 
-          {/* ═══ FAVORITES TAB ═══ */}
+            {/* ═══ FAVORITES TAB ═══ */}
           {activeTab === 'favorites' && (
             <div className="animate-in fade-in zoom-in-95 duration-300">
               {user && <FavoritesSection user={user} />}
+            </div>
+          )}
+
+          {/* ═══ FAVORITES STANDALONE (cuando no hay citas activas) ═══ */}
+          {activeTab === 'appointments' && user && activeAppointmentTab !== 'history' && appointments.length === 0 && (
+            <div className="mt-6 animate-in fade-in slide-in-from-bottom-4 duration-500">
+              <div className="bg-gradient-to-r from-rose-50 to-pink-50 dark:from-rose-950/20 dark:to-pink-950/20 border border-rose-200 dark:border-rose-800 rounded-xl p-5">
+                <div className="flex flex-col sm:flex-row items-start sm:items-center gap-4">
+                  <div className="w-12 h-12 rounded-xl bg-rose-100 dark:bg-rose-900/30 flex items-center justify-center shrink-0">
+                    <Heart className="w-6 h-6 text-rose-500" />
+                  </div>
+                  <div className="flex-1 min-w-0">
+                    <h3 className="text-base font-black text-rose-800 dark:text-rose-300 mb-0.5">
+                      Guarda tus negocios favoritos
+                    </h3>
+                    <p className="text-sm text-rose-600/70 dark:text-rose-400/70">
+                      Marca negocios con ❤️ en la exploración y vuelve a encontrarlos fácilmente aquí.
+                    </p>
+                  </div>
+                  <button
+                    onClick={() => setActiveTab('favorites')}
+                    className="inline-flex items-center gap-1.5 px-5 py-2.5 bg-rose-500 hover:bg-rose-600 text-white text-sm font-bold rounded-lg transition-all shadow-lg shadow-rose-500/25 active:scale-95 shrink-0 w-full sm:w-auto justify-center"
+                  >
+                    <Heart className="w-4 h-4" />
+                    Ver favoritos
+                  </button>
+                </div>
+              </div>
             </div>
           )}
 
@@ -671,6 +793,21 @@ const ProfileDashboard = ({ user }: ProfileDashboardProps) => {
                     </div>
                   </div>
                 )}
+
+                {/* Quick access to Favorites */}
+                <button
+                  onClick={() => setActiveTab('favorites')}
+                  className="group flex items-center gap-4 p-4 bg-white dark:bg-slate-900 rounded-lg border border-slate-200 dark:border-slate-800 hover:border-rose-200 dark:hover:border-rose-800 hover:shadow-lg transition-all w-full text-left"
+                >
+                  <div className="w-10 h-10 rounded-lg bg-rose-50 dark:bg-rose-500/10 flex items-center justify-center group-hover:scale-110 transition-transform">
+                    <Heart className="w-5 h-5 text-rose-500" />
+                  </div>
+                  <div className="flex-1 min-w-0">
+                    <p className="text-sm font-black text-slate-900 dark:text-white">Mis Favoritos</p>
+                    <p className="text-xs font-medium text-slate-500 dark:text-slate-400">Negocios y servicios que te gustan</p>
+                  </div>
+                  <ChevronRight className="w-4 h-4 text-slate-400 group-hover:text-rose-500 transition-colors" />
+                </button>
               </>)}
 
               {activeStatsTab === 'referrals' && user && (

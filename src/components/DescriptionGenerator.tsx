@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useRef, useEffect } from 'react';
 import { Wand2, Loader2 } from 'lucide-react';
 import { notifySuccess, notifyError } from '../lib/toast';
 
@@ -26,6 +26,16 @@ export default function DescriptionGenerator({
   const [generating, setGenerating] = useState(false);
   const [options, setOptions] = useState<{ option1: string; option2: string } | null>(null);
   const [confirmText, setConfirmText] = useState<string | null>(null);
+  const confirmDialogRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    if (confirmText === null) return;
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.key === 'Escape') setConfirmText(null);
+    };
+    document.addEventListener('keydown', handleKeyDown);
+    return () => document.removeEventListener('keydown', handleKeyDown);
+  }, [confirmText]);
 
   const handleGenerate = async () => {
     if (validate) {
@@ -111,9 +121,13 @@ export default function DescriptionGenerator({
       )}
 
       {confirmText !== null && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40">
-          <div className="bg-white dark:bg-slate-800 rounded-xl shadow-2xl p-6 max-w-md mx-4 w-full animate-in fade-in zoom-in duration-200">
-            <h3 className="text-lg font-bold text-slate-900 dark:text-white mb-2">
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40"
+          role="dialog"
+          aria-modal="true"
+          aria-labelledby="desc-confirm-title"
+        >
+          <div ref={confirmDialogRef} className="bg-white dark:bg-slate-800 rounded-xl shadow-2xl p-6 max-w-md mx-4 w-full animate-in fade-in zoom-in duration-200">
+            <h3 id="desc-confirm-title" className="text-lg font-bold text-slate-900 dark:text-white mb-2">
               ¿Mantener o reemplazar texto anterior?
             </h3>
             <p className="text-sm text-slate-500 dark:text-slate-400 mb-6">

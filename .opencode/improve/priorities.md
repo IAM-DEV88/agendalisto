@@ -47,22 +47,21 @@ Mantener `.opencode/improve/rounds.md` con el formato definido en `commands/repo
 
 ## Configuración necesaria en opencode.json
 
-Para que los loops multi-ronda funcionen, agregá esto a `opencode.json`:
+El agente `build` (primario) necesita permiso para invocar subagentes:
 
 ```json
 {
-  "subagent_depth": 20,
   "agent": {
-    "improver": {
-      "mode": "subagent",
-      "permission": { "task": "allow", "edit": "allow", "bash": "allow" },
-      "prompt": "Eres un ingeniero de mejora continua. Implementas cambios, validas con type-check, y te re-invocas hasta completar las rondas solicitadas."
+    "build": {
+      "permission": {
+        "task": "allow"
+      }
     }
   }
 }
 ```
 
-Sin `subagent_depth >= 2` el agente NO puede re-invocarse a sí mismo.
+Sin `permission.task: "allow"` en build, los comandos `/campaign` e `/improve` no pueden invocar a los agentes de división.
 
 ## Límites prácticos
 

@@ -1,7 +1,8 @@
 import { Link } from 'react-router-dom';
 import { Store, Heart, ArrowUp, BookOpen, Sparkles } from 'lucide-react';
+import { memo } from 'react';
 
-const Footer = () => {
+const Footer = memo(() => {
   const scrollToTop = () => {
     window.scrollTo({ top: 0, behavior: 'smooth' });
   };
@@ -100,7 +101,7 @@ const Footer = () => {
             <Link to="/business/register" className="text-xs text-slate-400 dark:text-slate-500 hover:text-slate-700 dark:hover:text-slate-300 transition-colors">Registrar negocio</Link>
             <button
               onClick={scrollToTop}
-              className="p-2 bg-slate-100 dark:bg-slate-800 hover:bg-primary-600 dark:hover:bg-primary-600 text-slate-500 dark:text-slate-400 hover:text-white rounded-lg transition-all hover:-translate-y-1"
+              className="p-2 bg-slate-100 dark:bg-slate-800 hover:bg-primary-600 dark:hover:bg-primary-600 text-slate-500 dark:text-slate-400 hover:text-white rounded-lg transition-all hover:-translate-y-1 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary-500 focus-visible:ring-offset-2 dark:focus-visible:ring-offset-slate-900"
               aria-label="Volver arriba"
             >
               <ArrowUp className="w-4 h-4" />
@@ -110,6 +111,6 @@ const Footer = () => {
       </div>
     </footer>
   );
-};
+});
 
 export default Footer;
