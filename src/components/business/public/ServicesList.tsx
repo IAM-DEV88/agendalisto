@@ -4,6 +4,7 @@ import { Clock, Heart, Gift, ChevronRight } from 'lucide-react';
 import { Service, toggleLike, checkIfLiked } from '../../../lib/api';
 import { toast } from 'react-hot-toast';
 import ShareButton from '../../ui/ShareButton';
+import { useDominantColor } from '../../../hooks/useDominantColor';
 
 interface ServicesListProps {
   services: Service[];
@@ -53,6 +54,7 @@ const ServiceCard: React.FC<{
   const hasImages = images.length > 0;
   const canBook = service.permitir_reservas_online !== false;
   const navigate = useNavigate();
+  const dominantColor = useDominantColor(hasImages ? images[0] : null);
 
   const goToBook = () => navigate(`/${window.location.pathname.split('/')[1]}/book/${service.id}`);
 
@@ -74,11 +76,14 @@ const ServiceCard: React.FC<{
 
       {/* Thumbnail */}
       {hasImages && (
-        <div className="relative w-24 shrink-0 overflow-hidden bg-slate-100 dark:bg-slate-800">
+        <div
+          className="relative w-24 shrink-0 overflow-hidden"
+          style={{ background: dominantColor }}
+        >
           <img
             src={images[0]}
             alt={service.name}
-            className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
+            className="w-full h-full object-contain transition-transform duration-500 group-hover:scale-105"
           />
         </div>
       )}
@@ -144,7 +149,7 @@ const ServiceCard: React.FC<{
             />
           </div>
 
-          <div className="ml-auto">
+          <div className="hidden sm:block ml-auto">
             <span className="flex items-center gap-0.5 text-[10px] font-bold text-primary-600 dark:text-primary-400 opacity-0 group-hover:opacity-100 transition-opacity">
               {showcaseOnly || !canBook ? 'Ver' : 'Reservar'} <ChevronRight className="w-2.5 h-2.5" />
             </span>

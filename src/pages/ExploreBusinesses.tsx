@@ -1,6 +1,6 @@
-import React, { useState, useEffect, useMemo, useCallback, useRef, lazy, Suspense } from 'react';
+import { useState, useEffect, useMemo, useCallback, useRef, lazy, Suspense } from 'react';
 import { Link, useSearchParams } from 'react-router-dom';
-import { MapPin, ArrowRight, Heart, Store, SlidersHorizontal, Search, X, Map, List, MessageCircle, Loader2 } from 'lucide-react';
+import { MapPin, Heart, Store, Search, X, Map, List, MessageCircle, Loader2, SlidersHorizontal } from 'lucide-react';
 import { getBusinesses, getBusinessCategories, toggleLike, checkLikedBusinesses, getReferralCounts } from '../lib/api';
 import type { Business, BusinessCategory } from '../lib/api';
 import { supabase } from '../lib/supabase';
@@ -11,11 +11,12 @@ import SelectMenu from '../components/ui/SelectMenu';
 import ShareButton from '../components/ui/ShareButton';
 import ReferralBadge from '../components/ui/ReferralBadge';
 import { FALLBACK_BUSINESS_LOGO } from '../lib/config';
+import { useDominantColor } from '../hooks/useDominantColor';
 
 const BusinessMap = lazy(() => import('../components/ui/BusinessMap'));
 const PAGE_SIZE = 12;
 
-const BusinessCard = React.memo(({ business, categories, isLiked: initialLiked, currentUser, onToggleLike, referralCount }: {
+const BusinessCard = ({ business, categories, isLiked: initialLiked, currentUser, onToggleLike, referralCount }: {
   business: Business;
   categories: BusinessCategory[];
   isLiked: boolean;
@@ -31,6 +32,10 @@ const BusinessCard = React.memo(({ business, categories, isLiked: initialLiked, 
     setIsLiked(initialLiked);
   }, [initialLiked]);
 
+  useEffect(() => {
+    setLikesCount(business.likes_count || 0);
+  }, [business.likes_count]);
+
   const handleToggleLike = async (e: React.MouseEvent) => {
     e.preventDefault();
     e.stopPropagation();
@@ -42,132 +47,131 @@ const BusinessCard = React.memo(({ business, categories, isLiked: initialLiked, 
         setIsLiked(result.action === 'added');
         setLikesCount(prev => result.action === 'added' ? prev + 1 : prev - 1);
         onToggleLike(business.id);
+        toast.success(result.action === 'added' ? '¡Te gusta este negocio!' : 'Ya no te gusta este negocio');
       }
     } catch { toast.error('Error al procesar'); } finally { setIsLiking(false); }
   };
 
   const cat = categories.find(c => c.id === business.category_id);
+  const shareUrl = `${window.location.origin}/${business.slug}`;
+  const dominantColor = useDominantColor(business.logo_url);
 
   return (
     <Link
       to={`/${business.slug}`}
-      className="group w-full bg-white dark:bg-slate-900 rounded-lg border border-slate-200 dark:border-slate-800 overflow-hidden hover:border-primary-300 dark:hover:border-primary-700 hover:shadow-2xl transition-all duration-300 hover:-translate-y-1 flex flex-col"
+      className="group relative flex items-stretch rounded-lg border transition-all cursor-pointer border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 hover:border-primary-300 dark:hover:border-primary-700 hover:shadow-lg focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary-500 focus-visible:ring-offset-2 dark:focus-visible:ring-offset-slate-900 min-h-[88px]"
     >
-      <div className="w-full h-48 sm:h-52 bg-slate-100 dark:bg-slate-800 relative overflow-hidden flex-shrink-0">
+      {/* Logo/Thumbnail */}
+      <div
+        className="relative w-20 sm:w-24 shrink-0 overflow-hidden rounded-l-lg"
+        style={{ background: dominantColor }}
+      >
         <img
           src={business.logo_url || FALLBACK_BUSINESS_LOGO}
           alt={business.name}
           loading="lazy"
-          className="block w-full h-full object-contain group-hover:scale-110 transition-transform duration-500"
+          className="w-full h-full object-contain transition-transform duration-500 group-hover:scale-105"
           onError={(e) => { e.currentTarget.src = FALLBACK_BUSINESS_LOGO; }}
         />
-        <div className="absolute inset-0 bg-gradient-to-t from-black/50 via-transparent to-transparent opacity-0 group-hover:opacity-100 group-focus-within:opacity-100 transition-opacity flex items-end p-4">
-          <div className="flex gap-2">
-            <button
-              onClick={handleToggleLike}
-              disabled={isLiking}
-              aria-label={isLiked ? 'Quitar de favoritos' : 'Agregar a favoritos'}
-              className={`p-2 rounded-lg backdrop-blur-md transition-all ${
-                isLiked ? 'bg-rose-500 text-white' : 'bg-white/20 hover:bg-white/40 text-white'
-              }`}
-            >
-              <Heart className={`h-4 w-4 ${isLiked ? 'fill-current' : ''}`} />
-            </button>
-            <div onMouseDown={e => e.nativeEvent.stopImmediatePropagation()} onClick={e => { e.nativeEvent.stopImmediatePropagation(); e.stopPropagation(); }}>
-              <ShareButton
-                url={`${window.location.origin}/${business.slug}`}
-                title={business.name}
-                variant="icon"
-                iconSize={16}
-                className="!bg-white/20 !backdrop-blur-md hover:!bg-white/40 !text-white !rounded-lg"
-              />
-            </div>
-            {business.whatsapp && (
-              <button
-                aria-label="Contactar por WhatsApp"
-                onClick={(e) => {
-                  e.preventDefault();
-                  e.stopPropagation();
-                  window.open(`https://wa.me/${business.whatsapp}?text=${encodeURIComponent('Hola, vi tu perfil en AgendaYa y quiero agendar una cita')}`, '_blank', 'noopener,noreferrer');
-                }}
-                className="p-2 rounded-lg backdrop-blur-md bg-emerald-500/80 hover:bg-emerald-500 text-white transition-all"
-                title="Hablar por WhatsApp"
-              >
-                <MessageCircle className="h-4 w-4" />
-              </button>
-            )}
-          </div>
-        </div>
-        {cat && (
-          <span className="absolute top-3 left-3 px-2.5 py-1 bg-white/90 dark:bg-slate-900/90 backdrop-blur-sm text-slate-700 dark:text-slate-300 rounded-lg text-[10px] font-black uppercase tracking-wider shadow-sm">
-            {cat.name}
-          </span>
-        )}
-        {business.plan === 'premium' && (
-          <span className="absolute top-3 right-3 px-2.5 py-1 bg-amber-100/90 dark:bg-amber-900/90 backdrop-blur-sm text-amber-700 dark:text-amber-300 rounded-lg text-[10px] font-black uppercase tracking-wider shadow-sm">
-            Premium
-          </span>
-        )}
-        {business.plan === 'pro' && (
-          <span className="absolute top-3 right-3 px-2.5 py-1 bg-blue-100/90 dark:bg-blue-900/90 backdrop-blur-sm text-blue-700 dark:text-blue-300 rounded-lg text-[10px] font-black uppercase tracking-wider shadow-sm">
-            Pro
-          </span>
-        )}
-        {(business as any).showcase_only && (
-          <span className="absolute top-12 left-3 px-2 py-1 bg-amber-100/90 dark:bg-amber-900/90 backdrop-blur-sm text-amber-700 dark:text-amber-300 rounded-lg text-[10px] font-black uppercase tracking-wider shadow-sm">
-            Solo info
-          </span>
-        )}
       </div>
 
-      <div className="p-5 flex-1 flex flex-col">
-        <div className="flex items-start justify-between gap-2 mb-2">
-          <h3 className="text-lg font-black text-slate-900 dark:text-white leading-tight group-hover:text-primary-600 dark:group-hover:text-primary-400 transition-colors line-clamp-1">
+      {/* Content */}
+      <div className="flex-1 flex flex-col justify-center min-w-0 px-3 py-2.5">
+        <div className="min-w-0 flex-1">
+          <h3 className="text-sm font-black text-slate-900 dark:text-white leading-tight truncate group-hover:text-primary-600 dark:group-hover:text-primary-400 transition-colors">
             {business.name}
           </h3>
-          <div className="flex items-center gap-1 text-slate-400 dark:text-slate-500 font-bold text-xs flex-shrink-0">
-            <Heart className={`h-3.5 w-3.5 ${likesCount > 0 ? 'text-rose-500 fill-rose-500' : ''}`} />
-            <span>{likesCount}</span>
+          <div className="flex flex-wrap items-center gap-1 mt-0.5">
+            {cat && (
+              <span className="px-1.5 py-[1px] bg-slate-100 dark:bg-slate-800 text-slate-500 dark:text-slate-400 rounded text-[9px] font-bold uppercase leading-tight">
+                {cat.name}
+              </span>
+            )}
+            {business.plan === 'premium' && (
+              <span className="px-1.5 py-[1px] bg-amber-100 dark:bg-amber-900/40 text-amber-700 dark:text-amber-300 rounded text-[9px] font-bold uppercase leading-tight">
+                Premium
+              </span>
+            )}
+            {business.plan === 'pro' && (
+              <span className="px-1.5 py-[1px] bg-blue-100 dark:bg-blue-900/40 text-blue-700 dark:text-blue-300 rounded text-[9px] font-bold uppercase leading-tight">
+                Pro
+              </span>
+            )}
           </div>
+          {business.description && (
+            <p className="text-[11px] text-slate-500 dark:text-slate-400 leading-tight truncate mt-0.5">
+              {business.description}
+            </p>
+          )}
         </div>
 
-        {referralCount !== undefined && referralCount >= 3 && (
-          <div className="mb-2">
-            <ReferralBadge count={referralCount} size="sm" />
-          </div>
-        )}
-
         {business.address && (
-          <div className="flex items-start text-slate-500 dark:text-slate-400 mb-2">
-            <MapPin className="h-3.5 w-3.5 mr-1.5 mt-0.5 flex-shrink-0 text-primary-500" />
-            <p className="text-xs font-medium line-clamp-1">{business.address}</p>
+          <div className="flex items-center gap-1 mt-1.5">
+            <MapPin className="w-2.5 h-2.5 text-slate-400 shrink-0" />
+            <p className="text-[10px] font-medium text-slate-400 truncate">{business.address}</p>
           </div>
         )}
 
-        <p className="text-sm text-slate-600 dark:text-slate-400 line-clamp-2 mb-4 leading-relaxed flex-1">
-          {business.description}
-        </p>
+        <div className="flex items-center gap-2 mt-2">
+          {referralCount !== undefined && referralCount >= 3 && (
+            <ReferralBadge count={referralCount} size="sm" />
+          )}
 
-        <div className="flex items-center justify-between pt-4 border-t border-slate-100 dark:border-slate-800">
-          <span className="flex items-center text-primary-600 dark:text-primary-400 font-black text-xs group-hover:translate-x-1 transition-transform uppercase tracking-wider">
-            Ver servicios
-            <ArrowRight className="ml-1.5 h-3.5 w-3.5" />
-          </span>
+          <button
+            onClick={handleToggleLike}
+            disabled={isLiking}
+            aria-label={isLiked ? 'Quitar de favoritos' : 'Agregar a favoritos'}
+            className={`flex items-center gap-1 px-1.5 py-0.5 rounded text-[10px] font-bold transition-all ${
+              isLiked ? 'text-rose-500' : 'text-slate-400 dark:text-slate-500 hover:text-rose-400'
+            }`}
+          >
+            <Heart className={`w-2.5 h-2.5 ${isLiked ? 'fill-current' : ''}`} />
+            {likesCount > 0 && likesCount}
+          </button>
+
+          <div onClick={(e) => { e.preventDefault(); e.stopPropagation(); }} className="flex-shrink-0">
+            <ShareButton
+              url={shareUrl}
+              title={business.name}
+              variant="text"
+              iconSize={11}
+              className="p-0.5 bg-transparent hover:bg-transparent text-slate-400 dark:text-slate-500 hover:text-primary-500 !rounded !gap-1"
+            />
+          </div>
+
+          {business.whatsapp && (
+            <button
+              aria-label="Contactar por WhatsApp"
+              onClick={(e) => {
+                e.preventDefault();
+                e.stopPropagation();
+                window.open(`https://wa.me/${business.whatsapp}?text=${encodeURIComponent('Hola, vi tu perfil en AgendaYa y quiero agendar una cita')}`, '_blank', 'noopener,noreferrer');
+              }}
+              className="text-slate-400 dark:text-slate-500 hover:text-emerald-500 transition-colors p-0.5"
+            >
+              <MessageCircle className="w-2.5 h-2.5" />
+            </button>
+          )}
+
+          <div className="ml-auto">
+            <span className="flex items-center gap-0.5 text-[10px] font-bold text-primary-600 dark:text-primary-400 opacity-0 group-hover:opacity-100 transition-opacity">
+              Ver <Store className="w-2.5 h-2.5" />
+            </span>
+          </div>
         </div>
       </div>
     </Link>
   );
-});
+};
 
 function SkeletonCard() {
   return (
-    <div className="bg-white dark:bg-slate-900 rounded-lg border border-slate-200 dark:border-slate-800 overflow-hidden animate-pulse">
-      <div className="h-48 bg-slate-200 dark:bg-slate-800" />
-      <div className="p-5 space-y-3">
-        <div className="h-5 bg-slate-200 dark:bg-slate-800 rounded-lg w-3/4" />
-        <div className="h-3 bg-slate-200 dark:bg-slate-800 rounded-lg w-1/2" />
-        <div className="h-3 bg-slate-200 dark:bg-slate-800 rounded-lg w-full" />
-        <div className="h-3 bg-slate-200 dark:bg-slate-800 rounded-lg w-2/3" />
+    <div className="bg-white dark:bg-slate-900 rounded-lg border border-slate-200 dark:border-slate-800 overflow-hidden animate-pulse flex min-h-[88px]">
+      <div className="w-20 sm:w-24 bg-slate-200 dark:bg-slate-800" />
+      <div className="flex-1 p-3 space-y-2">
+        <div className="h-4 bg-slate-200 dark:bg-slate-700 rounded w-3/4" />
+        <div className="h-3 bg-slate-200 dark:bg-slate-700 rounded w-1/2" />
+        <div className="h-3 bg-slate-200 dark:bg-slate-700 rounded w-2/3" />
       </div>
     </div>
   );
@@ -216,7 +220,6 @@ const ExploreBusinesses = () => {
     setCategory(searchParams.get('category') || 'all');
   }, [searchParams]);
 
-  // Debounce search inputs before firing API calls
   useEffect(() => {
     const timer = setTimeout(() => setDebouncedSearch(searchTerm), 350);
     return () => clearTimeout(timer);
@@ -245,7 +248,6 @@ const ExploreBusinesses = () => {
     });
   }, []);
 
-  // Reset on filter change (using debounced values for search/location)
   useEffect(() => {
     setPage(0);
     setBusinesses([]);
@@ -254,7 +256,6 @@ const ExploreBusinesses = () => {
     fetchPage(0, true);
   }, [debouncedSearch, debouncedLocation, category]);
 
-  // Load next page
   useEffect(() => {
     if (page > 0) {
       fetchPage(page, false);
@@ -277,14 +278,12 @@ const ExploreBusinesses = () => {
       setBusinesses(prev => isInitial ? data : [...prev, ...data]);
       setHasMore(data.length === PAGE_SIZE);
 
-      // Batch fetch likes for new businesses
       if (user && data.length > 0) {
         const ids = data.map(b => b.id);
         const liked = await checkLikedBusinesses(user.id, ids);
         setLikedIds(prev => new Set([...prev, ...liked]));
       }
 
-      // Batch fetch referral badges
       const ownerIds = data.map(b => b.owner_id).filter(Boolean);
       if (ownerIds.length > 0) {
         const counts = await getReferralCounts(ownerIds);
@@ -299,7 +298,6 @@ const ExploreBusinesses = () => {
     }
   };
 
-  // Sync map businesses from list data when switching to map view
   useEffect(() => {
     if (viewMode === 'map') {
       setMapBusinesses(businesses);
@@ -328,103 +326,113 @@ const ExploreBusinesses = () => {
         title="Explora Negocios y Servicios"
         description="Encuentra los mejores negocios locales de barbería, belleza, salud y más. Filtra por categoría, ubicación y reserva online."
       />
-      <div className="max-w-7xl mx-auto py-12 px-4 sm:px-6 lg:px-8">
+      <div className="max-w-7xl mx-auto px-4 py-6 space-y-4 sm:space-y-5">
 
-        {/* Header */}
-        <div className="text-center mb-10 animate-in fade-in slide-in-from-top-4 duration-500">
-          <div className="w-14 h-14 rounded-lg bg-primary-50 dark:bg-primary-500/10 flex items-center justify-center mx-auto mb-4 ring-1 ring-primary-200 dark:ring-primary-800">
-            <Store className="w-7 h-7 text-primary-600 dark:text-primary-400" />
+        {/* ═══ HEADER (dashboard style) ═══ */}
+        <div className="bg-white dark:bg-slate-900 rounded-lg border border-slate-200 dark:border-slate-800 shadow-sm p-4 animate-in fade-in slide-in-from-top-4 duration-500">
+          <div className="flex items-center gap-3">
+            <div className="w-10 h-10 rounded-lg bg-primary-50 dark:bg-primary-500/10 flex items-center justify-center text-primary-600 dark:text-primary-400 shrink-0">
+              <Store className="w-5 h-5" />
+            </div>
+            <div className="flex-1 min-w-0">
+              <h1 className="text-lg sm:text-xl font-black text-slate-900 dark:text-white tracking-tight truncate">
+                Explora Negocios
+              </h1>
+              <p className="text-xs sm:text-sm font-medium text-slate-500 dark:text-slate-400">
+                Encuentra servicios y reserva citas
+              </p>
+            </div>
           </div>
-          <h1 className="text-3xl sm:text-4xl font-black text-slate-900 dark:text-white tracking-tight mb-3">
-            Explora Negocios
-          </h1>
-          <p className="text-base sm:text-lg text-slate-500 dark:text-slate-400 font-medium max-w-xl mx-auto">
-            Encuentra servicios y reserva citas en los mejores negocios locales
-          </p>
         </div>
 
-        {/* Search & Filters */}
-        <div className="bg-white dark:bg-slate-900 rounded-lg border border-slate-200 dark:border-slate-800 shadow-lg shadow-slate-200/50 dark:shadow-none p-4 sm:p-5 mb-10 animate-in fade-in slide-in-from-bottom-4 duration-500 delay-100">
-          <div className="flex flex-col lg:flex-row gap-3">
-            <div className="flex-1 relative">
-              <Search className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
+        {/* ═══ FILTERS (compact) ═══ */}
+        <div className="animate-in fade-in slide-in-from-bottom-4 duration-500 delay-100">
+          <div className="flex flex-wrap items-center gap-2">
+            <div className="relative flex-1 min-w-[160px] max-w-xs">
+              <Search className="absolute left-2.5 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-slate-400" />
               <input
                 type="text"
                 value={searchTerm}
                 onChange={(e) => setSearchTerm(e.target.value)}
                 placeholder="¿Qué servicio buscas?"
-                className="w-full pl-10 pr-4 py-3 rounded-lg border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 text-slate-900 dark:text-slate-100 focus:ring-2 focus:ring-primary-500/20 focus:border-primary-500 outline-none transition-all text-sm font-medium"
+                className="w-full pl-8 pr-3 py-2 rounded-lg border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 text-slate-900 dark:text-slate-100 focus:ring-2 focus:ring-primary-500/20 focus:border-primary-500 outline-none transition-all text-xs font-medium min-h-[36px]"
               />
+              {searchTerm && (
+                <button onClick={() => setSearchTerm('')} className="absolute right-2 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600">
+                  <X className="w-3 h-3" />
+                </button>
+              )}
             </div>
-            <div className="flex-1 relative">
-              <MapPin className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
+            <div className="relative flex-1 min-w-[140px] max-w-xs">
+              <MapPin className="absolute left-2.5 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-slate-400" />
               <input
                 type="text"
                 value={locationTerm}
                 onChange={(e) => setLocationTerm(e.target.value)}
                 placeholder="Ubicación"
-                className="w-full pl-10 pr-4 py-3 rounded-lg border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 text-slate-900 dark:text-slate-100 focus:ring-2 focus:ring-primary-500/20 focus:border-primary-500 outline-none transition-all text-sm font-medium"
+                className="w-full pl-8 pr-3 py-2 rounded-lg border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 text-slate-900 dark:text-slate-100 focus:ring-2 focus:ring-primary-500/20 focus:border-primary-500 outline-none transition-all text-xs font-medium min-h-[36px]"
               />
+              {locationTerm && (
+                <button onClick={() => setLocationTerm('')} className="absolute right-2 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600">
+                  <X className="w-3 h-3" />
+                </button>
+              )}
             </div>
-            <div className="lg:w-48 relative">
-              <SlidersHorizontal className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400 pointer-events-none z-10" />
+            <div className="relative min-w-[130px]">
+              <SlidersHorizontal className="absolute left-2.5 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-slate-400 pointer-events-none z-10" />
               <SelectMenu
                 value={category}
                 onChange={setCategory}
                 options={categoryOptions}
               />
             </div>
-          </div>
-          {hasFilters && (
-            <div className="flex items-center justify-between mt-3 pt-3 border-t border-slate-100 dark:border-slate-800">
-              <p className="text-xs font-medium text-slate-500 dark:text-slate-400">
-                {businesses.length} {businesses.length === 1 ? 'resultado' : 'resultados'}
-              </p>
+            {hasFilters && (
               <button
                 onClick={clearFilters}
-                className="inline-flex items-center gap-1.5 text-xs font-bold text-slate-500 hover:text-red-500 transition-colors"
+                className="inline-flex items-center gap-1 px-2.5 py-2 rounded-lg text-[11px] font-bold text-slate-500 hover:text-red-500 hover:bg-red-50 dark:hover:bg-red-500/10 transition-all min-h-[36px]"
               >
                 <X className="w-3 h-3" />
-                Limpiar filtros
+                Limpiar
+              </button>
+            )}
+            <div className="flex items-center gap-1 ml-auto">
+              <button
+                onClick={() => setViewMode('list')}
+                className={`p-2 rounded-lg transition-all min-h-[36px] min-w-[36px] ${viewMode === 'list' ? 'bg-primary-100 dark:bg-primary-900/40 text-primary-600 dark:text-primary-400' : 'bg-slate-100 dark:bg-slate-800 text-slate-400 hover:text-slate-600'}`}
+                title="Vista lista"
+              >
+                <List className="w-3.5 h-3.5" />
+              </button>
+              <button
+                onClick={() => setViewMode('map')}
+                className={`p-2 rounded-lg transition-all min-h-[36px] min-w-[36px] ${viewMode === 'map' ? 'bg-primary-100 dark:bg-primary-900/40 text-primary-600 dark:text-primary-400' : 'bg-slate-100 dark:bg-slate-800 text-slate-400 hover:text-slate-600'}`}
+                title="Vista mapa"
+              >
+                <Map className="w-3.5 h-3.5" />
               </button>
             </div>
+          </div>
+          {hasFilters && businesses.length > 0 && (
+            <p className="text-[11px] font-medium text-slate-400 mt-1.5">
+              {businesses.length} {businesses.length === 1 ? 'resultado' : 'resultados'}
+            </p>
           )}
         </div>
 
         {/* Error */}
         {error && (
-          <div className="flex items-start gap-3 px-5 py-4 mb-8 bg-red-50 dark:bg-red-500/10 border border-red-200 dark:border-red-800 rounded-lg animate-in fade-in duration-300">
-            <span className="text-sm font-bold text-red-700 dark:text-red-400">{error}</span>
-          </div>
-        )}
-
-        {/* View Toggle */}
-        {!loading && businesses.length > 0 && (
-          <div className="flex items-center justify-end mb-4 gap-2">
-            <button
-              onClick={() => setViewMode('list')}
-              className={`p-2 rounded-lg transition-all ${viewMode === 'list' ? 'bg-primary-100 dark:bg-primary-900/40 text-primary-600 dark:text-primary-400' : 'bg-slate-100 dark:bg-slate-800 text-slate-400 hover:text-slate-600'}`}
-              title="Vista lista"
-            >
-              <List className="w-4 h-4" />
-            </button>
-            <button
-              onClick={() => setViewMode('map')}
-              className={`p-2 rounded-lg transition-all ${viewMode === 'map' ? 'bg-primary-100 dark:bg-primary-900/40 text-primary-600 dark:text-primary-400' : 'bg-slate-100 dark:bg-slate-800 text-slate-400 hover:text-slate-600'}`}
-              title="Vista mapa"
-            >
-              <Map className="w-4 h-4" />
-            </button>
+          <div className="flex items-start gap-3 px-4 py-3 bg-red-50 dark:bg-red-500/10 border border-red-200 dark:border-red-800 rounded-lg animate-in fade-in duration-300">
+            <span className="text-xs font-bold text-red-700 dark:text-red-400">{error}</span>
           </div>
         )}
 
         {/* Content */}
         {loading && businesses.length === 0 ? (
-          <div className="grid gap-6 grid-cols-1 sm:grid-cols-2 lg:grid-cols-3">
+          <div className="space-y-2">
             {[1, 2, 3, 4, 5, 6].map(i => <SkeletonCard key={i} />)}
           </div>
         ) : businesses.length === 0 ? (
-          <div className="animate-in fade-in zoom-in-95 duration-300">
+          <div className="animate-in fade-in zoom-in-95 duration-300 pt-8">
             <EmptyState
               icon={<Search className="w-8 h-8" />}
               title="No encontramos resultados"
@@ -448,41 +456,37 @@ const ExploreBusinesses = () => {
           </Suspense>
         ) : (
           <>
-            <div className="grid gap-6 grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 animate-in fade-in slide-in-from-bottom-4 duration-500">
+            <div className="space-y-2 animate-in fade-in slide-in-from-bottom-4 duration-500">
               {businesses.map((business) => (
-                <div key={business.id} className="w-full">
-                  <BusinessCard
-                    business={business}
-                    categories={categories}
-                    isLiked={likedIds.has(business.id)}
-                    currentUser={user}
-                    onToggleLike={handleToggleLike}
-                    referralCount={referralCounts[business.owner_id]}
-                  />
-                </div>
+                <BusinessCard
+                  key={business.id}
+                  business={business}
+                  categories={categories}
+                  isLiked={likedIds.has(business.id)}
+                  currentUser={user}
+                  onToggleLike={handleToggleLike}
+                  referralCount={referralCounts[business.owner_id]}
+                />
               ))}
             </div>
 
-            {/* Sentinel para infinite scroll — siempre visible si hay más páginas */}
-            {hasMore && (
-              <div ref={sentinelRef} className="h-4" />
-            )}
+            {hasMore && <div ref={sentinelRef} className="h-4" />}
 
             {loadingMore && (
-              <div className="flex justify-center py-8 animate-in fade-in duration-300">
-                <div className="flex items-center gap-3 px-6 py-3 bg-white dark:bg-slate-900 rounded-lg shadow-lg border border-slate-200 dark:border-slate-700">
-                  <Loader2 className="w-5 h-5 text-primary-600 animate-spin" />
-                  <span className="text-sm font-black text-slate-600 dark:text-slate-400 uppercase tracking-widest">Cargando más...</span>
+              <div className="flex justify-center py-6 animate-in fade-in duration-300">
+                <div className="flex items-center gap-2 px-4 py-2 bg-white dark:bg-slate-900 rounded-lg shadow border border-slate-200 dark:border-slate-700">
+                  <Loader2 className="w-4 h-4 text-primary-600 animate-spin" />
+                  <span className="text-[11px] font-black text-slate-500 dark:text-slate-400 uppercase tracking-widest">Cargando más...</span>
                 </div>
               </div>
             )}
 
             {!hasMore && businesses.length > 0 && (
-              <div className="text-center py-10 animate-in fade-in duration-300">
-                <div className="inline-flex items-center gap-3 px-6 py-2.5 bg-slate-100 dark:bg-slate-800/50 rounded-full border border-slate-200 dark:border-slate-700">
-                  <div className="w-1.5 h-1.5 rounded-full bg-slate-300 dark:bg-slate-600" />
-                  <span className="text-xs font-bold text-slate-400 uppercase tracking-widest">Has llegado al final</span>
-                  <div className="w-1.5 h-1.5 rounded-full bg-slate-300 dark:bg-slate-600" />
+              <div className="text-center py-8 animate-in fade-in duration-300">
+                <div className="inline-flex items-center gap-2 px-4 py-2 bg-slate-100 dark:bg-slate-800/50 rounded-full border border-slate-200 dark:border-slate-700">
+                  <div className="w-1 h-1 rounded-full bg-slate-300 dark:bg-slate-600" />
+                  <span className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Has llegado al final</span>
+                  <div className="w-1 h-1 rounded-full bg-slate-300 dark:bg-slate-600" />
                 </div>
               </div>
             )}
