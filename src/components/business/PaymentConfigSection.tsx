@@ -229,41 +229,9 @@ const PaymentConfigSection: React.FC<PaymentConfigSectionProps> = ({
                 {method.enabled && isExpanded && (
                   <div className="mt-4 pt-4 border-t border-slate-100 dark:border-slate-800 space-y-4">
                     {key === 'paypal' && (
-                      <>
-                        <div>
-                          <label className="block text-xs font-bold text-slate-700 dark:text-slate-300 mb-1">
-                            Email de negocio PayPal
-                          </label>
-                          <input
-                            type="email"
-                            value={method.email || ''}
-                            onChange={(e) => updateMethodConfig(key, 'email', e.target.value)}
-                            placeholder="ej: negocio@email.com"
-                            className="w-full px-3 py-2 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-lg text-sm text-slate-900 dark:text-white focus:ring-2 focus:ring-primary-500 focus:border-primary-500"
-                          />
-                        </div>
-                        <div>
-                          <label className="block text-xs font-bold text-slate-700 dark:text-slate-300 mb-1">
-                            Client ID
-                          </label>
-                          <input
-                            type="text"
-                            value={method.client_id || ''}
-                            onChange={(e) => updateMethodConfig(key, 'client_id', e.target.value)}
-                            placeholder="Client ID de PayPal"
-                            className="w-full px-3 py-2 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-lg text-sm text-slate-900 dark:text-white focus:ring-2 focus:ring-primary-500 focus:border-primary-500 font-mono text-xs"
-                          />
-                        </div>
-                        <label className="flex items-center gap-2 text-sm font-medium text-slate-700 dark:text-slate-300">
-                          <input
-                            type="checkbox"
-                            checked={method.sandbox ?? false}
-                            onChange={(e) => updateMethodConfig(key, 'sandbox', e.target.checked)}
-                            className="rounded border-slate-300 text-primary-600 focus:ring-primary-500"
-                          />
-                          Modo sandbox (pruebas)
-                        </label>
-                      </>
+                      <p className="text-xs text-slate-500 dark:text-slate-400 leading-relaxed">
+                        PayPal está configurado a nivel de plataforma. Los pagos se procesan con la cuenta de AgendaYa, igual que en la página de Planes.
+                      </p>
                     )}
 
                     {isCustom && (
