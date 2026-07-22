@@ -60,25 +60,36 @@ export default function GiftBooking() {
   };
 
   const handlePayPalCreateOrder = async (): Promise<string> => {
-    const res = await fetch('/.netlify/functions/create-service-payment', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({
-        provider: 'paypal',
-        amount: service!.price,
-        currency: 'COP',
-        serviceName: service!.name,
-        businessName: business?.name || '',
-        userId: user!.id,
-      }),
-    });
-    const text = await res.text();
-    let data;
-    try { data = JSON.parse(text); } catch { data = null; }
-    if (res.ok && data?.orderId) return data.orderId;
-    const errMsg = data?.error || `Error del servidor (${res.status}): ${text || 'sin respuesta'}`;
-    toast.error(errMsg);
-    throw new Error(errMsg);
+    const controller = new AbortController();
+    const timeout = setTimeout(() => controller.abort(), 8000);
+    try {
+      const res = await fetch('/.netlify/functions/create-service-paypal-order', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          amount: service!.price,
+          currency: 'COP',
+          serviceName: service!.name,
+          businessName: business?.name || '',
+        }),
+        signal: controller.signal,
+      });
+      const text = await res.text();
+      let data;
+      try { data = JSON.parse(text); } catch { data = null; }
+      if (res.ok && data?.id) return data.id;
+      const errMsg = data?.error || `Error del servidor (${res.status}): ${text || 'sin respuesta'}`;
+      toast.error(errMsg);
+      throw new Error(errMsg);
+    } catch (err) {
+      if (err instanceof DOMException && err.name === 'AbortError') {
+        toast.error('El pago tardó demasiado. Intenta de nuevo.');
+        throw new Error('Timeout');
+      }
+      throw err;
+    } finally {
+      clearTimeout(timeout);
+    }
   };
 
   const handlePayPalApprove = async (orderId: string) => {
