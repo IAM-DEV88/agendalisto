@@ -119,51 +119,6 @@ export default function GiftBooking() {
     window.open(`https://wa.me/?text=${waMsg}`, '_blank');
   };
 
-  const handleWompiPay = async () => {
-    const code = `GIFT-${Date.now().toString(36).toUpperCase()}`;
-    const expiresAt = new Date();
-    expiresAt.setFullYear(expiresAt.getFullYear() + 1);
-
-    const res = await fetch('/.netlify/functions/create-service-payment', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({
-        provider: 'wompi',
-        amount: service!.price,
-        currency: 'COP',
-        serviceName: service!.name,
-        businessName: business?.name || '',
-        userId: user!.id,
-        userEmail: user!.email,
-        userName: user!.user_metadata?.full_name || form.recipientName,
-        action: 'create_gift',
-        actionData: {
-          code,
-          giftCode: code,
-          service_id: serviceId!,
-          business_id: business?.id || '',
-          sender_user_id: user!.id,
-          recipient_name: form.recipientName.trim(),
-          recipient_email: form.recipientEmail.trim(),
-          recipient_phone: form.recipientPhone.trim() || undefined,
-          message: form.message.trim() || undefined,
-          expires_at: expiresAt.toISOString(),
-          amount: service!.price,
-          currency: 'COP',
-        },
-      }),
-    });
-
-    const data = await res.json();
-    if (!res.ok || !data.checkoutUrl) {
-      toast.error(data.error || 'Error al iniciar pago con Wompi');
-      return;
-    }
-
-    setGiftCode(code);
-    window.location.href = data.checkoutUrl;
-  };
-
   if (loading) return <div className="min-h-screen flex items-center justify-center"><div className="animate-spin rounded-full h-10 w-10 border-t-2 border-primary-600" /></div>;
 
   if (sent) {
@@ -266,7 +221,6 @@ export default function GiftBooking() {
                 userId={user?.id || ''}
                 onPayPalCreateOrder={handlePayPalCreateOrder}
                 onPayPalApprove={handlePayPalApprove}
-                onWompiPay={handleWompiPay}
                 enabledMethods={enabledMethods}
               />
             </div>

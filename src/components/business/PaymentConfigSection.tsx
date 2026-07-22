@@ -10,7 +10,6 @@ import {
   CheckCircle2,
   AlertCircle,
   Wallet,
-  Landmark,
   Copy,
 } from 'lucide-react';
 import type { PaymentMethodConfig } from '../../lib/api';
@@ -28,7 +27,6 @@ interface PaymentConfigSectionProps {
 }
 
 const CROWDFUNDING_PAYPAL_EMAIL = 'jaguerx88@gmail.com';
-const CROWDFUNDING_WOMPI_LINK = 'https://checkout.wompi.co/l/VPOS_kRgRp8';
 
 const PAYMENT_METHOD_META: Record<string, { label: string; icon: React.ReactNode; description: string; brandColor: string }> = {
   paypal: {
@@ -37,16 +35,9 @@ const PAYMENT_METHOD_META: Record<string, { label: string; icon: React.ReactNode
     description: 'Acepta pagos internacionales con tarjeta de crédito y cuenta PayPal.',
     brandColor: 'bg-blue-50 text-blue-600 dark:bg-blue-900/20 dark:text-blue-400',
   },
-  wompi: {
-    label: 'Wompi',
-    icon: <Landmark className="w-5 h-5" />,
-    description: 'Procesa pagos locales en Colombia (PSE, tarjetas, Nequi, Bancolombia).',
-    brandColor: 'bg-emerald-50 text-emerald-600 dark:bg-emerald-900/20 dark:text-emerald-400',
-  },
-
 };
 
-const DEFAULT_METHODS = ['paypal', 'wompi'];
+const DEFAULT_METHODS = ['paypal'];
 
 const PaymentConfigSection: React.FC<PaymentConfigSectionProps> = ({
   paymentMethods,
@@ -153,15 +144,6 @@ const PaymentConfigSection: React.FC<PaymentConfigSectionProps> = ({
           email: CROWDFUNDING_PAYPAL_EMAIL,
           client_id: PAYPAL_CLIENT_ID || '',
           sandbox: false,
-        },
-      });
-    } else if (key === 'wompi') {
-      onChange({
-        ...safeMethods,
-        wompi: {
-          ...current,
-          enabled: true,
-          sandbox: true,
         },
       });
     }
@@ -330,58 +312,6 @@ const PaymentConfigSection: React.FC<PaymentConfigSectionProps> = ({
                         </label>
                         <p className="text-[10px] text-slate-400 dark:text-slate-500 leading-relaxed">
                           El crowdfunding usa el email <code className="text-xs bg-slate-100 dark:bg-slate-800 px-1 rounded">{CROWDFUNDING_PAYPAL_EMAIL}</code> con IPN en agendaya.netlify.com.
-                        </p>
-                      </>
-                    )}
-
-                    {key === 'wompi' && (
-                      <>
-                        {isAdmin && (
-                          <div className="space-y-2">
-                            <button
-                              onClick={() => applyAdminPreset('wompi')}
-                              className="w-full flex items-center justify-center gap-2 px-4 py-2.5 bg-emerald-50 hover:bg-emerald-100 dark:bg-emerald-900/20 dark:hover:bg-emerald-900/30 text-emerald-700 dark:text-emerald-400 font-bold text-xs rounded-lg border border-emerald-200 dark:border-emerald-800 transition-colors"
-                            >
-                              <Copy className="w-4 h-4" />
-                              Usar configuración de crowdfunding
-                            </button>
-                          </div>
-                        )}
-                        <div>
-                          <label className="block text-xs font-bold text-slate-700 dark:text-slate-300 mb-1">
-                            Public Key
-                          </label>
-                          <input
-                            type="text"
-                            value={method.public_key || ''}
-                            onChange={(e) => updateMethodConfig(key, 'public_key', e.target.value)}
-                            placeholder="Wompi Public Key"
-                            className="w-full px-3 py-2 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-lg text-sm text-slate-900 dark:text-white focus:ring-2 focus:ring-primary-500 focus:border-primary-500 font-mono text-xs"
-                          />
-                        </div>
-                        <div>
-                          <label className="block text-xs font-bold text-slate-700 dark:text-slate-300 mb-1">
-                            Integrity Secret
-                          </label>
-                          <input
-                            type="text"
-                            value={method.integrity_secret || ''}
-                            onChange={(e) => updateMethodConfig(key, 'integrity_secret', e.target.value)}
-                            placeholder="Wompi Integrity Secret"
-                            className="w-full px-3 py-2 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-lg text-sm text-slate-900 dark:text-white focus:ring-2 focus:ring-primary-500 focus:border-primary-500 font-mono text-xs"
-                          />
-                        </div>
-                        <label className="flex items-center gap-2 text-sm font-medium text-slate-700 dark:text-slate-300">
-                          <input
-                            type="checkbox"
-                            checked={method.sandbox ?? true}
-                            onChange={(e) => updateMethodConfig(key, 'sandbox', e.target.checked)}
-                            className="rounded border-slate-300 text-primary-600 focus:ring-primary-500"
-                          />
-                          Modo sandbox (pruebas)
-                        </label>
-                        <p className="text-[10px] text-slate-400 dark:text-slate-500 leading-relaxed">
-                          El crowdfunding usa checkout link <code className="text-xs bg-slate-100 dark:bg-slate-800 px-1 rounded">{CROWDFUNDING_WOMPI_LINK}</code>.
                         </p>
                       </>
                     )}

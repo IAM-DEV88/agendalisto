@@ -51,7 +51,7 @@ interface BookingFormProps {
   hideHero?: boolean;
   hideForm?: boolean;
   hideGift?: boolean;
-  /** List of enabled payment method keys (e.g. ['paypal', 'wompi']). Passed to PaymentMethodSelector to filter visible methods. */
+  /** List of enabled payment method keys (e.g. ['paypal']). Passed to PaymentMethodSelector to filter visible methods. */
   enabledPaymentMethods?: string[];
 }
 
@@ -156,52 +156,6 @@ const BookingForm: React.FC<BookingFormProps> = ({
             guest_info: !userId ? localGuestInfo : null,
             payment_provider: 'paypal',
             payment_amount: paymentAmount,
-          },
-        }),
-      });
-
-      const result = await res.json();
-      if (!res.ok || !result.success) throw new Error(result.error || 'Error al procesar pago');
-      toast.success('Pago exitoso! El negocio te contactará para coordinar la cita.');
-      setShowPurchase(false);
-    } catch (err: unknown) {
-      toast.error(err instanceof Error ? err.message : 'Error al procesar pago');
-    } finally {
-      setPurchasing(false);
-    }
-  };
-
-  const handleDirectPurchaseWompi = async () => {
-    setPurchasing(true);
-    try {
-      const placeholderDate = new Date().toISOString().split('T')[0];
-      const placeholderTime = '12:00';
-      const startTime = new Date(`${placeholderDate}T${placeholderTime}`);
-      const endTime = new Date(startTime.getTime() + (service?.duration || 60) * 60000);
-
-      const res = await fetch('/.netlify/functions/create-service-payment', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          provider: 'wompi',
-          amount: paymentAmount,
-          currency: 'COP',
-          serviceName: service?.name || '',
-          businessName,
-          userId: userId || '',
-          userEmail: localGuestInfo.email || '',
-          userName: localGuestInfo.name || '',
-          action: 'create_appointment',
-          actionData: {
-            business_id: businessId,
-            service_id: serviceId,
-            user_id: userId || '',
-            start_time: startTime.toISOString(),
-            end_time: endTime.toISOString(),
-            notes: 'Compra directa — pendiente de coordinar fecha',
-            guest_info: !userId ? localGuestInfo : null,
-            amount: paymentAmount,
-            currency: 'COP',
           },
         }),
       });
@@ -563,49 +517,6 @@ const BookingForm: React.FC<BookingFormProps> = ({
     }
   }, [businessId, serviceId, userId, formData.date, formData.time, formData.notes, localGuestInfo, paymentAmount, service, giftApplied]);
 
-  const handleWompiPay = useCallback(async () => {
-    const startTime = new Date(`${formData.date}T${formData.time}`);
-    const endTime = new Date(startTime.getTime() + (service?.duration || 0) * 60000);
-
-    const res = await fetch('/.netlify/functions/create-service-payment', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({
-        provider: 'wompi',
-        amount: paymentAmount,
-        currency: 'COP',
-        serviceName: service?.name || '',
-        businessName,
-        userId: userId || '',
-        userEmail: localGuestInfo.email || '',
-        userName: localGuestInfo.name || '',
-        action: 'create_appointment',
-        actionData: {
-          business_id: businessId,
-          service_id: serviceId,
-          user_id: userId || '',
-          start_time: startTime.toISOString(),
-          end_time: endTime.toISOString(),
-          notes: formData.notes || null,
-          guest_info: !userId ? localGuestInfo : null,
-          amount: paymentAmount,
-          currency: 'COP',
-        },
-      }),
-    });
-
-    const data = await res.json();
-    if (!res.ok || !data.checkoutUrl) {
-      toast.error(data.error || 'Error al iniciar pago con Wompi');
-      return;
-    }
-
-    sessionStorage.setItem('pendingBooking', JSON.stringify({
-      businessId, serviceId, date: formData.date, time: formData.time,
-    }));
-    window.location.href = data.checkoutUrl;
-  }, [formData.date, formData.time, service, businessId, serviceId, userId, localGuestInfo, businessName, paymentAmount]);
-
   const handleDateSelect = (date: string) => {
     setFormData(prev => ({ ...prev, date, time: '' }));
   };
@@ -882,7 +793,7 @@ const BookingForm: React.FC<BookingFormProps> = ({
                     </p>
                     <PaymentMethodSelector amount={paymentAmount} currency="COP" serviceName={service?.name || ''} businessName={businessName}
                       userId={userId || ''} onPayPalCreateOrder={handleDirectPurchasePayPal} onPayPalApprove={handleDirectPurchaseApprove}
-                      onWompiPay={handleDirectPurchaseWompi} disabled={purchasing} enabledMethods={enabledPaymentMethods} />
+                      disabled={purchasing} enabledMethods={enabledPaymentMethods} />
                   </div>
                 );
               })()}
@@ -1123,7 +1034,7 @@ const BookingForm: React.FC<BookingFormProps> = ({
               ) : (
                 <PaymentMethodSelector amount={paymentAmount} currency="COP" serviceName={service?.name || ''} businessName={businessName}
                   userId={userId || ''} onPayPalCreateOrder={handlePayPalCreateOrder} onPayPalApprove={handlePayPalApprove}
-                  onWompiPay={handleWompiPay} disabled={submitting} enabledMethods={enabledPaymentMethods} />
+                  disabled={submitting} enabledMethods={enabledPaymentMethods} />
               )}
             </div>
           </div>

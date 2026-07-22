@@ -1,7 +1,6 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import { PayPalScriptProvider, PayPalButtons, usePayPalScriptReducer } from '@paypal/react-paypal-js';
-import { detectCountry, DetectedCountry } from '../utils/countryDetection';
-import { Loader2, ExternalLink, CreditCard } from 'lucide-react';
+import { Loader2, CreditCard } from 'lucide-react';
 
 const PAYPAL_CLIENT_ID = import.meta.env.VITE_PAYPAL_CLIENT_ID;
 
@@ -13,9 +12,8 @@ interface PaymentMethodSelectorProps {
   userId: string;
   onPayPalCreateOrder: () => Promise<string>;
   onPayPalApprove: (orderId: string) => Promise<void>;
-  onWompiPay: () => Promise<void>;
   disabled?: boolean;
-  /** If provided, only show methods included in this list (e.g. ['paypal', 'wompi']). When undefined, shows all available methods (current geo-detection behavior). */
+  /** If provided, only show methods included in this list (e.g. ['paypal']). When undefined, shows PayPal if available. */
   enabledMethods?: string[];
 }
 
@@ -66,21 +64,11 @@ const PayPalButtonWrapper = React.memo(function PayPalButtonWrapper({
 });
 
 const PaymentMethodSelector = React.memo(function PaymentMethodSelector(props: PaymentMethodSelectorProps) {
-  const { amount, currency, onPayPalCreateOrder, onPayPalApprove, onWompiPay, disabled, enabledMethods } = props;
-  const [country, setCountry] = useState<DetectedCountry>('other');
-  const [wompiLoading, setWompiLoading] = useState(false);
+  const { amount, currency, onPayPalCreateOrder, onPayPalApprove, disabled, enabledMethods } = props;
 
-  useEffect(() => {
-    setCountry(detectCountry());
-  }, []);
+  const paypalAvailable = !!PAYPAL_CLIENT_ID && (!enabledMethods || enabledMethods.includes('paypal'));
 
-  const paypalAvailable = (country === 'other' || country === 'us') && !!PAYPAL_CLIENT_ID && (!enabledMethods || enabledMethods.includes('paypal'));
-
-  const wompiAvailable = country === 'co' && (!enabledMethods || enabledMethods.includes('wompi'));
-
-  if (!paypalAvailable && !wompiAvailable) {
-    // If enabledMethods was explicitly provided (not undefined) but is empty,
-    // the business has payment config but no online methods enabled.
+  if (!paypalAvailable) {
     if (enabledMethods && enabledMethods.length === 0) {
       return (
         <div className="p-4 rounded-lg border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800/50 text-center" role="status">
@@ -102,50 +90,19 @@ const PaymentMethodSelector = React.memo(function PaymentMethodSelector(props: P
         Pagar <span className="text-primary-600">${amount.toLocaleString()}</span> {currency}
       </p>
 
-      {paypalAvailable && (
-        <div className="border border-slate-200 dark:border-slate-700 rounded-lg p-3">
-          <div className="flex items-center gap-2 mb-2">
-            <CreditCard className="w-4 h-4 text-blue-600" />
-            <span className="text-xs font-bold text-slate-500 uppercase tracking-wider">PayPal</span>
-          </div>
-          <PayPalScriptProvider options={{ clientId: PAYPAL_CLIENT_ID, vault: false, intent: 'capture' }}>
-            <PayPalButtonWrapper
-              onCreateOrder={onPayPalCreateOrder}
-              onApprove={onPayPalApprove}
-              disabled={disabled || wompiLoading}
-            />
-          </PayPalScriptProvider>
+      <div className="border border-slate-200 dark:border-slate-700 rounded-lg p-3">
+        <div className="flex items-center gap-2 mb-2">
+          <CreditCard className="w-4 h-4 text-blue-600" />
+          <span className="text-xs font-bold text-slate-500 uppercase tracking-wider">PayPal</span>
         </div>
-      )}
-
-      {wompiAvailable && (
-        <button
-          type="button"
-          onClick={async () => {
-            setWompiLoading(true);
-            try {
-              await onWompiPay();
-            } finally {
-              setWompiLoading(false);
-            }
-          }}
-          disabled={disabled || wompiLoading}
-          aria-label="Pagar con Wompi"
-          className="w-full inline-flex items-center justify-center gap-2 px-4 py-3 bg-emerald-600 hover:bg-emerald-700 text-white text-sm font-bold rounded-lg transition-all disabled:opacity-50 shadow-lg shadow-emerald-500/25"
-        >
-          {wompiLoading ? (
-            <>
-              <Loader2 className="w-4 h-4 animate-spin" />
-              Conectando con Wompi...
-            </>
-          ) : (
-            <>
-              <ExternalLink className="w-4 h-4" />
-              Pagar con Wompi — ${amount.toLocaleString()} {currency}
-            </>
-          )}
-        </button>
-      )}
+        <PayPalScriptProvider options={{ clientId: PAYPAL_CLIENT_ID, vault: false, intent: 'capture' }}>
+          <PayPalButtonWrapper
+            onCreateOrder={onPayPalCreateOrder}
+            onApprove={onPayPalApprove}
+            disabled={disabled}
+          />
+        </PayPalScriptProvider>
+      </div>
     </div>
   );
 });
