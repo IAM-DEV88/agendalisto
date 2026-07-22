@@ -1,5 +1,6 @@
 import { useState, useEffect, useMemo } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
+import { PayPalScriptProvider } from '@paypal/react-paypal-js';
 import {
   getBusinessBySlug,
   getService,
@@ -38,6 +39,8 @@ function BookingPageSkeleton() {
     </div>
   );
 }
+
+const PAYPAL_CLIENT_ID = import.meta.env.VITE_PAYPAL_CLIENT_ID;
 
 function BookingPage() {
   const { slug, serviceId } = useParams();
@@ -129,7 +132,7 @@ function BookingPage() {
     );
   }
 
-  return (
+  const pageContent = (
     <div className="min-h-screen bg-gradient-to-b from-slate-50 to-white dark:from-slate-950 dark:to-slate-900 pb-20">
       <SEO title={`Reservar ${service.name} — ${businessData.name}`} />
 
@@ -471,6 +474,16 @@ function BookingPage() {
       </div>
     </div>
   );
+
+  if (PAYPAL_CLIENT_ID) {
+    return (
+      <PayPalScriptProvider options={{ clientId: PAYPAL_CLIENT_ID, vault: false, intent: 'capture' }}>
+        {pageContent}
+      </PayPalScriptProvider>
+    );
+  }
+
+  return pageContent;
 }
 
 export default BookingPage;

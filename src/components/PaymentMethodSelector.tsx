@@ -1,8 +1,6 @@
 import React, { useState } from 'react';
-import { PayPalScriptProvider, PayPalButtons, usePayPalScriptReducer } from '@paypal/react-paypal-js';
+import { PayPalButtons, usePayPalScriptReducer } from '@paypal/react-paypal-js';
 import { Loader2, CreditCard } from 'lucide-react';
-
-const PAYPAL_CLIENT_ID = import.meta.env.VITE_PAYPAL_CLIENT_ID;
 
 interface PaymentMethodSelectorProps {
   amount: number;
@@ -66,7 +64,7 @@ const PayPalButtonWrapper = React.memo(function PayPalButtonWrapper({
 const PaymentMethodSelector = React.memo(function PaymentMethodSelector(props: PaymentMethodSelectorProps) {
   const { amount, currency, onPayPalCreateOrder, onPayPalApprove, disabled, enabledMethods } = props;
 
-  const paypalAvailable = !!PAYPAL_CLIENT_ID && (!enabledMethods || enabledMethods.includes('paypal'));
+  const paypalAvailable = !enabledMethods || enabledMethods.includes('paypal');
 
   if (!paypalAvailable) {
     if (enabledMethods && enabledMethods.length === 0) {
@@ -95,13 +93,11 @@ const PaymentMethodSelector = React.memo(function PaymentMethodSelector(props: P
           <CreditCard className="w-4 h-4 text-blue-600" />
           <span className="text-xs font-bold text-slate-500 uppercase tracking-wider">PayPal</span>
         </div>
-        <PayPalScriptProvider options={{ clientId: PAYPAL_CLIENT_ID, vault: false, intent: 'capture' }}>
-          <PayPalButtonWrapper
-            onCreateOrder={onPayPalCreateOrder}
-            onApprove={onPayPalApprove}
-            disabled={disabled}
-          />
-        </PayPalScriptProvider>
+        <PayPalButtonWrapper
+          onCreateOrder={onPayPalCreateOrder}
+          onApprove={onPayPalApprove}
+          disabled={disabled}
+        />
       </div>
     </div>
   );

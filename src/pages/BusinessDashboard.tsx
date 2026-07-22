@@ -890,7 +890,6 @@ export const BusinessDashboard: React.FC = () => {
                       saving={savingBusinessConfig}
                       loading={loadingBusinessConfig}
                       message={configMessage}
-                      isAdmin={userProfile?.role === 'admin'}
                     />
                   </div>
                 )}

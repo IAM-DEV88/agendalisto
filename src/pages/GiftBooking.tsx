@@ -234,7 +234,7 @@ export default function GiftBooking() {
     </div>
   );
 
-  if (PAYPAL_CLIENT_ID && showPayment && !sent) {
+  if (PAYPAL_CLIENT_ID) {
     return (
       <PayPalScriptProvider options={{ clientId: PAYPAL_CLIENT_ID, vault: false, intent: 'capture' }}>
         {content}

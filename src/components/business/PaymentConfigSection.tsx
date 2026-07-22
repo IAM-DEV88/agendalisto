@@ -1,4 +1,4 @@
-import { useState, useCallback } from 'react';
+import { useState } from 'react';
 import {
   CreditCard,
   Building2,
@@ -10,11 +10,8 @@ import {
   CheckCircle2,
   AlertCircle,
   Wallet,
-  Copy,
 } from 'lucide-react';
 import type { PaymentMethodConfig } from '../../lib/api';
-
-const PAYPAL_CLIENT_ID = import.meta.env.VITE_PAYPAL_CLIENT_ID;
 
 interface PaymentConfigSectionProps {
   paymentMethods: Record<string, PaymentMethodConfig>;
@@ -23,10 +20,7 @@ interface PaymentConfigSectionProps {
   saving?: boolean;
   loading?: boolean;
   message?: { text: string; type: 'success' | 'error' } | null;
-  isAdmin?: boolean;
 }
-
-const CROWDFUNDING_PAYPAL_EMAIL = 'jaguerx88@gmail.com';
 
 const PAYMENT_METHOD_META: Record<string, { label: string; icon: React.ReactNode; description: string; brandColor: string }> = {
   paypal: {
@@ -46,7 +40,6 @@ const PaymentConfigSection: React.FC<PaymentConfigSectionProps> = ({
   saving,
   loading,
   message,
-  isAdmin,
 }) => {
   const [expanded, setExpanded] = useState<Record<string, boolean>>({});
   const [customName, setCustomName] = useState('');
@@ -133,30 +126,6 @@ const PaymentConfigSection: React.FC<PaymentConfigSectionProps> = ({
     setExpanded((prev) => ({ ...prev, [key]: !prev[key] }));
   };
 
-  const applyAdminPreset = useCallback((key: string) => {
-    const current = safeMethods[key] || { enabled: true };
-    if (key === 'paypal') {
-      onChange({
-        ...safeMethods,
-        paypal: {
-          ...current,
-          enabled: true,
-          email: CROWDFUNDING_PAYPAL_EMAIL,
-          client_id: PAYPAL_CLIENT_ID || '',
-          sandbox: false,
-        },
-      });
-    }
-    setExpanded((prev) => ({ ...prev, [key]: true }));
-  }, [safeMethods, onChange]);
-
-  const isUsingAdminDefault = useCallback((key: string): boolean => {
-    if (key === 'paypal') {
-      return safeMethods.paypal?.email === CROWDFUNDING_PAYPAL_EMAIL;
-    }
-    return false;
-  }, [safeMethods]);
-
   const allMethods = [...DEFAULT_METHODS, ...Object.keys(safeMethods).filter((k) => !DEFAULT_METHODS.includes(k))];
 
   if (loading) {
@@ -219,11 +188,6 @@ const PaymentConfigSection: React.FC<PaymentConfigSectionProps> = ({
                       <span className="text-sm font-bold text-slate-900 dark:text-white">
                         {meta ? meta.label : key.replace(/^custom_/, '')}
                       </span>
-                      {isAdmin && key === 'paypal' && isUsingAdminDefault(key) && (
-                        <span className="px-1.5 py-0.5 text-[10px] font-bold rounded-full bg-blue-100 text-blue-700 dark:bg-blue-900/30 dark:text-blue-400 uppercase tracking-wider">
-                          Default
-                        </span>
-                      )}
                       {isCustom && (
                         <button
                           onClick={() => removeCustomMethod(key)}
@@ -266,17 +230,6 @@ const PaymentConfigSection: React.FC<PaymentConfigSectionProps> = ({
                   <div className="mt-4 pt-4 border-t border-slate-100 dark:border-slate-800 space-y-4">
                     {key === 'paypal' && (
                       <>
-                        {isAdmin && (
-                          <div className="space-y-2">
-                            <button
-                              onClick={() => applyAdminPreset('paypal')}
-                              className="w-full flex items-center justify-center gap-2 px-4 py-2.5 bg-blue-50 hover:bg-blue-100 dark:bg-blue-900/20 dark:hover:bg-blue-900/30 text-blue-700 dark:text-blue-400 font-bold text-xs rounded-lg border border-blue-200 dark:border-blue-800 transition-colors"
-                            >
-                              <Copy className="w-4 h-4" />
-                              Usar configuración de crowdfunding ({CROWDFUNDING_PAYPAL_EMAIL})
-                            </button>
-                          </div>
-                        )}
                         <div>
                           <label className="block text-xs font-bold text-slate-700 dark:text-slate-300 mb-1">
                             Email de negocio PayPal
@@ -310,9 +263,6 @@ const PaymentConfigSection: React.FC<PaymentConfigSectionProps> = ({
                           />
                           Modo sandbox (pruebas)
                         </label>
-                        <p className="text-[10px] text-slate-400 dark:text-slate-500 leading-relaxed">
-                          El crowdfunding usa el email <code className="text-xs bg-slate-100 dark:bg-slate-800 px-1 rounded">{CROWDFUNDING_PAYPAL_EMAIL}</code> con IPN en agendaya.netlify.com.
-                        </p>
                       </>
                     )}
 
