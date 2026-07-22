@@ -463,9 +463,13 @@ const BookingForm: React.FC<BookingFormProps> = ({
         userId: userId || '',
       }),
     });
-    const data = await res.json();
-    if (!res.ok || !data.orderId) throw new Error(data.error || 'Error al crear pago');
-    return data.orderId;
+    const text = await res.text();
+    let data;
+    try { data = JSON.parse(text); } catch { data = null; }
+    if (res.ok && data?.orderId) return data.orderId;
+    const errMsg = data?.error || `Error del servidor (${res.status}): ${text || 'sin respuesta'}`;
+    notifyError(errMsg);
+    throw new Error(errMsg);
   }, [paymentAmount, service, businessName, userId]);
 
   const handlePayPalApprove = useCallback(async (orderId: string) => {

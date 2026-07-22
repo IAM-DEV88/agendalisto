@@ -72,9 +72,13 @@ export default function GiftBooking() {
         userId: user!.id,
       }),
     });
-    const data = await res.json();
-    if (!res.ok || !data.orderId) throw new Error(data.error || 'Error al crear pago');
-    return data.orderId;
+    const text = await res.text();
+    let data;
+    try { data = JSON.parse(text); } catch { data = null; }
+    if (res.ok && data?.orderId) return data.orderId;
+    const errMsg = data?.error || `Error del servidor (${res.status}): ${text || 'sin respuesta'}`;
+    toast.error(errMsg);
+    throw new Error(errMsg);
   };
 
   const handlePayPalApprove = async (orderId: string) => {
