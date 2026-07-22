@@ -1,6 +1,6 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useMemo } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
-import { getBusinessBySlug, getService, Service } from '../lib/api';
+import { getBusinessBySlug, getService, Service, PaymentMethodConfig } from '../lib/api';
 import { supabase } from '../lib/supabase';
 import { PayPalScriptProvider } from '@paypal/react-paypal-js';
 import { toast } from 'react-hot-toast';
@@ -21,6 +21,14 @@ export default function GiftBooking() {
   const [showPayment, setShowPayment] = useState(false);
   const [form, setForm] = useState({ recipientName: '', recipientEmail: '', recipientPhone: '', message: '' });
   const [giftCode, setGiftCode] = useState('');
+
+  const enabledMethods = useMemo(() => {
+    return business?.config?.payment_methods
+      ? (Object.entries(business.config.payment_methods) as [string, PaymentMethodConfig][])
+          .filter(([, cfg]) => cfg.enabled)
+          .map(([key]) => key)
+      : undefined;
+  }, [business?.config?.payment_methods]);
 
   useEffect(() => {
     supabase.auth.getUser().then(({ data: { user } }) => setUser(user));
@@ -259,6 +267,7 @@ export default function GiftBooking() {
                 onPayPalCreateOrder={handlePayPalCreateOrder}
                 onPayPalApprove={handlePayPalApprove}
                 onWompiPay={handleWompiPay}
+                enabledMethods={enabledMethods}
               />
             </div>
           )}

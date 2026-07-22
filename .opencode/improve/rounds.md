@@ -29,3 +29,36 @@
 - Ronda 1: Sección beneficios en Home. Banner upgrade visitor→client mejorado. Welcome onboarding card en ProfileDashboard. Beneficios pre-formulario en BusinessRegister
 - Ronda 2: Banner comparativo en Plans.tsx. Banner upgrade Starter en BusinessDashboard. Badge plan dinámico en BusinessPublicPage
 - Ronda 3: Sticky CTA "Registra gratis" en ExploreBusinesses. Acceso rápido favoritos + resumen historial en ProfileDashboard. Upgrade cards contextuales en BusinessDashboard
+
+# Campaña 2026-07-21 — 1 ronda c/u — Flujo de métodos de pago
+Objetivo: "Completar el flujo de los métodos de pago. No puede haber cash en línea."
+
+## quality (1/1)
+- Eliminado `cash` de `DEFAULT_PAYMENT_METHODS` en defaults.ts
+- Eliminado `cash` de `PAYMENT_METHOD_META` y `DEFAULT_METHODS` en PaymentConfigSection.tsx
+- Eliminado bloque UI de cash y `DollarSign` import en PaymentConfigSection.tsx
+
+## architecture (1/1)
+- `PaymentMethodSelector.tsx`: agregada prop `enabledMethods` para filtrar métodos
+- `BusinessPublicPage.tsx`: badges dinámicos desde `config.payment_methods`, sin Efectivo
+- `BookingForm.tsx`: agregada prop `enabledPaymentMethods`, pasada a PaymentMethodSelector
+- `BookingPage.tsx`: computa `enabledPaymentMethods` con `useMemo`
+
+## reliability (1/1)
+- `PaymentMethodSelector.tsx`: fallback visual cuando `enabledMethods=[]`
+- `BookingForm.tsx`: 3 protecciones (oculta pago si no hay métodos, muestra error)
+- `BusinessPublicPage.tsx`: mensajes claros cuando no hay métodos configurados
+
+## performance (1/1)
+- `PaymentMethodSelector.tsx`: `React.memo` en PayPalButtonWrapper y componente principal
+- `BookingPage.tsx`: `useMemo` para enabledPaymentMethods
+- `BookingForm.tsx`: `useCallback` en handlePayPalCreateOrder, handlePayPalApprove, handleWompiPay
+
+## ux (1/1)
+- `PaymentMethodSelector.tsx`: aria-label, aria-live, role=radiogroup
+- `BusinessPublicPage.tsx`: role=region, aria-labelledby, badges con aria-label
+- `PaymentConfigSection.tsx`: aria-label en toggles, aria-describedby, role=alert
+
+## product (1/1)
+- `GiftBooking.tsx`: conectado enabledMethods a PaymentMethodSelector
+- Verificados faqContent.ts, ChatGuia.tsx, chat-proxy.ts — sin referencias a cash

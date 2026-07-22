@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useMemo } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import {
   getBusinessBySlug,
@@ -105,6 +105,14 @@ function BookingPage() {
     { id: 'agendar', label: 'Agendar' },
     ...(service?.can_be_gifted ? [{ id: 'regalar', label: 'Regalar' }] : []),
   ];
+
+  const enabledPaymentMethods = useMemo(() => {
+    return businessData?.config?.payment_methods
+      ? Object.entries(businessData.config.payment_methods)
+          .filter(([, cfg]) => cfg.enabled)
+          .map(([key]) => key)
+      : undefined;
+  }, [businessData?.config?.payment_methods]);
 
   if (loading) return <BookingPageSkeleton />;
 
@@ -229,6 +237,7 @@ function BookingPage() {
                   cancellationPolicy={service.cancellation_policy_text}
                   reschedulePolicy={service.reschedule_policy_text}
                   onUserRegistered={handleUserRegistered}
+                  enabledPaymentMethods={enabledPaymentMethods}
                 />
               )}
 
@@ -444,6 +453,7 @@ function BookingPage() {
                   cancellationPolicy={service.cancellation_policy_text}
                   reschedulePolicy={service.reschedule_policy_text}
                   onUserRegistered={handleUserRegistered}
+                  enabledPaymentMethods={enabledPaymentMethods}
                 />
               )}
             </div>

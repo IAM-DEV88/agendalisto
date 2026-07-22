@@ -1,5 +1,7 @@
 import type { BusinessConfig } from './api';
 
+export const DEFAULT_PAYMENT_METHODS: Record<string, { enabled: boolean }> = {};
+
 export const DEFAULT_BUSINESS_CONFIG: BusinessConfig = {
   permitir_reservas_online: true,
   mostrar_precios: true,
@@ -18,4 +20,5 @@ export const DEFAULT_BUSINESS_CONFIG: BusinessConfig = {
   password_protect_services: true,
   password_protect_appointments: true,
   password_protect_profile: true,
+  payment_methods: DEFAULT_PAYMENT_METHODS,
 };

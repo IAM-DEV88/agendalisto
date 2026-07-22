@@ -28,6 +28,7 @@ import BusinessProfileSection from '../components/business/BusinessProfileSectio
 import BusinessConfigSection from '../components/business/BusinessConfigSection';
 import BusinessHoursSection from '../components/business/BusinessHoursSection';
 import ServicesSection from '../components/business/ServicesSection';
+import PaymentConfigSection from '../components/business/PaymentConfigSection';
 import BusinessSwitcher from '../components/business/BusinessSwitcher';
 import BusinessProgressSection from '../components/business/BusinessProgressSection';
 import BusinessQrCode from '../components/business/BusinessQrCode';
@@ -117,6 +118,7 @@ export const BusinessDashboard: React.FC = () => {
   const [activeAppointmentTab, setActiveAppointmentTab] = useState('calendar');
   const [activeSettingsTab, setActiveSettingsTab] = useState('profile');
   const [activeActivasTab, setActiveActivasTab] = useState('pending');
+  const [activeServicesTab, setActiveServicesTab] = useState('vitrina');
 
   const loadBusinessData = useCallback(async (businessId?: string) => {
     const id = businessId || userProfile?.business_id;
@@ -367,12 +369,13 @@ export const BusinessDashboard: React.FC = () => {
     );
   }, [handleHoursSubmit]);
 
-  const handleConfigSaveWithPassword = useCallback(async (e: React.FormEvent) => {
-    e.preventDefault();
+  const handleConfigSaveWithPassword = useCallback(async (e?: React.FormEvent) => {
+    if (e) e.preventDefault();
     const bc = businessConfigRef.current;
+    const fakeE = e || ({ preventDefault: () => {} } as React.FormEvent);
     await execIfNoGuard(
       'Guardar configuración del negocio',
-      async () => { await handleConfigSave(e); },
+      async () => { await handleConfigSave(fakeE); },
       !!(bc?.password_protect_profile),
     );
   }, [handleConfigSave]);
@@ -506,6 +509,11 @@ export const BusinessDashboard: React.FC = () => {
     { id: 'profile', label: 'Perfil' },
     { id: 'operation', label: 'Operación' },
     { id: 'config', label: 'Ajustes' },
+  ];
+
+  const servicesTabs: Tab[] = [
+    { id: 'vitrina', label: 'Vitrina' },
+    { id: 'pago', label: 'Pago' },
   ];
 
   return (
@@ -841,28 +849,52 @@ export const BusinessDashboard: React.FC = () => {
             </div>
           )}
 
-          {/* ─── SERVICIOS ─── */}
+          {/* ─── SERVICIOS (Vitrina / Pago) ─── */}
           {activeTab === 'services' && businessData && (
-            <div className="animate-in fade-in zoom-in-95 duration-300">
-              <ServicesSection
-                businessId={businessData.id}
-                getServices={getBusinessServices}
-                  deleteService={async (id: string) => {
-                    const bc = businessConfigRef.current;
-                    const needsGuard = !!(bc?.password_protect_services);
-                    if (!needsGuard) return deleteBusinessService(id);
-                    return new Promise<{ success: boolean; error?: string }>((resolve) => {
-                      pendingActionRef.current = async () => {
-                        const result = await deleteBusinessService(id);
-                        resolve(result);
-                      };
-                      setPasswordDescription('Eliminar servicio');
-                      setShowPasswordModal(true);
-                    });
-                  }}
-                itemsPerPage={itemsPerPage}
-                plan={plan}
-              />
+            <div>
+              <div className="mb-4 md:mb-6">
+                <SectionHeader title="Servicios" description="Gestiona tu vitrina de servicios y métodos de pago" />
+              </div>
+
+              <ConnectedPillCard tabs={servicesTabs} activeTabId={activeServicesTab} onTabChange={setActiveServicesTab}>
+                {activeServicesTab === 'vitrina' && (
+                  <div className="animate-in fade-in zoom-in-95 duration-300">
+                    <ServicesSection
+                      businessId={businessData.id}
+                      getServices={getBusinessServices}
+                      deleteService={async (id: string) => {
+                        const bc = businessConfigRef.current;
+                        const needsGuard = !!(bc?.password_protect_services);
+                        if (!needsGuard) return deleteBusinessService(id);
+                        return new Promise<{ success: boolean; error?: string }>((resolve) => {
+                          pendingActionRef.current = async () => {
+                            const result = await deleteBusinessService(id);
+                            resolve(result);
+                          };
+                          setPasswordDescription('Eliminar servicio');
+                          setShowPasswordModal(true);
+                        });
+                      }}
+                      itemsPerPage={itemsPerPage}
+                      plan={plan}
+                    />
+                  </div>
+                )}
+
+                {activeServicesTab === 'pago' && (
+                  <div className="animate-in fade-in zoom-in-95 duration-300">
+                    <PaymentConfigSection
+                      paymentMethods={businessConfig?.payment_methods ?? {}}
+                      onChange={(methods) => handleConfigChange('payment_methods', methods)}
+                      onSave={handleConfigSaveWithPassword}
+                      saving={savingBusinessConfig}
+                      loading={loadingBusinessConfig}
+                      message={configMessage}
+                      isAdmin={userProfile?.role === 'admin'}
+                    />
+                  </div>
+                )}
+              </ConnectedPillCard>
             </div>
           )}
 

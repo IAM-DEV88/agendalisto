@@ -111,6 +111,18 @@ export type BusinessHours = {
   is_closed: boolean;
 };
 
+// Payment method configuration per business
+export interface PaymentMethodConfig {
+  enabled: boolean;
+  sandbox?: boolean;
+  email?: string;        // PayPal business email
+  client_id?: string;    // PayPal client ID
+  secret?: string;       // PayPal secret
+  public_key?: string;   // Wompi public key
+  integrity_secret?: string; // Wompi integrity secret
+  instructions?: string; // Custom payment method instructions
+}
+
 // Definir el tipo BusinessConfig para la configuración de negocios
 export interface BusinessConfig {
   permitir_reservas_online: boolean;
@@ -131,6 +143,7 @@ export interface BusinessConfig {
   password_protect_services?: boolean;
   password_protect_appointments?: boolean;
   password_protect_profile?: boolean;
+  payment_methods?: Record<string, PaymentMethodConfig>;
 }
 
 export interface Staff {

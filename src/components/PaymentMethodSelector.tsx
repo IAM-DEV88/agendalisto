@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import React, { useState, useEffect } from 'react';
 import { PayPalScriptProvider, PayPalButtons, usePayPalScriptReducer } from '@paypal/react-paypal-js';
 import { detectCountry, DetectedCountry } from '../utils/countryDetection';
 import { Loader2, ExternalLink, CreditCard } from 'lucide-react';
@@ -15,9 +15,11 @@ interface PaymentMethodSelectorProps {
   onPayPalApprove: (orderId: string) => Promise<void>;
   onWompiPay: () => Promise<void>;
   disabled?: boolean;
+  /** If provided, only show methods included in this list (e.g. ['paypal', 'wompi']). When undefined, shows all available methods (current geo-detection behavior). */
+  enabledMethods?: string[];
 }
 
-function PayPalButtonWrapper({
+const PayPalButtonWrapper = React.memo(function PayPalButtonWrapper({
   onCreateOrder,
   onApprove,
   disabled,
@@ -31,7 +33,7 @@ function PayPalButtonWrapper({
 
   if (isPending || loading) {
     return (
-      <div className="flex items-center justify-center gap-2 py-3 text-sm text-slate-500">
+      <div className="flex items-center justify-center gap-2 py-3 text-sm text-slate-500" aria-live="polite">
         <Loader2 className="w-4 h-4 animate-spin" />
         Procesando...
       </div>
@@ -61,10 +63,10 @@ function PayPalButtonWrapper({
       onError={() => setLoading(false)}
     />
   );
-}
+});
 
-export default function PaymentMethodSelector(props: PaymentMethodSelectorProps) {
-  const { amount, currency, onPayPalCreateOrder, onPayPalApprove, onWompiPay, disabled } = props;
+const PaymentMethodSelector = React.memo(function PaymentMethodSelector(props: PaymentMethodSelectorProps) {
+  const { amount, currency, onPayPalCreateOrder, onPayPalApprove, onWompiPay, disabled, enabledMethods } = props;
   const [country, setCountry] = useState<DetectedCountry>('other');
   const [wompiLoading, setWompiLoading] = useState(false);
 
@@ -72,12 +74,30 @@ export default function PaymentMethodSelector(props: PaymentMethodSelectorProps)
     setCountry(detectCountry());
   }, []);
 
-  const paypalAvailable = (country === 'other' || country === 'us') && !!PAYPAL_CLIENT_ID;
+  const paypalAvailable = (country === 'other' || country === 'us') && !!PAYPAL_CLIENT_ID && (!enabledMethods || enabledMethods.includes('paypal'));
 
-  if (!paypalAvailable && country !== 'co') return null;
+  const wompiAvailable = country === 'co' && (!enabledMethods || enabledMethods.includes('wompi'));
+
+  if (!paypalAvailable && !wompiAvailable) {
+    // If enabledMethods was explicitly provided (not undefined) but is empty,
+    // the business has payment config but no online methods enabled.
+    if (enabledMethods && enabledMethods.length === 0) {
+      return (
+        <div className="p-4 rounded-lg border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800/50 text-center" role="status">
+          <p className="text-xs font-bold text-slate-500 dark:text-slate-400">
+            Este negocio no tiene métodos de pago online configurados.
+          </p>
+          <p className="text-[11px] text-slate-400 dark:text-slate-500 mt-1">
+            Consulta con el negocio para coordinar el pago.
+          </p>
+        </div>
+      );
+    }
+    return null;
+  }
 
   return (
-    <div className="space-y-3">
+    <div className="space-y-3" role="radiogroup" aria-label="Seleccionar método de pago">
       <p className="text-sm font-bold text-slate-700 dark:text-slate-300 text-center">
         Pagar <span className="text-primary-600">${amount.toLocaleString()}</span> {currency}
       </p>
@@ -98,7 +118,7 @@ export default function PaymentMethodSelector(props: PaymentMethodSelectorProps)
         </div>
       )}
 
-      {country === 'co' && (
+      {wompiAvailable && (
         <button
           type="button"
           onClick={async () => {
@@ -110,6 +130,7 @@ export default function PaymentMethodSelector(props: PaymentMethodSelectorProps)
             }
           }}
           disabled={disabled || wompiLoading}
+          aria-label="Pagar con Wompi"
           className="w-full inline-flex items-center justify-center gap-2 px-4 py-3 bg-emerald-600 hover:bg-emerald-700 text-white text-sm font-bold rounded-lg transition-all disabled:opacity-50 shadow-lg shadow-emerald-500/25"
         >
           {wompiLoading ? (
@@ -127,4 +148,6 @@ export default function PaymentMethodSelector(props: PaymentMethodSelectorProps)
       )}
     </div>
   );
-}
+});
+
+export default PaymentMethodSelector;

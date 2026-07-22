@@ -19,7 +19,7 @@ import { useStickyDetection } from '../hooks/useStickyDetection';
 import ShareButton from '../components/ui/ShareButton';
 import { toast } from 'react-hot-toast';
 import { PLAN_BADGE } from '../lib/roles';
-import { Store, Clock, MapPin, Star, Heart, Phone, Mail, MessageCircle, Globe, Instagram, Facebook, Pen } from 'lucide-react';
+import { Store, Clock, MapPin, Star, Heart, Phone, Mail, MessageCircle, Globe, Instagram, Facebook, Pen, CreditCard, Landmark, DollarSign } from 'lucide-react';
 import QRCode from 'qrcode';
 
 function SkeletonHeader() {
@@ -527,12 +527,12 @@ function BusinessPublicPage() {
 
                   {/* ── Pagos ── */}
                   {activeServiciosTab === 'pagos' && (
-                    <div className="space-y-5">
+                    <div className="space-y-5" role="region" aria-labelledby="payment-methods-heading">
                       <div className="flex items-center gap-3">
                         <div className="p-2 bg-emerald-50 text-emerald-600 dark:bg-emerald-500/10 dark:text-emerald-400 rounded-lg">
                           <Store className="w-5 h-5" />
                         </div>
-                        <h3 className="text-lg font-black text-slate-900 dark:text-white tracking-tight">Métodos de Pago</h3>
+                        <h3 id="payment-methods-heading" className="text-lg font-black text-slate-900 dark:text-white tracking-tight">Métodos de Pago</h3>
                         {user && user.id === businessData?.owner_id && (
                           <Link to="/business/dashboard?tab=settings&sub=config" className="ml-auto p-1.5 text-slate-400 hover:text-primary-500 hover:bg-primary-50 dark:hover:bg-primary-900/20 rounded-lg transition-all" title="Configurar pagos">
                             <Pen className="w-3.5 h-3.5" />
@@ -542,12 +542,18 @@ function BusinessPublicPage() {
 
                       <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                         {services.filter(s => s.requires_payment).length > 0 && (
-                          <div className="p-4 rounded-lg border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800/50">
-                            <p className="text-xs font-bold text-slate-400 uppercase tracking-wider mb-2">Servicios con pago</p>
+                          <div>
+                            <p className="text-xs font-bold text-slate-400 uppercase tracking-wider mb-3">Servicios con pago</p>
                             <div className="space-y-2">
                               {services.filter(s => s.requires_payment).map(s => (
-                                <div key={s.id} className="flex items-center justify-between text-sm">
-                                  <span className="font-medium text-slate-700 dark:text-slate-300">{s.name}</span>
+                                <div key={s.id} className="flex items-center gap-3 p-3 rounded-lg bg-slate-50 dark:bg-slate-800/50 hover:bg-white dark:hover:bg-slate-800 transition-all border border-slate-100 dark:border-slate-700">
+                                  <div className="p-2 rounded-lg bg-primary-50 dark:bg-primary-500/10">
+                                    <DollarSign className="w-4 h-4 text-primary-600 dark:text-primary-400" />
+                                  </div>
+                                  <div className="flex-1 min-w-0">
+                                    <p className="text-xs font-bold text-slate-400 uppercase tracking-wider">Servicio</p>
+                                    <p className="text-sm font-bold text-slate-900 dark:text-white truncate">{s.name}</p>
+                                  </div>
                                   <span className="text-xs font-bold text-primary-600 dark:text-primary-400">{s.payment_percentage}%</span>
                                 </div>
                               ))}
@@ -555,12 +561,36 @@ function BusinessPublicPage() {
                           </div>
                         )}
 
-                        <div className="p-4 rounded-lg border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800/50">
+                        <div>
                           <p className="text-xs font-bold text-slate-400 uppercase tracking-wider mb-3">Aceptamos</p>
                           <div className="flex flex-wrap gap-2">
-                            <span className="px-3 py-1.5 text-xs font-bold rounded-lg bg-blue-50 dark:bg-blue-900/20 text-blue-700 dark:text-blue-300">PayPal</span>
-                            <span className="px-3 py-1.5 text-xs font-bold rounded-lg bg-purple-50 dark:bg-purple-900/20 text-purple-700 dark:text-purple-300">Wompi</span>
-                            <span className="px-3 py-1.5 text-xs font-bold rounded-lg bg-emerald-50 dark:bg-emerald-900/20 text-emerald-700 dark:text-emerald-300">Efectivo</span>
+                            {(() => {
+                              const methods = businessData.config?.payment_methods;
+                              if (!methods) return <span className="text-xs text-slate-400 italic">No hay métodos de pago configurados</span>;
+                              const enabledMethods = Object.entries(methods)
+                                .filter(([, cfg]) => cfg.enabled)
+                                .map(([key]) => key);
+                              if (enabledMethods.length === 0) return <span className="text-xs text-slate-400 italic">Próximamente — Consulta con el negocio</span>;
+                              const methodStyles: Record<string, string> = {
+                                paypal: 'bg-blue-50 dark:bg-blue-900/20 text-blue-700 dark:text-blue-300 hover:bg-blue-100 dark:hover:bg-blue-900/40',
+                                wompi: 'bg-purple-50 dark:bg-purple-900/20 text-purple-700 dark:text-purple-300 hover:bg-purple-100 dark:hover:bg-purple-900/40',
+                              };
+                              const methodLabels: Record<string, string> = {
+                                paypal: 'PayPal',
+                                wompi: 'Wompi',
+                              };
+                              const methodIcons: Record<string, React.ReactNode> = {
+                                paypal: <CreditCard className="w-3.5 h-3.5" />,
+                                wompi: <Landmark className="w-3.5 h-3.5" />,
+                              };
+                              return enabledMethods.map(m => (
+                                <span key={m} className={`inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-bold rounded-lg transition-all ${methodStyles[m] || 'bg-slate-100 dark:bg-slate-700 text-slate-700 dark:text-slate-300 hover:bg-slate-200 dark:hover:bg-slate-600'}`}
+                                  aria-label={`Acepta pagos con ${methodLabels[m] || m.charAt(0).toUpperCase() + m.slice(1)}`}>
+                                  {methodIcons[m]}
+                                  {methodLabels[m] || m.charAt(0).toUpperCase() + m.slice(1)}
+                                </span>
+                              ));
+                            })()}
                           </div>
                         </div>
                       </div>

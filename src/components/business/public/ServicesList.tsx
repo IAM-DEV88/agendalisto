@@ -65,10 +65,10 @@ const ServiceCard: React.FC<{
       role="link"
       tabIndex={0}
       aria-label={`${index + 1}. ${service.name} — ${service.duration} min — ${service.price ? '$' + service.price.toLocaleString() : 'Consultar precio'}`}
-      className="group relative flex items-stretch rounded-lg border transition-all cursor-pointer border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 hover:border-primary-300 dark:hover:border-primary-700 hover:shadow-lg focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary-500 focus-visible:ring-offset-2 dark:focus-visible:ring-offset-slate-900 min-h-[88px]"
+      className="group relative flex items-stretch rounded-lg border transition-all cursor-pointer border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800/50 hover:bg-white dark:hover:bg-slate-800 hover:border-primary-300 dark:hover:border-primary-700 hover:shadow-lg focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary-500 focus-visible:ring-offset-2 dark:focus-visible:ring-offset-slate-900 min-h-[88px]"
     >
       {/* Number badge */}
-      <div className="flex items-center justify-center w-10 shrink-0 bg-slate-50 dark:bg-slate-800/80 border-r border-slate-200 dark:border-slate-700">
+      <div className="flex items-center justify-center w-10 shrink-0 bg-white dark:bg-slate-900 border-r border-slate-200 dark:border-slate-700">
         <span className="text-xs font-black text-slate-300 dark:text-slate-600 leading-none">
           {(index + 1).toString().padStart(2, '0')}
         </span>

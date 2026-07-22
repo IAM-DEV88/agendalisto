@@ -51,6 +51,8 @@ interface BookingFormProps {
   hideHero?: boolean;
   hideForm?: boolean;
   hideGift?: boolean;
+  /** List of enabled payment method keys (e.g. ['paypal', 'wompi']). Passed to PaymentMethodSelector to filter visible methods. */
+  enabledPaymentMethods?: string[];
 }
 
 const BookingForm: React.FC<BookingFormProps> = ({
@@ -84,6 +86,7 @@ const BookingForm: React.FC<BookingFormProps> = ({
   hideHero = false,
   hideForm = false,
   hideGift = false,
+  enabledPaymentMethods,
 }) => {
   const [localImageIndex, setLocalImageIndex] = useState(0);
   const imageIndex = controlledImageIndex ?? localImageIndex;
@@ -405,6 +408,10 @@ const BookingForm: React.FC<BookingFormProps> = ({
     }
 
     if (requiresPayment) {
+      if (enabledPaymentMethods && enabledPaymentMethods.length === 0) {
+        setError('Este servicio requiere pago, pero el negocio no tiene métodos de pago online habilitados. Contacta directamente con el negocio para coordinar el pago.');
+        return;
+      }
       setShowPayment(true);
       return;
     }
@@ -489,7 +496,7 @@ const BookingForm: React.FC<BookingFormProps> = ({
     }
   };
 
-  const handlePayPalCreateOrder = async (): Promise<string> => {
+  const handlePayPalCreateOrder = useCallback(async (): Promise<string> => {
     const res = await fetch('/.netlify/functions/create-service-payment', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
@@ -505,9 +512,9 @@ const BookingForm: React.FC<BookingFormProps> = ({
     const data = await res.json();
     if (!res.ok || !data.orderId) throw new Error(data.error || 'Error al crear pago');
     return data.orderId;
-  };
+  }, [paymentAmount, service, businessName, userId]);
 
-  const handlePayPalApprove = async (orderId: string) => {
+  const handlePayPalApprove = useCallback(async (orderId: string) => {
     let toastId = '';
     try {
       toastId = notifyLoading('Procesando pago...');
@@ -554,9 +561,9 @@ const BookingForm: React.FC<BookingFormProps> = ({
     } finally {
       setSubmitting(false);
     }
-  };
+  }, [businessId, serviceId, userId, formData.date, formData.time, formData.notes, localGuestInfo, paymentAmount, service, giftApplied]);
 
-  const handleWompiPay = async () => {
+  const handleWompiPay = useCallback(async () => {
     const startTime = new Date(`${formData.date}T${formData.time}`);
     const endTime = new Date(startTime.getTime() + (service?.duration || 0) * 60000);
 
@@ -597,7 +604,7 @@ const BookingForm: React.FC<BookingFormProps> = ({
       businessId, serviceId, date: formData.date, time: formData.time,
     }));
     window.location.href = data.checkoutUrl;
-  };
+  }, [formData.date, formData.time, service, businessId, serviceId, userId, localGuestInfo, businessName, paymentAmount]);
 
   const handleDateSelect = (date: string) => {
     setFormData(prev => ({ ...prev, date, time: '' }));
@@ -847,23 +854,38 @@ const BookingForm: React.FC<BookingFormProps> = ({
           </div>
           {service?.requires_payment && (
             <div className="p-4 sm:p-5">
-              {!showPurchase ? (
-                <button type="button" onClick={() => setShowPurchase(true)}
-                  className="flex items-center justify-center gap-2 w-full px-5 py-3 bg-primary-600 hover:bg-primary-700 text-white font-bold rounded-lg shadow-lg shadow-primary-500/25 transition-all hover:-translate-y-0.5 active:translate-y-0">
-                  <Lock className="w-4 h-4" />
-                  Comprar ahora — ${(service?.price ?? 0).toLocaleString()}
-                </button>
-              ) : (
-                <div className="space-y-3">
-                  <p className="text-xs font-bold text-slate-500 dark:text-slate-400 flex items-center gap-1.5">
-                    <Lock className="w-3 h-3" />
-                    Pago seguro — El negocio te contactará
-                  </p>
-                  <PaymentMethodSelector amount={paymentAmount} currency="COP" serviceName={service?.name || ''} businessName={businessName}
-                    userId={userId || ''} onPayPalCreateOrder={handleDirectPurchasePayPal} onPayPalApprove={handleDirectPurchaseApprove}
-                    onWompiPay={handleDirectPurchaseWompi} disabled={purchasing} />
-                </div>
-              )}
+              {(() => {
+                const noPaymentMethods = enabledPaymentMethods && enabledPaymentMethods.length === 0;
+                if (noPaymentMethods) {
+                  return (
+                    <div className="text-center py-4">
+                      <p className="text-xs font-bold text-slate-500 dark:text-slate-400">
+                        Este servicio requiere pago, pero el negocio no tiene métodos de pago online configurados.
+                      </p>
+                      <p className="text-[11px] text-slate-400 dark:text-slate-500 mt-1">
+                        Contacta directamente con el negocio.
+                      </p>
+                    </div>
+                  );
+                }
+                return !showPurchase ? (
+                  <button type="button" onClick={() => setShowPurchase(true)}
+                    className="flex items-center justify-center gap-2 w-full px-5 py-3 bg-primary-600 hover:bg-primary-700 text-white font-bold rounded-lg shadow-lg shadow-primary-500/25 transition-all hover:-translate-y-0.5 active:translate-y-0">
+                    <Lock className="w-4 h-4" />
+                    Comprar ahora — ${(service?.price ?? 0).toLocaleString()}
+                  </button>
+                ) : (
+                  <div className="space-y-3">
+                    <p className="text-xs font-bold text-slate-500 dark:text-slate-400 flex items-center gap-1.5">
+                      <Lock className="w-3 h-3" />
+                      Pago seguro — El negocio te contactará
+                    </p>
+                    <PaymentMethodSelector amount={paymentAmount} currency="COP" serviceName={service?.name || ''} businessName={businessName}
+                      userId={userId || ''} onPayPalCreateOrder={handleDirectPurchasePayPal} onPayPalApprove={handleDirectPurchaseApprove}
+                      onWompiPay={handleDirectPurchaseWompi} disabled={purchasing} enabledMethods={enabledPaymentMethods} />
+                  </div>
+                );
+              })()}
             </div>
           )}
           <div className="p-4 sm:p-5 grid grid-cols-2 gap-2">
@@ -1089,9 +1111,20 @@ const BookingForm: React.FC<BookingFormProps> = ({
               </div>
             </div>
             <div className="p-4 sm:p-5">
-              <PaymentMethodSelector amount={paymentAmount} currency="COP" serviceName={service?.name || ''} businessName={businessName}
-                userId={userId || ''} onPayPalCreateOrder={handlePayPalCreateOrder} onPayPalApprove={handlePayPalApprove}
-                onWompiPay={handleWompiPay} disabled={submitting} />
+              {enabledPaymentMethods && enabledPaymentMethods.length === 0 ? (
+                <div className="text-center py-4">
+                  <p className="text-xs font-bold text-slate-500 dark:text-slate-400">
+                    Este negocio no tiene métodos de pago online configurados.
+                  </p>
+                  <p className="text-[11px] text-slate-400 dark:text-slate-500 mt-1">
+                    Contacta con el negocio para coordinar el pago.
+                  </p>
+                </div>
+              ) : (
+                <PaymentMethodSelector amount={paymentAmount} currency="COP" serviceName={service?.name || ''} businessName={businessName}
+                  userId={userId || ''} onPayPalCreateOrder={handlePayPalCreateOrder} onPayPalApprove={handlePayPalApprove}
+                  onWompiPay={handleWompiPay} disabled={submitting} enabledMethods={enabledPaymentMethods} />
+              )}
             </div>
           </div>
         )}

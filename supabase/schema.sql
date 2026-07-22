@@ -125,6 +125,7 @@ CREATE TABLE IF NOT EXISTS public.agendaya_business_config (
   requiere_confirmacion BOOLEAN NOT NULL DEFAULT true,
   notificaciones_email BOOLEAN NOT NULL DEFAULT false,
   notificaciones_whatsapp BOOLEAN NOT NULL DEFAULT false,
+  payment_methods JSONB NOT NULL DEFAULT '{}'::jsonb,
   updated_at TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT NOW()
 );
 

@@ -108,7 +108,7 @@ const ServicesSection: React.FC<ServicesSectionProps> = ({
         }
       />
 
-      <div className="bg-white dark:bg-slate-900 rounded-lg border border-slate-200 dark:border-slate-800 shadow-sm p-4 md:p-6">
+      <div className="bg-white dark:bg-slate-900">
 
       {maxServices !== Infinity && services.length >= maxServices && (
         <div className="flex items-center justify-between p-4 bg-amber-50 dark:bg-amber-950/30 border border-amber-200 dark:border-amber-800 rounded-lg mb-6">
