@@ -1,7 +1,6 @@
-import React, { useState } from 'react';
+import { useState } from 'react';
 import { PayPalButtons, usePayPalScriptReducer } from '@paypal/react-paypal-js';
 import { Loader2, CreditCard } from 'lucide-react';
-import { toast } from 'react-hot-toast';
 
 interface PaymentMethodSelectorProps {
   amount: number;
@@ -12,78 +11,14 @@ interface PaymentMethodSelectorProps {
   onPayPalCreateOrder: () => Promise<string>;
   onPayPalApprove: (orderId: string) => Promise<void>;
   disabled?: boolean;
-  /** If provided, only show methods included in this list (e.g. ['paypal']). When undefined, shows PayPal if available. */
   enabledMethods?: string[];
 }
 
-const PayPalButtonWrapper = React.memo(function PayPalButtonWrapper({
-  onCreateOrder,
-  onApprove,
-  disabled,
-  onErrorChange,
-}: {
-  onCreateOrder: () => Promise<string>;
-  onApprove: (orderId: string) => Promise<void>;
-  disabled?: boolean;
-  onErrorChange?: (msg: string | null) => void;
-}) {
-  const [loading, setLoading] = useState(false);
-  const [{ isPending }] = usePayPalScriptReducer();
-
-  if (isPending || loading) {
-    return (
-      <div className="flex items-center justify-center gap-2 py-3 text-sm text-slate-500" aria-live="polite">
-        <Loader2 className="w-4 h-4 animate-spin" />
-        Procesando...
-      </div>
-    );
-  }
-
-  return (
-    <PayPalButtons
-      style={{ layout: 'vertical', shape: 'rect', color: 'gold', label: 'paypal', height: 40 }}
-      disabled={disabled}
-      createOrder={async () => {
-        setLoading(true);
-        if (onErrorChange) onErrorChange(null);
-        try {
-          return await onCreateOrder();
-        } catch (err) {
-          const msg = err instanceof Error ? err.message : 'Error al crear el pago';
-          if (onErrorChange) onErrorChange(msg);
-          toast.error(msg);
-          throw err;
-        } finally {
-          setLoading(false);
-        }
-      }}
-      onApprove={async (data) => {
-        setLoading(true);
-        if (onErrorChange) onErrorChange(null);
-        try {
-          await onApprove(data.orderID);
-        } catch (err) {
-          const msg = err instanceof Error ? err.message : 'Error al procesar el pago';
-          if (onErrorChange) onErrorChange(msg);
-          toast.error(msg);
-          throw err;
-        } finally {
-          setLoading(false);
-        }
-      }}
-      onError={() => {
-        setLoading(false);
-        const msg = 'Error al procesar el pago';
-        if (onErrorChange) onErrorChange(msg);
-        toast.error(msg);
-      }}
-    />
-  );
-});
-
-const PaymentMethodSelector = React.memo(function PaymentMethodSelector(props: PaymentMethodSelectorProps) {
+export default function PaymentMethodSelector(props: PaymentMethodSelectorProps) {
   const { amount, currency, onPayPalCreateOrder, onPayPalApprove, disabled, enabledMethods } = props;
   const [paypalError, setPaypalError] = useState<string | null>(null);
+  const [paypalLoading, setPaypalLoading] = useState(false);
+  const [{ isPending }] = usePayPalScriptReducer();
 
   const paypalAvailable = !enabledMethods || enabledMethods.includes('paypal');
 
@@ -103,6 +38,15 @@ const PaymentMethodSelector = React.memo(function PaymentMethodSelector(props: P
     return null;
   }
 
+  if (isPending || paypalLoading) {
+    return (
+      <div className="flex items-center justify-center gap-2 py-3 text-sm text-slate-500" aria-live="polite">
+        <Loader2 className="w-4 h-4 animate-spin" />
+        Procesando...
+      </div>
+    );
+  }
+
   return (
     <div className="space-y-3" role="radiogroup" aria-label="Seleccionar método de pago">
       <p className="text-sm font-bold text-slate-700 dark:text-slate-300 text-center">
@@ -114,20 +58,45 @@ const PaymentMethodSelector = React.memo(function PaymentMethodSelector(props: P
           <CreditCard className="w-4 h-4 text-blue-600" />
           <span className="text-xs font-bold text-slate-500 uppercase tracking-wider">PayPal</span>
         </div>
-        <PayPalButtonWrapper
-          onCreateOrder={onPayPalCreateOrder}
-          onApprove={onPayPalApprove}
+
+        <PayPalButtons
+          style={{ layout: 'vertical', shape: 'rect', color: 'gold', label: 'paypal', height: 40 }}
           disabled={disabled}
-          onErrorChange={setPaypalError}
+          createOrder={async () => {
+            setPaypalLoading(true);
+            setPaypalError(null);
+            try {
+              const id = await onPayPalCreateOrder();
+              return id;
+            } catch (err) {
+              const msg = err instanceof Error ? err.message : 'Error al crear el pago';
+              setPaypalError(msg);
+              throw err;
+            } finally {
+              setPaypalLoading(false);
+            }
+          }}
+          onApprove={async (data) => {
+            setPaypalLoading(true);
+            setPaypalError(null);
+            try {
+              await onPayPalApprove(data.orderID);
+            } catch (err) {
+              const msg = err instanceof Error ? err.message : 'Error al procesar el pago';
+              setPaypalError(msg);
+              throw err;
+            } finally {
+              setPaypalLoading(false);
+            }
+          }}
         />
+
         {paypalError && (
-          <div className="mt-2 p-2 rounded-lg bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800">
-            <p className="text-xs font-bold text-red-600 dark:text-red-400">{paypalError}</p>
-          </div>
+          <p className="mt-2 p-2 rounded-lg bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 text-xs font-bold text-red-600 dark:text-red-400">
+            {paypalError}
+          </p>
         )}
       </div>
     </div>
   );
-});
-
-export default PaymentMethodSelector;
+}
