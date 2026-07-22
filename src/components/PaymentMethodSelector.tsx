@@ -51,8 +51,10 @@ const PayPalButtonWrapper = React.memo(function PayPalButtonWrapper({
         } catch (err) {
           const msg = err instanceof Error ? err.message : 'Error al crear el pago';
           if (onErrorChange) onErrorChange(msg);
-          setLoading(false);
+          toast.error(msg);
           throw err;
+        } finally {
+          setLoading(false);
         }
       }}
       onApprove={async (data) => {
@@ -63,8 +65,10 @@ const PayPalButtonWrapper = React.memo(function PayPalButtonWrapper({
         } catch (err) {
           const msg = err instanceof Error ? err.message : 'Error al procesar el pago';
           if (onErrorChange) onErrorChange(msg);
-          setLoading(false);
+          toast.error(msg);
           throw err;
+        } finally {
+          setLoading(false);
         }
       }}
       onError={() => {
