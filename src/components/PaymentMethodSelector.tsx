@@ -20,10 +20,12 @@ const PayPalButtonWrapper = React.memo(function PayPalButtonWrapper({
   onCreateOrder,
   onApprove,
   disabled,
+  onErrorChange,
 }: {
   onCreateOrder: () => Promise<string>;
   onApprove: (orderId: string) => Promise<void>;
   disabled?: boolean;
+  onErrorChange?: (msg: string | null) => void;
 }) {
   const [loading, setLoading] = useState(false);
   const [{ isPending }] = usePayPalScriptReducer();
@@ -43,23 +45,33 @@ const PayPalButtonWrapper = React.memo(function PayPalButtonWrapper({
       disabled={disabled}
       createOrder={async () => {
         setLoading(true);
+        if (onErrorChange) onErrorChange(null);
         try {
           return await onCreateOrder();
-        } finally {
+        } catch (err) {
+          const msg = err instanceof Error ? err.message : 'Error al crear el pago';
+          if (onErrorChange) onErrorChange(msg);
           setLoading(false);
+          throw err;
         }
       }}
       onApprove={async (data) => {
         setLoading(true);
+        if (onErrorChange) onErrorChange(null);
         try {
           await onApprove(data.orderID);
-        } finally {
+        } catch (err) {
+          const msg = err instanceof Error ? err.message : 'Error al procesar el pago';
+          if (onErrorChange) onErrorChange(msg);
           setLoading(false);
+          throw err;
         }
       }}
       onError={() => {
         setLoading(false);
-        toast.error('Error al procesar el pago');
+        const msg = 'Error al procesar el pago';
+        if (onErrorChange) onErrorChange(msg);
+        toast.error(msg);
       }}
     />
   );
@@ -67,6 +79,7 @@ const PayPalButtonWrapper = React.memo(function PayPalButtonWrapper({
 
 const PaymentMethodSelector = React.memo(function PaymentMethodSelector(props: PaymentMethodSelectorProps) {
   const { amount, currency, onPayPalCreateOrder, onPayPalApprove, disabled, enabledMethods } = props;
+  const [paypalError, setPaypalError] = useState<string | null>(null);
 
   const paypalAvailable = !enabledMethods || enabledMethods.includes('paypal');
 
@@ -101,7 +114,13 @@ const PaymentMethodSelector = React.memo(function PaymentMethodSelector(props: P
           onCreateOrder={onPayPalCreateOrder}
           onApprove={onPayPalApprove}
           disabled={disabled}
+          onErrorChange={setPaypalError}
         />
+        {paypalError && (
+          <div className="mt-2 p-2 rounded-lg bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800">
+            <p className="text-xs font-bold text-red-600 dark:text-red-400">{paypalError}</p>
+          </div>
+        )}
       </div>
     </div>
   );
