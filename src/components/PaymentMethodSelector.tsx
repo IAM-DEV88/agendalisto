@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { PayPalButtons, usePayPalScriptReducer } from '@paypal/react-paypal-js';
 import { Loader2, CreditCard } from 'lucide-react';
+import { toast } from 'react-hot-toast';
 
 interface PaymentMethodSelectorProps {
   amount: number;
@@ -56,7 +57,10 @@ const PayPalButtonWrapper = React.memo(function PayPalButtonWrapper({
           setLoading(false);
         }
       }}
-      onError={() => setLoading(false)}
+      onError={() => {
+        setLoading(false);
+        toast.error('Error al procesar el pago');
+      }}
     />
   );
 });
