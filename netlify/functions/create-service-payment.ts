@@ -65,22 +65,12 @@ export const handler = async (event: any) => {
 
     if (provider === 'paypal') {
       const accessToken = await getPaypalAccessToken();
-      let amountUsd = amount;
-      if (currency === 'COP') {
-        try {
-          const fxRes = await fetch('https://open.er-api.com/v6/latest/USD');
-          const fxData = await fxRes.json();
-          const copRate = fxData.rates?.COP;
-          if (copRate) {
-            amountUsd = parseFloat((amount / copRate).toFixed(2));
-          } else {
-            amountUsd = parseFloat((amount / 4000).toFixed(2));
-          }
-        } catch {
-          amountUsd = parseFloat((amount / 4000).toFixed(2));
-        }
-      } else {
-        amountUsd = parseFloat(amount.toFixed(2));
+      const amountUsd = currency === 'COP'
+        ? parseFloat((Number(amount) / 4000).toFixed(2))
+        : parseFloat(Number(amount).toFixed(2));
+
+      if (!amountUsd || amountUsd <= 0) {
+        return { statusCode: 400, body: JSON.stringify({ error: 'Monto inválido después de conversión' }) };
       }
 
       const orderRes = await fetch(`${PAYPAL_API}/v2/checkout/orders`, {
@@ -94,7 +84,6 @@ export const handler = async (event: any) => {
           purchase_units: [{
             description: `${serviceName || 'Servicio'} - ${businessName || 'AgendaYa'}`,
             amount: { currency_code: 'USD', value: String(amountUsd) },
-            custom_id: `${action}:${userId}`,
           }],
         }),
       });
@@ -106,13 +95,7 @@ export const handler = async (event: any) => {
 
       return {
         statusCode: 200,
-        body: JSON.stringify({
-          provider: 'paypal',
-          orderId: order.id,
-          amount: amountUsd,
-          currency: 'USD',
-          action,
-        }),
+        body: JSON.stringify({ provider: 'paypal', orderId: order.id }),
       };
     }
 
